@@ -32,42 +32,70 @@ const browser = await puppeteer.launch({
   headless: 'new',
   args: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
 });
-async function shot(name, { w, h }) {
-  const page = await browser.newPage();
-  await page.setViewport({ width: w, height: h, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+async function ready(page) {
   await page.goto(`http://127.0.0.1:${port}/?test=1`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => window.__totTest, { timeout: 20000 });
   await page.evaluate(() => window.__totTest.startQuick());
   await page.waitForFunction(() => window.__totTest.snapshot().hand > 0, { timeout: 8000 });
-  if (name.includes('glow')) {
-    await page.evaluate(() => {
-      const gold = [...document.querySelectorAll('#hand-zone .card')].find(el => el.dataset.id === 'gold');
-      gold?.click();
-    });
-    await new Promise(r => setTimeout(r, 450));
-  }
-  await new Promise(r => setTimeout(r, 400));
+  await new Promise(r => setTimeout(r, 300));
+}
+
+async function shot(name, page) {
   const dest = `/opt/cursor/artifacts/${name}.png`;
   await page.screenshot({ path: dest });
   await page.screenshot({ path: `/workspace/${name}.png` });
-  const info = await page.evaluate(() => {
-    const snap = window.__totTest.snapshot();
-    const coins = [...document.querySelectorAll('.patron-coin')].map(el => ({
-      id: el.dataset.pid, favor: el.dataset.favor, cls: el.className,
-    }));
-    const hg = document.querySelector('#btn-end')?.getBoundingClientRect();
-    const piles = [...document.querySelectorAll('#match .hex-pile:not(.sr-pile)')].map(el => {
-      const r = el.getBoundingClientRect();
-      return { id: el.id, w: Math.round(r.width), h: Math.round(r.height), x: Math.round(r.x), y: Math.round(r.y) };
-    });
-    return { snap, coins, hg: hg && { x: Math.round(hg.x), y: Math.round(hg.y), w: Math.round(hg.width), h: Math.round(hg.height) }, piles };
-  });
-  console.log(name, JSON.stringify(info, null, 2));
-  await page.close();
 }
-await shot('phone-landscape-844x390', { w: 844, h: 390 });
-await shot('phone-landscape-844x390-glow', { w: 844, h: 390 });
-await shot('phone-landscape-667x375', { w: 667, h: 375 });
-await shot('phone-landscape-932x430', { w: 932, h: 430 });
+
+const land = await browser.newPage();
+await land.setViewport({ width: 844, height: 390, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+await ready(land);
+const before = await land.evaluate(() => ({
+  snap: window.__totTest.snapshot(),
+  zones: window.__totTest.zones(),
+  lift: window.__totTest.liftOpen(),
+  gate: window.__totTest.rotateGate(),
+}));
+await shot('phone-landscape-844x390', land);
+await land.evaluate(() => window.__totTest.tapCard('#hand-zone .card[data-id="gold"]'));
+await new Promise(r => setTimeout(r, 750));
+const afterTap = await land.evaluate(() => ({
+  lift: window.__totTest.liftOpen(),
+  hand: window.__totTest.snapshot().hand,
+  coin: window.__totTest.snapshot().coin,
+}));
+if (afterTap.hand === before.snap.hand) {
+  await land.evaluate(() => window.__totTest.playFirstGold());
+  await new Promise(r => setTimeout(r, 750));
+}
+const after = await land.evaluate(() => ({
+  snap: window.__totTest.snapshot(),
+  zones: window.__totTest.zones(),
+  lift: window.__totTest.liftOpen(),
+}));
+await shot('phone-landscape-844x390-after-play', land);
+const shift = Object.keys(before.zones).map((k) => {
+  const a = before.zones[k], b = after.zones[k];
+  if (!a || !b) return { k, miss: true };
+  return { k, dx: b.x - a.x, dy: b.y - a.y, dw: b.w - a.w, dh: b.h - a.h };
+});
+console.log('before', JSON.stringify(before, null, 2));
+console.log('afterTap', JSON.stringify(afterTap));
+console.log('after', JSON.stringify(after, null, 2));
+console.log('shift', JSON.stringify(shift));
+await land.close();
+
+const portShot = await browser.newPage();
+await portShot.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+await ready(portShot);
+const gate = await portShot.evaluate(() => window.__totTest.rotateGate());
+await shot('phone-portrait-rotate-gate', portShot);
+console.log('portraitGate', gate);
+await portShot.close();
+
+const small = await browser.newPage();
+await small.setViewport({ width: 667, height: 375, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+await ready(small);
+await shot('phone-landscape-667x375', small);
+await small.close();
 await browser.close();
 server.close();

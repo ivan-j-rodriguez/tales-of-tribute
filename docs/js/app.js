@@ -48,7 +48,7 @@ let gauntletStopIndex = null;
 let isGauntletMatch = false;
 
 const TURN_SECONDS = 90;
-const HOLD_MS = 850;
+const HOLD_MS = 500;
 const AGENT_SLOTS = 4;
 const TOUR_KEY = 'tot_tour_v2';
 
@@ -81,17 +81,36 @@ async function loadData() {
 function show(id) {
   document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
   $(id).classList.add('active');
-  if (id === '#match') requestAnimationFrame(() => fitMatchBoard());
+  requestAnimationFrame(() => syncRotateGate());
 }
 
 const BOARD_W = 1180;
 const BOARD_H = 640;
+
+function isPortrait() {
+  const vv = window.visualViewport;
+  const w = vv?.width || window.innerWidth;
+  const h = vv?.height || window.innerHeight;
+  return h > w;
+}
+
+function syncRotateGate() {
+  const match = $('#match');
+  const matchOn = !!match?.classList.contains('active');
+  const portrait = isPortrait();
+  const need = matchOn && portrait;
+  document.body.classList.toggle('need-landscape', need);
+  const gate = $('#rotate-gate');
+  if (gate) gate.hidden = !need;
+  if (matchOn && !portrait) fitMatchBoard();
+}
 
 function fitMatchBoard() {
   const match = $('#match');
   const vp = match?.querySelector('.board-viewport');
   const board = match?.querySelector('.board');
   if (!vp || !board || !match.classList.contains('active')) return;
+  if (isPortrait()) return;
   const w = vp.clientWidth;
   const h = vp.clientHeight;
   if (!w || !h) return;
@@ -175,7 +194,7 @@ function onSplashEnter() {
   }
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 26';
+  if (stamp) stamp.textContent = 'build 27';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -256,40 +275,59 @@ function dossierHTML(d) {
  * There is no dead zone between tap and hold.
  */
 function bindCardGesture(el, { onTap, onHoldRead }) {
-  // iOS click plays. Hold (850ms, still down) inspects. A slow tap must never lift.
+  // Pointer-only: a short tap plays/buys. Hold (>=500ms) inspects and never also plays.
+  // Do not bind touchstart+pointerdown together — iOS leaks the first timer and inspects after a tap.
   let held = false;
   let timer = null;
   let t0 = 0;
-  const start = (e) => {
+  let sx = 0;
+  let sy = 0;
+  let pid = null;
+  const clearHold = () => { clearTimeout(timer); timer = null; };
+  el.addEventListener('pointerdown', (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (pid != null) return;
+    pid = e.pointerId;
     held = false;
     t0 = Date.now();
-    clearTimeout(timer);
+    sx = e.clientX;
+    sy = e.clientY;
+    try { el.setPointerCapture(e.pointerId); } catch {}
+    clearHold();
     timer = setTimeout(() => {
       held = true;
-      if (onHoldRead) onHoldRead(el);
+      if (onHoldRead) onHoldRead();
     }, HOLD_MS);
-  };
-  const clearHoldTimer = () => { clearTimeout(timer); timer = null; };
-  el.addEventListener('pointerdown', start);
-  el.addEventListener('touchstart', start, { passive: true });
-  el.addEventListener('pointerup', clearHoldTimer);
-  el.addEventListener('touchend', clearHoldTimer, { passive: true });
-  el.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    clearHoldTimer();
+  });
+  el.addEventListener('pointermove', (e) => {
+    if (e.pointerId !== pid) return;
+    if (Math.hypot(e.clientX - sx, e.clientY - sy) > 14) clearHold();
+  });
+  const finish = (e) => {
+    if (pid != null && e.pointerId !== pid) return;
+    const wasHeld = held;
+    clearHold();
+    pid = null;
     const elapsed = t0 ? Date.now() - t0 : 0;
     t0 = 0;
-    if (held && elapsed >= HOLD_MS) {
+    if (wasHeld) {
       endLift();
       held = false;
       return;
     }
     if (liftActive) endLift(true);
     held = false;
-    if (onTap) onTap(e);
+    if (elapsed < HOLD_MS && onTap) onTap(e);
+  };
+  el.addEventListener('pointerup', finish);
+  el.addEventListener('pointercancel', (e) => {
+    if (e.pointerId !== pid) return;
+    clearHold();
+    pid = null;
+    if (held) endLift();
+    held = false;
   });
+  el.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); });
   el.addEventListener('contextmenu', (e) => e.preventDefault());
 }
 
@@ -950,8 +988,8 @@ function renderMatch() {
         if (!canControl()) return;
         const isAgent = def?.type === 'agent';
         const dest = isAgent
-          ? ($('#you-agents') || pileEl('played'))
-          : (pileEl('played') || pileEl('you-played'));
+          ? ($('#you-agents') || pileEl('you-cooldown'))
+          : pileEl('you-cooldown');
         const ok = engine.playCard(c.uid);
         if (!ok) { toast('Cannot play that now'); return; }
         flyCard(el, dest, c, () => {});
@@ -961,8 +999,6 @@ function renderMatch() {
       onHoldRead: (_i, el) => startLift(el, def),
     }));
   });
-  // Player hand is a flex row — layoutFan stacks them.
-
   // Rival fanned backs (top)
   const ohz = $('#opp-hand-zone');
   if (ohz) {
@@ -993,7 +1029,7 @@ function renderMatch() {
   else if (isRankedMatch || isGauntletMatch) setMusicCue('boss');
   else if (s.turn >= 3) setMusicCue('fight');
   else setMusicCue('tavern');
-  fitMatchBoard();
+  syncRotateGate();
 }
 
 function layoutFan(container, rival = false) {
@@ -2215,9 +2251,9 @@ function bind() {
     syncSfxToggles();
     if (isSfxOn()) playSfx('tap');
   });
-  window.addEventListener('resize', fitMatchBoard);
-  window.addEventListener('orientationchange', () => setTimeout(fitMatchBoard, 120));
-  window.visualViewport?.addEventListener('resize', fitMatchBoard);
+  window.addEventListener('resize', syncRotateGate);
+  window.addEventListener('orientationchange', () => setTimeout(syncRotateGate, 160));
+  window.visualViewport?.addEventListener('resize', syncRotateGate);
   $('#btn-hand-done').onclick = () => {
     $('#hand-device-overlay').classList.remove('show');
     renderMatch();
@@ -2339,6 +2375,29 @@ function installTestHook() {
       document.querySelector('[data-pile="you-draw"]')?.click();
       return lastToast;
     },
+    playFirstGold() {
+      const c = engine?.state?.players[0]?.hand.find(x => x.id === 'gold');
+      if (!c) return false;
+      engine.playCard(c.uid);
+      renderMatch();
+      return true;
+    },
+    tapCard(sel) {
+      const el = document.querySelector(sel);
+      if (!el) return false;
+      el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1, pointerType: 'touch', clientX: 8, clientY: 8 }));
+      el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1, pointerType: 'touch', clientX: 8, clientY: 8 }));
+      return true;
+    },
+    zones() {
+      const ids = ['#tavern-zone', '#you-agents', '#hand-zone', '#pile-you-draw', '#pile-you-cd', '#pile-tavern-draw', '#btn-end'];
+      return Object.fromEntries(ids.map((id) => {
+        const r = document.querySelector(id)?.getBoundingClientRect();
+        return [id, r ? { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) } : null];
+      }));
+    },
+    liftOpen: () => liftActive,
+    rotateGate: () => !$('#rotate-gate')?.hidden,
   };
 }
 

@@ -14,6 +14,9 @@
   display: flex !important;
   flex-direction: column !important;
   overflow: hidden !important;
+  width: 100dvw;
+  height: 100dvh;
+  touch-action: manipulation;
   padding:
     max(4px, env(safe-area-inset-top, 0px))
     max(6px, env(safe-area-inset-right, 0px))
@@ -32,15 +35,54 @@
   --felt-deep: var(--eso-felt-deep) !important;
 }
 
+.rotate-gate {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(255, 220, 140, 0.12), transparent 50%),
+    #0c1c1a;
+}
+body.need-landscape .rotate-gate {
+  display: flex !important;
+}
+body.need-landscape #match .board-viewport {
+  visibility: hidden;
+  pointer-events: none;
+}
+.rotate-card {
+  max-width: 22rem;
+  text-align: center;
+  color: #f3ead2;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  background: linear-gradient(180deg, #2a2214, #14100c);
+  padding: 1.4rem 1.2rem;
+  box-shadow: 0 12px 28px #000a;
+}
+.rotate-card h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.25rem;
+  color: #f0d060;
+  margin: 0.3rem 0 0.5rem;
+}
+.rotate-card p { margin: 0; color: #d8cba0; line-height: 1.4; }
+.rotate-icon { font-size: 2.2rem; color: #e8c547; }
+
 #match .board-viewport {
   flex: 1 1 auto;
   width: 100%;
+  height: 100%;
   min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   position: relative;
+  touch-action: manipulation;
 }
 
 #match .board {
@@ -99,123 +141,144 @@
 }
 #match #events-combo { display: none !important; }
 
-/* ——— Felt: full official topology, piles in-flow ——— */
+/* Locked absolute zones — playing a card cannot reflow the table */
 #match .felt-table {
-  display: grid !important;
+  display: block !important;
   position: relative !important;
+  width: 100% !important;
   height: 100% !important;
   min-height: 0 !important;
-  max-height: none !important;
-  overflow: visible !important;
-  padding: 8px 10px 6px !important;
-  gap: 4px 8px !important;
-  align-items: center !important;
-  justify-items: center !important;
-  grid-template-columns: 74px minmax(0, 1fr) 74px !important;
-  grid-template-rows:
-    68px
-    56px
-    40px
-    168px
-    40px
-    68px
-    148px !important;
-  grid-template-areas:
-    "opp-draw   opp-hand    opp-cd"
-    "opp-draw   opp-agents  opp-cd"
-    ".          opp-res     ."
-    "tavern-d   tavern      tavern-x"
-    ".          you-res     ."
-    "you-draw   you-agents  you-cd"
-    "you-draw   you-hand    you-cd" !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  gap: 0 !important;
+  overflow: hidden !important;
   background: transparent !important;
+  grid-template-columns: none !important;
+  grid-template-rows: none !important;
+  grid-template-areas: none !important;
 }
 
-#match .felt-table > .hex-pile,
-#match .felt-table > .pile-btn {
-  position: relative !important;
+#match .felt-table > * {
+  grid-area: auto !important;
+}
+
+#match .felt-hud-opp,
+#match .felt-tools,
+#match .felt-played,
+#match .sr-pile { display: none !important; }
+
+#match .felt-opp-hand {
+  position: absolute !important;
+  left: 86px; right: 86px; top: 8px; height: 60px;
+  overflow: hidden !important;
+}
+#match .felt-opp-agents {
+  position: absolute !important;
+  left: 86px; right: 86px; top: 70px; height: 52px;
+  overflow: hidden !important;
+}
+#match #opp-res {
+  position: absolute !important;
+  left: 86px; right: 86px; top: 124px; height: 36px;
+}
+#match .felt-tavern {
+  position: absolute !important;
+  left: 86px; right: 86px; top: 164px; height: 148px;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  overflow: hidden !important;
+}
+#match #you-res {
+  position: absolute !important;
+  left: 86px; right: 86px; top: 316px; height: 36px;
+}
+#match .felt-you-agents {
+  position: absolute !important;
+  left: 86px; right: 86px; top: 356px; height: 70px;
+  overflow: hidden !important;
+}
+#match .felt-you-hand {
+  position: absolute !important;
+  left: 72px; right: 72px; top: 430px; height: 150px;
+  overflow: hidden !important;
+}
+#match .felt-hud-you {
+  position: absolute !important;
+  right: 6px; bottom: 6px;
+  width: auto !important;
+  z-index: 12;
+}
+
+#match #pile-opp-draw,
+#match #pile-opp-cd,
+#match #pile-tavern-draw,
+#match #pile-tavern-discard,
+#match #pile-you-draw,
+#match #pile-you-cd {
+  position: absolute !important;
   top: auto !important;
   left: auto !important;
   right: auto !important;
   bottom: auto !important;
-  inset: auto !important;
-  z-index: 5 !important;
+  margin: 0 !important;
 }
+#match #pile-opp-draw { left: 8px !important; top: 10px !important; }
+#match #pile-opp-cd { right: 8px !important; top: 10px !important; }
+#match #pile-tavern-draw { left: 8px !important; top: 188px !important; }
+#match #pile-tavern-discard { right: 8px !important; top: 188px !important; }
+#match #pile-you-draw { left: 8px !important; top: 448px !important; }
+#match #pile-you-cd { right: 8px !important; top: 448px !important; }
 
-#match .felt-hud-opp { display: none !important; }
-#match .felt-opp-hand { grid-area: opp-hand !important; width: 100%; min-height: 0 !important; }
-#match .felt-opp-agents { grid-area: opp-agents !important; width: 100%; min-height: 0 !important; overflow: visible !important; }
-#match #opp-res { grid-area: opp-res !important; grid-row: auto !important; }
-#match .felt-tavern {
-  grid-area: tavern !important;
-  grid-row: auto !important;
-  width: 100% !important;
-  min-height: 0 !important;
-  height: auto !important;
-  overflow: visible !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-}
-#match #you-res { grid-area: you-res !important; grid-row: auto !important; }
-#match .felt-played {
-  grid-area: you-agents !important;
-  width: 0 !important;
-  height: 0 !important;
-  overflow: hidden !important;
-  opacity: 0;
-  pointer-events: none;
-}
-#match .felt-you-agents { grid-area: you-agents !important; width: 100%; min-height: 0 !important; overflow: visible !important; }
-#match .felt-you-hand {
-  grid-area: you-hand !important;
-  width: 100%;
-  height: auto !important;
-  min-height: 0 !important;
-  flex: none !important;
-  overflow: visible !important;
-}
-#match .felt-hud-you {
-  position: absolute !important;
-  right: 4px;
-  bottom: 4px;
-  width: auto !important;
-  grid-row: auto !important;
-  z-index: 12;
-}
-#match .felt-tools { display: none !important; }
-
-#match #pile-opp-draw { grid-area: opp-draw !important; }
-#match #pile-opp-cd { grid-area: opp-cd !important; }
-#match #pile-tavern-draw { grid-area: tavern-d !important; }
-#match #pile-tavern-discard { grid-area: tavern-x !important; }
-#match #pile-you-draw { grid-area: you-draw !important; }
-#match #pile-you-cd { grid-area: you-cd !important; }
-
-/* Visible piles */
+/* Stacked card-back piles */
 #match .hex-pile,
 #match .pile-btn {
-  min-width: 58px !important;
-  padding: 2px !important;
+  min-width: 64px !important;
+  padding: 0 !important;
   background: transparent !important;
   border: none !important;
   color: #efe6c8 !important;
+  z-index: 6 !important;
 }
-#match .hex-pile .pile-art,
-#match .pile-btn .pile-art {
-  width: 50px !important;
-  height: 74px !important;
-  clip-path: polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0 50%);
-  border: 1px solid rgba(212, 175, 55, 0.7) !important;
-  box-shadow: 0 3px 8px #0008, inset 0 0 0 1px #0006 !important;
-  background:
-    radial-gradient(circle at 50% 42%, rgba(212, 175, 55, 0.35), transparent 46%),
-    linear-gradient(160deg, #6a4220, #2a160c) !important;
+#match .pile-stack {
+  position: relative;
+  display: block;
+  width: 46px;
+  height: 66px;
+  margin: 0 auto;
 }
-#match .hex-pile .pile-art.card-back-face {
+#match .pile-stack i {
+  position: absolute;
+  inset: 0;
+  border-radius: 5px;
+  border: 1px solid #d4af37;
+  box-shadow: 0 2px 4px #0008;
   background:
-    linear-gradient(160deg, rgba(212, 175, 55, 0.35), transparent 50%),
-    repeating-linear-gradient(45deg, #4a2c16, #4a2c16 5px, #2a180c 5px, #2a180c 7px) !important;
+    radial-gradient(circle at 50% 46%, rgba(212, 175, 55, 0.4), transparent 42%),
+    repeating-linear-gradient(135deg, #3a2412 0 5px, #26160c 5px 8px);
+}
+#match .pile-stack i:nth-child(1) { transform: translate(-5px, 3px) rotate(-8deg); opacity: 0.7; }
+#match .pile-stack i:nth-child(2) { transform: translate(4px, 2px) rotate(7deg); opacity: 0.85; }
+#match .pile-stack i:nth-child(3) {
+  transform: none;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(240, 210, 120, 0.35), transparent 46%),
+    linear-gradient(160deg, #5a3820, #1e1208);
+}
+#match .pile-stack i:nth-child(3)::after {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.55);
+  border-radius: 3px;
+}
+#match .pile-stack-cd i {
+  background:
+    radial-gradient(circle at 50% 40%, rgba(160, 190, 210, 0.2), transparent 48%),
+    linear-gradient(160deg, #2a3038, #101418);
+}
+#match .hex-pile.shuffling .pile-stack {
+  animation: tot-shuffle 0.62s ease-in-out;
 }
 #match .hex-pile .pile-count,
 #match .pile-count {
@@ -298,25 +361,35 @@
 
 /* Tavern — five cards, never crop the table around them */
 #match .felt-tavern { min-height: 0 !important; }
+#match .tavern-band {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
 #match .tavern-zone {
   width: 100% !important;
-  min-height: 0 !important;
+  height: 128px !important;
+  min-height: 128px !important;
+  max-height: 128px !important;
   display: flex !important;
   flex-wrap: nowrap !important;
   justify-content: center !important;
   align-items: center !important;
-  gap: 0.45rem !important;
-  overflow: visible !important;
-  background: rgba(0, 0, 0, 0.18);
-  border: 1px solid rgba(212, 175, 55, 0.2);
+  gap: 0.4rem !important;
+  overflow: hidden !important;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(212, 175, 55, 0.22);
   border-radius: 10px;
-  padding: 0.3rem 0.35rem !important;
+  padding: 0.2rem 0.3rem !important;
 }
 #match .tavern-zone .card {
-  width: 86px !important;
-  height: 132px !important;
-  flex: 0 0 86px !important;
-  max-width: none !important;
+  width: 78px !important;
+  height: 118px !important;
+  flex: 0 0 78px !important;
+  max-width: 78px !important;
+  transform: none !important;
 }
 #match .turn-chip {
   position: static !important;
@@ -330,9 +403,53 @@
 }
 #match .turn-chip.your-turn { color: #e8f8c8; text-shadow: 0 0 8px rgba(180, 255, 90, 0.55); }
 
-#match #hand-zone .card {
-  width: 92px !important;
-  height: 142px !important;
+#match #hand-zone,
+#match .you-fan {
+  display: flex !important;
+  justify-content: center;
+  align-items: flex-end;
+  height: 148px !important;
+  width: 100%;
+  position: relative;
+}
+#match #hand-zone .card,
+#match .you-fan .card {
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  width: 84px !important;
+  height: 128px !important;
+  margin: 0 -14px;
+  transform: none !important;
+}
+
+#match .felt-you-agents,
+#match .felt-opp-agents {
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+#match .agent-slot.empty {
+  width: 48px !important;
+  height: 60px !important;
+  border: 1px dashed rgba(212, 175, 55, 0.5);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.12);
+}
+#match .agent-slot .slot-label {
+  font-size: 0.48rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c8b888;
+}
+#match .agent-slot.filled .card {
+  width: 48px !important;
+  height: 64px !important;
 }
 
 /* Legal-card glow — cyan/gold rim (filter:none on buttons is overridden here) */
@@ -592,3 +709,14 @@
 }
 
 .settings-row.sfx-mute-row { margin-top: 0.15rem; }
+
+#match .card,
+#match button.card {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+#match #btn-end {
+  background: transparent !important;
+  border: none !important;
+}

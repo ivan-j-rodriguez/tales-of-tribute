@@ -1,6 +1,13 @@
 # Status
 
-**2026-09-13 (web phone-landscape fix, build 26):** GitHub Pages players were zoomed into the tavern on iPhone landscape. The web table now **scale-to-fits the full board** (opponent piles/hand, tavern, player agents/hand, draw+cooldown both sides, patrons, hourglass) with iPhone safe-area padding. End Turn is the ornate hourglass (lime/gold glow on your turn). Affordable tavern and playable hand cards glow. Wooden pendants tip left with names + medallions. SFX + mute persist separately from music.
+**2026-09-13 (web phone fix, build 27):** iPhone Pages shots showed a crushed portrait stack, tap-to-inspect zoom, a table that jumped on the first play, brown pile stubs, and a red End Turn bar over the hand.
+
+- **Portrait:** rotate-to-landscape gate. The match table is hidden until the phone is sideways.
+- **Landscape:** 1180×640 canvas scale-to-fits `100dvw × 100dvh`. Zones are **absolutely locked** so playing a card cannot reflow tavern / agents / hand (verified 0px shift).
+- **Tap vs hold:** pointer-only. Short tap plays; hold ≥500ms inspects; hold never also plays.
+- **Piles:** stacked card-back art + count badges. Tavern deck is labeled Deck, not “Tavern” under the pile.
+- **Tavern** sits in a fixed center band. Agent row is a dedicated band between tokens and hand.
+- End Turn is the glowing hourglass. Playable glow, SFX+mute, tokens, and left-pointing pendants stay.
 
 **Unofficial fan project.** Not affiliated with Bethesda / ZeniMax / ESO. Not for sale.
 

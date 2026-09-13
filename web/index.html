@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta name="theme-color" content="#1e4a48" />
   <title>Tales of Tribute — Fan Table</title>
-  <link rel="stylesheet" href="css/style.css?v=26" />
-  <link rel="stylesheet" href="css/phone-eso.css?v=26" />
+  <link rel="stylesheet" href="css/style.css?v=27" />
+  <link rel="stylesheet" href="css/phone-eso.css?v=27" />
 </head>
 <body>
   <div id="app">
@@ -31,7 +31,7 @@
           <label class="chk"><input type="checkbox" id="chk-hourglass-splash" /> Hourglass (90s)</label>
           <button type="button" id="btn-music" class="music-toggle" title="Music">♪ Music: Off</button>
         </div>
-        <p class="build-stamp" id="build-stamp">build 26</p>
+        <p class="build-stamp" id="build-stamp">build 27</p>
         <p class="disclaimer">Unofficial fan project. Not affiliated with Bethesda Softworks or ZeniMax Online Studios. Not for sale. Card art courtesy of UESP. No real-money purchases — earn gold at the table.</p>
       </div>
     </section>
@@ -180,6 +180,13 @@
 
     <!-- MATCH — authentic board -->
     <section id="match" class="screen skin-high-isle">
+      <div id="rotate-gate" class="rotate-gate" hidden>
+        <div class="rotate-card">
+          <div class="rotate-icon" aria-hidden="true">↻</div>
+          <h2>Rotate to landscape</h2>
+          <p>The table is built for a wide screen — turn your phone on its side to play.</p>
+        </div>
+      </div>
       <div class="board-viewport">
       <div class="board">
         <aside class="events-rail" id="events-rail" aria-label="Played effects">
@@ -190,12 +197,12 @@
         <div class="board-main felt-table">
           <div class="felt-hud-opp" aria-hidden="true"></div>
           <button type="button" class="pile-btn hex-pile pile-opp-draw" id="pile-opp-draw" data-pile="opp-draw" title="Rival draw">
-            <span class="pile-art card-back-face"></span>
+            <span class="pile-stack" aria-hidden="true"><i></i><i></i><i></i></span>
             <span class="pile-count" id="cnt-opp-draw">0</span>
             <span class="pile-label">Draw</span>
           </button>
           <button type="button" class="pile-btn hex-pile pile-opp-cd" id="pile-opp-cd" data-pile="opp-cooldown" title="Rival cooldown">
-            <span class="pile-art"></span>
+            <span class="pile-stack pile-stack-cd" aria-hidden="true"><i></i><i></i><i></i></span>
             <span class="pile-count" id="cnt-opp-cd">0</span>
             <span class="pile-label">Cooldown</span>
           </button>
@@ -210,19 +217,21 @@
           <div class="agents-row felt-opp-agents" id="opp-agents"></div>
 
           <button type="button" class="pile-btn hex-pile pile-tavern-draw" id="pile-tavern-draw" data-pile="tavern-draw" title="Tavern deck">
-            <span class="pile-art card-back-face"></span>
+            <span class="pile-stack" aria-hidden="true"><i></i><i></i><i></i></span>
             <span class="pile-count" id="cnt-tavern-draw">0</span>
-            <span class="pile-label">Tavern</span>
+            <span class="pile-label">Deck</span>
           </button>
           <button type="button" class="pile-btn hex-pile pile-tavern-discard" id="pile-tavern-discard" data-pile="tavern-discard" title="Tavern discard">
-            <span class="pile-art"></span>
+            <span class="pile-stack pile-stack-cd" aria-hidden="true"><i></i><i></i><i></i></span>
             <span class="pile-count" id="cnt-tavern-discard">0</span>
             <span class="pile-label">Discard</span>
           </button>
           <div class="token-row rival-res" id="opp-res"></div>
           <div class="felt-tavern">
             <div class="turn-chip" id="turn-ind">Your turn</div>
-            <div class="tavern-zone" id="tavern-zone"></div>
+            <div class="tavern-band">
+              <div class="tavern-zone" id="tavern-zone"></div>
+            </div>
           </div>
           <div class="token-row you-res" id="you-res"></div>
           <div class="felt-tools" hidden></div>
@@ -231,12 +240,12 @@
           <div class="agents-row felt-you-agents" id="you-agents"></div>
 
           <button type="button" class="pile-btn hex-pile pile-you-draw" id="pile-you-draw" data-pile="you-draw" title="Your draw">
-            <span class="pile-art card-back-face"></span>
+            <span class="pile-stack" aria-hidden="true"><i></i><i></i><i></i></span>
             <span class="pile-count" id="cnt-you-draw">0</span>
             <span class="pile-label">Draw</span>
           </button>
           <button type="button" class="pile-btn hex-pile pile-you-cd" id="pile-you-cd" data-pile="you-cooldown" title="Your cooldown">
-            <span class="pile-art"></span>
+            <span class="pile-stack pile-stack-cd" aria-hidden="true"><i></i><i></i><i></i></span>
             <span class="pile-count" id="cnt-you-cd">0</span>
             <span class="pile-label">Cooldown</span>
           </button>
@@ -362,6 +371,6 @@
       <div class="modal-body" id="card-modal-body"></div>
     </div>
   </div>
-  <script type="module" src="js/app.js?v=26"></script>
+  <script type="module" src="js/app.js?v=27"></script>
 </body>
 </html>
