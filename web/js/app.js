@@ -228,18 +228,26 @@ function dossierHTML(d) {
 function bindCardGesture(el, { onTap, onHoldRead }) {
   let timer = null;
   let held = false;
-  let cancelled = false;
-  let consumed = false;
-  let sx = 0, sy = 0;
-  const clearTimer = () => { if (timer && timer !== 'x') { clearTimeout(timer); } timer = null; };
+  let armed = false;
+  const clearTimer = () => { if (timer) { clearTimeout(timer); timer = null; } };
+
+  const play = (e) => {
+    if (held || liftActive) {
+      e && e.preventDefault();
+      endLift();
+      held = false;
+      return;
+    }
+    if (!onTap) return;
+    e && e.preventDefault();
+    e && e.stopPropagation();
+    onTap(e);
+  };
 
   el.addEventListener('pointerdown', (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     held = false;
-    cancelled = false;
-    consumed = false;
-    sx = e.clientX; sy = e.clientY;
-    try { el.setPointerCapture(e.pointerId); } catch {}
+    armed = true;
     clearTimer();
     timer = setTimeout(() => {
       held = true;
@@ -247,42 +255,32 @@ function bindCardGesture(el, { onTap, onHoldRead }) {
       if (onHoldRead) onHoldRead(el);
     }, HOLD_MS);
   });
-  el.addEventListener('pointermove', (e) => {
-    if (Math.hypot(e.clientX - sx, e.clientY - sy) > 24) {
-      cancelled = true;
-      clearTimer();
-    }
-  });
   el.addEventListener('pointerup', (e) => {
+    if (!armed) return;
+    armed = false;
     const wasHeld = held;
     clearTimer();
-    held = false;
-    try { el.releasePointerCapture(e.pointerId); } catch {}
     if (wasHeld || liftActive) {
       e.preventDefault();
-      e.stopPropagation();
       endLift();
-      consumed = true;
+      held = false;
       return;
     }
-    if (cancelled) return;
-    consumed = true;
-    if (onTap) onTap(e);
+    held = false;
+    play(e);
   });
   el.addEventListener('pointercancel', () => {
+    armed = false;
     clearTimer();
     if (held || liftActive) endLift();
     held = false;
   });
-  el.addEventListener('contextmenu', (e) => e.preventDefault());
   el.addEventListener('click', (e) => {
-    if (consumed || held || liftActive) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-    if (onTap) onTap(e);
+    e.preventDefault();
+    e.stopPropagation();
+    // pointerup already played this press
   });
+  el.addEventListener('contextmenu', (e) => e.preventDefault());
 }
 
 function startLift(fromEl, def) {
@@ -766,7 +764,7 @@ function renderMatch() {
     const def = cardsById[c.id];
     hz.appendChild(renderCard(c, {
       playable: yourTurn,
-      deal: true,
+      extraClass: 'hand-card',
       onTap: (inst, el) => {
         if (!canControl()) return;
         const isAgent = def?.type === 'agent';
@@ -785,7 +783,7 @@ function renderMatch() {
       onHoldRead: (_i, el) => startLift(el, def),
     }));
   });
-  layoutFan(hz, false);
+  // Player hand is a flex row — layoutFan stacks them.
 
   // Rival fanned backs (top)
   const ohz = $('#opp-hand-zone');
@@ -1060,9 +1058,8 @@ function startMatch(opts = {}) {
   lastRes = { you: {}, opp: {} };
   show('#match');
   renderMatch();
-  if (!localStorage.getItem(TOUR_KEY) && matchMode === 'ai') {
-    setTimeout(() => startTour(), 350);
-  }
+  // Tour is opt-in from Settings — never cover the table on first play.
+
   if (hourglassOn && canControl()) startHourglass();
   else syncHourglassUI();
   if ((matchMode === 'ai' || matchMode === 'ranked') && engine.state.active === 1) maybeAI();

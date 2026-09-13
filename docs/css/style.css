@@ -19,9 +19,9 @@
   --border: 1px solid rgba(212, 175, 55, 0.5);
   --radius: 8px;
   --card-w: 86px;
-  --card-h: 130px;
-  --hand-card-w: 96px;
-  --hand-card-h: 146px;
+  --card-h: 132px;
+  --hand-card-w: 92px;
+  --hand-card-h: 142px;
   --rail-w: 72px;
   --skin-base: #2a1810;
   --skin-accent: #5c3a24;
@@ -1520,11 +1520,11 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
 
 /* ========== ESO TABLE v2 — felt, hex, effects rail, dossier ========== */
 :root {
-  --hex: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-  --card-w: 78px;
-  --card-h: 90px;
-  --hand-card-w: 86px;
-  --hand-card-h: 100px;
+  --hex: polygon(50% 0%, 100% 15%, 100% 85%, 50% 100%, 0% 85%, 0% 15%);
+  --card-w: 86px;
+  --card-h: 132px;
+  --hand-card-w: 92px;
+  --hand-card-h: 142px;
   --events-w: 58px;
 }
 #match.screen { display: none; }
@@ -1574,8 +1574,8 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
   width: 100%;
 }
 .event-hex {
-  width: 46px;
-  height: 54px;
+  width: 42px;
+  height: 64px;
   position: relative;
   cursor: pointer;
   filter: drop-shadow(0 2px 4px #0008);
@@ -1692,7 +1692,7 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
   padding: 0.1rem;
 }
 .hex-pile .pile-art {
-  width: 44px; height: 50px;
+  width: 40px; height: 60px;
   clip-path: var(--hex);
   border: none;
   border-radius: 0;
@@ -1841,7 +1841,7 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
   position: relative;
   flex: 0 0 auto;
   width: min(38vw, 200px);
-  height: calc(min(38vw, 200px) * 1.16);
+  height: calc(min(38vw, 200px) * 1.54);
   filter: drop-shadow(0 12px 28px #000c);
 }
 .dossier-hex img {
@@ -1908,7 +1908,7 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
     flex-direction: column;
     max-width: 92vw;
   }
-  .dossier-hex { width: min(56vw, 200px); height: calc(min(56vw, 200px) * 1.16); }
+  .dossier-hex { width: min(56vw, 200px); height: calc(min(56vw, 200px) * 1.54); }
 }
 
 .felt-mid-res {
@@ -1932,11 +1932,6 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
 }
 .felt-played { opacity: 0.95; pointer-events: auto; }
 .res-label { opacity: 0.7; margin-right: 0.25rem; font-size: 0.75rem; }
-#match .card.deal-anim { animation: hex-deal 0.42s cubic-bezier(.2,.8,.2,1) both; }
-@keyframes hex-deal {
-  from { transform: translateY(-18px) scale(0.86); opacity: 0; }
-  to { transform: none; opacity: 1; }
-}
 
 #card-modal .modal-body {
   max-width: min(92vw, 720px);
@@ -2068,8 +2063,8 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
 
 @media (orientation: landscape) {
   :root {
-    --card-w: 86px; --card-h: 100px;
-    --hand-card-w: 94px; --hand-card-h: 108px;
+    --card-w: 96px; --card-h: 148px;
+    --hand-card-w: 102px; --hand-card-h: 156px;
   }
   .felt-table { padding: 0.25rem 5.5rem 0.1rem 3.4rem; }
   .felt-you-hand { min-height: calc(var(--hand-card-h) + 28px); flex-basis: calc(var(--hand-card-h) + 28px); }
@@ -2077,8 +2072,8 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
 }
 @media (orientation: portrait) {
   :root {
-    --card-w: 70px; --card-h: 82px;
-    --hand-card-w: 78px; --hand-card-h: 92px;
+    --card-w: 76px; --card-h: 116px;
+    --hand-card-w: 82px; --hand-card-h: 126px;
   }
   .felt-table { padding: 0.2rem 3.2rem 0.1rem 2.8rem; }
   .felt-you-hand {
@@ -2090,3 +2085,42 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
     height: calc(var(--card-h) * 0.4);
   }
 }
+
+
+/* Hand = simple row you can actually tap (Solitaire-simple) */
+#hand-zone.you-fan,
+#hand-zone.fan-hand {
+  display: flex !important;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: flex-end;
+  position: relative !important;
+  height: auto !important;
+  min-height: var(--hand-card-h);
+  pointer-events: auto !important;
+  overflow: visible !important;
+}
+#hand-zone .card {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  animation: none !important;
+  margin: 0 -8px;
+  flex: 0 0 auto;
+  pointer-events: auto !important;
+  z-index: 20;
+}
+#hand-zone .card:nth-child(1) { z-index: 21; }
+#hand-zone .card:nth-child(2) { z-index: 22; }
+#hand-zone .card:nth-child(3) { z-index: 23; }
+#hand-zone .card:nth-child(4) { z-index: 24; }
+#hand-zone .card:nth-child(5) { z-index: 25; }
+#hand-zone .card:nth-child(6) { z-index: 26; }
+#hand-zone .card:active { transform: translateY(-8px) scale(1.04) !important; }
+
+.tavern-zone .card:active { transform: translateY(-6px) scale(1.03); }
+.tour-backdrop { pointer-events: none !important; }
