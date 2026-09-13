@@ -287,38 +287,58 @@ function startLift(fromEl, def) {
   endLift(true);
   if (!fromEl || !def) return;
   const rect = fromEl.getBoundingClientRect();
+  if (!rect.width) return;
   liftActive = true;
-  liftFromRect = rect.width ? rect : null;
-  if (fromEl) {
-    fromEl.classList.add('lift-source');
-    fromEl.style.opacity = '0.2';
-  }
+  liftFromRect = { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+  fromEl.classList.add('lift-source');
+  fromEl.style.opacity = '0.12';
+
   const layer = $('#lift-layer') || document.body;
-  const clone = document.createElement('div');
-  clone.className = 'lift-clone lift-dossier';
-  clone.innerHTML = dossierHTML(def);
-  layer.appendChild(clone);
-  liftClone = clone;
+  const wrap = document.createElement('div');
+  wrap.className = 'lift-clone lift-fly';
+  wrap.innerHTML = `
+    <div class="lift-hex-fly">
+      <img src="${artFor(def)}" alt="" draggable="false" />
+      ${def.cost != null ? `<div class="cost-badge">${def.cost}</div>` : ''}
+    </div>
+    <div class="lift-text-fly">${dossierHTML(def)}</div>
+  `;
+  layer.appendChild(wrap);
+  liftClone = wrap;
+
+  const hex = wrap.querySelector('.lift-hex-fly');
+  const text = wrap.querySelector('.lift-text-fly');
+  hex.style.left = rect.left + 'px';
+  hex.style.top = rect.top + 'px';
+  hex.style.width = rect.width + 'px';
+  hex.style.height = rect.height + 'px';
+
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  requestAnimationFrame(() => {
-    const w = clone.offsetWidth || Math.min(vw * 0.9, 640);
-    const h = clone.offsetHeight || 280;
-    const tx = Math.max(12, (vw - w) / 2);
-    const ty = Math.max(16, (vh - h) / 2);
-    clone.style.left = tx + 'px';
-    clone.style.top = ty + 'px';
-    clone.animate([
-      { opacity: 0, transform: 'scale(0.86) translateY(18px)' },
-      { opacity: 1, transform: 'scale(1) translateY(0)' },
-    ], { duration: 260, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
-  });
+  const land = vw > vh;
+  const targetW = Math.min(land ? vw * 0.28 : vw * 0.46, 230);
+  const targetH = targetW * 1.54;
+  const tx = land ? Math.max(24, vw * 0.10) : (vw - targetW) / 2;
+  const ty = Math.max(16, (vh - targetH) / 2 - (land ? 0 : 36));
+  wrap._to = { left: tx, top: ty, width: targetW, height: targetH };
+
+  hex.animate([
+    { left: rect.left + 'px', top: rect.top + 'px', width: rect.width + 'px', height: rect.height + 'px' },
+    { left: tx + 'px', top: ty + 'px', width: targetW + 'px', height: targetH + 'px' },
+  ], { duration: 340, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
+  if (text) {
+    text.style.left = (land ? tx + targetW + 18 : 16) + 'px';
+    text.style.top = (land ? ty : ty + targetH + 10) + 'px';
+    text.style.maxWidth = land ? Math.min(360, vw * 0.48) + 'px' : (vw - 32) + 'px';
+    requestAnimationFrame(() => text.classList.add('show'));
+  }
 }
 
 function endLift(instant = false) {
   const src = document.querySelector('.lift-source');
-  const clone = liftClone;
-  const rect = liftFromRect;
+  const wrap = liftClone;
+  const from = liftFromRect;
+  const to = wrap && wrap._to;
   liftActive = false;
   liftClone = null;
   liftFromRect = null;
@@ -326,18 +346,18 @@ function endLift(instant = false) {
     src.classList.remove('lift-source');
     src.style.opacity = '';
   }
-  if (!clone) return;
-  if (instant || !rect) {
-    clone.remove();
-    return;
-  }
-  const cur = clone.getBoundingClientRect();
-  const anim = clone.animate([
-    { left: cur.left + 'px', top: cur.top + 'px', width: cur.width + 'px', height: cur.height + 'px' },
-    { left: rect.left + 'px', top: rect.top + 'px', width: rect.width + 'px', height: rect.height + 'px' },
-  ], { duration: 240, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'forwards' });
-  anim.onfinish = () => clone.remove();
-  setTimeout(() => { if (clone.parentNode) clone.remove(); }, 320);
+  if (!wrap) return;
+  if (instant || !from) { wrap.remove(); return; }
+  const hex = wrap.querySelector('.lift-hex-fly') || wrap;
+  const text = wrap.querySelector('.lift-text-fly');
+  if (text) text.classList.remove('show');
+  const start = to || hex.getBoundingClientRect();
+  const anim = hex.animate([
+    { left: start.left + 'px', top: start.top + 'px', width: start.width + 'px', height: start.height + 'px' },
+    { left: from.left + 'px', top: from.top + 'px', width: from.width + 'px', height: from.height + 'px' },
+  ], { duration: 300, easing: 'cubic-bezier(.25,.75,.2,1)', fill: 'forwards' });
+  anim.onfinish = () => wrap.remove();
+  setTimeout(() => { if (wrap.parentNode) wrap.remove(); }, 360);
 }
 
 function renderCard(inst, opts = {}) {
