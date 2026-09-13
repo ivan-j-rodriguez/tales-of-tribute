@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta name="theme-color" content="#1e4a48" />
   <title>Tales of Tribute — Fan Table</title>
-  <link rel="stylesheet" href="css/style.css?v=23" />
+  <link rel="stylesheet" href="css/style.css?v=24" />
 </head>
 <body>
   <div id="app">
@@ -30,7 +30,7 @@
           <label class="chk"><input type="checkbox" id="chk-hourglass-splash" /> Hourglass (90s)</label>
           <button type="button" id="btn-music" class="music-toggle" title="Music">♪ Music: Off</button>
         </div>
-        <p class="build-stamp" id="build-stamp">build 23</p>
+        <p class="build-stamp" id="build-stamp">build 24</p>
         <p class="disclaimer">Unofficial fan project. Not affiliated with Bethesda Softworks or ZeniMax Online Studios. Not for sale. Card art courtesy of UESP. No real-money purchases — earn gold at the table.</p>
       </div>
     </section>
@@ -216,15 +216,13 @@
             <span class="pile-count" id="cnt-tavern-discard">0</span>
             <span class="pile-label">Discard</span>
           </button>
+          <div class="token-row rival-res" id="opp-res"></div>
           <div class="felt-tavern">
             <div class="turn-chip" id="turn-ind">Your turn</div>
             <div class="tavern-zone" id="tavern-zone"></div>
           </div>
+          <div class="token-row you-res" id="you-res"></div>
           <div class="felt-tools" hidden></div>
-          <div class="felt-res-wells res-dock" id="res-dock">
-            <div class="hud rival-res token-row" id="opp-res"></div>
-            <div class="hud you-res token-row" id="you-res"></div>
-          </div>
 
           <div class="played-row felt-played" id="you-played"></div>
           <div class="agents-row felt-you-agents" id="you-agents"></div>
@@ -348,6 +346,6 @@
       <div class="modal-body" id="card-modal-body"></div>
     </div>
   </div>
-  <script type="module" src="js/app.js?v=23"></script>
+  <script type="module" src="js/app.js?v=24"></script>
 </body>
 </html>

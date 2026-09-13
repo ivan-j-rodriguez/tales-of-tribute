@@ -669,10 +669,9 @@ function resHTML(pl, label, key) {
   };
   lastRes[key] = { coin: pl.coin, power: pl.power, prestige: pl.prestige };
   return `
-    <span class="res-label">${label}</span>
-    <span class="tok tok-coin res" title="Coin"><span class="icon-disc coin">₵</span>${tick('coin', pl.coin)}</span>
-    <span class="tok tok-prestige res" title="Prestige"><span class="icon-disc prestige">♛</span>${tick('prestige', pl.prestige)}</span>
-    <span class="tok tok-power res" title="Power"><span class="icon-disc power">✊</span>${tick('power', pl.power)}</span>
+    <span class="eso-tok tok-coin" title="Coin">${tick('coin', pl.coin)}</span>
+    <span class="eso-tok tok-prestige" title="Prestige">${tick('prestige', pl.prestige)}</span>
+    <span class="eso-tok tok-power" title="Power">${tick('power', pl.power)}</span>
   `;
 }
 
