@@ -40,6 +40,9 @@ html, body {
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
 }
+button { touch-action: manipulation; }
+.card { touch-action: manipulation; cursor: pointer; }
+
 button {
   font-family: 'Cinzel', serif;
   cursor: pointer;

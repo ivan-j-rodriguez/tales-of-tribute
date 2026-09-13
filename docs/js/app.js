@@ -47,8 +47,7 @@ let gauntletStopIndex = null;
 let isGauntletMatch = false;
 
 const TURN_SECONDS = 90;
-const TAP_MAX_MS = 350;
-const HOLD_MS = 500;
+const HOLD_MS = 520;
 const AGENT_SLOTS = 4;
 const TOUR_KEY = 'tot_tour_v2';
 
@@ -178,22 +177,26 @@ function typeLabel(d) {
 
 /**
  * Phone-first gestures:
- * - Short tap (<350ms, little movement) = PLAY/BUY via onTap. Never opens inspect.
- * - Press-and-hold (>=500ms): lift a floating clone from exact rect; pointerup animates back.
- * Hold never also plays.
+ * - Any press that is NOT a hold = play / buy / claim (onTap).
+ * - Hold (>=520ms, little movement): lift-to-read; release returns the card.
+ * There is no dead zone between tap and hold.
  */
 function bindCardGesture(el, { onTap, onHoldRead }) {
   let timer = null;
   let held = false;
-  let sx = 0, sy = 0, t0 = 0;
-  const clear = () => { if (timer) { clearTimeout(timer); timer = null; } };
+  let cancelled = false;
+  let consumed = false;
+  let sx = 0, sy = 0;
+  const clearTimer = () => { if (timer && timer !== 'x') { clearTimeout(timer); } timer = null; };
 
   el.addEventListener('pointerdown', (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     held = false;
-    sx = e.clientX; sy = e.clientY; t0 = performance.now();
+    cancelled = false;
+    consumed = false;
+    sx = e.clientX; sy = e.clientY;
     try { el.setPointerCapture(e.pointerId); } catch {}
-    clear();
+    clearTimer();
     timer = setTimeout(() => {
       held = true;
       timer = null;
@@ -201,33 +204,41 @@ function bindCardGesture(el, { onTap, onHoldRead }) {
     }, HOLD_MS);
   });
   el.addEventListener('pointermove', (e) => {
-    if (!timer && !held) return;
-    if (Math.hypot(e.clientX - sx, e.clientY - sy) > 16) {
-      clear();
-      if (held) { /* keep lift until up */ }
+    if (Math.hypot(e.clientX - sx, e.clientY - sy) > 24) {
+      cancelled = true;
+      clearTimer();
     }
   });
   el.addEventListener('pointerup', (e) => {
     const wasHeld = held;
-    const dt = performance.now() - t0;
-    const moved = Math.hypot(e.clientX - sx, e.clientY - sy);
-    clear();
+    clearTimer();
     held = false;
     try { el.releasePointerCapture(e.pointerId); } catch {}
     if (wasHeld || liftActive) {
       e.preventDefault();
       e.stopPropagation();
       endLift();
+      consumed = true;
       return;
     }
-    if (dt < TAP_MAX_MS && moved < 16 && onTap) onTap(e);
+    if (cancelled) return;
+    consumed = true;
+    if (onTap) onTap(e);
   });
   el.addEventListener('pointercancel', () => {
-    clear();
+    clearTimer();
     if (held || liftActive) endLift();
     held = false;
   });
   el.addEventListener('contextmenu', (e) => e.preventDefault());
+  el.addEventListener('click', (e) => {
+    if (consumed || held || liftActive) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    if (onTap) onTap(e);
+  });
 }
 
 function startLift(fromEl, def) {
