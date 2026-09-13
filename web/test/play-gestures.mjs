@@ -85,7 +85,7 @@ async function holdPatron(page, pid = 'pelin') {
       || document.querySelector('#rail-patrons .patron-coin[data-side="you"]');
     if (!el) return { ok: false };
     el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', isPrimary: true }));
-    await new Promise(r => setTimeout(r, 920));
+    await new Promise(r => setTimeout(r, 1250));
     const mid = window.__totTest.snapshot();
     const dossier = document.querySelector('.lift-text-fly')?.innerText || '';
     el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch', isPrimary: true }));
@@ -99,7 +99,7 @@ async function holdHand(page) {
     const el = document.querySelector('#hand-zone .card');
     if (!el) return false;
     el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', isPrimary: true }));
-    await new Promise(r => setTimeout(r, 920));
+    await new Promise(r => setTimeout(r, 1250));
     el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch', isPrimary: true }));
     el.click();
     return true;
@@ -141,6 +141,11 @@ let b = await snap(page);
 assert('full tap plays one card', b.hand === hand0 - 1 && b.played >= 1, b);
 assert('full tap does not double-play', b.hand === hand0 - 1, b);
 assert('gold pays a coin', b.golds === golds0 - 1 && b.coin === coin0 + 1, b);
+assert('tap does not lift', b.liftActive === false && b.liftLayer === false, b);
+assert('combo rail shows card art', b.comboHexes >= 1, b);
+assert('draw pile paints a card back', a.pileBack === true && a.pileEmpty === false, a);
+assert('tavern sits near vertical center', a.tavernCenter === true, a);
+assert('gold tip is in-game sentence', /Gain 1 Coin/i.test(a.goldTip || ''), a.goldTip);
 
 // 2. iOS click-only still plays
 await start(page);
@@ -162,6 +167,8 @@ assert('hold does not play', b.hand === a.hand && b.coin === a.coin, { a, b });
 await start(page);
 const toast = await page.evaluate(() => window.__totTest.clickDraw());
 assert('draw pile sealed', /sealed/i.test(toast), toast);
+const tavernToast = await page.evaluate(() => window.__totTest.clickTavernDeck());
+assert('tavern deck sealed', /sealed/i.test(tavernToast), tavernToast);
 
 // 5. patron tap opens confirm, not lift
 await start(page);

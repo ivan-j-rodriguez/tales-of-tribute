@@ -15,6 +15,7 @@ import {
 import { UPGRADE_TO_BASE, upgradesForPatron } from './upgrades.js';
 import { hostRoom, joinRoom } from './netplay.js';
 import { setMusicEnabled, preferMusicFromStorage, warmMuted, playSfx, setMusicCue, setSfxStyle, getSfxStyle, setSfxEnabled, preferSfxFromStorage, isSfxOn } from './music.js';
+import { applyOfficialPatronText } from './texts.js';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -72,7 +73,7 @@ async function loadData() {
   ]);
   const norm = normalizeCatalog(c, p, d);
   DATA.cards = norm.cards;
-  DATA.patrons = norm.patrons;
+  DATA.patrons = applyOfficialPatronText(norm.patrons);
   DATA.decks = norm.decks;
   cardsById = Object.fromEntries(DATA.cards.map(x => [x.id, x]));
   patronsById = Object.fromEntries(DATA.patrons.map(x => [x.id, x]));
