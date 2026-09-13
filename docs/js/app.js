@@ -14,7 +14,7 @@ import {
 } from './profile.js';
 import { UPGRADE_TO_BASE, upgradesForPatron } from './upgrades.js';
 import { hostRoom, joinRoom } from './netplay.js';
-import { setMusicEnabled, preferMusicFromStorage, warmMuted, playSfx, setMusicCue, setSfxStyle, getSfxStyle } from './music.js';
+import { setMusicEnabled, preferMusicFromStorage, warmMuted, playSfx, setMusicCue, setSfxStyle, getSfxStyle, setSfxEnabled, preferSfxFromStorage, isSfxOn } from './music.js';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -81,6 +81,24 @@ async function loadData() {
 function show(id) {
   document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
   $(id).classList.add('active');
+  if (id === '#match') requestAnimationFrame(() => fitMatchBoard());
+}
+
+const BOARD_W = 1180;
+const BOARD_H = 640;
+
+function fitMatchBoard() {
+  const match = $('#match');
+  const vp = match?.querySelector('.board-viewport');
+  const board = match?.querySelector('.board');
+  if (!vp || !board || !match.classList.contains('active')) return;
+  const w = vp.clientWidth;
+  const h = vp.clientHeight;
+  if (!w || !h) return;
+  const scale = Math.min(w / BOARD_W, h / BOARD_H);
+  board.style.width = BOARD_W + 'px';
+  board.style.height = BOARD_H + 'px';
+  board.style.transform = `scale(${scale})`;
 }
 
 let lastToast = '';
@@ -157,7 +175,7 @@ function onSplashEnter() {
   }
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 19';
+  if (stamp) stamp.textContent = 'build 25';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -481,6 +499,7 @@ function renderCard(inst, opts = {}) {
   el.className = 'card' + (opts.extraClass ? ' ' + opts.extraClass : '');
   if (opts.affordable) el.classList.add('affordable');
   if (opts.playable) el.classList.add('playable');
+  if (opts.comboN >= 2) el.classList.add('combo-glow', `combo-${Math.min(4, opts.comboN)}`);
   if (opts.deal) el.classList.add('deal-anim');
   el.dataset.uid = inst.uid || '';
   el.dataset.id = inst.id;
@@ -667,11 +686,12 @@ function resHTML(pl, label, key) {
     const changed = prev[field] != null && prev[field] !== val;
     return `<span class="num${changed ? ' tick' : ''}" data-f="${field}">${val}</span>`;
   };
-  lastRes[key] = { coin: pl.coin, power: pl.power, prestige: pl.prestige };
+  lastRes[key] = { coin: pl.coin, power: pl.power, prestige: pl.prestige, patron: pl.patronCallsLeft };
   return `
     <span class="eso-tok tok-coin" title="Coin">${tick('coin', pl.coin)}</span>
     <span class="eso-tok tok-prestige" title="Prestige">${tick('prestige', pl.prestige)}</span>
     <span class="eso-tok tok-power" title="Power">${tick('power', pl.power)}</span>
+    <span class="eso-tok tok-patron" title="Patron uses">${tick('patron', pl.patronCallsLeft ?? 0)}</span>
   `;
 }
 
@@ -792,6 +812,11 @@ function renderMatch() {
     ? (s.winner === seat ? 'Victory' : 'Defeat')
     : (yourTurn ? (matchMode === 'hotseat' ? `Player ${seat + 1}` : 'Your turn') : (matchMode === 'ranked' || matchMode === 'ai' ? 'Rival thinking…' : 'Waiting…'));
   turn.classList.toggle('your-turn', yourTurn);
+  const endBtn = $('#btn-end');
+  if (endBtn) {
+    endBtn.classList.toggle('can-end', yourTurn && s.winner == null);
+    endBtn.disabled = !yourTurn || s.winner != null;
+  }
 
   // Pile counts
   $('#cnt-opp-hand').textContent = opp.hand.length;
@@ -829,17 +854,24 @@ function renderMatch() {
     if (prevFavor[pid] && prevFavor[pid] !== favorWord.toLowerCase()) el.classList.add('just-flipped');
     el.innerHTML = `
       <div class="token-dial" title="${favorWord}">
-        <svg class="token-frame" viewBox="0 0 64 80" aria-hidden="true">
+        <svg class="token-frame" viewBox="0 0 96 52" aria-hidden="true">
           <defs>
+            <linearGradient id="wood-${pid}" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#7a5330"/>
+              <stop offset="45%" stop-color="#4a2e14"/>
+              <stop offset="100%" stop-color="#2a180a"/>
+            </linearGradient>
             <linearGradient id="sil-${pid}" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stop-color="#f4efe6"/>
               <stop offset="40%" stop-color="#c9c0b0"/>
               <stop offset="100%" stop-color="#5a544c"/>
             </linearGradient>
           </defs>
-          <path d="M32 2 C36 12 60 28 60 48 C60 66 48 78 32 78 C16 78 4 66 4 48 C4 28 28 12 32 2 Z"
-                fill="url(#sil-${pid})" stroke="#2c2822" stroke-width="1.4"/>
+          <path d="M4 26 L20 6 H86 Q94 6 94 14 V38 Q94 46 86 46 H20 Z"
+                fill="url(#wood-${pid})" stroke="#2c2010" stroke-width="1.4"/>
+          <path d="M86 10 H90 V42 H86" fill="url(#sil-${pid})" opacity="0.35"/>
         </svg>
+        <span class="favor-pip" aria-hidden="true"></span>
         <div class="coin-ring"><img src="${patronArt(pid)}" alt="${pat.short}" draggable="false" /></div>
       </div>
       <div class="plabel">${pat.short}</div>
@@ -875,7 +907,6 @@ function renderMatch() {
         if (!canControl()) return;
         if (engine.canBuy(i)) {
           const dest = pileEl('you-cooldown');
-          playSfx('buy');
           flyCard(el, dest, c, () => {});
           engine.buy(i);
           syncAction({ op: 'buy', i });
@@ -906,11 +937,15 @@ function renderMatch() {
   // Played this turn
   const yp = $('#you-played');
   yp.innerHTML = '';
+  const suitTally = {};
   you.played.forEach(c => {
     const def = cardsById[c.id];
+    const suit = def?.patron;
+    if (suit) suitTally[suit] = (suitTally[suit] || 0) + 1;
     if (def?.type === 'agent') return; // agents live in agents row
     yp.appendChild(renderCard(c, {
       extraClass: 'played-card',
+      comboN: suitTally[suit] || 0,
       onTap: (_i, el) => startLift(el, cardsById[c.id]),
       onHoldRead: (_i, el) => startLift(el, cardsById[c.id]),
     }));
@@ -922,18 +957,14 @@ function renderMatch() {
   you.hand.forEach(c => {
     const def = cardsById[c.id];
     hz.appendChild(renderCard(c, {
-      playable: yourTurn,
+      playable: yourTurn && engine.canPlay(c.uid),
       extraClass: 'hand-card',
       onTap: (inst, el) => {
         if (!canControl()) return;
         const isAgent = def?.type === 'agent';
-        const isContract = !!def?.contract;
         const dest = isAgent
           ? ($('#you-agents') || pileEl('played'))
           : (pileEl('played') || pileEl('you-played'));
-        if (isContract) { playSfx('contract'); flashVfx(el, 'contract'); }
-        else if (isAgent) { playSfx('agent'); flashVfx(el, 'agent'); }
-        else playSfx('play');
         const ok = engine.playCard(c.uid);
         if (!ok) { toast('Cannot play that now'); return; }
         flyCard(el, dest, c, () => {});
@@ -975,6 +1006,7 @@ function renderMatch() {
   else if (isRankedMatch || isGauntletMatch) setMusicCue('boss');
   else if (s.turn >= 3) setMusicCue('fight');
   else setMusicCue('tavern');
+  fitMatchBoard();
 }
 
 function layoutFan(container, rival = false) {
@@ -1208,10 +1240,22 @@ function startMatch(opts = {}) {
   engine.on((ev, data) => {
     if (ev === 'combo') { flashCombo(data.n); playSfx('combo'); }
     if (ev === 'win') { stopHourglass(); playSfx('win'); showWin(data); }
-    if (ev === 'buy') playSfx('coin');
+    if (ev === 'play') {
+      const def = data.def;
+      if (def?.contract) { playSfx('contract'); }
+      else if (def?.type === 'agent') { playSfx('agent'); }
+      else playSfx('play');
+      if (def?.id === 'gold' || def?.id === 'writ-of-coin') playSfx('coinA');
+    }
+    if (ev === 'buy') playSfx('buy');
+    if (ev === 'writ') playSfx('coinB');
     if (ev === 'patron') playSfx('patron');
+    if (ev === 'knockout') playSfx('knockout');
+    if (ev === 'shuffle') {
+      playSfx('shuffle');
+      animateShuffle(data.player);
+    }
     if (ev === 'agentEnter') { playSfx('agent'); }
-    if (ev === 'prestige') playSfx('coin');
     if (ev === 'aiAction') handleAiActionAnim(data);
     if (ev === 'state' && !liftActive && engine?.state?.active === 1 &&
         (matchMode === 'ai' || matchMode === 'ranked' || isGauntletMatch)) {
@@ -1348,23 +1392,42 @@ function handleAiActionAnim(action) {
       const isAgent = def?.type === 'agent';
       const isContract = !!def?.contract;
       const dest = isAgent ? $('#opp-agents') : pileEl('opp-cooldown');
-      if (isContract) { playSfx('contract'); flashVfx(from, 'contract'); }
-      else if (isAgent) { playSfx('agent'); flashVfx(from, 'agent'); }
-      else playSfx('play');
+      if (isContract) flashVfx(from, 'contract');
+      else if (isAgent) flashVfx(from, 'agent');
       flyCard(from, dest || $('#opp-agents'), { id: action.cardId }, () => {});
     } else if (action.type === 'buy') {
       const tz = $('#tavern-zone');
       const from = tz?.children[action.index] || tz;
-      playSfx('buy');
       flyCard(from, pileEl('opp-cooldown'), { id: action.cardId }, () => {});
-    } else if (action.type === 'patron') {
-      playSfx('patron');
     }
   } catch {}
 }
 
+function animateShuffle(player) {
+  if (!engine?.state || !player) return;
+  const you = engine.state.players[localSeat()];
+  const draw = player === you ? $('#pile-you-draw') : $('#pile-opp-draw');
+  const cd = player === you ? $('#pile-you-cd') : $('#pile-opp-cd');
+  [draw, cd].forEach((el) => el?.classList.add('shuffling'));
+  setTimeout(() => [draw, cd].forEach((el) => el?.classList.remove('shuffling')), 700);
+}
+
+function syncSfxToggles() {
+  const on = isSfxOn();
+  const chk = $('#chk-settings-sfx');
+  if (chk) chk.checked = on;
+  const btn = $('#btn-match-sfx');
+  if (btn) {
+    btn.textContent = on ? 'SFX' : 'SFX off';
+    btn.classList.toggle('muted', !on);
+  }
+}
+
 async function doEndTurn() {
   if (!engine || !canControl() || engine.state.winner) return;
+  playSfx('end');
+  $('#btn-end')?.classList.add('just-ended');
+  setTimeout(() => $('#btn-end')?.classList.remove('just-ended'), 600);
   // Fly played cards to cooldown
   const playedEls = $$('#you-played .card');
   const dest = pileEl('you-cooldown');
@@ -1469,6 +1532,7 @@ function renderSettings() {
   if (bot) bot.checked = !!profile.showBotCards;
   const sfx = $('#sel-sfx');
   if (sfx) sfx.value = getSfxStyle();
+  syncSfxToggles();
   mountDiffSlider('#diff-slider-settings', '#diff-val-settings');
   paintDiffAll();
   // Show-bot only meaningful for AI; still listed with note
@@ -2159,6 +2223,14 @@ function bind() {
 
   $('#btn-end').onclick = () => doEndTurn();
   $('#btn-hg-toggle').onclick = () => setHourglass(!hourglassOn);
+  $('#btn-match-sfx')?.addEventListener('click', () => {
+    setSfxEnabled(!isSfxOn());
+    syncSfxToggles();
+    if (isSfxOn()) playSfx('tap');
+  });
+  window.addEventListener('resize', fitMatchBoard);
+  window.addEventListener('orientationchange', () => setTimeout(fitMatchBoard, 120));
+  window.visualViewport?.addEventListener('resize', fitMatchBoard);
   $('#btn-hand-done').onclick = () => {
     $('#hand-device-overlay').classList.remove('show');
     renderMatch();
@@ -2191,6 +2263,11 @@ function bind() {
     warmMuted();
     await setMusicEnabled(!!e.target.checked);
     updateMusicBtn();
+  });
+  $('#chk-settings-sfx')?.addEventListener('change', (e) => {
+    setSfxEnabled(!!e.target.checked);
+    syncSfxToggles();
+    if (e.target.checked) playSfx('tap');
   });
   $('#sel-sfx')?.addEventListener('change', (e) => {
     setSfxStyle(e.target.value);
@@ -2261,6 +2338,14 @@ function installTestHook() {
         patrons: coins,
         clusterH: cluster?.height || 0,
         railH: rail?.height || 0,
+        glow: document.querySelectorAll('#match .card.playable, #match .card.affordable').length,
+        piles: [...document.querySelectorAll('#match .hex-pile:not(.sr-pile)')].map(el => ({
+          id: el.id,
+          count: el.querySelector('.pile-count')?.textContent,
+          vis: el.getBoundingClientRect().width > 20,
+        })),
+        endGlow: !!document.querySelector('#btn-end.can-end'),
+        scale: document.querySelector('#match .board')?.style.transform || '',
       };
     },
     clickDraw() {
@@ -2279,7 +2364,9 @@ loadData().then(() => {
   paintDiffAll();
   warmMuted();
   setSfxStyle(getSfxStyle());
+  setSfxEnabled(preferSfxFromStorage());
   updateMusicBtn();
+  syncSfxToggles();
   if (preferMusicFromStorage()) setMusicEnabled(true);
   onSplashEnter();
   installTestHook();

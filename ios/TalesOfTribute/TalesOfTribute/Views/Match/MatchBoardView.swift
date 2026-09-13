@@ -14,7 +14,9 @@ struct MatchBoardView: View {
                 FeltTable(theme: theme)
                 VStack(spacing: 4) {
                     opponentRow
+                    tokenRow(for: 1).scaleEffect(0.9)
                     tavernRow
+                    tokenRow(for: 0)
                     playerAgentsAndResources
                     FannedHandView(
                         cards: eng.state.players[0].hand,
@@ -117,7 +119,8 @@ struct MatchBoardView: View {
                 let d = session.catalog.card(c.cardId)
                 TributeCardView(
                     def: d, inst: c, theme: theme, width: 72,
-                    affordable: yourTurn && eng.canBuy(i)
+                    affordable: yourTurn && eng.canBuy(i),
+                    legalGlow: yourTurn && eng.canBuy(i)
                 )
                 .onTapGesture {
                     if yourTurn, eng.buy(i) { session.afterHumanAction() }
@@ -134,15 +137,20 @@ struct MatchBoardView: View {
         HStack(spacing: 12) {
             PileToken(title: "Draw", count: eng.state.players[0].draw.count, theme: theme)
             agentRow(eng.state.players[0].agents, enemy: false)
-            HStack(spacing: 10) {
-                ResourceHex(label: "Coin", value: eng.state.players[0].coin, color: Color(red: 0.92, green: 0.78, blue: 0.28))
-                ResourceHex(label: "Prestige", value: eng.state.players[0].prestige, color: Color(red: 0.95, green: 0.72, blue: 0.28))
-                ResourceHex(label: "Power", value: eng.state.players[0].power, color: Color(red: 0.45, green: 0.82, blue: 0.95))
-            }
             PileToken(title: "Cooldown", count: eng.state.players[0].cooldown.count, theme: theme)
             Spacer(minLength: 170)
         }
         .frame(height: 86)
+    }
+
+    func tokenRow(for seat: Int) -> some View {
+        let p = eng.state.players[seat]
+        return HStack(spacing: 10) {
+            ResourceHex(label: "Coin", value: p.coin, color: Color(red: 0.92, green: 0.78, blue: 0.28), shape: .circle)
+            ResourceHex(label: "Prestige", value: p.prestige, color: Color(red: 0.22, green: 0.52, blue: 0.92), shape: .hex)
+            ResourceHex(label: "Power", value: p.power, color: Color(red: 0.82, green: 0.20, blue: 0.20), shape: .diamond)
+            ResourceHex(label: "Patron", value: p.patronCallsLeft, color: Color(red: 0.78, green: 0.75, blue: 0.68), shape: .circle)
+        }
     }
 
     var playedEffectsStrip: some View {

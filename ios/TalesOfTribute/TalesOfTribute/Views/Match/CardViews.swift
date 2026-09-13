@@ -9,6 +9,7 @@ struct TributeCardView: View {
     var showBack: Bool = false
     var dimmed: Bool = false
     var affordable: Bool = true
+    var legalGlow: Bool = false
 
     var height: CGFloat { width * 1.62 }
 
@@ -22,7 +23,8 @@ struct TributeCardView: View {
         }
         .frame(width: width, height: height)
         .opacity(dimmed ? 0.45 : 1)
-        .shadow(color: .black.opacity(0.45), radius: 3, y: 2)
+        .shadow(color: legalGlow ? Color(red: 0.45, green: 0.92, blue: 1.0).opacity(0.95) : .black.opacity(0.45), radius: legalGlow ? 10 : 3)
+        .shadow(color: legalGlow ? Color(red: 0.83, green: 0.69, blue: 0.22).opacity(0.55) : .clear, radius: legalGlow ? 16 : 0)
     }
 
     var face: some View {
@@ -115,7 +117,7 @@ struct FannedHandView: View {
             HStack(spacing: -cardW * 0.42) {
                 ForEach(Array(cards.enumerated()), id: \.element.uid) { i, c in
                     let t = Double(i) - mid
-                    TributeCardView(def: catalog.card(c.cardId), inst: c, theme: theme, width: cardW)
+                    TributeCardView(def: catalog.card(c.cardId), inst: c, theme: theme, width: cardW, legalGlow: enabled)
                         .rotationEffect(.degrees(t * 5.2))
                         .offset(y: CGFloat(abs(t) * 5.5))
                         .zIndex(Double(i))
@@ -157,24 +159,61 @@ struct PileToken: View {
     }
 }
 
+enum TokenShape { case circle, hex, diamond }
+
 struct ResourceHex: View {
     var label: String
     var value: Int
     var color: Color
+    var shape: TokenShape = .hex
     var body: some View {
         VStack(spacing: 1) {
             ZStack {
-                Hexagon().fill(Color(red: 0.12, green: 0.09, blue: 0.05).opacity(0.85))
-                Hexagon().stroke(color.opacity(0.8), lineWidth: 1.2)
+                tokenFill
+                tokenStroke
                 Text("\(value)")
                     .font(.system(size: 16, weight: .bold, design: .serif))
-                    .foregroundStyle(color)
+                    .foregroundStyle(label == "Coin" || label == "Patron" ? Color(red: 0.18, green: 0.12, blue: 0.05) : .white)
             }
             .frame(width: 44, height: 40)
             Text(label)
                 .font(.system(size: 8, weight: .semibold, design: .serif))
                 .foregroundStyle(Color(red: 0.90, green: 0.84, blue: 0.68).opacity(0.8))
         }
+    }
+
+    @ViewBuilder var tokenFill: some View {
+        switch shape {
+        case .circle:
+            Circle().fill(color)
+        case .hex:
+            Hexagon().fill(color)
+        case .diamond:
+            Diamond().fill(color)
+        }
+    }
+
+    @ViewBuilder var tokenStroke: some View {
+        switch shape {
+        case .circle:
+            Circle().stroke(Color.black.opacity(0.35), lineWidth: 1)
+        case .hex:
+            Hexagon().stroke(Color.white.opacity(0.25), lineWidth: 1)
+        case .diamond:
+            Diamond().stroke(Color.white.opacity(0.25), lineWidth: 1)
+        }
+    }
+}
+
+struct Diamond: Shape {
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        p.move(to: CGPoint(x: rect.midX, y: rect.minY))
+        p.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+        p.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
+        p.addLine(to: CGPoint(x: rect.minX, y: rect.midY))
+        p.closeSubpath()
+        return p
     }
 }
 

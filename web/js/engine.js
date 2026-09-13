@@ -133,6 +133,7 @@ export class GameEngine {
         if (!player.cooldown.length) break;
         player.draw = player.cooldown.splice(0);
         this._shuffle(player.draw);
+        this.emit('shuffle', { player });
       }
       if (player.draw.length) {
         const c = player.draw.pop();
@@ -565,11 +566,16 @@ export class GameEngine {
   }
 
   _createToken(p, cardId, n) {
+    let made = 0;
     for (let i = 0; i < n; i++) {
       if (!this.cardsById[cardId]) continue;
       const c = this._inst(cardId);
       this._toCooldown(p, c);
       this._log(`Create ${this.card(cardId).name}`);
+      made += 1;
+    }
+    if (made && (cardId === 'writ-of-coin' || cardId === 'gold')) {
+      this.emit('writ', { cardId, n: made });
     }
   }
 

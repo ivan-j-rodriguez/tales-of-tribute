@@ -17,6 +17,7 @@ let musicEl = null;
 let playing = false;
 let musicOn = false;
 let sfxStyle = 'table';
+let sfxOn = true;
 
 function ensureCtx() {
   if (ctx) return ctx;
@@ -76,6 +77,23 @@ export function getSfxStyle() {
   try { return localStorage.getItem('tot_sfx') === 'dramatic' ? 'dramatic' : 'table'; } catch { return 'table'; }
 }
 
+export function setSfxEnabled(on) {
+  sfxOn = !!on;
+  try { localStorage.setItem('tot_sfx_on', sfxOn ? '1' : '0'); } catch {}
+  if (sfxGain) sfxGain.gain.value = sfxOn ? 0.28 : 0;
+  return sfxOn;
+}
+
+export function isSfxOn() { return sfxOn; }
+
+export function preferSfxFromStorage() {
+  try {
+    const v = localStorage.getItem('tot_sfx_on');
+    if (v === null) return true;
+    return v === '1';
+  } catch { return true; }
+}
+
 export function setMusicCue(cue) {
   const next = STEMS[cue] ? cue : 'tavern';
   ensureMusicEl();
@@ -91,6 +109,8 @@ export function warmMuted() {
   ensureCtx();
   ensureMusicEl();
   sfxStyle = getSfxStyle();
+  sfxOn = preferSfxFromStorage();
+  if (sfxGain) sfxGain.gain.value = sfxOn ? 0.28 : 0;
   musicEl.volume = 0.34;
 }
 
@@ -130,18 +150,41 @@ function noiseBurst({ dur = 0.06, vol = 0.2, freq = 1200, Q = 0.7 }) {
 }
 
 export function playSfx(kind) {
+  if (!sfxOn) return;
   ensureCtx();
   sfxStyle = getSfxStyle();
   if (ctx?.state === 'suspended') ctx.resume().catch(() => {});
   const table = sfxStyle === 'table';
   switch (kind) {
     case 'play':
-      if (table) { noiseBurst({ dur: 0.07, vol: 0.22, freq: 900, Q: 0.6 }); beep({ freq: 180, dur: 0.05, type: 'sine', vol: 0.12 }); }
+      if (table) { noiseBurst({ dur: 0.08, vol: 0.26, freq: 720, Q: 0.55 }); beep({ freq: 140, dur: 0.07, type: 'triangle', vol: 0.16, slide: -40 }); }
       else beep({ freq: 320, dur: 0.09, type: 'triangle', vol: 0.28, slide: 80 });
       break;
     case 'buy':
-      if (table) { beep({ freq: 980, dur: 0.05, type: 'sine', vol: 0.2 }); beep({ freq: 1310, dur: 0.06, type: 'sine', vol: 0.14 }); }
-      else { beep({ freq: 520, dur: 0.07, type: 'sine', vol: 0.25 }); beep({ freq: 780, dur: 0.1, type: 'sine', vol: 0.18, slide: 40 }); }
+      noiseBurst({ dur: 0.1, vol: 0.2, freq: 1100, Q: 0.45 });
+      beep({ freq: 980, dur: 0.05, type: 'sine', vol: 0.2 });
+      beep({ freq: 1310, dur: 0.07, type: 'sine', vol: 0.14 });
+      beep({ freq: 660, dur: 0.1, type: 'triangle', vol: 0.1, slide: 80 });
+      break;
+    case 'coinA':
+    case 'coin':
+      beep({ freq: 1040, dur: 0.05, type: 'sine', vol: 0.2 });
+      beep({ freq: 1560, dur: 0.07, type: 'triangle', vol: 0.12 });
+      break;
+    case 'coinB':
+      beep({ freq: 660, dur: 0.06, type: 'square', vol: 0.1 });
+      beep({ freq: 880, dur: 0.08, type: 'triangle', vol: 0.16 });
+      beep({ freq: 1320, dur: 0.1, type: 'sine', vol: 0.12 });
+      break;
+    case 'shuffle':
+      noiseBurst({ dur: 0.16, vol: 0.22, freq: 1600, Q: 0.7 });
+      noiseBurst({ dur: 0.12, vol: 0.16, freq: 900, Q: 0.8 });
+      beep({ freq: 220, dur: 0.08, type: 'triangle', vol: 0.08, slide: 40 });
+      break;
+    case 'knockout':
+    case 'trap':
+      noiseBurst({ dur: 0.1, vol: 0.28, freq: 140, Q: 0.45 });
+      beep({ freq: 70, dur: 0.18, type: 'square', vol: 0.2, slide: -25 });
       break;
     case 'swipe':
       noiseBurst({ dur: 0.05, vol: 0.16, freq: 1400, Q: 0.8 });
@@ -155,23 +198,26 @@ export function playSfx(kind) {
       beep({ freq: 90, dur: 0.16, type: 'sine', vol: 0.28, slide: -30 });
       break;
     case 'patron':
-      beep({ freq: 392, dur: 0.12, type: 'triangle', vol: 0.22 });
-      beep({ freq: 523, dur: 0.16, type: 'triangle', vol: 0.18, slide: 60 });
-      break;
-    case 'coin':
-      beep({ freq: 980, dur: 0.05, type: 'sine', vol: 0.18 });
-      beep({ freq: 1310, dur: 0.07, type: 'sine', vol: 0.12 });
+      beep({ freq: 740, dur: 0.08, type: 'triangle', vol: 0.2 });
+      beep({ freq: 880, dur: 0.12, type: 'triangle', vol: 0.16 });
+      beep({ freq: 1110, dur: 0.16, type: 'sine', vol: 0.12 });
       break;
     case 'combo':
-      beep({ freq: 440, dur: 0.08, type: 'triangle', vol: 0.2 });
-      beep({ freq: 554, dur: 0.1, type: 'triangle', vol: 0.18 });
-      beep({ freq: 659, dur: 0.14, type: 'triangle', vol: 0.16 });
+      beep({ freq: 520, dur: 0.07, type: 'sine', vol: 0.16 });
+      beep({ freq: 660, dur: 0.08, type: 'sine', vol: 0.16 });
+      beep({ freq: 880, dur: 0.1, type: 'triangle', vol: 0.15 });
+      beep({ freq: 1100, dur: 0.14, type: 'triangle', vol: 0.14 });
+      break;
+    case 'end':
+      beep({ freq: 220, dur: 0.1, type: 'triangle', vol: 0.16 });
+      beep({ freq: 330, dur: 0.16, type: 'sine', vol: 0.14, slide: 40 });
+      noiseBurst({ dur: 0.08, vol: 0.1, freq: 700, Q: 1.2 });
       break;
     case 'win':
-      beep({ freq: 392, dur: 0.12, type: 'triangle', vol: 0.22 });
-      beep({ freq: 523, dur: 0.14, type: 'triangle', vol: 0.2 });
-      beep({ freq: 659, dur: 0.18, type: 'triangle', vol: 0.18 });
-      beep({ freq: 784, dur: 0.28, type: 'sine', vol: 0.16 });
+      beep({ freq: 523, dur: 0.1, type: 'triangle', vol: 0.2 });
+      beep({ freq: 659, dur: 0.12, type: 'triangle', vol: 0.18 });
+      beep({ freq: 784, dur: 0.16, type: 'sine', vol: 0.16 });
+      beep({ freq: 1046, dur: 0.28, type: 'sine', vol: 0.14 });
       break;
     case 'tap':
       if (table) noiseBurst({ dur: 0.03, vol: 0.1, freq: 1600, Q: 1 });
