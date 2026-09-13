@@ -625,7 +625,7 @@ export const GAUNTLET_STOPS = [
   { id: 'selsweyr', name: 'Southern Elsweyr', region: 'Elsweyr', difficulty: 8, you: ['rajhin', 'orgnum'], opp: ['orgnum', 'redeagle'], rival: 'Sai Sahan', rewardGold: 40, x: 52, y: 76 },
   { id: 'khenarthi', name: "Khenarthi's Roost", region: 'Elsweyr', difficulty: 1, you: ['rajhin', 'celarus'], opp: ['crows', 'rajhin'], rival: 'Commander Karinith', rewardGold: 8, x: 52, y: 86 },
   { id: 'summerset', name: 'Summerset', region: 'Summerset', difficulty: 7, you: ['celarus', 'orgnum'], opp: ['celarus', 'orgnum'], rival: 'Proxy Queen Alwinarwe', rewardGold: 35, x: 14, y: 80 },
-  { id: 'highisle', name: 'High Isle', region: 'Systres', difficulty: 9, you: ['orgnum', 'pelin'], opp: ['orgnum', 'alessia'], rival: 'Lord Bacaro', rewardGold: 48, x: 8, y: 60 },
+  { id: 'highisle', name: 'Gonfalon Bay', region: 'High Isle', difficulty: 1, you: ['pelin', 'hlaalu'], opp: ['crows', 'celarus'], rival: 'Lord Bacaro', rewardGold: 10, x: 8, y: 60, sea: true },
   { id: 'galen', name: 'Galen', region: 'Systres', difficulty: 9, you: ['druid', 'orgnum'], opp: ['druid', 'mora'], rival: 'Druid King Kasorayn', rewardGold: 50, x: 6, y: 50 },
   { id: 'solstice', name: 'Solstice', region: 'Southern Seas', difficulty: 10, you: ['orgnum', 'mora'], opp: ['orgnum', 'mora'], rival: 'Tide-Born Admiral', rewardGold: 70, x: 74, y: 90 },
   { id: 'apocrypha', name: 'Apocrypha', region: 'Oblivion', difficulty: 10, you: ['mora', 'celarus'], opp: ['mora', 'alessia'], rival: 'Hermaeus Mora', rewardGold: 80, x: 94, y: 16 },
@@ -651,12 +651,23 @@ function seededShuffle(arr, seedStr) {
 export function ensureGauntletDay(profile) {
   const today = nyDateStr();
   if (!profile.gauntlet) profile.gauntlet = { date: null, order: [], lastPlayAt: 0, lastId: null };
-  if (profile.gauntlet.date !== today || !profile.gauntlet.order?.length) {
+  const startOk = profile.gauntlet.order?.[0] === 'highisle';
+  if (profile.gauntlet.date !== today || !profile.gauntlet.order?.length || !startOk) {
+    const rest = GAUNTLET_STOPS.map(s => s.id).filter(id => id !== 'highisle');
     profile.gauntlet.date = today;
-    profile.gauntlet.order = seededShuffle(GAUNTLET_STOPS.map(s => s.id), today + ':tot-road');
+    profile.gauntlet.order = ['highisle', ...seededShuffle(rest, today + ':tot-road')];
     saveProfile(profile);
   }
   return profile.gauntlet;
+}
+
+export const WATER_ZONES = new Set([
+  'highisle', 'galen', 'summerset', 'auridon', 'stros', 'betnikh',
+  'solstice', 'khenarthi', 'bleakrock', 'vvardenfell',
+]);
+
+export function roadCrossing(fromId, toId) {
+  return WATER_ZONES.has(fromId) || WATER_ZONES.has(toId);
 }
 
 export function gauntletCooldownMs(g) {

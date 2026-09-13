@@ -346,6 +346,7 @@
       "short": "Mora",
       "color": "#556b2f",
       "starter": "unsealed-glyphic",
+      "alwaysNeutral": true,
       "abilities": {
         "favored": {
           "cost": {

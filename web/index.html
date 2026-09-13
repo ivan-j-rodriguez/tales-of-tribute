@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta name="theme-color" content="#1e4a48" />
   <title>Tales of Tribute — Fan Table</title>
-  <link rel="stylesheet" href="css/style.css?v=18" />
+  <link rel="stylesheet" href="css/style.css?v=23" />
 </head>
 <body>
   <div id="app">
@@ -30,7 +30,7 @@
           <label class="chk"><input type="checkbox" id="chk-hourglass-splash" /> Hourglass (90s)</label>
           <button type="button" id="btn-music" class="music-toggle" title="Music">♪ Music: Off</button>
         </div>
-        <p class="build-stamp" id="build-stamp">build 18</p>
+        <p class="build-stamp" id="build-stamp">build 23</p>
         <p class="disclaimer">Unofficial fan project. Not affiliated with Bethesda Softworks or ZeniMax Online Studios. Not for sale. Card art courtesy of UESP. No real-money purchases — earn gold at the table.</p>
       </div>
     </section>
@@ -68,10 +68,11 @@
         <h2>Challenge the Provinces</h2>
         <button id="btn-gauntlet-back">Back</button>
       </header>
-      <p class="hint" id="gauntlet-hint">The map of Tamriel. One pin per zone, including Solstice. Today's challenge is random. Then wait 24 hours.</p>
+      <p class="hint" id="gauntlet-hint">Start at Gonfalon Bay. Then the road wanders — horse overland, boat across water. One challenge every 24 hours.</p>
       <div class="gauntlet-map-wrap">
         <img class="gauntlet-map" id="gauntlet-map-img" src="assets/ui/tamriel-map.jpg" alt="Map of Tamriel — provinces" />
         <div class="gauntlet-markers" id="gauntlet-markers"></div>
+        <div id="road-traveler" class="road-traveler" hidden>🐎</div>
       </div>
       <div class="gauntlet-status" id="gauntlet-status"></div>
       <div class="gauntlet-actions">
@@ -184,7 +185,7 @@
           <div class="events-list" id="events-list"></div>
         </aside>
         <div class="board-main felt-table">
-          <div class="hud felt-hud-opp" id="opp-res"></div>
+          <div class="felt-hud-opp" aria-hidden="true"></div>
           <button type="button" class="pile-btn hex-pile pile-opp-draw" id="pile-opp-draw" data-pile="opp-draw" title="Rival draw">
             <span class="pile-art card-back-face"></span>
             <span class="pile-count" id="cnt-opp-draw">0</span>
@@ -220,8 +221,11 @@
             <div class="tavern-zone" id="tavern-zone"></div>
           </div>
           <div class="felt-tools" hidden></div>
+          <div class="felt-res-wells res-dock" id="res-dock">
+            <div class="hud rival-res token-row" id="opp-res"></div>
+            <div class="hud you-res token-row" id="you-res"></div>
+          </div>
 
-          <div class="hud felt-mid-res" id="you-res"></div>
           <div class="played-row felt-played" id="you-played"></div>
           <div class="agents-row felt-you-agents" id="you-agents"></div>
 
@@ -244,8 +248,16 @@
             <div class="hand-cards fan-hand you-fan" id="hand-zone"></div>
           </div>
           <div class="felt-hud-you">
-            <div class="match-actions you-actions">
-              <div class="hourglass" id="hourglass" data-on="0">
+            <div class="match-actions you-actions">              <button id="btn-end" class="primary">End Turn</button>
+              <button id="btn-hg-toggle" title="Hourglass">⌛</button>
+              <button id="btn-match-settings" title="Settings">⚙</button>
+              <button id="btn-concede">Leave</button>
+            </div>
+          </div>
+        </div>
+        <aside class="patron-rail" id="patron-rail" aria-label="Patrons">
+          <div class="rail-patrons" id="rail-patrons"></div>
+          <div class="rail-glass"><div class="hourglass" id="hourglass" data-on="0">
                 <svg viewBox="0 0 40 64" class="hg-svg" aria-hidden="true">
                   <defs>
                     <linearGradient id="sandGrad" x1="0" y1="0" x2="0" y2="1">
@@ -263,15 +275,7 @@
                 </svg>
                 <span class="hg-time" id="hg-time">—</span>
               </div>
-              <button id="btn-end" class="primary">End Turn</button>
-              <button id="btn-hg-toggle" title="Hourglass">⌛</button>
-              <button id="btn-match-settings" title="Settings">⚙</button>
-              <button id="btn-concede">Leave</button>
-            </div>
           </div>
-        </div>
-        <aside class="patron-rail" id="patron-rail" aria-label="Patrons">
-          <div class="rail-patrons" id="rail-patrons"></div>
         </aside>
       </div>
       <div class="log-dock" id="log-dock"></div>
@@ -344,6 +348,6 @@
       <div class="modal-body" id="card-modal-body"></div>
     </div>
   </div>
-  <script type="module" src="js/app.js?v=18"></script>
+  <script type="module" src="js/app.js?v=23"></script>
 </body>
 </html>

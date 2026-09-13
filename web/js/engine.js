@@ -679,16 +679,19 @@ export class GameEngine {
 
     this._applyPatronEffect(patronId, ab);
 
-    // Flip favor
-    if (patronId === 'hunding' && favBefore === -1 && pat.abilities.flipUnfavoredToFavored) {
-      // unfavored → favored for caller
-      this.state.favor.hunding = this.state.active === 0 ? 1 : -1;
-    } else if (favBefore === 0) {
-      this.state.favor[patronId] = this.state.active === 0 ? 1 : -1;
-    } else if (favBefore === -1) {
-      this.state.favor[patronId] = 0;
+    // Official dial: Neutral → you. Unfavored → Neutral.
+    // Already Favored: stay (Crows/Hunding lock). Ansei jumps Unfavored → Favored.
+    // Treasury and Mora never take a side.
+    const neverTurns = !!(pat.alwaysNeutral || pat.abilities?.alwaysNeutral || patronId === 'mora' || patronId === 'treasury');
+    if (!neverTurns) {
+      if ((patronId === 'hunding' || pat.abilities?.flipUnfavoredToFavored) && favBefore === -1) {
+        this.state.favor[patronId] = this.state.active === 0 ? 1 : -1;
+      } else if (favBefore === 0) {
+        this.state.favor[patronId] = this.state.active === 0 ? 1 : -1;
+      } else if (favBefore === -1) {
+        this.state.favor[patronId] = 0;
+      }
     }
-    // if already favored, ability was used (rare) — no flip further
 
     this._log(`Patron: ${pat.short}`);
     this.emit('patron', { id: patronId });

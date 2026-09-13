@@ -9,7 +9,7 @@ import {
   TABLE_SKINS, CARD_BACKS, CARD_BACK_PALETTE, STORE_FRAGMENT_COST, STORE_UPGRADE_COST,
   buyFragment, buyUpgrade, buySkin, buyBack, equipSkin, equipBack, RANK_TIERS,
   GAUNTLET_STOPS, ensureGauntletDay, recordGauntletResult, setAiDifficulty,
-  gauntletCooldownMs, todaysFeatured,
+  gauntletCooldownMs, todaysFeatured, roadCrossing, WATER_ZONES,
   msUntilNextNyMidnight, nyDateStr,
 } from './profile.js';
 import { UPGRADE_TO_BASE, upgradesForPatron } from './upgrades.js';
@@ -157,7 +157,7 @@ function onSplashEnter() {
   }
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 18';
+  if (stamp) stamp.textContent = 'build 19';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -180,7 +180,7 @@ function typeLabel(d) {
 
 function dossierKind(d) {
   if (d.contract && d.type === 'agent') return 'Contract Agent';
-  if (d.contract) return 'Contract';
+  if (d.contract) return 'Contract Action';
   if (d.type === 'agent') return 'Agent';
   return 'Action';
 }
@@ -189,7 +189,11 @@ function effectBullets(text) {
   if (!text) return '<li>—</li>';
   const parts = String(text).split(/[;\n]|(?<=\.)\s+/).map(s => s.trim()).filter(Boolean);
   return parts.map((s) => {
-    const cls = /power/i.test(s) ? 'power' : /prestige/i.test(s) ? 'prestige' : /coin/i.test(s) ? 'coin' : '';
+    let cls = '';
+    if (/setback/i.test(s)) cls = 'setback';
+    else if (/power/i.test(s)) cls = 'power';
+    else if (/prestige/i.test(s)) cls = 'prestige';
+    else if (/coin/i.test(s)) cls = 'coin';
     const line = s.endsWith('.') ? s : s + '.';
     return `<li class="${cls}">${line}</li>`;
   }).join('');
@@ -198,30 +202,32 @@ function effectBullets(text) {
 function dossierHTML(d) {
   const pat = patronsById[d.patron];
   const patronName = pat?.name || d.patron || '';
+  const icon = d.patron ? patronArt(d.patron) : '';
   const combos = [
-    d.combo2Text && ['Combo 2', d.combo2Text],
-    d.combo3Text && ['Combo 3', d.combo3Text],
-    d.combo4Text && ['Combo 4', d.combo4Text],
+    d.combo2Text && ['COMBO 2', d.combo2Text],
+    d.combo3Text && ['COMBO 3', d.combo3Text],
+    d.combo4Text && ['COMBO 4', d.combo4Text],
   ].filter(Boolean);
   return `
-    <div class="dossier-hex">
-      <img src="${artFor(d)}" alt="" draggable="false" />
-      ${d.cost != null ? `<div class="cost-badge">${d.cost}</div>` : ''}
-    </div>
-    <div class="dossier-text">
-      <div class="dossier-kinds">
-        <span>Tribute Card</span>
-        <span>${dossierKind(d)}</span>
-        <span>${patronName}</span>
+    <div class="eso-tip">
+      <div class="eso-tip-head">
+        <div class="eso-tip-left">
+          <div class="eso-tip-kicker">Tribute Card</div>
+          <div class="eso-tip-type">${dossierKind(d)}</div>
+        </div>
+        <div class="eso-tip-patron">
+          ${icon ? `<img src="${icon}" alt="" />` : ''}
+          <span>${patronName}</span>
+        </div>
       </div>
-      <h2>${(d.name || '').toUpperCase()}</h2>
-      ${d.cost != null ? `<div class="dossier-cost"><span class="icon-disc coin">₵</span> Coin Cost <strong>${d.cost}</strong></div>` : ''}
-      <div class="dossier-block">
-        <div class="dossier-h">Play Effect</div>
+      <h2 class="eso-tip-name">${(d.name || '').toUpperCase()}</h2>
+      ${d.cost != null ? `<div class="eso-tip-cost">COIN COST <b>${d.cost}</b></div>` : ''}
+      <div class="eso-tip-block dossier-block">
+        <div class="eso-tip-h dossier-h">PLAY EFFECT</div>
         <ul>${effectBullets(d.playText)}</ul>
       </div>
-      ${combos.map(([h, tx]) => `<div class="dossier-block"><div class="dossier-h">${h}</div><ul>${effectBullets(tx)}</ul></div>`).join('')}
-      ${d.hp != null ? `<div class="dossier-block"><div class="dossier-h">Health</div><ul><li>${d.hp}${d.taunt ? ' · Taunt' : ''}</li></ul></div>` : ''}
+      ${combos.map(([h, tx]) => `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">${h}</div><ul>${effectBullets(tx)}</ul></div>`).join('')}
+      ${d.hp != null ? `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">HEALTH</div><ul><li>${d.hp}${d.taunt ? ' · Taunt' : ''}</li></ul></div>` : ''}
     </div>`;
 }
 
@@ -269,6 +275,52 @@ function bindCardGesture(el, { onTap, onHoldRead }) {
   el.addEventListener('contextmenu', (e) => e.preventDefault());
 }
 
+function placeInspectStage(wrap, rect, kind) {
+  const hex = wrap.querySelector('.lift-hex-fly');
+  const text = wrap.querySelector('.lift-text-fly');
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const land = vw > vh;
+  const isCoin = kind === 'coin';
+  const targetW = isCoin
+    ? Math.min(land ? vw * 0.22 : vw * 0.36, 168)
+    : Math.min(land ? vw * 0.30 : vw * 0.50, 260);
+  const targetH = isCoin ? targetW : targetW * 1.54;
+  let tx, ty, textL, textT, textW;
+  if (land) {
+    tx = Math.max(22, vw * 0.07);
+    ty = Math.max(18, (vh - targetH) / 2);
+    textL = tx + targetW + 28;
+    textT = Math.max(28, ty + 8);
+    textW = Math.min(440, vw - textL - 24);
+  } else {
+    tx = (vw - targetW) / 2;
+    ty = Math.max(10, vh * 0.05);
+    textL = 18;
+    textT = ty + targetH + 14;
+    textW = vw - 36;
+  }
+  wrap._to = { left: tx, top: ty, width: targetW, height: targetH };
+  hex.style.left = rect.left + 'px';
+  hex.style.top = rect.top + 'px';
+  hex.style.width = rect.width + 'px';
+  hex.style.height = rect.height + 'px';
+  hex.animate([
+    { left: rect.left + 'px', top: rect.top + 'px', width: rect.width + 'px', height: rect.height + 'px' },
+    { left: tx + 'px', top: ty + 'px', width: targetW + 'px', height: targetH + 'px' },
+  ], { duration: 340, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
+  if (text) {
+    text.style.left = textL + 'px';
+    text.style.top = textT + 'px';
+    text.style.width = textW + 'px';
+    text.style.maxWidth = textW + 'px';
+    requestAnimationFrame(() => {
+      wrap.classList.add('show-veil');
+      text.classList.add('show');
+    });
+  }
+}
+
 function startLift(fromEl, def) {
   endLift(true);
   if (!fromEl || !def) return;
@@ -277,47 +329,22 @@ function startLift(fromEl, def) {
   liftActive = true;
   liftFromRect = { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
   fromEl.classList.add('lift-source');
-  fromEl.style.opacity = '0.12';
+  fromEl.style.opacity = '0.08';
+  $('#toast')?.classList.remove('show');
 
   const layer = $('#lift-layer') || document.body;
   const wrap = document.createElement('div');
   wrap.className = 'lift-clone lift-fly';
   wrap.innerHTML = `
+    <div class="lift-veil"></div>
     <div class="lift-hex-fly">
       <img src="${artFor(def)}" alt="" draggable="false" />
-      ${def.cost != null ? `<div class="cost-badge">${def.cost}</div>` : ''}
     </div>
     <div class="lift-text-fly">${dossierHTML(def)}</div>
   `;
   layer.appendChild(wrap);
   liftClone = wrap;
-
-  const hex = wrap.querySelector('.lift-hex-fly');
-  const text = wrap.querySelector('.lift-text-fly');
-  hex.style.left = rect.left + 'px';
-  hex.style.top = rect.top + 'px';
-  hex.style.width = rect.width + 'px';
-  hex.style.height = rect.height + 'px';
-
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const land = vw > vh;
-  const targetW = Math.min(land ? vw * 0.28 : vw * 0.46, 230);
-  const targetH = targetW * 1.54;
-  const tx = land ? Math.max(24, vw * 0.10) : (vw - targetW) / 2;
-  const ty = Math.max(16, (vh - targetH) / 2 - (land ? 0 : 36));
-  wrap._to = { left: tx, top: ty, width: targetW, height: targetH };
-
-  hex.animate([
-    { left: rect.left + 'px', top: rect.top + 'px', width: rect.width + 'px', height: rect.height + 'px' },
-    { left: tx + 'px', top: ty + 'px', width: targetW + 'px', height: targetH + 'px' },
-  ], { duration: 340, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
-  if (text) {
-    text.style.left = (land ? tx + targetW + 18 : 16) + 'px';
-    text.style.top = (land ? ty : ty + targetH + 10) + 'px';
-    text.style.maxWidth = land ? Math.min(360, vw * 0.48) + 'px' : (vw - 32) + 'px';
-    requestAnimationFrame(() => text.classList.add('show'));
-  }
+  placeInspectStage(wrap, rect, 'card');
 }
 
 function endLift(instant = false) {
@@ -337,6 +364,7 @@ function endLift(instant = false) {
   const hex = wrap.querySelector('.lift-hex-fly') || wrap;
   const text = wrap.querySelector('.lift-text-fly');
   if (text) text.classList.remove('show');
+  wrap.classList.remove('show-veil');
   const start = to || hex.getBoundingClientRect();
   const anim = hex.animate([
     { left: start.left + 'px', top: start.top + 'px', width: start.width + 'px', height: start.height + 'px' },
@@ -354,28 +382,70 @@ function favorKeyForSeat(pid) {
   return favYou ? 'favored' : favOpp ? 'unfavored' : 'neutral';
 }
 
+function patronCostLine(ab) {
+  if (!ab) return 'Cannot be used.';
+  if (ab.passive && !(ab.cost && (ab.cost.coin || ab.cost.power || ab.cost.discard))) {
+    return 'Passive — cannot be activated.';
+  }
+  const c = ab.cost || {};
+  const bits = [];
+  if (c.coin) bits.push(`Pay ${c.coin} Coin`);
+  if (c.power) bits.push(`Pay ${c.power} Power`);
+  if (c.discard) bits.push(`Discard ${c.discard}`);
+  return bits.join(', ') || 'No cost';
+}
+
+function patronTurnLine(pid, key, pat) {
+  if (pat.alwaysNeutral || pat.abilities?.alwaysNeutral || pid === 'mora' || pid === 'treasury') {
+    return 'This Patron does not take a side.';
+  }
+  if (key === 'favored') return 'This Patron still FAVORS you.';
+  if (key === 'neutral') return 'This Patron now FAVORS you.';
+  if (pat.abilities?.flipUnfavoredToFavored) return 'This Patron now FAVORS you.';
+  return 'This Patron is now NEUTRAL.';
+}
+
 function patronDossierHTML(pid) {
   const pat = patronsById[pid];
   if (!pat) return '';
   const unlocked = pid === 'treasury' || isDeckUnlocked(profile, pid);
   const current = favorKeyForSeat(pid);
-  const alwaysN = !!(pat.alwaysNeutral || pat.abilities?.alwaysNeutral);
-  const rows = alwaysN ? [['neutral', 'Neutral']] : [
-    ['favored', 'Favored'],
-    ['neutral', 'Neutral'],
-    ['unfavored', 'Unfavored'],
+  const alwaysN = !!(pat.alwaysNeutral || pat.abilities?.alwaysNeutral || pid === 'mora' || pid === 'treasury');
+  const rows = alwaysN ? [['neutral', 'NEUTRAL']] : [
+    ['favored', 'FAVORED'],
+    ['neutral', 'NEUTRAL'],
+    ['unfavored', 'UNFAVORED'],
   ];
   const blocks = rows.map(([key, label]) => {
-    const desc = unlocked
-      ? (pat.abilities?.[key]?.desc || '—')
-      : '???';
+    const ab = pat.abilities?.[key];
     const on = key === current;
-    return `<div class="dossier-block${on ? ' current-favor' : ''}"><div class="dossier-h">${label}${on ? ' · now' : ''}</div><ul><li>${desc}</li></ul></div>`;
+    const cost = unlocked ? patronCostLine(ab) : '???';
+    let desc = unlocked ? (ab?.desc || (ab ? '—' : 'Cannot be used.')) : '???';
+    if (unlocked && desc) desc = desc.replace(/^Pay [^:]+:\s*/i, '');
+    const turn = unlocked ? patronTurnLine(pid, key, pat) : '';
+    return `
+      <div class="eso-tip-block dossier-block${on ? ' current-favor' : ''}">
+        <div class="eso-tip-h dossier-h">${label}${on ? ' · current' : ''}</div>
+        <ul>
+          <li class="coin">${cost}</li>
+          <li>${desc}</li>
+          ${turn ? `<li class="turn-note">${turn}</li>` : ''}
+        </ul>
+      </div>`;
   }).join('');
   return `
-    <div class="dossier-text patron-dossier">
-      <div class="dossier-kinds"><span>Patron Coin</span><span>${unlocked ? (pat.short || '') : '???'}</span></div>
-      <h2>${unlocked ? (pat.name || '').toUpperCase() : '???'}</h2>
+    <div class="eso-tip patron-dossier">
+      <div class="eso-tip-head">
+        <div class="eso-tip-left">
+          <div class="eso-tip-kicker">Tribute Patron</div>
+          <div class="eso-tip-type">${current.toUpperCase()}</div>
+        </div>
+        <div class="eso-tip-patron">
+          <img src="${patronArt(pid)}" alt="" />
+          <span>${unlocked ? (pat.short || '') : '???'}</span>
+        </div>
+      </div>
+      <h2 class="eso-tip-name">${unlocked ? (pat.name || '').toUpperCase() : '???'}</h2>
       ${blocks}
     </div>`;
 }
@@ -393,6 +463,7 @@ function startPatronLift(fromEl, pid) {
   const wrap = document.createElement('div');
   wrap.className = 'lift-clone lift-fly';
   wrap.innerHTML = `
+    <div class="lift-veil"></div>
     <div class="lift-hex-fly lift-coin-fly">
       <img src="${patronArt(pid)}" alt="" draggable="false" />
     </div>
@@ -400,30 +471,7 @@ function startPatronLift(fromEl, pid) {
   `;
   layer.appendChild(wrap);
   liftClone = wrap;
-  const hex = wrap.querySelector('.lift-hex-fly');
-  const text = wrap.querySelector('.lift-text-fly');
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const land = vw > vh;
-  const targetW = Math.min(land ? vw * 0.22 : vw * 0.38, 168);
-  const targetH = targetW;
-  const tx = land ? Math.max(24, vw * 0.10) : (vw - targetW) / 2;
-  const ty = Math.max(16, (vh - targetH) / 2 - (land ? 0 : 48));
-  wrap._to = { left: tx, top: ty, width: targetW, height: targetH };
-  hex.style.left = rect.left + 'px';
-  hex.style.top = rect.top + 'px';
-  hex.style.width = rect.width + 'px';
-  hex.style.height = rect.height + 'px';
-  hex.animate([
-    { left: rect.left + 'px', top: rect.top + 'px', width: rect.width + 'px', height: rect.height + 'px' },
-    { left: tx + 'px', top: ty + 'px', width: targetW + 'px', height: targetH + 'px' },
-  ], { duration: 320, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
-  if (text) {
-    text.style.left = (land ? tx + targetW + 18 : 16) + 'px';
-    text.style.top = (land ? ty : ty + targetH + 10) + 'px';
-    text.style.maxWidth = land ? Math.min(380, vw * 0.5) + 'px' : (vw - 32) + 'px';
-    requestAnimationFrame(() => text.classList.add('show'));
-  }
+  placeInspectStage(wrap, rect, 'coin');
 }
 
 function renderCard(inst, opts = {}) {
@@ -622,9 +670,9 @@ function resHTML(pl, label, key) {
   lastRes[key] = { coin: pl.coin, power: pl.power, prestige: pl.prestige };
   return `
     <span class="res-label">${label}</span>
-    <span class="res" title="Coin"><span class="icon-disc coin">₵</span> ${tick('coin', pl.coin)}</span>
-    <span class="res" title="Prestige"><span class="icon-disc prestige">♛</span> ${tick('prestige', pl.prestige)}</span>
-    <span class="res" title="Power"><span class="icon-disc power">✊</span> ${tick('power', pl.power)}</span>
+    <span class="tok tok-coin res" title="Coin"><span class="icon-disc coin">₵</span>${tick('coin', pl.coin)}</span>
+    <span class="tok tok-prestige res" title="Prestige"><span class="icon-disc prestige">♛</span>${tick('prestige', pl.prestige)}</span>
+    <span class="tok tok-power res" title="Power"><span class="icon-disc power">✊</span>${tick('power', pl.power)}</span>
   `;
 }
 
@@ -760,6 +808,8 @@ function renderMatch() {
 
   // Patron rail: opp patrons TOP, treasury MIDDLE, your patrons BOTTOM
   const rail = $('#rail-patrons');
+  const prevFavor = {};
+  rail.querySelectorAll('.patron-coin').forEach((el) => { prevFavor[el.dataset.pid] = el.dataset.favor; });
   rail.innerHTML = '';
   const youPats = you.patrons || [];
   const oppPats = opp.patrons || [];
@@ -777,14 +827,33 @@ function renderMatch() {
     el.dataset.favor = favorWord.toLowerCase();
     el.dataset.side = pid === 'treasury' ? 'mid' : (youPats.includes(pid) ? 'you' : 'opp');
     if (yourTurn && engine.canCallPatron(pid)) el.classList.add('callable');
+    if (prevFavor[pid] && prevFavor[pid] !== favorWord.toLowerCase()) el.classList.add('just-flipped');
     el.innerHTML = `
-      <div class="coin-ring"><img src="${patronArt(pid)}" alt="${pat.short}" draggable="false" /></div>
+      <div class="token-dial" title="${favorWord}">
+        <svg class="token-frame" viewBox="0 0 64 80" aria-hidden="true">
+          <defs>
+            <linearGradient id="sil-${pid}" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#f4efe6"/>
+              <stop offset="40%" stop-color="#c9c0b0"/>
+              <stop offset="100%" stop-color="#5a544c"/>
+            </linearGradient>
+          </defs>
+          <path d="M32 2 C36 12 60 28 60 48 C60 66 48 78 32 78 C16 78 4 66 4 48 C4 28 28 12 32 2 Z"
+                fill="url(#sil-${pid})" stroke="#2c2822" stroke-width="1.4"/>
+        </svg>
+        <div class="coin-ring"><img src="${patronArt(pid)}" alt="${pat.short}" draggable="false" /></div>
+      </div>
       <div class="plabel">${pat.short}</div>
-      <div class="pfavor">${favorWord}</div>
     `;
     bindCardGesture(el, {
       onTap: () => openPatronConfirm(pid, 'call'),
       onHoldRead: () => startPatronLift(el, pid),
+    });
+    el.addEventListener('pointerenter', (e) => {
+      if (e.pointerType === 'mouse') startPatronLift(el, pid);
+    });
+    el.addEventListener('pointerleave', (e) => {
+      if (e.pointerType === 'mouse') endLift();
     });
     return el;
   };
@@ -1008,7 +1077,7 @@ function afterPlayerAction() {
 function showCardModal(d) {
   if (!d) return;
   const m = $('#card-modal');
-  $('#card-modal-body').innerHTML = `<div class="lift-dossier modal-dossier">${dossierHTML(d)}</div><button id="btn-modal-close">Close</button>`;
+  $('#card-modal-body').innerHTML = `<div class="lift-dossier modal-dossier"><div class="dossier-hex"><img src="${artFor(d)}" alt="" /></div>${dossierHTML(d)}</div><button id="btn-modal-close">Close</button>`;
   m.classList.add('show');
   $('#btn-modal-close').onclick = () => m.classList.remove('show');
   m.onclick = (e) => { if (e.target === m) m.classList.remove('show'); };
@@ -1923,32 +1992,51 @@ function renderGauntlet() {
   const markers = $('#gauntlet-markers');
   if (!markers) return;
   markers.innerHTML = '';
+  const prev = g.lastId ? GAUNTLET_STOPS.find(s => s.id === g.lastId) : null;
+  const from = prev || GAUNTLET_STOPS.find(s => s.id === 'highisle');
   GAUNTLET_STOPS.forEach((stop) => {
     const el = document.createElement('button');
     el.type = 'button';
     el.className = 'g-marker';
-    if (stop.id === 'solstice') el.classList.add('solstice');
     el.style.left = stop.x + '%';
     el.style.top = stop.y + '%';
-    el.innerHTML = `<span class="g-dot">${stop.difficulty}</span><span class="g-name">${stop.name}</span>`;
-    el.title = `${stop.name} · vs ${stop.rival} · ${stop.opp.join(' + ')} · diff ${stop.difficulty}`;
+    const showName = stop.id === featured.id || stop.id === g.lastId || stop.id === 'highisle';
+    el.innerHTML = `<span class="g-pin"></span>${showName ? `<span class="g-name">${stop.name}</span>` : ''}`;
+    el.title = stop.name;
+    if (stop.id === 'highisle') el.classList.add('start');
     if (g.lastId === stop.id) el.classList.add('cleared');
-    else if (featured.id === stop.id) el.classList.add('current');
-    else el.classList.add('locked');
+    if (featured.id === stop.id) el.classList.add('current');
     el.addEventListener('click', () => {
-      if (featured.id !== stop.id) { toast(`Today's challenge is ${featured.name}`); return; }
+      if (featured.id !== stop.id) { toast(`The road is at ${featured.name}`); return; }
       startGauntletStop(stop);
     });
     markers.appendChild(el);
   });
+  const boat = roadCrossing(from?.id || 'highisle', featured.id);
+  const traveler = $('#road-traveler');
+  if (traveler) {
+    traveler.hidden = false;
+    traveler.textContent = boat ? '⛵' : '🐎';
+    traveler.classList.toggle('boat', boat);
+    const startAt = from || featured;
+    traveler.style.left = startAt.x + '%';
+    traveler.style.top = startAt.y + '%';
+    requestAnimationFrame(() => {
+      traveler.style.left = featured.x + '%';
+      traveler.style.top = featured.y + '%';
+    });
+  }
   const st = $('#gauntlet-status');
   const btn = $('#btn-gauntlet-play');
+  const via = boat ? 'by boat' : 'on horseback';
   if (cd > 0) {
-    if (st) st.textContent = `Next challenge in ${fmtCountdown(cd)}. Today's zone is ${featured.name} — vs ${featured.rival}.`;
-    if (btn) { btn.disabled = true; btn.textContent = 'On cooldown'; }
+    if (st) st.textContent = `Next ride in ${fmtCountdown(cd)}. The road waits at ${featured.name}.`;
+    if (btn) { btn.disabled = true; btn.textContent = 'On the road'; }
   } else {
-    if (st) st.textContent = `Today: ${featured.name} — vs ${featured.rival}. Decks ${featured.opp.join(' + ')}. Diff ${featured.difficulty}. Then 24 hours.`;
-    if (btn) { btn.disabled = false; btn.textContent = `Challenge ${featured.name}`; }
+    if (st) st.textContent = featured.id === 'highisle'
+      ? `First stop: Gonfalon Bay — vs ${featured.rival}. Then the road wanders.`
+      : `Next: ${featured.name} ${via} — vs ${featured.rival}.`;
+    if (btn) { btn.disabled = false; btn.textContent = `Ride to ${featured.name}`; }
   }
 }
 
