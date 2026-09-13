@@ -73,7 +73,7 @@
   max-height: none !important;
   flex: 1 1 auto;
   display: grid !important;
-  grid-template-columns: minmax(48px, 6.5%) minmax(0, 1fr) minmax(150px, 20%) !important;
+  grid-template-columns: minmax(44px, 6%) minmax(0, 1fr) minmax(168px, 23%) !important;
   grid-template-rows: 1fr !important;
   transform: none !important;
   overflow: hidden !important;
@@ -140,13 +140,13 @@
   justify-items: stretch !important;
   grid-template-columns: minmax(52px, 9%) minmax(0, 1fr) minmax(52px, 9%) !important;
   grid-template-rows:
-    minmax(44px, 0.7fr)
-    minmax(48px, 0.82fr)
-    minmax(24px, 0.36fr)
-    minmax(96px, 1.58fr)
-    minmax(24px, 0.36fr)
-    minmax(48px, 0.82fr)
-    minmax(72px, 1.12fr) !important;
+    minmax(36px, 0.58fr)
+    minmax(40px, 0.68fr)
+    minmax(22px, 0.32fr)
+    minmax(124px, 2fr)
+    minmax(22px, 0.32fr)
+    minmax(40px, 0.68fr)
+    minmax(68px, 1.2fr) !important;
   grid-template-areas:
     "opp-draw opp-hand   opp-cd"
     ".        opp-agents ."
@@ -169,7 +169,7 @@
   width: 100% !important;
   height: auto !important;
   min-height: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 #match .felt-opp-agents {
   grid-area: opp-agents !important;
@@ -199,7 +199,7 @@
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 #match #you-res {
   grid-area: you-res !important;
@@ -226,7 +226,7 @@
   width: 100% !important;
   height: auto !important;
   min-height: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 #match .felt-hud-you {
   grid-area: you-hand !important;
@@ -409,24 +409,26 @@
   justify-content: center !important;
   align-items: center !important;
   gap: 0.35rem !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(212, 175, 55, 0.22);
   border-radius: 10px;
   padding: 0.15rem 0.25rem !important;
 }
 #match .tavern-zone .card {
-  width: clamp(52px, 8.6vw, 88px) !important;
-  height: calc(clamp(52px, 8.6vw, 88px) * 1.52) !important;
+  width: min(78px, 9vw, calc((100% - 1rem) / 5.15)) !important;
+  height: calc(min(78px, 9vw) * 1.52) !important;
   flex: 0 0 auto !important;
   max-width: none !important;
   transform: none !important;
 }
 #match .turn-chip {
-  position: static !important;
-  transform: none !important;
-  align-self: center;
-  margin-bottom: 2px;
+  position: absolute !important;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) !important;
+  z-index: 5;
+  margin: 0;
   font-size: 0.62rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -435,30 +437,37 @@
 #match .turn-chip.your-turn { color: #e8f8c8; text-shadow: 0 0 8px rgba(180, 255, 90, 0.55); }
 
 #match #hand-zone,
+#match #hand-zone.you-fan,
+#match #hand-zone.fan-hand,
 #match .you-fan {
   display: flex !important;
+  flex-wrap: nowrap !important;
   justify-content: center;
   align-items: flex-end;
   height: 100% !important;
   min-height: 0 !important;
   width: 100%;
-  position: relative;
+  position: relative !important;
+  overflow: visible !important;
 }
 #match #hand-zone .card,
+#match #hand-zone button.card,
+#match #hand-zone.you-fan button.card,
 #match .you-fan .card {
   position: relative !important;
   left: auto !important;
   top: auto !important;
   bottom: auto !important;
-  width: clamp(56px, 9vw, 90px) !important;
-  height: calc(clamp(56px, 9vw, 90px) * 1.52) !important;
-  margin: 0 -12px;
+  width: min(64px, 7.6vw, calc((100% + 1.6rem) / 5.3)) !important;
+  height: calc(min(64px, 7.6vw) * 1.52) !important;
+  margin: 0 -10px;
   transform: none !important;
 }
 
 #match .felt-you-agents,
 #match .felt-opp-agents {
   display: flex !important;
+  flex-wrap: nowrap !important;
   justify-content: center;
   align-items: center;
   gap: 8px;
@@ -488,19 +497,29 @@
 #match .felt-opp-hand {
   position: relative;
   min-height: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
-#match .rival-fan {
+#match .rival-fan,
+#match #opp-hand-zone {
   height: 100% !important;
   min-height: 0 !important;
-  position: relative;
-  display: flex;
+  position: relative !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
   justify-content: center;
   align-items: center;
+  overflow: visible !important;
 }
-#match .rival-fan .card {
-  width: clamp(32px, 4.6vw, 48px) !important;
-  height: clamp(42px, 6.2vw, 62px) !important;
+#match .rival-fan .card,
+#match #opp-hand-zone .card {
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  width: min(40px, 4.6vw, calc((100% + 1rem) / 6.2)) !important;
+  height: calc(min(40px, 4.6vw) * 1.35) !important;
+  margin: 0 -6px;
+  transform: none !important;
 }
 
 #match button.card.playable,
@@ -568,17 +587,25 @@
 }
 #match .rail-group { gap: 8px !important; align-items: stretch !important; }
 #match .patron-coin {
-  width: 108px !important;
-  height: 46px !important;
+  width: 96px !important;
+  height: 42px !important;
   position: relative;
   overflow: visible !important;
 }
 #match .patron-coin .wood-pendant,
-#match .patron-coin .token-dial {
+#match .patron-coin .token-dial,
+#match .patron-coin.neutral .token-dial,
+#match .patron-coin.treasury .token-dial,
+#match .patron-coin.fav-you .token-dial,
+#match .patron-coin.fav-opp .token-dial,
+#match .patron-coin.mora .token-dial,
+#match .patron-coin[data-pid="mora"] .token-dial,
+#match .patron-coin[data-pid="treasury"] .token-dial {
   display: flex !important;
   align-items: center;
-  width: 108px !important;
-  height: 46px !important;
+  width: 96px !important;
+  height: 42px !important;
+  transform: none !important;
   position: relative;
   background: transparent !important;
   border: none !important;
@@ -639,11 +666,19 @@
   box-shadow: 0 0 0 1px #e8dcc0, inset 0 0 0 1px #000 !important;
   overflow: hidden;
 }
-#match .patron-coin .coin-ring img {
+#match .patron-coin .coin-ring img,
+#match .patron-coin.neutral img,
+#match .patron-coin.treasury img,
+#match .patron-coin.fav-you img,
+#match .patron-coin.fav-opp img,
+#match .patron-coin.mora img,
+#match .patron-coin[data-pid="mora"] img,
+#match .patron-coin[data-pid="treasury"] img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
+  transform: none !important;
 }
 #match .patron-coin.callable .wood-bar {
   box-shadow: 0 0 10px rgba(180, 255, 90, 0.55), 0 2px 4px #0007;
@@ -760,39 +795,40 @@
 
 /* Portrait — compact but complete table, never a rotate-gate */
 body.is-portrait #match .board {
-  grid-template-columns: minmax(36px, 10%) minmax(0, 1fr) minmax(78px, 24%) !important;
+  grid-template-columns: minmax(28px, 8%) minmax(0, 1fr) minmax(68px, 20%) !important;
 }
 body.is-portrait #match .felt-table {
   padding: 28px 4px 4px !important;
   gap: 2px 4px !important;
-  grid-template-columns: minmax(44px, 13%) minmax(0, 1fr) minmax(44px, 13%) !important;
+  grid-template-columns: minmax(36px, 11%) minmax(0, 1fr) minmax(36px, 11%) !important;
   grid-template-rows:
-    minmax(40px, 0.68fr)
-    minmax(44px, 0.78fr)
-    minmax(22px, 0.32fr)
-    minmax(88px, 1.42fr)
-    minmax(22px, 0.32fr)
-    minmax(44px, 0.78fr)
-    minmax(84px, 1.18fr) !important;
+    minmax(36px, 0.6fr)
+    minmax(40px, 0.7fr)
+    minmax(22px, 0.3fr)
+    minmax(96px, 1.55fr)
+    minmax(22px, 0.3fr)
+    minmax(40px, 0.7fr)
+    minmax(80px, 1.15fr) !important;
 }
 body.is-portrait #match .tavern-zone .card {
-  width: clamp(46px, 15vw, 70px) !important;
-  height: calc(clamp(46px, 15vw, 70px) * 1.52) !important;
+  width: min(58px, calc((100% - 0.5rem) / 5.1)) !important;
+  height: calc(min(58px, 15vw) * 1.52) !important;
 }
 body.is-portrait #match #hand-zone .card,
+body.is-portrait #match #hand-zone button.card,
 body.is-portrait #match .you-fan .card {
-  width: clamp(50px, 16vw, 74px) !important;
-  height: calc(clamp(50px, 16vw, 74px) * 1.52) !important;
-  margin: 0 -10px;
+  width: min(52px, calc((100% + 1.4rem) / 5.2)) !important;
+  height: calc(min(52px, 13vw) * 1.52) !important;
 }
-body.is-portrait #match .rival-fan .card {
-  width: clamp(30px, 10vw, 42px) !important;
-  height: clamp(40px, 13vw, 56px) !important;
+body.is-portrait #match .rival-fan .card,
+body.is-portrait #match #opp-hand-zone .card {
+  width: min(34px, calc((100% + 0.8rem) / 6.2)) !important;
+  height: calc(min(34px, 8vw) * 1.35) !important;
 }
 body.is-portrait #match .agent-slot.empty,
 body.is-portrait #match .agent-slot.filled .card {
-  width: clamp(32px, 9vw, 44px) !important;
-  height: clamp(42px, 12vw, 58px) !important;
+  width: clamp(28px, 7vw, 40px) !important;
+  height: clamp(36px, 9vw, 52px) !important;
 }
 body.is-portrait #match .patron-rail {
   grid-template-columns: 1fr !important;
@@ -810,9 +846,11 @@ body.is-portrait #match .rail-glass {
 body.is-portrait #match .patron-coin,
 body.is-portrait #match .patron-coin .wood-pendant,
 body.is-portrait #match .patron-coin .token-dial {
-  width: 72px !important;
-  height: 36px !important;
+  width: 58px !important;
+  height: 32px !important;
 }
+body.is-portrait #match .patron-coin .wood-name { display: none; }
+body.is-portrait #match .patron-rail { overflow: visible !important; }
 body.is-portrait #match .eso-hourglass-end { width: 56px; padding: 4px 0 6px !important; }
 body.is-portrait #match .eso-hourglass-end .hg-svg {
   width: 40px !important;

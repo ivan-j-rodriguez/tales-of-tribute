@@ -1023,6 +1023,16 @@ function renderMatch() {
 
 function layoutFan(container, rival = false) {
   if (!container) return;
+  if (document.body.classList.contains('is-landscape') || document.body.classList.contains('is-portrait')) {
+    [...container.children].forEach((card, i) => {
+      card.style.transform = '';
+      card.style.left = '';
+      card.style.top = '';
+      card.style.bottom = '';
+      card.style.zIndex = String(i + 1);
+    });
+    return;
+  }
   const cards = [...container.children];
   const n = cards.length;
   if (!n) return;
