@@ -48,7 +48,7 @@ let gauntletStopIndex = null;
 let isGauntletMatch = false;
 
 const TURN_SECONDS = 90;
-const HOLD_MS = 520;
+const HOLD_MS = 850;
 const AGENT_SLOTS = 4;
 const TOUR_KEY = 'tot_tour_v2';
 
@@ -157,7 +157,7 @@ function onSplashEnter() {
   }
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 17';
+  if (stamp) stamp.textContent = 'build 18';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -232,28 +232,38 @@ function dossierHTML(d) {
  * There is no dead zone between tap and hold.
  */
 function bindCardGesture(el, { onTap, onHoldRead }) {
-  // iOS: do NOT preventDefault on touchstart — that kills the native click.
-  // Play/buy on click. Hold only inspects; the click after a hold is ignored.
+  // iOS click plays. Hold (850ms, still down) inspects. A slow tap must never lift.
   let held = false;
   let timer = null;
+  let t0 = 0;
   const start = (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     held = false;
+    t0 = Date.now();
     clearTimeout(timer);
     timer = setTimeout(() => {
       held = true;
       if (onHoldRead) onHoldRead(el);
     }, HOLD_MS);
   };
-  const clear = () => { clearTimeout(timer); };
+  const clearHoldTimer = () => { clearTimeout(timer); timer = null; };
   el.addEventListener('pointerdown', start);
   el.addEventListener('touchstart', start, { passive: true });
-  el.addEventListener('pointerup', clear);
-  el.addEventListener('touchend', clear, { passive: true });
+  el.addEventListener('pointerup', clearHoldTimer);
+  el.addEventListener('touchend', clearHoldTimer, { passive: true });
   el.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (held || liftActive) { endLift(); held = false; return; }
+    clearHoldTimer();
+    const elapsed = t0 ? Date.now() - t0 : 0;
+    t0 = 0;
+    if (held && elapsed >= HOLD_MS) {
+      endLift();
+      held = false;
+      return;
+    }
+    if (liftActive) endLift(true);
+    held = false;
     if (onTap) onTap(e);
   });
   el.addEventListener('contextmenu', (e) => e.preventDefault());

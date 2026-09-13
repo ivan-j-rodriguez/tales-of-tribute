@@ -2131,9 +2131,9 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
 #hand-zone .card:nth-child(4) { z-index: 24; }
 #hand-zone .card:nth-child(5) { z-index: 25; }
 #hand-zone .card:nth-child(6) { z-index: 26; }
-#hand-zone .card:active { transform: translateY(-8px) scale(1.04) !important; }
+#hand-zone .card:active { transform: none !important; }
 
-.tavern-zone .card:active { transform: translateY(-6px) scale(1.03); }
+.tavern-zone .card:active { transform: none; }
 .tour-backdrop { pointer-events: none !important; }
 
 
@@ -2389,3 +2389,37 @@ button.primary {
 .g-marker.solstice .g-dot { background: #1565c0; color: #fff; border-color: #bbdefb; }
 .g-marker .g-name { max-width: 88px; }
 .build-stamp { font-size: 0.7rem; color: #c8e6d0; letter-spacing: 0.08em; }
+
+/* Five tavern tiles always visible; End Turn lives with you */
+.felt-tavern { overflow: visible !important; min-height: calc(var(--card-h) * 0.72) !important; }
+.tavern-zone {
+  width: 100% !important;
+  max-width: 100%;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  justify-content: center;
+  gap: 0.2rem !important;
+  overflow: visible !important;
+}
+.tavern-zone .card,
+#match .tavern-zone .card {
+  width: calc((100% - 1rem) / 5) !important;
+  max-width: var(--card-w);
+  height: calc(calc((100% - 1rem) / 5) * 1.54) !important;
+  flex: 0 0 calc((100% - 1rem) / 5) !important;
+  transform: none !important;
+}
+button.card:active, #match button.card:active { transform: none !important; }
+.felt-hud-you { z-index: 20; }
+.you-actions {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 0.35rem; padding: 0.15rem 0.2rem 0.35rem;
+}
+.you-actions .hourglass { margin: 0; opacity: 0.9; flex-direction: row; gap: 0.25rem; }
+.you-actions .hg-svg { width: 22px; height: 34px; }
+#btn-end {
+  order: -1;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.78rem;
+}
+.felt-tools[hidden] { display: none !important; }
