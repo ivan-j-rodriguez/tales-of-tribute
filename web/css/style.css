@@ -1973,3 +1973,120 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
     repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 3px),
     linear-gradient(180deg, #140c08 0%, #2a1a10 48%, #100a06 100%);
 }
+
+
+/* ========== PLAYABLE TABLE — flex stack, hand always visible ========== */
+#match.screen.active { overflow: hidden; }
+#match .board { overflow: hidden; min-height: 0; }
+.felt-table {
+  display: flex !important;
+  flex-direction: column;
+  grid-template-columns: none !important;
+  grid-template-rows: none !important;
+  grid-template-areas: none !important;
+  position: relative;
+  gap: 0.2rem;
+  padding: 0.3rem 3.4rem 0.15rem 3.1rem;
+  overflow: hidden;
+  align-items: stretch;
+  justify-items: stretch;
+}
+.felt-table > * {
+  grid-area: auto !important;
+  justify-self: stretch;
+  align-self: auto;
+}
+.felt-table > .hex-pile {
+  position: absolute;
+  z-index: 4;
+  justify-self: auto;
+}
+#pile-opp-draw { top: 6px; left: 6px; }
+#pile-opp-cd { top: 6px; right: 6px; }
+#pile-tavern-draw { top: 34%; left: 6px; }
+#pile-tavern-discard { top: 46%; left: 6px; }
+#pile-you-draw { bottom: 26%; left: 6px; }
+#pile-you-cd { bottom: 10px; right: 8px; }
+
+.felt-hud-opp { flex: 0 0 auto; width: auto; align-self: flex-start; z-index: 5; }
+.felt-opp-hand {
+  flex: 0 0 auto;
+  min-height: 56px;
+  z-index: 3;
+}
+.felt-opp-agents { flex: 0 0 auto; min-height: 0; }
+.felt-tavern {
+  flex: 0 0 auto;
+  min-height: var(--card-h);
+  z-index: 7;
+  pointer-events: auto;
+}
+.felt-mid-res { flex: 0 0 auto; z-index: 5; padding: 0.15rem 0; }
+.felt-played { flex: 0 0 auto; min-height: 0; }
+.felt-you-agents { flex: 0 0 auto; min-height: 0; }
+.felt-you-hand {
+  flex: 1 0 calc(var(--hand-card-h) + 44px);
+  min-height: calc(var(--hand-card-h) + 44px);
+  z-index: 12;
+  overflow: visible;
+  position: relative;
+  pointer-events: auto;
+}
+.felt-hud-you { flex: 0 0 auto; z-index: 6; }
+.felt-tools { position: absolute; top: 8px; right: 4px; z-index: 6; }
+
+.fan-hand { pointer-events: auto !important; overflow: visible; }
+.you-fan {
+  height: calc(var(--hand-card-h) + 36px) !important;
+  position: relative;
+}
+.you-fan .card {
+  pointer-events: auto !important;
+  bottom: 4px;
+  z-index: 12;
+}
+.tavern-zone {
+  pointer-events: auto !important;
+  z-index: 7;
+  min-height: var(--card-h);
+  overflow: visible !important;
+}
+.tavern-zone .card { pointer-events: auto !important; }
+
+.agents-row {
+  min-height: 0 !important;
+  gap: 0.25rem;
+}
+#match .agent-slot.empty {
+  width: calc(var(--card-w) * 0.48);
+  height: calc(var(--card-h) * 0.48);
+}
+#match .agent-slot.filled .card {
+  width: calc(var(--card-w) * 0.62);
+  height: calc(var(--card-h) * 0.62);
+}
+
+@media (orientation: landscape) {
+  :root {
+    --card-w: 86px; --card-h: 100px;
+    --hand-card-w: 94px; --hand-card-h: 108px;
+  }
+  .felt-table { padding: 0.25rem 5.5rem 0.1rem 3.4rem; }
+  .felt-you-hand { min-height: calc(var(--hand-card-h) + 28px); flex-basis: calc(var(--hand-card-h) + 28px); }
+  .felt-opp-agents, .felt-you-agents { max-height: calc(var(--card-h) * 0.7); }
+}
+@media (orientation: portrait) {
+  :root {
+    --card-w: 70px; --card-h: 82px;
+    --hand-card-w: 78px; --hand-card-h: 92px;
+  }
+  .felt-table { padding: 0.2rem 3.2rem 0.1rem 2.8rem; }
+  .felt-you-hand {
+    flex: 1 0 calc(var(--hand-card-h) + 52px);
+    min-height: calc(var(--hand-card-h) + 52px);
+  }
+  #match .agent-slot.empty {
+    width: calc(var(--card-w) * 0.4);
+    height: calc(var(--card-h) * 0.4);
+  }
+}

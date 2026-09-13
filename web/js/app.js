@@ -819,10 +819,10 @@ function layoutFan(container, rival = false) {
   const cards = [...container.children];
   const n = cards.length;
   if (!n) return;
-  const spread = Math.min(52, 10 + n * 6);
+  const spread = rival ? Math.min(36, 8 + n * 4) : Math.min(28, 6 + n * 3);
   const start = -spread / 2;
   const step = n === 1 ? 0 : spread / (n - 1);
-  const overlap = rival ? 18 : 22;
+  const overlap = rival ? 22 : Math.max(36, Math.min(52, 220 / n));
   cards.forEach((card, i) => {
     const rot = start + step * i;
     const x = (i - (n - 1) / 2) * overlap;
