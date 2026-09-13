@@ -1,6 +1,6 @@
 # Status
 
-**2026-09-13 (phone UX pass):** Tap plays/buys; ~400ms hold inspects (never double-fires). Empty agent slot outlines. Rival hand/draw stay face-down unless Settings → Show bot cards (vs AI only). Settings equips table skins + card backs, music, hourglass default, replay tour. First-match guided tour (`tot_tour_v2`) replaces old tooltips. Engine: agents leave played into agent row; contract actions exile; contract agents exile on KO; taunt still blocks Power→Prestige.
+**2026-09-13 (quality-critical phone rebuild):** Tap plays/buys only (<350ms). Press-and-hold (≥500ms) lifts a floating card clone from the exact screen rect, scales toward the player to read, and animates back on release — no inspect-overlay dismiss-at-top. Tavern is a single non-wrapping row. Hands are fanned (yours playable at bottom; rival backs at top). Patron rail: rival coins top, Treasury middle, yours bottom. Patron taps open Continue/Cancel confirm (pick + in-match). Locked patrons show greyed art + "???". AI difficulty 1–10 smoky-dot slider (`profile.aiDifficulty`). Daily **Challenge the Provinces** Road of Tamriel gauntlet (10 stops, NY midnight reset). Music is real Dowland CC0 MP3 (Tourdion alt) — not the old oscillator bed. Distinct contract/agent VFX+SFX. Table skins use carved wood rim + felt play surface. Agent slots labeled **Agent**. Engine confirmed: contract actions exile; agents enter agent row; contract agents exile on KO; taunt blocks prestige.
 
 Playable fan table rebuilt to feel like the real ESO Tales of Tribute board. Web preview is the priority client. `docs/` mirrors `web/` for GitHub Pages.
 
@@ -11,93 +11,54 @@ Playable fan table rebuilt to feel like the real ESO Tales of Tribute board. Web
 - **164/164** cards have matching slug art in `web/assets/cards/<id>.png`.
 - **13/13** patron portraits in `web/assets/patrons/` (incl. `mora.png`).
 
-## Board authenticity (2026-09-13 rebuild)
+## Board authenticity
 
-Match layout now mirrors ESO ToT, not a generic card site:
-
-- **Right rail (always vertical):** 4 match patron **coins** (portrait rings) + Treasury coin + hourglass. Portrait: narrow scrollable rail so patrons stay readable (Mora never clipped into a tiny row).
-- **Opponent strip (top):** face-down hand count, draw, cooldown, agents + live HUD.
-- **Center:** 5-card Tavern + tavern discard pile.
-- **You (bottom):** agents, played-this-turn, hand, draw/played/cooldown piles + HUD + End Turn.
-- **Resource HUD:** Coin (septim disc) / Prestige (crown) / Power (fist-gem) with tick animation on change.
-- **Pile modals:** tap Draw / Cooldown / Played / Hand / Tavern discard. Rival hand/draw show backs unless Settings → Show bot cards (vs AI).
-- **Fly animations:** play → played/agents; buy → your cooldown (WAAPI).
-- **Tap vs hold:** tap plays/buys; ~400ms hold inspects (release/backdrop closes; hold never plays).
-- **Agent slots:** dashed gold empty seats always visible.
-- **Settings:** splash + in-match gear — music, hourglass default, bot cards, equip table skin & card back, replay tour.
-- **Tour:** `tot_tour_v2` first-match spotlight walkthrough.
-- **Hourglass:** 90s per turn for Ranked / timed casual; OFF by default for vs AI. Toggle on splash, pick, and in-match. Gold sand drains; auto end turn at 0.
-- **Look:** Cinzel + Crimson Pro, stained wood textures, gold filigree frames, coin rims, candle bloom, ESO-style hint tooltip. Table skins via CSS on `#match`.
+- **Right rail (vertical):** opponent’s two patron coins (top) · Treasury (middle) · your two (bottom) · hourglass.
+- **Opponent strip:** fanned card-backs, draw/cooldown piles, agents + HUD.
+- **Center:** single-row 5-card Tavern + discard.
+- **You:** agents, played, fanned hand, piles + HUD + End Turn.
+- **Tap vs hold:** short tap = play/buy; hold = lift-to-read (never also plays).
+- **Patron confirm:** portrait + ability + green Continue / red Cancel.
+- **Hourglass:** 90s for Ranked / timed casual; OFF by default for vs AI.
+- **Look:** Cinzel + Crimson Pro, carved wood rim, gold inlay, felt center (skin-tinted), candle bloom.
 
 ## Modes (splash)
 
-- **Play vs AI** — casual, hourglass off by default
-- **Ranked** — stronger pace, 90s timer, tiers Unranked → Orichalcum → Ebony → Quicksilver → Voidsteel → Rubedite; streak raises cutpurse rarity
-- **Play a Friend** — hotseat + PeerJS remote (unchanged contract)
-- **Club** — collection, store, cutpurses, achievements, daily
+- **Play vs AI** — casual; difficulty slider 1–10
+- **Challenge the Provinces** — daily Road of Tamriel gauntlet (America/New_York midnight reset)
+- **Ranked** — stronger pace, 90s timer, tiers Unranked → Rubedite
+- **Play a Friend** — hotseat + PeerJS remote
+- **Club** — collection, store, cutpurses, achievements, daily wins
 - **Encyclopedia** — all cards including Mora
-
-## Patron pick UX
-
-- Tap to select, tap again to **deselect** (no Back required)
-- Clear **You 2 / Rival 2** meters with coin slots
-- After your pair: pick rival’s pair **or** “AI takes the rest” / Random
-- Portrait: large patron tiles in a **scrollable** 2-col grid (all 12 + readable art)
-- Landscape: denser grid still showing coin art
-
-## Progression / store (no IAP)
-
-`localStorage tot_profile_v1`:
-
-- gold (start **80**), unlockedDecks (pelin, crows, hlaalu, celarus), ownedUpgrades
-- tableSkin, cardBack, unlockedSkins, unlockedBacks
-- ranked `{ tier, points, placementLeft, winStreak }`
-- purses (queued cutpurses): Common → Legendary from streak
-- Loot: gold, upgrades, deck fragments (5 unlocks a deck **including Mora**), table skins, card backs
-- Store spends gold only — fragments (35g), upgrades (55g), skins, backs; everything earnable
-
-### Table skins
-
-High Isle Oak (free), Clockwork, Coldharbour/Daedra, Apocrypha, Orsinium Anvil, Vestige Hall.
-
-### Card backs
-
-Default Roister + Clockwork / Daedra / Apocrypha / Vestige.
 
 ## Audio
 
-Procedural Web Audio tavern bed (`js/music.js`): low drone, soft lute-like plucks, fireplace crackle. **Not** ESO OST. Starts muted; obvious ♪ Music toggle (respects browser autoplay).
+- **Music loop (default):** `web/assets/audio/dowland-complaints.mp3` — John Dowland “If my complaints could passions move” (CC0 via OpenGameArt / Of Far Different Nature). Modest volume (~0.28). Toggle required.
+- **Alt / fallback:** `web/assets/audio/tourdion.mp3` — Tourdion (Quand je bois du vin clairet), Wikimedia Commons public domain.
+- **Credits:** `web/assets/audio/CREDITS.txt`
+- **SFX:** quiet synthesized one-shots (play, buy, contract/violet, agent/gold-slam, patron, coin, combo, win) — not the old music.js oscillator bed.
+
+## Daily gauntlet
+
+`profile.gauntlet` tracks `{ date, cleared, failed, failedStop }` keyed to `nyDateStr()` (America/New_York). Fail locks the day’s run until next NY midnight. Wins grant gold + purse; stops are scripted patron pairs difficulty 1→10.
 
 ## Engine
 
-Existing `GameEngine` kept. `newMatch({ ownedUpgrades })` + `tavernQty` so unupgraded cards are default until owned. Mora cards enter the tavern when Mora is a match patron.
+`GameEngine` confirmed: agents leave played into agent row; contract actions exile; contract agents exile on KO; taunt still blocks Power→Prestige.
 
 ## Files touched this ship
 
-- `web/index.html` — authentic board DOM, ranked/store/hourglass/music shells
-- `web/css/style.css` — full restyle + skins + rail + responsive
-- `web/js/app.js` — board render, deselect pick, fly anims, timer, ranked, store wiring
-- `web/js/profile.js` — ranked, purses, skins, backs, store purchases (gold start 80)
-- `web/js/music.js` — new procedural bed
-- `docs/` — `cp -a web/. docs/` for Pages
-
-## Incomplete / simplified (unchanged engine limits)
-
-- Player targeting for Toss / Destroy / Donate / Confine / Acquire / Replace still auto-resolved
-- Alessia agent HP defaults; some patron abilities simplified (see prior notes)
-- Ranked opponent is still heuristic AI (no human ladder yet)
-- iOS SwiftUI skeleton not updated in this pass
+- `web/js/music.js` — Dowland file loop + SFX
+- `web/js/ai.js` — difficulty 1–10 scaling + visible pacing
+- `web/js/profile.js` — `aiDifficulty`, gauntlet helpers
+- `web/js/app.js` — lift gestures, fans, rail, confirm, gauntlet, VFX
+- `web/css/style.css` — felt table, tavern row, fans, diff dots, map
+- `web/index.html` — gauntlet screen, lift layer, patron confirm, fans
+- `web/assets/audio/*`, `web/assets/ui/tamriel-map.svg`
+- `docs/` — `cp -a web/. docs/`
 
 ## How to run
 
 `cd /workspace/tots/web && python3 -m http.server 8080`
 
 Pages: `docs/` (do not git push from this agent — parent pushes).
-
-## Smoke verified
-
-- All 12 patrons on pick grid including **Mora**
-- Select + deselect by tap; AI takes the rest; Begin Match
-- Match rail shows 4 patrons + Treasury; Coin/Prestige/Power HUD present
-- Hourglass toggle works; landscape keeps vertical rail
-- Store: buy Clockwork skin with gold

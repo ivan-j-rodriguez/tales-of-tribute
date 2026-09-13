@@ -8,10 +8,12 @@ import {
   ALL_DECKS, FRAGMENTS_TO_UNLOCK, SACK_BUY_COST, purseCount,
   TABLE_SKINS, CARD_BACKS, STORE_FRAGMENT_COST, STORE_UPGRADE_COST,
   buyFragment, buyUpgrade, buySkin, buyBack, equipSkin, equipBack, RANK_TIERS,
+  GAUNTLET_STOPS, ensureGauntletDay, recordGauntletResult, setAiDifficulty,
+  msUntilNextNyMidnight, nyDateStr,
 } from './profile.js';
 import { UPGRADE_TO_BASE, upgradesForPatron } from './upgrades.js';
 import { hostRoom, joinRoom } from './netplay.js';
-import { setMusicEnabled, preferMusicFromStorage, warmMuted } from './music.js';
+import { setMusicEnabled, preferMusicFromStorage, warmMuted, playSfx } from './music.js';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -37,20 +39,26 @@ let animating = false;
 let tourStep = 0;
 let tourActive = false;
 let settingsReturnScreen = '#splash';
-let inspectOpen = false;
+let liftActive = false;
+let liftClone = null;
+let liftFromRect = null;
+let pendingPatron = null;
+let gauntletStopIndex = null;
+let isGauntletMatch = false;
 
 const TURN_SECONDS = 90;
-const HOLD_MS = 400;
+const TAP_MAX_MS = 350;
+const HOLD_MS = 500;
 const AGENT_SLOTS = 4;
 const TOUR_KEY = 'tot_tour_v2';
 
 /** Guided first-match walkthrough — plain language, one spotlight at a time. */
 const TOUR_STEPS = [
-  { sel: '#hand-zone', text: 'This is your hand. Tap a card to play it. Hold (~half a second) to zoom in and read name, cost, type, and effects.' },
+  { sel: '#hand-zone', text: 'This is your hand. Tap a card to play it. Press and hold to lift the card and read it — release to put it back.' },
   { sel: '#tavern-zone', text: 'Coin buys from the tavern — the five cards in the middle. Tap one you can afford; it flies to your cooldown pile.' },
   { sel: '#you-res', text: 'Power fights enemy agents. Leftover Power becomes Prestige at end of turn — unless a Taunt agent is still standing in their way.' },
   { sel: '#pile-you-draw', text: 'Your draw pile is cards you have not seen yet. Bought cards wait in cooldown until the deck reshuffles — then they join your draw again.' },
-  { sel: '#you-agents', text: 'Agents sit in these slots and stay until knocked out. Empty gold outlines show open seats. Taunt agents must be hit first.' },
+  { sel: '#you-agents', text: 'Agents sit in these slots and stay until knocked out. Empty gold outlines show open Agent slots. Taunt agents must be hit first.' },
   { sel: '#tavern-zone', text: 'Contract cards are one-and-done — they exile after use (or when a contract agent is defeated). They do not come back through cooldown.' },
   { sel: '#patron-rail', text: 'Patron coins live on the right (plus Treasury). You get one patron call per turn — flip favor toward yourself.' },
   { sel: '#turn-ind', text: 'You win at 40 prestige if they cannot pass you on their last chance, at 80 outright, or by favoring all 4 patrons.' },
@@ -169,48 +177,123 @@ function typeLabel(d) {
 }
 
 /**
- * Phone-first: short tap fires onTap; ~400ms hold fires onInspect and NEVER also taps.
+ * Phone-first gestures:
+ * - Short tap (<350ms, little movement) = PLAY/BUY via onTap. Never opens inspect.
+ * - Press-and-hold (>=500ms): lift a floating clone from exact rect; pointerup animates back.
+ * Hold never also plays.
  */
-function bindCardGesture(el, { onTap, onInspect }) {
+function bindCardGesture(el, { onTap, onHoldRead }) {
   let timer = null;
   let held = false;
-  let sx = 0, sy = 0;
+  let sx = 0, sy = 0, t0 = 0;
   const clear = () => { if (timer) { clearTimeout(timer); timer = null; } };
-  const cancelHold = () => { clear(); };
 
   el.addEventListener('pointerdown', (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     held = false;
-    sx = e.clientX; sy = e.clientY;
+    sx = e.clientX; sy = e.clientY; t0 = performance.now();
     try { el.setPointerCapture(e.pointerId); } catch {}
     clear();
     timer = setTimeout(() => {
       held = true;
       timer = null;
-      if (onInspect) onInspect();
+      if (onHoldRead) onHoldRead(el);
     }, HOLD_MS);
   });
   el.addEventListener('pointermove', (e) => {
-    if (!timer) return;
-    if (Math.hypot(e.clientX - sx, e.clientY - sy) > 14) cancelHold();
+    if (!timer && !held) return;
+    if (Math.hypot(e.clientX - sx, e.clientY - sy) > 16) {
+      clear();
+      if (held) { /* keep lift until up */ }
+    }
   });
   el.addEventListener('pointerup', (e) => {
     const wasHeld = held;
+    const dt = performance.now() - t0;
+    const moved = Math.hypot(e.clientX - sx, e.clientY - sy);
     clear();
     held = false;
     try { el.releasePointerCapture(e.pointerId); } catch {}
-    if (wasHeld) {
+    if (wasHeld || liftActive) {
       e.preventDefault();
       e.stopPropagation();
-      // Release closes inspect; never also play/buy
-      closeInspect();
+      endLift();
       return;
     }
-    if (inspectOpen) return;
-    if (onTap) onTap(e);
+    if (dt < TAP_MAX_MS && moved < 16 && onTap) onTap(e);
   });
-  el.addEventListener('pointercancel', () => { clear(); held = false; });
+  el.addEventListener('pointercancel', () => {
+    clear();
+    if (held || liftActive) endLift();
+    held = false;
+  });
   el.addEventListener('contextmenu', (e) => e.preventDefault());
+}
+
+function startLift(fromEl, def) {
+  endLift(true);
+  if (!fromEl || !def) return;
+  const rect = fromEl.getBoundingClientRect();
+  if (!rect.width) return;
+  liftActive = true;
+  liftFromRect = rect;
+  fromEl.classList.add('lift-source');
+  fromEl.style.opacity = '0.25';
+  const layer = $('#lift-layer') || document.body;
+  const clone = document.createElement('div');
+  clone.className = 'lift-clone';
+  clone.style.left = rect.left + 'px';
+  clone.style.top = rect.top + 'px';
+  clone.style.width = rect.width + 'px';
+  clone.style.height = rect.height + 'px';
+  const bits = [];
+  if (def.cost != null) bits.push('cost ' + def.cost);
+  if (def.hp != null) bits.push('HP ' + def.hp);
+  if (def.taunt) bits.push('Taunt');
+  clone.innerHTML = `
+    <img src="${artFor(def)}" alt="" draggable="false" />
+    <div class="lift-meta"><strong>${def.name || ''}</strong>${typeLabel(def)}${bits.length ? ' · ' + bits.join(' · ') : ''}<br>${def.playText || ''}</div>
+  `;
+  layer.appendChild(clone);
+  liftClone = clone;
+  // Scale toward player (bottom of screen)
+  requestAnimationFrame(() => {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const targetW = Math.min(vw * 0.72, 220);
+    const targetH = targetW * (rect.height / rect.width);
+    const tx = (vw - targetW) / 2;
+    const ty = Math.max(40, vh * 0.28 - targetH / 2);
+    clone.animate([
+      { left: rect.left + 'px', top: rect.top + 'px', width: rect.width + 'px', height: rect.height + 'px', transform: 'scale(1)' },
+      { left: tx + 'px', top: ty + 'px', width: targetW + 'px', height: targetH + 'px', transform: 'scale(1.02)' },
+    ], { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
+  });
+}
+
+function endLift(instant = false) {
+  const src = document.querySelector('.lift-source');
+  const clone = liftClone;
+  const rect = liftFromRect;
+  liftActive = false;
+  liftClone = null;
+  liftFromRect = null;
+  if (src) {
+    src.classList.remove('lift-source');
+    src.style.opacity = '';
+  }
+  if (!clone) return;
+  if (instant || !rect) {
+    clone.remove();
+    return;
+  }
+  const cur = clone.getBoundingClientRect();
+  const anim = clone.animate([
+    { left: cur.left + 'px', top: cur.top + 'px', width: cur.width + 'px', height: cur.height + 'px' },
+    { left: rect.left + 'px', top: rect.top + 'px', width: rect.width + 'px', height: rect.height + 'px' },
+  ], { duration: 240, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'forwards' });
+  anim.onfinish = () => clone.remove();
+  setTimeout(() => { if (clone.parentNode) clone.remove(); }, 320);
 }
 
 function renderCard(inst, opts = {}) {
@@ -234,57 +317,27 @@ function renderCard(inst, opts = {}) {
       <div class="ceffect">${d.playText || ''}</div>
     </div>
   `;
-  const inspect = () => {
-    if (opts.onInspect) opts.onInspect(inst, el);
-    else showInspect(d, el);
+  if (d.contract) el.classList.add('contract-card');
+  const holdRead = () => {
+    if (opts.onHoldRead) opts.onHoldRead(inst, el);
+    else startLift(el, d);
   };
   const tap = (ev) => {
     ev && ev.stopPropagation();
     if (opts.onTap) opts.onTap(inst, el);
     else if (opts.onClick) opts.onClick(inst, el);
   };
-  bindCardGesture(el, { onTap: tap, onInspect: inspect });
+  bindCardGesture(el, { onTap: tap, onHoldRead: holdRead });
   return el;
 }
 
 function showInspect(d, fromEl) {
-  if (!d) return;
-  closeInspect();
-  const overlay = $('#inspect-overlay');
-  const card = $('#inspect-card');
-  if (!overlay || !card) {
-    showCardModal(d);
-    return;
-  }
-  inspectOpen = true;
-  const hp = d.hp;
-  card.innerHTML = `
-    <img class="inspect-art" src="${artFor(d)}" alt="${d.name}" draggable="false" />
-    <div class="inspect-meta">
-      <h3>${d.name}</h3>
-      <p class="inspect-type">${d.patron || ''} · ${typeLabel(d)} · cost ${d.cost ?? '—'}${hp != null ? ' · HP ' + hp : ''}${d.taunt ? ' · Taunt' : ''}</p>
-      <p class="inspect-play">${d.playText || '—'}</p>
-      ${d.combo2Text ? `<p class="inspect-combo"><strong>Combo 2:</strong> ${d.combo2Text}</p>` : ''}
-      ${d.combo3Text ? `<p class="inspect-combo"><strong>Combo 3:</strong> ${d.combo3Text}</p>` : ''}
-      ${d.combo4Text ? `<p class="inspect-combo"><strong>Combo 4:</strong> ${d.combo4Text}</p>` : ''}
-      <p class="inspect-hint">Release or tap outside to close</p>
-    </div>
-  `;
-  overlay.hidden = false;
-  overlay.classList.add('show');
-  // Zoom toward player (bottom of screen)
-  requestAnimationFrame(() => card.classList.add('zoomed'));
+  // Legacy name — hold-to-read lift only (no dismiss-at-top overlay)
+  if (fromEl) startLift(fromEl, d);
+  else if (d) showCardModal(d);
 }
 
-function closeInspect() {
-  const overlay = $('#inspect-overlay');
-  const card = $('#inspect-card');
-  if (!overlay) return;
-  inspectOpen = false;
-  card?.classList.remove('zoomed');
-  overlay.classList.remove('show');
-  overlay.hidden = true;
-}
+function closeInspect() { endLift(); }
 
 function unlockedPool() {
   return ALL_DECKS.filter(id => isDeckUnlocked(profile, id));
@@ -316,18 +369,23 @@ function renderDeckPick() {
     if (pickOpp.includes(p.id)) el.classList.add('selected-rival');
     const ab = p.abilities?.neutral || p.abilities?.favored || {};
     const frag = fragmentProgress(profile, p.id);
+    const displayName = unlocked ? p.short : '???';
     el.innerHTML = `
-      <img src="${patronArt(p.id)}" alt="${p.short}" />
-      <div class="name">${p.short}</div>
-      <div class="desc">${ab.desc || ''}</div>
+      <img src="${patronArt(p.id)}" alt="${displayName}" style="${unlocked ? '' : 'filter:grayscale(0.85) brightness(0.65)'}" />
+      <div class="name">${displayName}</div>
+      <div class="desc">${unlocked ? (ab.desc || '') : 'Locked patron'}</div>
       ${!unlocked ? `<div class="frag">${frag}/${FRAGMENTS_TO_UNLOCK} fragments</div>` : ''}
     `;
-    el.addEventListener('click', () => onPatronTap(p));
+    el.addEventListener('click', () => {
+      // Always confirm via panel (Continue / Cancel) — no silent select/call
+      openPatronConfirm(p.id, 'pick');
+    });
     grid.appendChild(el);
   }
   updatePickStatus();
 }
 
+function onPatronTapConfirmed(p) { return onPatronTap(p); }
 function onPatronTap(p) {
   const unlocked = isDeckUnlocked(profile, p.id);
   // Deselect if already yours
@@ -463,9 +521,9 @@ function flyCard(fromEl, toEl, cardInst, onDone) {
     { transform: 'translate(0,0) scale(1)', opacity: 1 },
     { transform: `translate(${dx * 0.5}px, ${dy * 0.5 - 40}px) scale(1.05)`, opacity: 1, offset: 0.45 },
     { transform: `translate(${dx}px, ${dy}px) scale(${Math.max(0.35, tr.width / fr.width)})`, opacity: 0.85 },
-  ], { duration: 480, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'forwards' });
+  ], { duration: 620, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'forwards' });
   anim.onfinish = () => { flyer.remove(); onDone && onDone(); };
-  setTimeout(() => { if (flyer.parentNode) { flyer.remove(); onDone && onDone(); } }, 600);
+  setTimeout(() => { if (flyer.parentNode) { flyer.remove(); onDone && onDone(); } }, 750);
 }
 
 function pileEl(which) {
@@ -495,14 +553,14 @@ function renderAgentRow(row, agents, { attackable = false, onAttack = null } = {
     if (a) {
       slot.appendChild(renderCard(a, {
         extraClass: 'agent-board' + (a.taunt ? ' has-taunt' : ''),
-        onTap: () => {
+        onTap: (_inst, el) => {
           if (attackable && onAttack) onAttack(a);
-          else showInspect(cardsById[a.id]);
+          else startLift(el, cardsById[a.id]);
         },
-        onInspect: () => showInspect(cardsById[a.id]),
+        onHoldRead: (_inst, el) => startLift(el, cardsById[a.id]),
       }));
     } else {
-      slot.innerHTML = '<span class="slot-label">Seat</span>';
+      slot.innerHTML = '<span class="slot-label">Agent</span>';
     }
     row.appendChild(slot);
   }
@@ -535,12 +593,14 @@ function renderMatch() {
   $('#cnt-you-cd').textContent = you.cooldown.length;
   $('#cnt-tavern-discard').textContent = s.tavernDiscard.length;
 
-  // Patron rail
+  // Patron rail: opp patrons TOP, treasury MIDDLE, your patrons BOTTOM
   const rail = $('#rail-patrons');
   rail.innerHTML = '';
-  for (const pid of [...s.matchPatrons, 'treasury']) {
+  const youPats = you.patrons || [];
+  const oppPats = opp.patrons || [];
+  const makeCoin = (pid) => {
     const pat = patronsById[pid];
-    if (!pat) continue;
+    if (!pat) return null;
     const f = s.favor[pid] || 0;
     const favYou = (seat === 0 && f === 1) || (seat === 1 && f === -1);
     const favOpp = (seat === 0 && f === -1) || (seat === 1 && f === 1);
@@ -555,14 +615,17 @@ function renderMatch() {
     el.title = (pat.abilities?.neutral?.desc) || pat.name;
     el.addEventListener('click', () => {
       if (!canControl()) return;
-      if (engine.canCallPatron(pid)) {
-        engine.callPatron(pid);
-        syncAction({ op: 'patron', pid });
-        afterPlayerAction();
-      }
+      openPatronConfirm(pid, 'call');
     });
-    rail.appendChild(el);
-  }
+    return el;
+  };
+  const gOpp = document.createElement('div'); gOpp.className = 'rail-group rail-opp';
+  for (const pid of oppPats) { const c = makeCoin(pid); if (c) gOpp.appendChild(c); }
+  const gMid = document.createElement('div'); gMid.className = 'rail-group rail-mid';
+  { const c = makeCoin('treasury'); if (c) gMid.appendChild(c); }
+  const gYou = document.createElement('div'); gYou.className = 'rail-group rail-you';
+  for (const pid of youPats) { const c = makeCoin(pid); if (c) gYou.appendChild(c); }
+  rail.appendChild(gOpp); rail.appendChild(gMid); rail.appendChild(gYou);
 
   // Tavern — tap to buy if affordable; hold to inspect (never buys on hold)
   const tz = $('#tavern-zone');
@@ -575,6 +638,7 @@ function renderMatch() {
         if (!canControl()) return;
         if (engine.canBuy(i)) {
           const dest = pileEl('you-cooldown');
+          playSfx('buy');
           flyCard(el, dest, c, () => {});
           engine.buy(i);
           syncAction({ op: 'buy', i });
@@ -583,11 +647,11 @@ function renderMatch() {
           toast(`Need ${cardsById[c.id]?.cost ?? '?'} coin`);
         }
       },
-      onInspect: () => showInspect(cardsById[c.id]),
+      onHoldRead: (_inst, el) => startLift(el, cardsById[c.id]),
     }));
   });
 
-  // Agent rows — always show dashed/gold slot outlines (empty seats)
+  // Agent rows — always show dashed/gold Agent slot outlines
   renderAgentRow($('#opp-agents'), opp.agents, {
     attackable: yourTurn,
     onAttack: (a) => {
@@ -610,12 +674,12 @@ function renderMatch() {
     if (def?.type === 'agent') return; // agents live in agents row
     yp.appendChild(renderCard(c, {
       extraClass: 'played-card',
-      onTap: () => showInspect(cardsById[c.id]),
-      onInspect: () => showInspect(cardsById[c.id]),
+      onTap: (_i, el) => startLift(el, cardsById[c.id]),
+      onHoldRead: (_i, el) => startLift(el, cardsById[c.id]),
     }));
   });
 
-  // Hand — tap plays, hold inspects (hold never also plays)
+  // Hand — tap plays, hold lifts to read (hold never also plays)
   const hz = $('#hand-zone');
   hz.innerHTML = '';
   you.hand.forEach(c => {
@@ -626,20 +690,128 @@ function renderMatch() {
       onTap: (inst, el) => {
         if (!canControl()) return;
         const isAgent = def?.type === 'agent';
+        const isContract = !!def?.contract;
         const dest = isAgent
           ? ($('#you-agents') || pileEl('played'))
           : (pileEl('played') || pileEl('you-played'));
+        if (isContract) { playSfx('contract'); flashVfx(el, 'contract'); }
+        else if (isAgent) { playSfx('agent'); flashVfx(el, 'agent'); }
+        else playSfx('play');
         flyCard(el, dest, c, () => {});
         engine.playCard(c.uid);
         syncAction({ op: 'play', uid: c.uid });
         afterPlayerAction();
       },
-      onInspect: () => showInspect(def),
+      onHoldRead: (_i, el) => startLift(el, def),
     }));
   });
+  layoutFan(hz, false);
+
+  // Rival fanned backs (top)
+  const ohz = $('#opp-hand-zone');
+  if (ohz) {
+    ohz.innerHTML = '';
+    const reveal = botRevealAllowed() || matchMode === 'hotseat';
+    opp.hand.forEach((c) => {
+      if (reveal) {
+        const def = cardsById[c.id];
+        ohz.appendChild(renderCard(c, {
+          extraClass: 'rival-card',
+          onTap: (_i, e) => startLift(e, def),
+          onHoldRead: (_i, e) => startLift(e, def),
+        }));
+      } else {
+        const el = document.createElement('div');
+        el.className = 'card card-back-only';
+        el.innerHTML = `<div class="art card-back-face" style="height:100%"></div>`;
+        ohz.appendChild(el);
+      }
+    });
+    layoutFan(ohz, true);
+  }
 
   const dock = $('#log-dock');
   if (dock) dock.innerHTML = engine.log.slice(-12).map(l => l.msg).join('<br>');
+}
+
+function layoutFan(container, rival = false) {
+  if (!container) return;
+  const cards = [...container.children];
+  const n = cards.length;
+  if (!n) return;
+  const spread = Math.min(52, 10 + n * 6);
+  const start = -spread / 2;
+  const step = n === 1 ? 0 : spread / (n - 1);
+  const overlap = rival ? 18 : 22;
+  cards.forEach((card, i) => {
+    const rot = start + step * i;
+    const x = (i - (n - 1) / 2) * overlap;
+    const y = Math.abs(rot) * (rival ? 0.35 : 0.45);
+    card.style.zIndex = String(i + 1);
+    card.style.transform = `translate(calc(-50% + ${x}px), ${rival ? y : -y}px) rotate(${rot}deg)`;
+  });
+}
+
+function flashVfx(fromEl, kind) {
+  if (!fromEl) return;
+  const r = fromEl.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'vfx-flash ' + kind;
+  el.style.left = r.left + 'px';
+  el.style.top = r.top + 'px';
+  el.style.width = r.width + 'px';
+  el.style.height = r.height + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 600);
+}
+
+function openPatronConfirm(pid, mode = 'call') {
+  const pat = patronsById[pid];
+  if (!pat) return;
+  const unlocked = pid === 'treasury' || isDeckUnlocked(profile, pid);
+  const overlay = $('#patron-confirm-overlay');
+  if (!overlay) return;
+  pendingPatron = { pid, mode };
+  const art = $('#pc-art');
+  const name = $('#pc-name');
+  const abil = $('#pc-ability');
+  if (art) {
+    art.src = patronArt(pid);
+    art.style.filter = unlocked ? '' : 'grayscale(0.85) brightness(0.65)';
+  }
+  if (name) name.textContent = unlocked ? (pat.short || pat.name) : '???';
+  const f = engine?.state?.favor?.[pid] || 0;
+  const key = f === 1 ? 'favored' : f === -1 ? 'unfavored' : 'neutral';
+  const desc = unlocked
+    ? (pat.abilities?.[key]?.desc || pat.abilities?.neutral?.desc || pat.name || '')
+    : 'This patron has not yet revealed their true name.';
+  if (abil) abil.textContent = desc;
+  overlay.classList.add('show');
+}
+
+function closePatronConfirm() {
+  pendingPatron = null;
+  $('#patron-confirm-overlay')?.classList.remove('show');
+}
+
+function confirmPatronContinue() {
+  if (!pendingPatron) { closePatronConfirm(); return; }
+  const { pid, mode } = pendingPatron;
+  closePatronConfirm();
+  if (mode === 'pick') {
+    const pat = patronsById[pid];
+    if (pat) onPatronTapConfirmed(pat);
+    return;
+  }
+  if (!engine || !canControl()) return;
+  if (engine.canCallPatron(pid)) {
+    playSfx('patron');
+    engine.callPatron(pid);
+    syncAction({ op: 'patron', pid });
+    afterPlayerAction();
+  } else {
+    toast('Cannot call that patron now');
+  }
 }
 
 function afterPlayerAction() {
@@ -711,8 +883,8 @@ function openPileModal(pileKey) {
         grid.appendChild(el);
       } else {
         grid.appendChild(renderCard(c, {
-          onTap: () => showInspect(cardsById[c.id]),
-          onInspect: () => showInspect(cardsById[c.id]),
+          onTap: (_i, el) => startLift(el, cardsById[c.id]),
+          onHoldRead: (_i, el) => startLift(el, cardsById[c.id]),
         }));
       }
     }
@@ -785,13 +957,24 @@ function applyRemoteAction(msg) {
 
 function startMatch(opts = {}) {
   engine = new GameEngine(cardsById, patronsById);
-  ai = (matchMode === 'ai' || matchMode === 'ranked') ? new TributeAI(engine) : null;
-  // Ranked AI plays a touch more patiently via delay only (same heuristics)
+  const diff = opts.difficulty != null ? opts.difficulty
+    : (isGauntletMatch && gauntletStopIndex != null ? GAUNTLET_STOPS[gauntletStopIndex].difficulty
+    : (profile?.aiDifficulty || 5));
+  ai = (matchMode === 'ai' || matchMode === 'ranked' || isGauntletMatch)
+    ? new TributeAI(engine, isRankedMatch ? Math.max(diff, 7) : diff)
+    : null;
   engine.on((ev, data) => {
-    if (ev === 'combo') flashCombo(data.n);
-    if (ev === 'win') { stopHourglass(); showWin(data); }
-    if (ev === 'draw' && data?.card) {
-      // subtle — full fly handled on buy/play
+    if (ev === 'combo') { flashCombo(data.n); playSfx('combo'); }
+    if (ev === 'win') { stopHourglass(); playSfx('win'); showWin(data); }
+    if (ev === 'buy') playSfx('coin');
+    if (ev === 'patron') playSfx('patron');
+    if (ev === 'agentEnter') { playSfx('agent'); }
+    if (ev === 'prestige') playSfx('coin');
+    if (ev === 'aiAction') handleAiActionAnim(data);
+    if (ev === 'state' && !liftActive && engine?.state?.active === 1 &&
+        (matchMode === 'ai' || matchMode === 'ranked' || isGauntletMatch)) {
+      // Refresh board between AI moves so flies remain readable
+      renderMatch();
     }
   });
   const owned = profile?.ownedUpgrades || [];
@@ -838,6 +1021,19 @@ function showWin(data) {
       const r = recordMatchResult(profile, { won, isRandom: false, ranked: false });
       rewardLine = `+${r.gold}g`;
       if (r.purse) purseNote = ` · ${r.purse.rarity} cutpurse`;
+    } else if (isGauntletMatch && gauntletStopIndex != null) {
+      const awardWin = engine.state.winner === 0;
+      const g = recordGauntletResult(profile, { stopIndex: gauntletStopIndex, won: awardWin });
+      if (awardWin) {
+        rewardLine = `Province secured · +${g.gold || 0}g`;
+        purseNote = g.complete ? ' · Road complete!' : ' · next stop unlocked';
+      } else {
+        rewardLine = "Today's road ends here";
+        const ms = g.retryInMs || msUntilNextNyMidnight();
+        purseNote = ` · retry in ${fmtCountdown(ms)}`;
+      }
+      // still record a casual match for stats
+      recordMatchResult(profile, { won: awardWin, isRandom: false, ranked: false });
     } else {
       const awardWin = engine.state.winner === 0;
       const r = recordMatchResult(profile, { won: awardWin, isRandom: isRandomMatch, ranked: isRankedMatch });
@@ -864,10 +1060,14 @@ function showWin(data) {
   setTimeout(() => {
     $('#btn-again')?.addEventListener('click', () => {
       $('#win-overlay').classList.remove('show');
+      const wasGauntlet = isGauntletMatch;
       isRandomMatch = false;
       isRankedMatch = false;
+      isGauntletMatch = false;
+      gauntletStopIndex = null;
       if (net) { try { net.destroy(); } catch {} net = null; }
-      onSplashEnter();
+      if (wasGauntlet) openGauntlet();
+      else onSplashEnter();
     });
     $('#btn-win-purse')?.addEventListener('click', () => {
       $('#win-overlay').classList.remove('show');
@@ -887,8 +1087,7 @@ function reasonText(r) {
 async function maybeAI() {
   if (!engine || !ai || engine.state.winner != null) return;
   if (engine.state.active === 1) {
-    const delay = matchMode === 'ranked' ? 200 : 280;
-    await ai.takeTurn(delay);
+    await ai.takeTurn(ai.actionDelay());
     renderMatch();
     if (engine.state.active === 1 && engine.state.winner == null) {
       await maybeAI();
@@ -896,6 +1095,31 @@ async function maybeAI() {
       startHourglass();
     }
   }
+}
+
+/** Visualize AI plays/buys flying from rival fan / tavern. */
+function handleAiActionAnim(action) {
+  if (!action) return;
+  try {
+    if (action.type === 'play') {
+      const from = $('#opp-hand-zone')?.querySelector('.card') || $('#pile-opp-hand');
+      const def = cardsById[action.cardId];
+      const isAgent = def?.type === 'agent';
+      const isContract = !!def?.contract;
+      const dest = isAgent ? $('#opp-agents') : pileEl('opp-cooldown');
+      if (isContract) { playSfx('contract'); flashVfx(from, 'contract'); }
+      else if (isAgent) { playSfx('agent'); flashVfx(from, 'agent'); }
+      else playSfx('play');
+      flyCard(from, dest || $('#opp-agents'), { id: action.cardId }, () => {});
+    } else if (action.type === 'buy') {
+      const tz = $('#tavern-zone');
+      const from = tz?.children[action.index] || tz;
+      playSfx('buy');
+      flyCard(from, pileEl('opp-cooldown'), { id: action.cardId }, () => {});
+    } else if (action.type === 'patron') {
+      playSfx('patron');
+    }
+  } catch {}
 }
 
 async function doEndTurn() {
@@ -1002,6 +1226,8 @@ function renderSettings() {
   if (music) music.checked = preferMusicFromStorage();
   if (hg) hg.checked = !!profile.hourglassDefault;
   if (bot) bot.checked = !!profile.showBotCards;
+  mountDiffSlider('#diff-slider-settings', '#diff-val-settings');
+  paintDiffAll();
   // Show-bot only meaningful for AI; still listed with note
   const row = $('#row-show-bot');
   if (row) row.classList.toggle('dim', false);
@@ -1339,9 +1565,15 @@ function beginDeckPick(mode) {
   pickYou = []; pickOpp = []; pickPhase = 'you';
   isRandomMatch = false;
   isRankedMatch = mode === 'ranked';
+  isGauntletMatch = false;
+  gauntletStopIndex = null;
   if (mode === 'ranked') setHourglass(true);
   if ($('#chk-random-match')) $('#chk-random-match').checked = false;
   renderDeckPick();
+  mountDiffSlider('#diff-slider-pick', '#diff-val-pick');
+  paintDiffAll();
+  const wrap = $('#diff-pick-wrap');
+  if (wrap) wrap.style.display = (mode === 'ai' || mode === 'ranked') ? '' : 'none';
   show('#deckpick');
 }
 
@@ -1432,12 +1664,164 @@ async function updateMusicBtn() {
   btn.classList.toggle('on', on);
 }
 
+
+function fmtCountdown(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  return `${h}h ${String(m).padStart(2, '0')}m`;
+}
+
+function mountDiffSlider(rootId, valId) {
+  const root = $(rootId);
+  if (!root || root.dataset.ready) return;
+  root.dataset.ready = '1';
+  root.innerHTML = '';
+  for (let i = 1; i <= 10; i++) {
+    const d = document.createElement('div');
+    d.className = 'diff-dot';
+    d.dataset.n = String(i);
+    root.appendChild(d);
+  }
+  const paint = (n) => {
+    root.querySelectorAll('.diff-dot').forEach((dot) => {
+      dot.classList.toggle('on', Number(dot.dataset.n) <= n);
+    });
+    root.setAttribute('aria-valuenow', String(n));
+    const lab = $(valId);
+    if (lab) lab.textContent = String(n);
+  };
+  const fromX = (clientX) => {
+    const r = root.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+    return Math.max(1, Math.min(10, Math.round(pct * 9) + 1));
+  };
+  const apply = (n) => {
+    profile = loadProfile();
+    setAiDifficulty(profile, n);
+    profile = loadProfile();
+    paint(profile.aiDifficulty || n);
+    // sync other sliders
+    paintDiffAll();
+  };
+  let dragging = false;
+  root.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    try { root.setPointerCapture(e.pointerId); } catch {}
+    apply(fromX(e.clientX));
+  });
+  root.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    apply(fromX(e.clientX));
+  });
+  root.addEventListener('pointerup', () => { dragging = false; });
+  root.addEventListener('pointercancel', () => { dragging = false; });
+  paint(profile?.aiDifficulty || 5);
+}
+
+function paintDiffAll() {
+  const n = profile?.aiDifficulty || 5;
+  for (const id of ['#diff-slider-settings', '#diff-slider-pick']) {
+    const root = $(id);
+    if (!root) continue;
+    root.querySelectorAll('.diff-dot').forEach((dot) => {
+      dot.classList.toggle('on', Number(dot.dataset.n) <= n);
+    });
+    root.setAttribute('aria-valuenow', String(n));
+  }
+  const a = $('#diff-val-settings'); if (a) a.textContent = String(n);
+  const b = $('#diff-val-pick'); if (b) b.textContent = String(n);
+}
+
+function openGauntlet() {
+  profile = loadProfile();
+  ensureGauntletDay(profile);
+  renderGauntlet();
+  show('#gauntlet');
+}
+
+const GAUNTLET_POS = [
+  { x: 24, y: 30 }, { x: 30, y: 36 }, { x: 36, y: 28 }, { x: 32, y: 46 }, { x: 26, y: 56 },
+  { x: 44, y: 60 }, { x: 50, y: 70 }, { x: 64, y: 56 }, { x: 58, y: 30 }, { x: 80, y: 38 },
+];
+
+function renderGauntlet() {
+  profile = loadProfile();
+  const g = ensureGauntletDay(profile);
+  const markers = $('#gauntlet-markers');
+  if (!markers) return;
+  markers.innerHTML = '';
+  GAUNTLET_STOPS.forEach((stop, i) => {
+    const pos = GAUNTLET_POS[i] || { x: 10 + i * 8, y: 50 };
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'g-marker';
+    el.style.left = pos.x + '%';
+    el.style.top = pos.y + '%';
+    el.textContent = String(stop.difficulty);
+    el.title = `${stop.name} · diff ${stop.difficulty}`;
+    if (g.failed && g.failedStop === i) el.classList.add('failed');
+    else if (i < g.cleared) el.classList.add('cleared');
+    else if (i === g.cleared && !g.failed) el.classList.add('current');
+    else el.classList.add('locked');
+    el.addEventListener('click', () => {
+      if (i === g.cleared && !g.failed) startGauntletStop(i);
+      else if (g.failed) toast("Today's run is over — returns at midnight EST");
+      else if (i < g.cleared) toast(`${stop.name} already cleared today`);
+      else toast('Clear earlier stops first');
+    });
+    markers.appendChild(el);
+  });
+  const st = $('#gauntlet-status');
+  const btn = $('#btn-gauntlet-play');
+  if (g.failed) {
+    const ms = msUntilNextNyMidnight();
+    if (st) st.textContent = `Run failed at stop ${(g.failedStop ?? 0) + 1}. Next road opens in ${fmtCountdown(ms)} (America/New_York midnight).`;
+    if (btn) btn.disabled = true;
+  } else if (g.cleared >= GAUNTLET_STOPS.length) {
+    if (st) st.textContent = 'All ten provinces bowed today. Return tomorrow for a fresh road.';
+    if (btn) btn.disabled = true;
+  } else {
+    const next = GAUNTLET_STOPS[g.cleared];
+    if (st) st.textContent = `Next: ${next.name} (${next.region}) — difficulty ${next.difficulty}. Patrons locked to the scripted pair.`;
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = `Play ${next.name}`;
+    }
+  }
+}
+
+function startGauntletStop(index) {
+  const stop = GAUNTLET_STOPS[index];
+  if (!stop) return;
+  profile = loadProfile();
+  const g = ensureGauntletDay(profile);
+  if (g.failed || index !== g.cleared) return;
+  isGauntletMatch = true;
+  isRankedMatch = false;
+  isRandomMatch = false;
+  gauntletStopIndex = index;
+  matchMode = 'ai';
+  pickYou = [...stop.you];
+  pickOpp = [...stop.opp];
+  setHourglass(false);
+  // Temporarily boost difficulty for this match via opts
+  startMatch({ difficulty: stop.difficulty });
+}
+
 /* ——— Wire ——— */
 function bind() {
   $('#btn-play').onclick = () => {
     setHourglass($('#chk-hourglass-splash')?.checked || !!profile?.hourglassDefault);
     beginDeckPick('ai');
   };
+  $('#btn-gauntlet')?.addEventListener('click', () => openGauntlet());
+  $('#btn-gauntlet-back')?.addEventListener('click', () => onSplashEnter());
+  $('#btn-gauntlet-play')?.addEventListener('click', () => {
+    profile = loadProfile();
+    const g = ensureGauntletDay(profile);
+    if (!g.failed && g.cleared < GAUNTLET_STOPS.length) startGauntletStop(g.cleared);
+  });
   $('#btn-ranked').onclick = beginRanked;
   $('#btn-friend').onclick = () => { $('#friend-status').textContent = ''; show('#friend-lobby'); };
   $('#btn-club').onclick = () => { renderClub(); show('#club'); };
@@ -1543,10 +1927,10 @@ function bind() {
   $('#btn-pile-close').onclick = () => $('#pile-overlay').classList.remove('show');
   $('#pile-overlay').onclick = (e) => { if (e.target.id === 'pile-overlay') e.target.classList.remove('show'); };
 
-  // Inspect: tap backdrop to close; pointerup after hold also closes if over backdrop
-  $('#inspect-backdrop')?.addEventListener('pointerup', () => closeInspect());
-  $('#inspect-overlay')?.addEventListener('click', (e) => {
-    if (e.target.id === 'inspect-overlay' || e.target.id === 'inspect-backdrop') closeInspect();
+  $('#pc-continue')?.addEventListener('click', () => confirmPatronContinue());
+  $('#pc-cancel')?.addEventListener('click', () => closePatronConfirm());
+  $('#patron-confirm-overlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'patron-confirm-overlay') closePatronConfirm();
   });
 
   // Settings toggles
@@ -1589,6 +1973,9 @@ loadData().then(() => {
   profile = loadProfile();
   hourglassOn = !!profile.hourglassDefault;
   bind();
+  mountDiffSlider('#diff-slider-settings', '#diff-val-settings');
+  mountDiffSlider('#diff-slider-pick', '#diff-val-pick');
+  paintDiffAll();
   warmMuted();
   updateMusicBtn();
   if (preferMusicFromStorage()) setMusicEnabled(true);

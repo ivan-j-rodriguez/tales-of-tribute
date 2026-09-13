@@ -17,6 +17,7 @@
         <div class="splash-purse" id="splash-purse"></div>
         <div class="actions">
           <button class="primary" id="btn-play">Play vs AI</button>
+          <button id="btn-gauntlet">Challenge the Provinces</button>
           <button id="btn-ranked">Ranked</button>
           <button id="btn-friend">Play a Friend</button>
           <button id="btn-club">Club</button>
@@ -42,6 +43,10 @@
       <div class="deckpick-modes">
         <label class="chk"><input type="checkbox" id="chk-random-match" /> Random from unlocked</label>
         <label class="chk"><input type="checkbox" id="chk-hourglass-pick" /> Hourglass</label>
+        <div class="diff-inline" id="diff-pick-wrap">
+          <span class="diff-label">AI <span id="diff-val-pick">5</span></span>
+          <div class="diff-slider" id="diff-slider-pick" role="slider" aria-valuemin="1" aria-valuemax="10" aria-valuenow="5" tabindex="0"></div>
+        </div>
       </div>
       <div class="patron-grid" id="patron-grid"></div>
       <div class="deckpick-bar">
@@ -50,6 +55,24 @@
         <button id="btn-ai-rest">AI takes the rest</button>
         <button class="primary" id="btn-start" disabled>Begin Match</button>
         <button id="btn-back-splash">Back</button>
+      </div>
+    </section>
+
+
+    <!-- GAUNTLET / Road of Tamriel -->
+    <section id="gauntlet" class="screen">
+      <header class="club-header">
+        <h2>Challenge the Provinces</h2>
+        <button id="btn-gauntlet-back">Back</button>
+      </header>
+      <p class="hint" id="gauntlet-hint">Road of Tamriel — beat each stop in order. Fail once and today's run ends (resets midnight America/New_York).</p>
+      <div class="gauntlet-map-wrap">
+        <img class="gauntlet-map" id="gauntlet-map-img" src="assets/ui/tamriel-map.svg" alt="Map of Tamriel" />
+        <div class="gauntlet-markers" id="gauntlet-markers"></div>
+      </div>
+      <div class="gauntlet-status" id="gauntlet-status"></div>
+      <div class="gauntlet-actions">
+        <button class="primary" id="btn-gauntlet-play" disabled>Play next stop</button>
       </div>
     </section>
 
@@ -131,6 +154,10 @@
         <label class="chk settings-row"><input type="checkbox" id="chk-settings-music" /> Music</label>
         <label class="chk settings-row"><input type="checkbox" id="chk-settings-hourglass" /> Hourglass default (90s)</label>
         <label class="chk settings-row" id="row-show-bot"><input type="checkbox" id="chk-settings-botcards" /> Show bot cards <span class="hint-inline">(vs AI coach mode — never in ranked/friend)</span></label>
+        <div class="settings-row diff-block">
+          <div class="diff-label">AI Difficulty <span id="diff-val-settings">5</span></div>
+          <div class="diff-slider" id="diff-slider-settings" role="slider" aria-valuemin="1" aria-valuemax="10" aria-valuenow="5" tabindex="0"></div>
+        </div>
         <button type="button" id="btn-replay-tour" class="settings-row-btn">Replay first-match tour</button>
       </div>
       <h3 class="club-section">Choose table skin</h3>
@@ -152,6 +179,9 @@
               <button type="button" class="pile-btn" id="pile-opp-cd" data-pile="opp-cooldown" title="Rival cooldown"><span class="pile-art"></span><span class="pile-count" id="cnt-opp-cd">0</span><span class="pile-label">Cooldown</span></button>
             </div>
             <div class="agents-row" id="opp-agents"></div>
+            <div class="hand-row rival-hand-row">
+              <div class="hand-cards fan-hand rival-fan" id="opp-hand-zone"></div>
+            </div>
           </div>
 
           <!-- Tavern -->
@@ -165,8 +195,8 @@
           <div class="strip you-strip">
             <div class="agents-row" id="you-agents"></div>
             <div class="played-row" id="you-played"></div>
-            <div class="hand-row">
-              <div class="hand-cards" id="hand-zone"></div>
+            <div class="hand-row you-hand-row">
+              <div class="hand-cards fan-hand you-fan" id="hand-zone"></div>
             </div>
             <div class="you-footer">
               <div class="strip-piles">
@@ -262,9 +292,17 @@
         </div>
       </div>
     </div>
-    <div class="inspect-overlay" id="inspect-overlay" hidden>
-      <div class="inspect-backdrop" id="inspect-backdrop"></div>
-      <div class="inspect-card" id="inspect-card"></div>
+    <div id="lift-layer" aria-hidden="true"></div>
+    <div class="overlay" id="patron-confirm-overlay">
+      <div class="patron-confirm" id="patron-confirm">
+        <img id="pc-art" alt="" />
+        <h3 id="pc-name">Patron</h3>
+        <p id="pc-ability" class="pc-ability"></p>
+        <div class="pc-actions">
+          <button class="pc-continue" id="pc-continue">Continue</button>
+          <button class="pc-cancel" id="pc-cancel">Cancel</button>
+        </div>
+      </div>
     </div>
     <div class="modal" id="card-modal">
       <div class="modal-body" id="card-modal-body"></div>

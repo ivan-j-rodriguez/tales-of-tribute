@@ -1,129 +1,72 @@
-/** Procedural Gonfalon-tavern bed — Web Audio, no copyrighted OST. */
+/**
+ * Tales of Tribute audio — real renaissance loop + quiet synthesized SFX.
+ * Default loop: Dowland CC0 (OpenGameArt / Of Far Different Nature).
+ * Alt: Tourdion (Wikimedia Commons PD).
+ * Never falls back to oscillator bed as the music default.
+ */
+
+const LOOP_SRC = 'assets/audio/dowland-complaints.mp3';
+const ALT_SRC = 'assets/audio/tourdion.mp3';
 
 let ctx = null;
 let master = null;
+let sfxGain = null;
+let musicEl = null;
 let playing = false;
-let nodes = [];
-let crackleTimer = null;
+let musicOn = false;
 
-function ensure() {
+function ensureCtx() {
   if (ctx) return ctx;
   const AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return null;
   ctx = new AC();
   master = ctx.createGain();
-  master.gain.value = 0;
+  master.gain.value = 1;
   master.connect(ctx.destination);
+  sfxGain = ctx.createGain();
+  sfxGain.gain.value = 0.22;
+  sfxGain.connect(master);
   return ctx;
 }
 
-function softOsc(type, freq, gainVal, detune = 0) {
-  const o = ctx.createOscillator();
-  const g = ctx.createGain();
-  o.type = type;
-  o.frequency.value = freq;
-  o.detune.value = detune;
-  g.gain.value = gainVal;
-  o.connect(g);
-  g.connect(master);
-  o.start();
-  nodes.push(o, g);
-  return { o, g };
-}
-
-function startDrone() {
-  // Low warm strings / cello-ish drone (triangle + sine)
-  softOsc('sine', 55, 0.04); // A1
-  softOsc('triangle', 82.41, 0.028, 3); // E2
-  softOsc('sine', 110, 0.018, -4); // A2
-  // Soft fifth pad
-  softOsc('sine', 164.81, 0.012, 2);
-}
-
-function schedulePluck(time) {
-  if (!ctx || !playing) return;
-  const freqs = [220, 246.94, 293.66, 329.63, 369.99, 440]; // A minor-ish lute tones
-  const f = freqs[Math.floor(Math.random() * freqs.length)];
-  const o = ctx.createOscillator();
-  const g = ctx.createGain();
-  const f2 = ctx.createBiquadFilter();
-  o.type = 'triangle';
-  o.frequency.value = f;
-  f2.type = 'lowpass';
-  f2.frequency.value = 1200;
-  g.gain.setValueAtTime(0.0001, time);
-  g.gain.exponentialRampToValueAtTime(0.045, time + 0.02);
-  g.gain.exponentialRampToValueAtTime(0.0001, time + 1.4 + Math.random());
-  o.connect(f2);
-  f2.connect(g);
-  g.connect(master);
-  o.start(time);
-  o.stop(time + 2.2);
-}
-
-function pluckLoop() {
-  if (!playing || !ctx) return;
-  const now = ctx.currentTime;
-  // Sparse lute-like plucks
-  schedulePluck(now + 0.05);
-  if (Math.random() < 0.55) schedulePluck(now + 0.55 + Math.random() * 0.4);
-  if (Math.random() < 0.35) schedulePluck(now + 1.3 + Math.random() * 0.5);
-  setTimeout(pluckLoop, 2200 + Math.random() * 1800);
-}
-
-function crackleOnce() {
-  if (!playing || !ctx) return;
-  const len = 0.04 + Math.random() * 0.08;
-  const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * len), ctx.sampleRate);
-  const data = buf.getChannelData(0);
-  for (let i = 0; i < data.length; i++) {
-    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 2) * 0.35;
-  }
-  const src = ctx.createBufferSource();
-  const g = ctx.createGain();
-  const f = ctx.createBiquadFilter();
-  f.type = 'bandpass';
-  f.frequency.value = 1800 + Math.random() * 2000;
-  f.Q.value = 0.8;
-  src.buffer = buf;
-  g.gain.value = 0.08 + Math.random() * 0.06;
-  src.connect(f);
-  f.connect(g);
-  g.connect(master);
-  src.start();
-}
-
-function crackleLoop() {
-  if (!playing) return;
-  crackleOnce();
-  crackleTimer = setTimeout(crackleLoop, 120 + Math.random() * 400);
+function ensureMusicEl() {
+  if (musicEl) return musicEl;
+  musicEl = new Audio(LOOP_SRC);
+  musicEl.loop = true;
+  musicEl.preload = 'auto';
+  musicEl.volume = 0.28;
+  musicEl.addEventListener('error', () => {
+    // Prefer Tourdion if Dowland fails to decode/load
+    if (musicEl.src && !musicEl.src.includes('tourdion')) {
+      musicEl.src = ALT_SRC;
+      musicEl.load();
+      if (musicOn) musicEl.play().catch(() => {});
+    }
+  });
+  return musicEl;
 }
 
 export function isMusicOn() {
-  return playing && master && master.gain.value > 0.01;
+  return musicOn && playing;
 }
 
 export async function setMusicEnabled(on) {
-  ensure();
-  if (!ctx) return false;
-  if (on) {
-    if (ctx.state === 'suspended') await ctx.resume();
-    if (!playing) {
-      playing = true;
-      startDrone();
-      pluckLoop();
-      crackleLoop();
-    }
-    master.gain.cancelScheduledValues(ctx.currentTime);
-    master.gain.linearRampToValueAtTime(0.55, ctx.currentTime + 0.8);
-  } else {
-    if (master) {
-      master.gain.cancelScheduledValues(ctx.currentTime);
-      master.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.4);
-    }
-    // keep graph warm but silent — browsers like resume
-  }
+  ensureCtx();
+  ensureMusicEl();
+  musicOn = !!on;
   try { localStorage.setItem('tot_music', on ? '1' : '0'); } catch {}
+  if (on) {
+    if (ctx?.state === 'suspended') await ctx.resume();
+    playing = true;
+    try {
+      await musicEl.play();
+    } catch {
+      // autoplay blocked until gesture — keep flag for next toggle
+    }
+  } else if (musicEl) {
+    musicEl.pause();
+    playing = false;
+  }
   return on;
 }
 
@@ -131,13 +74,94 @@ export function preferMusicFromStorage() {
   try { return localStorage.getItem('tot_music') === '1'; } catch { return false; }
 }
 
-/** Auto-start muted (gain 0) so first unmute is instant. */
+/** Warm decode path; stay silent until unmute. */
 export function warmMuted() {
-  ensure();
-  if (!ctx || playing) return;
-  playing = true;
-  startDrone();
-  pluckLoop();
-  crackleLoop();
-  master.gain.value = 0;
+  ensureCtx();
+  ensureMusicEl();
+  musicEl.volume = 0.28;
+  // do not auto-play
+}
+
+function beep({ freq = 440, dur = 0.08, type = 'triangle', vol = 0.35, slide = 0, noiseFreq = 0, noiseQ = 1 }) {
+  if (!ensureCtx() || !sfxGain) return;
+  const t0 = ctx.currentTime;
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  const f = ctx.createBiquadFilter();
+  o.type = type;
+  o.frequency.setValueAtTime(freq, t0);
+  if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, freq + slide), t0 + dur);
+  f.type = filterFreq ? 'bandpass' : 'lowpass';
+  f.frequency.value = filterFreq || 2400;
+  f.Q.value = filterQ;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(vol, t0 + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(f); f.connect(g); g.connect(sfxGain);
+  o.start(t0); o.stop(t0 + dur + 0.02);
+}
+
+function noiseBurst({ dur = 0.06, vol = 0.2, freq = 1200, Q = 0.7 }) {
+  if (!ensureCtx() || !sfxGain) return;
+  const n = Math.floor(ctx.sampleRate * dur);
+  const buf = ctx.createBuffer(1, n, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 1.5);
+  const src = ctx.createBufferSource();
+  const g = ctx.createGain();
+  const f = ctx.createBiquadFilter();
+  f.type = 'bandpass'; f.frequency.value = freq; f.Q.value = Q;
+  src.buffer = buf;
+  g.gain.value = vol;
+  src.connect(f); f.connect(g); g.connect(sfxGain);
+  src.start();
+}
+
+/** Quiet distinct SFX for engine/UI events. */
+export function playSfx(kind) {
+  ensureCtx();
+  if (ctx?.state === 'suspended') ctx.resume().catch(() => {});
+  switch (kind) {
+    case 'play':
+      beep({ freq: 320, dur: 0.09, type: 'triangle', vol: 0.28, slide: 80 });
+      break;
+    case 'buy':
+      beep({ freq: 520, dur: 0.07, type: 'sine', vol: 0.25 });
+      beep({ freq: 780, dur: 0.1, type: 'sine', vol: 0.18, slide: 40 });
+      break;
+    case 'contract':
+      beep({ freq: 220, dur: 0.14, type: 'sawtooth', vol: 0.16, filterFreq: 900, filterQ: 4 });
+      noiseBurst({ dur: 0.08, vol: 0.12, freq: 1400, Q: 2 });
+      beep({ freq: 660, dur: 0.18, type: 'triangle', vol: 0.14, slide: 220 });
+      break;
+    case 'agent':
+      noiseBurst({ dur: 0.05, vol: 0.22, freq: 180, Q: 0.5 });
+      beep({ freq: 90, dur: 0.16, type: 'sine', vol: 0.32, slide: -30 });
+      beep({ freq: 880, dur: 0.12, type: 'sine', vol: 0.12, slide: 120 });
+      break;
+    case 'patron':
+      beep({ freq: 392, dur: 0.12, type: 'triangle', vol: 0.22 });
+      beep({ freq: 523, dur: 0.16, type: 'triangle', vol: 0.18, slide: 60 });
+      break;
+    case 'coin':
+      beep({ freq: 980, dur: 0.05, type: 'sine', vol: 0.18 });
+      beep({ freq: 1310, dur: 0.07, type: 'sine', vol: 0.12 });
+      break;
+    case 'combo':
+      beep({ freq: 440, dur: 0.08, type: 'triangle', vol: 0.2 });
+      beep({ freq: 554, dur: 0.1, type: 'triangle', vol: 0.18 });
+      beep({ freq: 659, dur: 0.14, type: 'triangle', vol: 0.16 });
+      break;
+    case 'win':
+      beep({ freq: 392, dur: 0.12, type: 'triangle', vol: 0.22 });
+      beep({ freq: 523, dur: 0.14, type: 'triangle', vol: 0.2 });
+      beep({ freq: 659, dur: 0.18, type: 'triangle', vol: 0.18 });
+      beep({ freq: 784, dur: 0.28, type: 'sine', vol: 0.16 });
+      break;
+    case 'tap':
+      beep({ freq: 600, dur: 0.04, type: 'sine', vol: 0.1 });
+      break;
+    default:
+      break;
+  }
 }

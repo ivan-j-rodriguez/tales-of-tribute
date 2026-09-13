@@ -72,6 +72,8 @@ export function defaultProfile() {
     unlockedBacks: ['default'],
     hourglassDefault: false,
     showBotCards: false,
+    aiDifficulty: 5,
+    gauntlet: { date: null, cleared: 0, failed: false, failedStop: null },
     ranked: { tier: 'Unranked', points: 0, placementLeft: 5, winStreak: 0 },
     purses: [{ rarity: 'Common' }], // queued cutpurses
     lastCheckIn: null,
@@ -108,6 +110,8 @@ export function loadProfile() {
     p.cardBack = p.cardBack || 'default';
     p.hourglassDefault = !!p.hourglassDefault;
     p.showBotCards = !!p.showBotCards;
+    p.aiDifficulty = Math.max(1, Math.min(10, Math.round(p.aiDifficulty || 5)));
+    p.gauntlet = { date: null, cleared: 0, failed: false, failedStop: null, ...(p.gauntlet || {}) };
     p.ranked = { tier: 'Unranked', points: 0, placementLeft: 5, winStreak: 0, ...(p.ranked || {}) };
     p.purses = Array.isArray(p.purses) ? p.purses : [];
     // migrate legacy sacks → purses
@@ -523,4 +527,85 @@ export function equipBack(profile, backId) {
   profile.cardBack = backId;
   saveProfile(profile);
   return { ok: true };
+}
+
+/** Calendar day in America/New_York (EST/EDT). */
+export function nyDateStr(d = new Date()) {
+  try {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit',
+    }).format(d);
+  } catch {
+    return todayStr();
+  }
+}
+
+export function msUntilNextNyMidnight() {
+  const now = Date.now();
+  // Probe next 36h for date rollover in NY
+  for (let h = 1; h <= 36; h++) {
+    const t = new Date(now + h * 3600_000);
+    if (nyDateStr(t) !== nyDateStr(new Date(now))) {
+      // binary refine within that hour
+      let lo = now + (h - 1) * 3600_000;
+      let hi = now + h * 3600_000;
+      while (hi - lo > 1000) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (nyDateStr(new Date(mid)) === nyDateStr(new Date(now))) lo = mid;
+        else hi = mid;
+      }
+      return Math.max(0, hi - now);
+    }
+  }
+  return 12 * 3600_000;
+}
+
+/** Scripted Road of Tamriel stops — difficulty 1→10 with fixed patron pairs. */
+export const GAUNTLET_STOPS = [
+  { id: 'glenumbra', name: 'Glenumbra', region: 'High Rock', difficulty: 1, you: ['pelin', 'hlaalu'], opp: ['crows', 'celarus'], rewardGold: 10 },
+  { id: 'stormhaven', name: 'Stormhaven', region: 'High Rock', difficulty: 2, you: ['pelin', 'celarus'], opp: ['hunding', 'crows'], rewardGold: 12 },
+  { id: 'rivenspire', name: 'Rivenspire', region: 'High Rock', difficulty: 3, you: ['hlaalu', 'crows'], opp: ['rajhin', 'pelin'], rewardGold: 14 },
+  { id: 'bangkorai', name: 'Bangkorai', region: 'Hammerfell', difficulty: 4, you: ['pelin', 'hunding'], opp: ['redeagle', 'almalexia'], rewardGold: 16 },
+  { id: 'alikr', name: "Alik'r Desert", region: 'Hammerfell', difficulty: 5, you: ['hunding', 'orgnum'], opp: ['rajhin', 'crows'], rewardGold: 18 },
+  { id: 'reapers', name: "Reaper's March", region: 'Elsweyr', difficulty: 6, you: ['rajhin', 'hlaalu'], opp: ['druid', 'celarus'], rewardGold: 22 },
+  { id: 'grahtwood', name: 'Grahtwood', region: 'Valenwood', difficulty: 7, you: ['druid', 'celarus'], opp: ['orgnum', 'redeagle'], rewardGold: 26 },
+  { id: 'deshaan', name: 'Deshaan', region: 'Morrowind', difficulty: 8, you: ['almalexia', 'hlaalu'], opp: ['mora', 'pelin'], rewardGold: 30 },
+  { id: 'eastmarch', name: 'Eastmarch', region: 'Skyrim', difficulty: 9, you: ['redeagle', 'pelin'], opp: ['alessia', 'hunding'], rewardGold: 36 },
+  { id: 'apocrypha', name: 'Apocrypha', region: 'Oblivion', difficulty: 10, you: ['mora', 'celarus'], opp: ['alessia', 'druid'], rewardGold: 50 },
+];
+
+export function ensureGauntletDay(profile) {
+  const today = nyDateStr();
+  if (!profile.gauntlet) profile.gauntlet = { date: null, cleared: 0, failed: false, failedStop: null };
+  if (profile.gauntlet.date !== today) {
+    profile.gauntlet = { date: today, cleared: 0, failed: false, failedStop: null };
+    saveProfile(profile);
+  }
+  return profile.gauntlet;
+}
+
+export function recordGauntletResult(profile, { stopIndex, won }) {
+  ensureGauntletDay(profile);
+  const g = profile.gauntlet;
+  const stop = GAUNTLET_STOPS[stopIndex];
+  if (!stop) return { error: 'bad stop' };
+  if (g.failed) return { error: 'run over' };
+  if (stopIndex !== g.cleared) return { error: 'out of order' };
+  if (won) {
+    g.cleared = stopIndex + 1;
+    profile.gold += stop.rewardGold;
+    profile.purses.push({ rarity: stop.difficulty >= 8 ? 'Epic' : stop.difficulty >= 5 ? 'Superior' : 'Fine' });
+    saveProfile(profile);
+    return { gold: stop.rewardGold, cleared: g.cleared, complete: g.cleared >= GAUNTLET_STOPS.length };
+  }
+  g.failed = true;
+  g.failedStop = stopIndex;
+  saveProfile(profile);
+  return { failed: true, failedStop: stopIndex, retryInMs: msUntilNextNyMidnight() };
+}
+
+export function setAiDifficulty(profile, n) {
+  profile.aiDifficulty = Math.max(1, Math.min(10, Math.round(n)));
+  saveProfile(profile);
+  return profile.aiDifficulty;
 }
