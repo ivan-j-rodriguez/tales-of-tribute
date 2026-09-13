@@ -3061,7 +3061,12 @@ body:has(#match.screen.active) #toast { display: none !important; }
 #hand-zone .card,
 #hand-zone .card:hover,
 #hand-zone .card:active,
-#hand-zone .card:focus {
+#hand-zone .card:focus,
+#match #hand-zone button.card,
+#match #hand-zone button.card:hover,
+#match #hand-zone button.card:active,
+#match #opp-hand-zone .card,
+#match #opp-hand-zone .card:hover {
   transform: var(--fan-tf, none) !important;
   scale: 1 !important;
 }
@@ -3091,7 +3096,8 @@ html.has-touch #match .card:hover { transform: none !important; }
   position: relative !important;
   height: calc(var(--hand-card-h) + 18px) !important;
 }
-#hand-zone .card {
+#hand-zone .card,
+#match #hand-zone button.card {
   position: absolute !important;
   left: 50% !important;
   bottom: 0 !important;
