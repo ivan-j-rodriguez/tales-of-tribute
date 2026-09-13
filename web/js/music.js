@@ -1,13 +1,13 @@
 /**
- * Tribute audio — CC-BY Kevin MacLeod beds (never ESO OST).
- * tavern: Celtic Impulse · fight: Heroic Age · boss: Five Armies · danger: Dark Fog
+ * Tribute audio — CC-BY Kevin MacLeod beds (never ESO OST, never folk drones).
+ * tavern/menu: Call to Adventure · fight: Heroic Age · boss: Five Armies · danger: Black Vortex
  */
 
 const STEMS = {
-  tavern: 'assets/audio/celtic-impulse.mp3',
+  tavern: 'assets/audio/call-to-adventure.mp3',
   fight: 'assets/audio/heroic-age.mp3',
   boss: 'assets/audio/five-armies.mp3',
-  danger: 'assets/audio/dark-fog.mp3',
+  danger: 'assets/audio/black-vortex.mp3',
 };
 
 let ctx = null;
@@ -16,7 +16,6 @@ let sfxGain = null;
 let musicEl = null;
 let playing = false;
 let musicOn = false;
-let currentCue = 'tavern';
 let sfxStyle = 'table';
 
 function ensureCtx() {
@@ -38,7 +37,7 @@ function ensureMusicEl() {
   musicEl = new Audio(STEMS.tavern);
   musicEl.loop = true;
   musicEl.preload = 'auto';
-  musicEl.volume = 0.32;
+  musicEl.volume = 0.34;
   musicEl.dataset.cue = 'tavern';
   return musicEl;
 }
@@ -62,7 +61,11 @@ export async function setMusicEnabled(on) {
 }
 
 export function preferMusicFromStorage() {
-  try { return localStorage.getItem('tot_music') === '1'; } catch { return false; }
+  try {
+    const v = localStorage.getItem('tot_music');
+    if (v === null) return true;
+    return v === '1';
+  } catch { return true; }
 }
 
 export function setSfxStyle(style) {
@@ -78,7 +81,6 @@ export function setMusicCue(cue) {
   ensureMusicEl();
   if (musicEl.dataset.cue === next) return;
   const was = !musicEl.paused && musicOn;
-  currentCue = next;
   musicEl.dataset.cue = next;
   musicEl.src = STEMS[next];
   musicEl.loop = true;
@@ -89,7 +91,7 @@ export function warmMuted() {
   ensureCtx();
   ensureMusicEl();
   sfxStyle = getSfxStyle();
-  musicEl.volume = 0.32;
+  musicEl.volume = 0.34;
 }
 
 function beep({ freq = 440, dur = 0.08, type = 'triangle', vol = 0.35, slide = 0, filterFreq = 0, filterQ = 1 }) {

@@ -1,21 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap');
 
 :root {
-  --wood-dark: #1a0f0a;
-  --wood: #2b1810;
-  --wood-mid: #3d2418;
-  --wood-light: #5c3a24;
+  --wood-dark: #14383a;
+  --wood: #1f4d4a;
+  --wood-mid: #2a6a62;
+  --wood-light: #3d8a7a;
   --gold: #d4af37;
   --gold-dim: #a68b2c;
   --gold-bright: #f0e6b8;
   --candle: #ffb347;
-  --ink: #f3e6d0;
-  --ink-dim: #c4b39a;
+  --ink: #fff8e8;
+  --ink-dim: #e8dcc0;
   --danger: #8b1a1a;
   --power: #c44;
   --prestige: #e8c547;
   --coin: #f0d060;
-  --panel: rgba(22, 14, 8, 0.94);
+  --panel: rgba(18, 48, 46, 0.92);
   --border: 1px solid rgba(212, 175, 55, 0.5);
   --radius: 8px;
   --card-w: 86px;
@@ -91,7 +91,7 @@ button.primary {
   overflow: auto;
 }
 
-body.skin-high-isle { --splash-a: rgba(255,210,130,0.32); --splash-b: rgba(80,50,20,0.4); --splash-c: rgba(232,200,120,0.2); --splash-base: #120c08; --splash-mid: #2a1c10; }
+body.skin-high-isle { --splash-a: rgba(255,230,150,0.45); --splash-b: rgba(40,180,170,0.35); --splash-c: rgba(255,200,80,0.22); --splash-base: #0c2a2c; --splash-mid: #1a4a44; }
 body.skin-auridon { --splash-a: rgba(255,230,160,0.35); --splash-b: rgba(50,160,210,0.3); --splash-c: rgba(240,220,150,0.18); --splash-base: #0c1816; --splash-mid: #1a2c28; }
 body.skin-grahtwood { --splash-a: rgba(210,190,70,0.22); --splash-b: rgba(30,70,20,0.45); --splash-c: rgba(80,120,30,0.2); --splash-base: #081208; --splash-mid: #142410; }
 body.skin-vvardenfell { --splash-a: rgba(255,90,20,0.28); --splash-b: rgba(200,140,50,0.25); --splash-c: rgba(80,30,10,0.35); --splash-base: #100806; --splash-mid: #22140e; }
@@ -321,9 +321,9 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
 
 /* High Isle — teal surf, limestone, Breton gold */
 #match.skin-high-isle {
-  --rim: #4a3420;
-  --felt: #1c2a22;
-  --felt-deep: #0e1612;
+  --rim: #d4af37;
+  --felt: #2a7a64;
+  --felt-deep: #145246;
   --inlay-line: rgba(232,200,120,0.85);
   --skin-glow: rgba(255,200,110,0.22);
   --bloom-a: radial-gradient(ellipse at 12% 0%, rgba(255,210,130,0.42), transparent 40%);
@@ -1451,33 +1451,44 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
 }
 .gauntlet-map-wrap {
   position: relative;
-  width: min(96vw, 720px);
-  margin: 0.5rem auto;
-  border: 2px solid rgba(212,175,55,0.45);
-  border-radius: 10px;
+  width: min(98vw, 980px);
+  margin: 0.35rem auto;
+  border: 2px solid rgba(212,175,55,0.55);
+  border-radius: 12px;
   overflow: hidden;
-  background: #0a1420;
-  box-shadow: 0 0 30px rgba(0,0,0,0.5);
+  background: #e8d5a8;
+  box-shadow: 0 8px 28px rgba(0,40,40,0.25);
 }
 .gauntlet-map { display: block; width: 100%; height: auto; }
 .gauntlet-markers { position: absolute; inset: 0; }
 .g-marker {
   position: absolute; transform: translate(-50%, -50%);
-  width: 34px; height: 34px; border-radius: 50%;
-  border: 2px solid #d4af37;
-  background: rgba(20,12,8,0.85);
-  color: #f0e6b8; font-family: Cinzel, serif; font-size: 0.7rem; font-weight: 700;
+  width: auto; height: auto; min-width: 0;
+  padding: 0; border: none; background: transparent;
+  box-shadow: none; display: flex; flex-direction: column; align-items: center;
+  color: #3a2410; font-family: Cinzel, serif; cursor: pointer;
+}
+.g-marker .g-dot {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid #fff6c8;
+  background: #c9a227;
+  color: #2a1a08; font-size: 0.62rem; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 10px rgba(212,175,55,0.35);
-  cursor: default;
+  box-shadow: 0 2px 8px #0005;
 }
-.g-marker.cleared { background: #1b5e20; border-color: #81c784; }
-.g-marker.current {
-  background: #5a4010; border-color: #ffe082;
-  animation: pulse-gold 1.4s infinite; cursor: pointer;
+.g-marker .g-name {
+  font-size: 0.48rem; line-height: 1.05; margin-top: 2px;
+  background: rgba(255,248,220,0.88); padding: 1px 4px; border-radius: 4px;
+  white-space: nowrap; max-width: 72px; overflow: hidden; text-overflow: ellipsis;
 }
-.g-marker.locked { opacity: 0.4; filter: grayscale(0.6); }
-.g-marker.failed { background: #4a0a0a; border-color: #ef5350; }
+.g-marker.cleared .g-dot { background: #2e7d32; color: #e8ffe8; }
+.g-marker.current .g-dot {
+  background: #ffb300; border-color: #fff;
+  animation: pulse-gold 1.4s infinite;
+}
+.g-marker.locked { opacity: 0.55; }
+.g-marker.locked .g-name { display: none; }
+.g-marker.failed .g-dot { background: #c62828; color: #fff; }
 .gauntlet-status {
   text-align: center; color: var(--ink-dim); font-size: 0.95rem;
   padding: 0.5rem 1rem;
@@ -2326,4 +2337,51 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
 .sfx-row select {
   background: #1a120c; color: #f3e6d0; border: 1px solid rgba(212,175,55,0.45);
   border-radius: 6px; padding: 0.25rem 0.4rem;
+}
+
+
+/* Cards are buttons so iOS will actually click them */
+button.card, #match button.card {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0;
+  margin: 0;
+  letter-spacing: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  font: inherit;
+  color: inherit;
+  filter: none;
+}
+button.card:hover { filter: none; }
+#hand-zone { z-index: 30; touch-action: manipulation; }
+#hand-zone .card { z-index: 31; }
+
+/* Cheerful table — sunlit High Isle, not brown sludge */
+html, body { background: #1a4a48; }
+.splash-frame {
+  background:
+    linear-gradient(135deg, rgba(255,230,150,0.18), transparent 40%),
+    linear-gradient(180deg, rgba(30,90,86,0.95), rgba(14,50,48,0.96));
+  border-color: rgba(255,210,110,0.7);
+}
+button {
+  background:
+    linear-gradient(180deg, rgba(255,220,120,0.22), transparent 40%),
+    linear-gradient(180deg, #3d8a7a, #1f4d4a);
+  color: #fff8e8;
+}
+button.primary {
+  background:
+    linear-gradient(180deg, rgba(255,230,140,0.4), transparent 45%),
+    linear-gradient(180deg, #e0b040, #b8860b);
+  color: #2a1a08;
+}
+#gauntlet.screen {
+  background: linear-gradient(180deg, #2a6a62, #1a3a38);
+}
+#match.skin-high-isle, #match {
+  --felt: #24705c;
+  --felt-deep: #124038;
 }

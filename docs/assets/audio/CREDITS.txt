@@ -1,9 +1,10 @@
 Music (Creative Commons By Attribution 3.0 — Kevin MacLeod, incompetech.com):
-  Celtic Impulse — tavern / menus
+  Call to Adventure — menus
   Heroic Age — fight
   Five Armies — boss / ranked
-  Dark Fog — danger / about to lose
+  Black Vortex — danger
 Credit: "[Title] Kevin MacLeod (incompetech.com) Licensed under Creative Commons: By Attribution 3.0 http://creativecommons.org/licenses/by/3.0/"
 
-Older files kept as unused fallbacks: Dowland CC0 (OpenGameArt / Of Far Different Nature); Tourdion (Wikimedia Commons, public domain).
-Never uses Elder Scrolls Online soundtrack.
+Tamriel provinces map: UESP File:ON-map-Tamriel (provinces).jpg — used as card art is, unofficial fan table, not for sale.
+
+Never uses Elder Scrolls Online soundtrack. Folk/renaissance beds are not used.

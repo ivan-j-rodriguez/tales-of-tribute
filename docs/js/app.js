@@ -229,52 +229,51 @@ function dossierHTML(d) {
  * There is no dead zone between tap and hold.
  */
 function bindCardGesture(el, { onTap, onHoldRead }) {
-  let press = null;
-  let lockUntil = 0;
-  const lock = (ms = 420) => { lockUntil = Date.now() + ms; };
-  const clearHold = () => { if (press?.timer) { clearTimeout(press.timer); press.timer = null; } };
+  let t0 = 0;
+  let held = false;
+  let timer = null;
+  let lastTap = 0;
+  const lockMs = 300;
 
-  const finish = (e) => {
-    if (!press || press.done) return;
-    press.done = true;
-    clearHold();
-    const held = press.held;
-    press = null;
-    if (held || liftActive) {
-      if (e) { e.preventDefault(); e.stopPropagation(); }
-      lock(520);
-      endLift();
-      return;
-    }
-    lock(420);
-    if (onTap) onTap(e);
-  };
-
-  el.addEventListener('pointerdown', (e) => {
+  const start = (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
-    clearHold();
-    press = { held: false, done: false, timer: null };
-    press.timer = setTimeout(() => {
-      if (!press || press.done) return;
-      press.held = true;
+    if (e.cancelable) e.preventDefault();
+    held = false;
+    t0 = Date.now();
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      held = true;
       if (onHoldRead) onHoldRead(el);
     }, HOLD_MS);
-  });
-  el.addEventListener('pointerup', (e) => finish(e));
-  el.addEventListener('pointercancel', () => {
-    // iOS often cancels a tap; keep press so click/touchend can still play.
-    clearHold();
-  });
-  el.addEventListener('touchend', (e) => {
-    if (press && !press.done && !press.held) finish(e);
-  }, { passive: true });
+  };
+  const end = (e) => {
+    if (e && e.cancelable) e.preventDefault();
+    if (e) e.stopPropagation();
+    clearTimeout(timer);
+    if (!t0) return;
+    const dt = Date.now() - t0;
+    t0 = 0;
+    if (held || liftActive) {
+      endLift();
+      lastTap = Date.now();
+      return;
+    }
+    if (dt < HOLD_MS && Date.now() - lastTap > lockMs) {
+      lastTap = Date.now();
+      if (onTap) onTap(e);
+    }
+  };
+
+  el.addEventListener('touchstart', start, { passive: false });
+  el.addEventListener('touchend', end, { passive: false });
+  el.addEventListener('pointerdown', start);
+  el.addEventListener('pointerup', end);
   el.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (press && !press.done) { finish(e); return; }
-    // iOS: sometimes the only event is click. Never replay after pointerup/hold.
-    if (!press && !liftActive && Date.now() > lockUntil && onTap) {
-      lock(420);
+    if (held || liftActive) { endLift(); lastTap = Date.now(); return; }
+    if (Date.now() - lastTap > lockMs && onTap) {
+      lastTap = Date.now();
       onTap(e);
     }
   });
@@ -440,7 +439,8 @@ function startPatronLift(fromEl, pid) {
 
 function renderCard(inst, opts = {}) {
   const d = cardsById[inst.id] || inst;
-  const el = document.createElement('div');
+  const el = document.createElement('button');
+  el.type = 'button';
   el.className = 'card' + (opts.extraClass ? ' ' + opts.extraClass : '');
   if (opts.affordable) el.classList.add('affordable');
   if (opts.playable) el.classList.add('playable');
@@ -1926,11 +1926,6 @@ function openGauntlet() {
   show('#gauntlet');
 }
 
-const GAUNTLET_POS = [
-  { x: 24, y: 30 }, { x: 30, y: 36 }, { x: 36, y: 28 }, { x: 32, y: 46 }, { x: 26, y: 56 },
-  { x: 44, y: 60 }, { x: 50, y: 70 }, { x: 64, y: 56 }, { x: 58, y: 30 }, { x: 80, y: 38 },
-];
-
 function renderGauntlet() {
   profile = loadProfile();
   const g = ensureGauntletDay(profile);
@@ -1938,38 +1933,31 @@ function renderGauntlet() {
   if (!markers) return;
   markers.innerHTML = '';
   GAUNTLET_STOPS.forEach((stop, i) => {
-    const pos = GAUNTLET_POS[i] || { x: 10 + i * 8, y: 50 };
     const el = document.createElement('button');
     el.type = 'button';
     el.className = 'g-marker';
-    el.style.left = pos.x + '%';
-    el.style.top = pos.y + '%';
-    el.textContent = String(stop.difficulty);
-    el.title = `${stop.name} · diff ${stop.difficulty}`;
-    if (g.failed && g.failedStop === i) el.classList.add('failed');
-    else if (i < g.cleared) el.classList.add('cleared');
-    else if (i === g.cleared && !g.failed) el.classList.add('current');
+    el.style.left = stop.x + '%';
+    el.style.top = stop.y + '%';
+    el.innerHTML = `<span class="g-dot">${stop.difficulty}</span><span class="g-name">${stop.name}</span>`;
+    el.title = `${stop.name} · vs ${stop.rival} · ${stop.opp.join(' + ')} · diff ${stop.difficulty}`;
+    if (i < g.cleared) el.classList.add('cleared');
+    else if (i === g.cleared) el.classList.add('current');
     else el.classList.add('locked');
     el.addEventListener('click', () => {
-      if (i === g.cleared && !g.failed) startGauntletStop(i);
-      else if (g.failed) toast("Today's run is over — returns at midnight EST");
-      else if (i < g.cleared) toast(`${stop.name} already cleared today`);
-      else toast('Clear earlier stops first');
+      if (i === g.cleared) startGauntletStop(i);
+      else if (i < g.cleared) toast(`${stop.name} already cleared`);
+      else toast(`Clear earlier zones first — next is ${GAUNTLET_STOPS[g.cleared].name}`);
     });
     markers.appendChild(el);
   });
   const st = $('#gauntlet-status');
   const btn = $('#btn-gauntlet-play');
-  if (g.failed) {
-    const ms = msUntilNextNyMidnight();
-    if (st) st.textContent = `Run failed at stop ${(g.failedStop ?? 0) + 1}. Next road opens in ${fmtCountdown(ms)} (America/New_York midnight).`;
-    if (btn) btn.disabled = true;
-  } else if (g.cleared >= GAUNTLET_STOPS.length) {
-    if (st) st.textContent = 'All ten provinces bowed today. Return tomorrow for a fresh road.';
+  if (g.cleared >= GAUNTLET_STOPS.length) {
+    if (st) st.textContent = 'Every marked zone has bowed. The road stays yours.';
     if (btn) btn.disabled = true;
   } else {
     const next = GAUNTLET_STOPS[g.cleared];
-    if (st) st.textContent = `Next: ${next.name} (${next.region}) — difficulty ${next.difficulty}. Patrons locked to the scripted pair.`;
+    if (st) st.textContent = `Next: ${next.name} — vs ${next.rival}. Their decks: ${next.opp.join(' + ')}. Difficulty ${next.difficulty}.`;
     if (btn) {
       btn.disabled = false;
       btn.textContent = `Play ${next.name}`;
@@ -1982,7 +1970,7 @@ function startGauntletStop(index) {
   if (!stop) return;
   profile = loadProfile();
   const g = ensureGauntletDay(profile);
-  if (g.failed || index !== g.cleared) return;
+  if (index !== g.cleared) return;
   isGauntletMatch = true;
   isRankedMatch = false;
   isRandomMatch = false;
@@ -2006,7 +1994,7 @@ function bind() {
   $('#btn-gauntlet-play')?.addEventListener('click', () => {
     profile = loadProfile();
     const g = ensureGauntletDay(profile);
-    if (!g.failed && g.cleared < GAUNTLET_STOPS.length) startGauntletStop(g.cleared);
+    if (g.cleared < GAUNTLET_STOPS.length) startGauntletStop(g.cleared);
   });
   $('#btn-ranked').onclick = beginRanked;
   $('#btn-friend').onclick = () => { $('#friend-status').textContent = ''; show('#friend-lobby'); };

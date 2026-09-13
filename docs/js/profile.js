@@ -586,25 +586,55 @@ export function msUntilNextNyMidnight() {
   return 12 * 3600_000;
 }
 
-/** Scripted Road of Tamriel stops — difficulty 1→10 with fixed patron pairs. */
+/** Persistent Road of Tamriel — one marker per base + DLC zone. Difficulty ramps. */
 export const GAUNTLET_STOPS = [
-  { id: 'glenumbra', name: 'Glenumbra', region: 'High Rock', difficulty: 1, you: ['pelin', 'hlaalu'], opp: ['crows', 'celarus'], rewardGold: 10 },
-  { id: 'stormhaven', name: 'Stormhaven', region: 'High Rock', difficulty: 2, you: ['pelin', 'celarus'], opp: ['hunding', 'crows'], rewardGold: 12 },
-  { id: 'rivenspire', name: 'Rivenspire', region: 'High Rock', difficulty: 3, you: ['hlaalu', 'crows'], opp: ['rajhin', 'pelin'], rewardGold: 14 },
-  { id: 'bangkorai', name: 'Bangkorai', region: 'Hammerfell', difficulty: 4, you: ['pelin', 'hunding'], opp: ['redeagle', 'almalexia'], rewardGold: 16 },
-  { id: 'alikr', name: "Alik'r Desert", region: 'Hammerfell', difficulty: 5, you: ['hunding', 'orgnum'], opp: ['rajhin', 'crows'], rewardGold: 18 },
-  { id: 'reapers', name: "Reaper's March", region: 'Elsweyr', difficulty: 6, you: ['rajhin', 'hlaalu'], opp: ['druid', 'celarus'], rewardGold: 22 },
-  { id: 'grahtwood', name: 'Grahtwood', region: 'Valenwood', difficulty: 7, you: ['druid', 'celarus'], opp: ['orgnum', 'redeagle'], rewardGold: 26 },
-  { id: 'deshaan', name: 'Deshaan', region: 'Morrowind', difficulty: 8, you: ['almalexia', 'hlaalu'], opp: ['mora', 'pelin'], rewardGold: 30 },
-  { id: 'eastmarch', name: 'Eastmarch', region: 'Skyrim', difficulty: 9, you: ['redeagle', 'pelin'], opp: ['alessia', 'hunding'], rewardGold: 36 },
-  { id: 'apocrypha', name: 'Apocrypha', region: 'Oblivion', difficulty: 10, you: ['mora', 'celarus'], opp: ['alessia', 'druid'], rewardGold: 50 },
+  { id: 'stros', name: "Stros M'Kai", region: 'Hammerfell', difficulty: 1, you: ['pelin', 'hlaalu'], opp: ['crows', 'celarus'], rival: 'Captain Kaleen', rewardGold: 8, x: 22, y: 48 },
+  { id: 'glenumbra', name: 'Glenumbra', region: 'High Rock', difficulty: 1, you: ['pelin', 'hlaalu'], opp: ['crows', 'pelin'], rival: 'Daggerfall Knight-Errant', rewardGold: 9, x: 27, y: 35 },
+  { id: 'stormhaven', name: 'Stormhaven', region: 'High Rock', difficulty: 2, you: ['pelin', 'celarus'], opp: ['hunding', 'crows'], rival: 'High King Emeric', rewardGold: 10, x: 33, y: 32 },
+  { id: 'rivenspire', name: 'Rivenspire', region: 'High Rock', difficulty: 2, you: ['hlaalu', 'crows'], opp: ['rajhin', 'pelin'], rival: 'Count Verandis', rewardGold: 11, x: 31, y: 26 },
+  { id: 'alikr', name: "Alik'r Desert", region: 'Hammerfell', difficulty: 2, you: ['hunding', 'hlaalu'], opp: ['hunding', 'crows'], rival: 'Ash\'abah Seer', rewardGold: 12, x: 28, y: 44 },
+  { id: 'bangkorai', name: 'Bangkorai', region: 'Hammerfell', difficulty: 3, you: ['pelin', 'hunding'], opp: ['redeagle', 'crows'], rival: 'Seventh Legion Strategist', rewardGold: 13, x: 33, y: 38 },
+  { id: 'auridon', name: 'Auridon', region: 'Summerset', difficulty: 3, you: ['celarus', 'hlaalu'], opp: ['celarus', 'crows'], rival: 'Canonreeve Sinyon', rewardGold: 14, x: 33, y: 58 },
+  { id: 'grahtwood', name: 'Grahtwood', region: 'Valenwood', difficulty: 3, you: ['druid', 'celarus'], opp: ['druid', 'crows'], rival: 'King Camoran Aeradan', rewardGold: 15, x: 42, y: 64 },
+  { id: 'greenshade', name: 'Greenshade', region: 'Valenwood', difficulty: 4, you: ['druid', 'pelin'], opp: ['druid', 'rajhin'], rival: 'Queen Ayrenn', rewardGold: 16, x: 38, y: 62 },
+  { id: 'malabal', name: 'Malabal Tor', region: 'Valenwood', difficulty: 4, you: ['druid', 'hlaalu'], opp: ['orgnum', 'crows'], rival: 'Silvenar Hound', rewardGold: 17, x: 40, y: 54 },
+  { id: 'reapers', name: "Reaper's March", region: 'Elsweyr', difficulty: 4, you: ['rajhin', 'hlaalu'], opp: ['rajhin', 'celarus'], rival: 'Mane Akkhuz-ri', rewardGold: 18, x: 46, y: 52 },
+  { id: 'stonefalls', name: 'Stonefalls', region: 'Morrowind', difficulty: 4, you: ['almalexia', 'pelin'], opp: ['almalexia', 'crows'], rival: 'Tanval Indoril', rewardGold: 18, x: 64, y: 40 },
+  { id: 'deshaan', name: 'Deshaan', region: 'Morrowind', difficulty: 5, you: ['almalexia', 'hlaalu'], opp: ['almalexia', 'celarus'], rival: 'Ordinator Vamen', rewardGold: 20, x: 66, y: 44 },
+  { id: 'shadowfen', name: 'Shadowfen', region: 'Black Marsh', difficulty: 5, you: ['rajhin', 'celarus'], opp: ['rajhin', 'hunding'], rival: 'Vicecanon Heita-Meen', rewardGold: 21, x: 62, y: 50 },
+  { id: 'eastmarch', name: 'Eastmarch', region: 'Skyrim', difficulty: 5, you: ['redeagle', 'pelin'], opp: ['redeagle', 'crows'], rival: 'Jorunn the Skald-King', rewardGold: 22, x: 56, y: 26 },
+  { id: 'rift', name: 'The Rift', region: 'Skyrim', difficulty: 5, you: ['redeagle', 'hlaalu'], opp: ['redeagle', 'hunding'], rival: 'Thane Unnvald', rewardGold: 23, x: 54, y: 32 },
+  { id: 'cyrodiil', name: 'Cyrodiil', region: 'Cyrodiil', difficulty: 6, you: ['alessia', 'pelin'], opp: ['alessia', 'crows'], rival: 'Elder Council Envoy', rewardGold: 24, x: 50, y: 40 },
+  { id: 'craglorn', name: 'Craglorn', region: 'Hammerfell', difficulty: 6, you: ['hunding', 'celarus'], opp: ['hunding', 'almalexia'], rival: 'Celestial Warrior', rewardGold: 26, x: 42, y: 34 },
+  { id: 'wrothgar', name: 'Wrothgar', region: 'High Rock', difficulty: 6, you: ['hunding', 'redeagle'], opp: ['hunding', 'redeagle'], rival: 'King Kurog', rewardGold: 27, x: 34, y: 24 },
+  { id: 'hewsbane', name: "Hew's Bane", region: 'Hammerfell', difficulty: 6, you: ['rajhin', 'hlaalu'], opp: ['rajhin', 'orgnum'], rival: 'Zeira of the Thieves', rewardGold: 28, x: 30, y: 52 },
+  { id: 'goldcoast', name: 'Gold Coast', region: 'Cyrodiil', difficulty: 7, you: ['alessia', 'hlaalu'], opp: ['alessia', 'rajhin'], rival: 'Speaker Terenus', rewardGold: 30, x: 42, y: 46 },
+  { id: 'vvardenfell', name: 'Vvardenfell', region: 'Morrowind', difficulty: 7, you: ['almalexia', 'celarus'], opp: ['almalexia', 'mora'], rival: 'Vivec', rewardGold: 32, x: 68, y: 30 },
+  { id: 'clockwork', name: 'Clockwork City', region: 'Oblivion', difficulty: 7, you: ['celarus', 'hlaalu'], opp: ['celarus', 'alessia'], rival: 'Sotha Sil', rewardGold: 34, x: 72, y: 34 },
+  { id: 'summerset', name: 'Summerset', region: 'Summerset', difficulty: 7, you: ['celarus', 'orgnum'], opp: ['celarus', 'orgnum'], rival: 'Proxy Queen Alwinarwe', rewardGold: 35, x: 28, y: 68 },
+  { id: 'murkmire', name: 'Murkmire', region: 'Black Marsh', difficulty: 8, you: ['rajhin', 'druid'], opp: ['rajhin', 'druid'], rival: 'Kassandra', rewardGold: 36, x: 64, y: 64 },
+  { id: 'nelsweyr', name: 'Northern Elsweyr', region: 'Elsweyr', difficulty: 8, you: ['rajhin', 'almalexia'], opp: ['rajhin', 'alessia'], rival: 'Khamira', rewardGold: 38, x: 50, y: 52 },
+  { id: 'selsweyr', name: 'Southern Elsweyr', region: 'Elsweyr', difficulty: 8, you: ['rajhin', 'orgnum'], opp: ['orgnum', 'redeagle'], rival: 'Sai Sahan', rewardGold: 40, x: 48, y: 62 },
+  { id: 'wskyrim', name: 'Western Skyrim', region: 'Skyrim', difficulty: 8, you: ['redeagle', 'hunding'], opp: ['redeagle', 'alessia'], rival: 'Svana of Solitude', rewardGold: 42, x: 46, y: 24 },
+  { id: 'reach', name: 'The Reach', region: 'Skyrim', difficulty: 8, you: ['redeagle', 'druid'], opp: ['redeagle', 'mora'], rival: 'Ard Caddach', rewardGold: 44, x: 44, y: 28 },
+  { id: 'blackwood', name: 'Blackwood', region: 'Black Marsh', difficulty: 9, you: ['alessia', 'almalexia'], opp: ['alessia', 'almalexia'], rival: 'Eveli Sharp-Arrow', rewardGold: 46, x: 58, y: 52 },
+  { id: 'highisle', name: 'High Isle', region: 'Systres', difficulty: 9, you: ['orgnum', 'pelin'], opp: ['orgnum', 'alessia'], rival: 'Lord Bacaro', rewardGold: 48, x: 20, y: 50 },
+  { id: 'galen', name: 'Galen', region: 'Systres', difficulty: 9, you: ['druid', 'orgnum'], opp: ['druid', 'mora'], rival: 'Druid King Kasorayn', rewardGold: 50, x: 18, y: 56 },
+  { id: 'telvanni', name: 'Telvanni Peninsula', region: 'Morrowind', difficulty: 9, you: ['mora', 'almalexia'], opp: ['mora', 'almalexia'], rival: 'Master Nelos', rewardGold: 52, x: 74, y: 36 },
+  { id: 'westweald', name: 'West Weald', region: 'Cyrodiil', difficulty: 9, you: ['alessia', 'celarus'], opp: ['alessia', 'druid'], rival: 'Tribune Alea', rewardGold: 54, x: 48, y: 48 },
+  { id: 'solstice', name: 'Solstice', region: 'Southern Seas', difficulty: 10, you: ['orgnum', 'mora'], opp: ['orgnum', 'mora'], rival: 'Tide-Born Admiral', rewardGold: 56, x: 52, y: 72 },
+  { id: 'coldharbour', name: 'Coldharbour', region: 'Oblivion', difficulty: 10, you: ['alessia', 'mora'], opp: ['alessia', 'mora'], rival: 'Molag Bal\'s Proxy', rewardGold: 60, x: 12, y: 16 },
+  { id: 'deadlands', name: 'The Deadlands', region: 'Oblivion', difficulty: 10, you: ['redeagle', 'mora'], opp: ['redeagle', 'alessia'], rival: 'Lyranth', rewardGold: 64, x: 14, y: 22 },
+  { id: 'apocrypha', name: 'Apocrypha', region: 'Oblivion', difficulty: 10, you: ['mora', 'celarus'], opp: ['mora', 'alessia'], rival: 'Hermaeus Mora', rewardGold: 80, x: 80, y: 28 },
 ];
 
 export function ensureGauntletDay(profile) {
   const today = nyDateStr();
   if (!profile.gauntlet) profile.gauntlet = { date: null, cleared: 0, failed: false, failedStop: null };
   if (profile.gauntlet.date !== today) {
-    profile.gauntlet = { date: today, cleared: 0, failed: false, failedStop: null };
+    profile.gauntlet.date = today;
+    profile.gauntlet.failed = false;
+    profile.gauntlet.failedStop = null;
     saveProfile(profile);
   }
   return profile.gauntlet;
@@ -615,16 +645,15 @@ export function recordGauntletResult(profile, { stopIndex, won }) {
   const g = profile.gauntlet;
   const stop = GAUNTLET_STOPS[stopIndex];
   if (!stop) return { error: 'bad stop' };
-  if (g.failed) return { error: 'run over' };
   if (stopIndex !== g.cleared) return { error: 'out of order' };
   if (won) {
     g.cleared = stopIndex + 1;
+    g.failed = false;
     profile.gold += stop.rewardGold;
     profile.purses.push({ rarity: stop.difficulty >= 8 ? 'Epic' : stop.difficulty >= 5 ? 'Superior' : 'Fine' });
     saveProfile(profile);
     return { gold: stop.rewardGold, cleared: g.cleared, complete: g.cleared >= GAUNTLET_STOPS.length };
   }
-  g.failed = true;
   g.failedStop = stopIndex;
   saveProfile(profile);
   return { failed: true, failedStop: stopIndex, retryInMs: msUntilNextNyMidnight() };
