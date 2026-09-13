@@ -1,0 +1,411 @@
+{
+  "patrons": [
+    {
+      "id": "treasury",
+      "name": "The Treasury",
+      "short": "Treasury",
+      "color": "#c9a227",
+      "starter": null,
+      "alwaysNeutral": true,
+      "abilities": {
+        "favored": null,
+        "neutral": {
+          "cost": {
+            "coin": 2
+          },
+          "effect": "sacrifice_for_writ",
+          "desc": "Pay 2 Coin, sacrifice a played card, create Writ of Coin in cooldown."
+        },
+        "unfavored": null,
+        "lockFavored": false,
+        "alwaysNeutral": true
+      },
+      "image": "patrons/treasury.png"
+    },
+    {
+      "id": "pelin",
+      "name": "Saint Pelin",
+      "short": "Pelin",
+      "color": "#8b4513",
+      "starter": "fortify",
+      "abilities": {
+        "favored": {
+          "cost": {
+            "power": 2
+          },
+          "effect": "agent_to_draw",
+          "desc": "Pay 2 Power: move an Agent from cooldown to top of draw."
+        },
+        "neutral": {
+          "cost": {
+            "power": 2
+          },
+          "effect": "agent_to_draw",
+          "desc": "Pay 2 Power: move an Agent from cooldown to top of draw."
+        },
+        "unfavored": {
+          "cost": {
+            "power": 2
+          },
+          "effect": "agent_to_draw",
+          "desc": "Pay 2 Power: move an Agent from cooldown to top of draw."
+        },
+        "lockFavored": false
+      },
+      "image": "patrons/pelin.png"
+    },
+    {
+      "id": "hlaalu",
+      "name": "Grandmaster Delmene Hlaalu",
+      "short": "Hlaalu",
+      "color": "#daa520",
+      "starter": "goods-shipment",
+      "abilities": {
+        "favored": {
+          "cost": {},
+          "effect": "sacrifice_prestige",
+          "desc": "Sacrifice a card: gain Prestige = cost \u2212 1."
+        },
+        "neutral": {
+          "cost": {},
+          "effect": "sacrifice_prestige",
+          "desc": "Sacrifice a card: gain Prestige = cost \u2212 1."
+        },
+        "unfavored": {
+          "cost": {},
+          "effect": "sacrifice_prestige",
+          "desc": "Sacrifice a card: gain Prestige = cost \u2212 1."
+        },
+        "lockFavored": false
+      },
+      "image": "patrons/hlaalu.png"
+    },
+    {
+      "id": "crows",
+      "name": "Duke of Crows",
+      "short": "Crows",
+      "color": "#2f2f2f",
+      "starter": "peck",
+      "abilities": {
+        "favored": null,
+        "neutral": {
+          "cost": {},
+          "effect": "coin_to_power",
+          "desc": "Sacrifice all Coin, gain Power = Coin \u2212 1."
+        },
+        "unfavored": {
+          "cost": {},
+          "effect": "coin_to_power",
+          "desc": "Sacrifice all Coin, gain Power = Coin \u2212 1."
+        },
+        "lockFavored": true
+      },
+      "image": "patrons/crows.png"
+    },
+    {
+      "id": "celarus",
+      "name": "Psijic Loremaster Celarus",
+      "short": "Celarus",
+      "color": "#4169e1",
+      "starter": "mainland-inquiries",
+      "abilities": {
+        "favored": {
+          "cost": {
+            "coin": 4
+          },
+          "effect": "knockout_agent",
+          "desc": "Pay 4 Coin: knock out an opponent agent."
+        },
+        "neutral": {
+          "cost": {
+            "coin": 4
+          },
+          "effect": "knockout_agent",
+          "desc": "Pay 4 Coin: knock out an opponent agent."
+        },
+        "unfavored": {
+          "cost": {
+            "coin": 4
+          },
+          "effect": "knockout_agent",
+          "desc": "Pay 4 Coin: knock out an opponent agent."
+        },
+        "lockFavored": false
+      },
+      "image": "patrons/celarus.png"
+    },
+    {
+      "id": "hunding",
+      "name": "Ansei Frandar Hunding",
+      "short": "Hunding",
+      "color": "#cd853f",
+      "starter": "way-of-the-sword",
+      "abilities": {
+        "favored": {
+          "passive": "start_coin",
+          "n": 1,
+          "desc": "Can't be used. Gain 1 Coin at start of each turn."
+        },
+        "neutral": {
+          "cost": {
+            "power": 2
+          },
+          "effect": "gain_coin",
+          "n": 1,
+          "desc": "Pay 2 Power, gain 1 Coin."
+        },
+        "unfavored": {
+          "cost": {
+            "power": 2
+          },
+          "effect": "gain_coin_favor",
+          "n": 1,
+          "desc": "Pay 2 Power, gain 1 Coin, flip to Favored."
+        },
+        "lockFavored": true,
+        "flipUnfavoredToFavored": true
+      },
+      "image": "patrons/hunding.png"
+    },
+    {
+      "id": "redeagle",
+      "name": "Red Eagle, King of the Reach",
+      "short": "Red Eagle",
+      "color": "#8b0000",
+      "starter": "war-song",
+      "abilities": {
+        "favored": {
+          "cost": {
+            "power": 2
+          },
+          "effect": "draw",
+          "n": 1,
+          "desc": "Pay 2 Power, Draw 1."
+        },
+        "neutral": {
+          "cost": {
+            "power": 2
+          },
+          "effect": "draw",
+          "n": 1,
+          "desc": "Pay 2 Power, Draw 1."
+        },
+        "unfavored": {
+          "cost": {
+            "power": 2
+          },
+          "effect": "draw",
+          "n": 1,
+          "desc": "Pay 2 Power, Draw 1."
+        },
+        "lockFavored": false
+      },
+      "image": "patrons/redeagle.png"
+    },
+    {
+      "id": "orgnum",
+      "name": "Sorcerer-King Orgnum",
+      "short": "Orgnum",
+      "color": "#20b2aa",
+      "starter": "sea-elf-raid",
+      "abilities": {
+        "favored": {
+          "cost": {
+            "coin": 3
+          },
+          "effect": "orgnum_favored",
+          "desc": "Pay 3 Coin: +1 Power per 4 cards owned; create Summerset Sacking."
+        },
+        "neutral": {
+          "cost": {
+            "coin": 2
+          },
+          "effect": "orgnum_neutral",
+          "desc": "Pay 2 Coin: +1 Power per 6 cards owned."
+        },
+        "unfavored": {
+          "cost": {
+            "coin": 1
+          },
+          "effect": "power",
+          "n": 2,
+          "desc": "Pay 1 Coin, gain 2 Power."
+        },
+        "lockFavored": false
+      },
+      "image": "patrons/orgnum.png"
+    },
+    {
+      "id": "rajhin",
+      "name": "Rajhin, the Purring Liar",
+      "short": "Rajhin",
+      "color": "#9932cc",
+      "starter": "swipe",
+      "abilities": {
+        "favored": {
+          "cost": {
+            "coin": 3
+          },
+          "effect": "bewilderment",
+          "desc": "Pay 3 Coin: create Bewilderment for opponent."
+        },
+        "neutral": {
+          "cost": {
+            "coin": 3
+          },
+          "effect": "bewilderment",
+          "desc": "Pay 3 Coin: create Bewilderment for opponent."
+        },
+        "unfavored": {
+          "cost": {
+            "coin": 3
+          },
+          "effect": "bewilderment",
+          "desc": "Pay 3 Coin: create Bewilderment for opponent."
+        },
+        "lockFavored": false
+      },
+      "image": "patrons/rajhin.png"
+    },
+    {
+      "id": "druid",
+      "name": "The Druid King",
+      "short": "Druid King",
+      "color": "#228b22",
+      "starter": "ritual-herbs",
+      "abilities": {
+        "favored": {
+          "cost": {
+            "power": 2
+          },
+          "effect": "tavern_remove",
+          "n": 2,
+          "chimeraCombo": 4,
+          "desc": "Pay 2 Power: remove up to 2 tavern cards. Combo 4 \u2192 Chimera."
+        },
+        "neutral": {
+          "cost": {
+            "power": 2
+          },
+          "effect": "tavern_remove",
+          "n": 2,
+          "chimeraCombo": 5,
+          "desc": "Pay 2 Power: remove up to 2 tavern cards. Combo 5 \u2192 Chimera."
+        },
+        "unfavored": {
+          "cost": {
+            "power": 2
+          },
+          "effect": "tavern_remove",
+          "n": 2,
+          "desc": "Pay 2 Power: remove up to 2 tavern cards."
+        },
+        "lockFavored": false
+      },
+      "image": "patrons/druid.png"
+    },
+    {
+      "id": "almalexia",
+      "name": "Almalexia",
+      "short": "Almalexia",
+      "color": "#ff6347",
+      "starter": "collection-plate",
+      "abilities": {
+        "favored": {
+          "cost": {
+            "coin": 1,
+            "discard": 1
+          },
+          "effect": "look_confine",
+          "n": 5,
+          "desc": "Pay 1 Coin + discard: look at top 5 of opp draw, move 1 to cooldown."
+        },
+        "neutral": {
+          "cost": {
+            "discard": 1
+          },
+          "effect": "look_confine",
+          "n": 4,
+          "desc": "Discard: look at top 4 of opp draw, move 1 to cooldown."
+        },
+        "unfavored": {
+          "cost": {
+            "coin": 1
+          },
+          "effect": "look_confine",
+          "n": 3,
+          "desc": "Pay 1 Coin: look at top 3 of opp draw, move 1 to cooldown."
+        },
+        "lockFavored": false
+      },
+      "image": "patrons/almalexia.png"
+    },
+    {
+      "id": "mora",
+      "name": "Hermaeus Mora",
+      "short": "Mora",
+      "color": "#556b2f",
+      "starter": "unsealed-glyphic",
+      "abilities": {
+        "favored": {
+          "cost": {
+            "power": 3
+          },
+          "effect": "mora_share",
+          "desc": "Pay 3 Power: put a tavern Action into both cooldowns."
+        },
+        "neutral": {
+          "cost": {
+            "power": 3
+          },
+          "effect": "mora_share",
+          "desc": "Pay 3 Power: put a tavern Action into both cooldowns."
+        },
+        "unfavored": {
+          "cost": {
+            "power": 2
+          },
+          "effect": "mora_share",
+          "desc": "Pay 2 Power: put a tavern Action into both cooldowns."
+        },
+        "lockFavored": false
+      },
+      "image": "patrons/mora.png"
+    },
+    {
+      "id": "alessia",
+      "name": "Saint Alessia",
+      "short": "Alessia",
+      "color": "#b8860b",
+      "starter": "alessian-rebel",
+      "abilities": {
+        "favored": {
+          "cost": {
+            "coin": 4
+          },
+          "effect": "create_agent",
+          "card": "Chainbreaker Sergeant",
+          "desc": "Pay 4 Coin: create Chainbreaker Sergeant in cooldown."
+        },
+        "neutral": {
+          "cost": {
+            "coin": 4
+          },
+          "effect": "create_agent",
+          "card": "Soldier of the Empire",
+          "desc": "Pay 4 Coin: create Soldier of the Empire in cooldown."
+        },
+        "unfavored": {
+          "cost": {
+            "coin": 3
+          },
+          "effect": "power",
+          "n": 2,
+          "desc": "Pay 3 Coin, gain 2 Power."
+        },
+        "lockFavored": false
+      },
+      "image": "patrons/alessia.png"
+    }
+  ]
+}

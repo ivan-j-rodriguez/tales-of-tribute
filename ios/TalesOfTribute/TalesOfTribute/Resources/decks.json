@@ -1,0 +1,283 @@
+{
+  "decks": [
+    {
+      "id": "treasury",
+      "name": "The Treasury",
+      "short": "Treasury",
+      "starter": null,
+      "cards": [
+        "gold",
+        "ambush",
+        "barterer",
+        "black-sacrament",
+        "blackmail",
+        "harvest-season",
+        "imprisonment",
+        "ragpicker",
+        "tithe"
+      ],
+      "color": "#c9a227"
+    },
+    {
+      "id": "pelin",
+      "name": "Saint Pelin",
+      "short": "Pelin",
+      "starter": "fortify",
+      "cards": [
+        "fortify",
+        "knight-commander",
+        "banneret",
+        "knights-of-saint-pelin",
+        "bangkorai-sentries",
+        "legions-arrival",
+        "reinforcements",
+        "siege-weapon-volley",
+        "archers-volley",
+        "rally",
+        "shield-bearer",
+        "the-armory",
+        "the-portcullis"
+      ],
+      "color": "#8b4513"
+    },
+    {
+      "id": "hlaalu",
+      "name": "Grandmaster Delmene Hlaalu",
+      "short": "Hlaalu",
+      "starter": "goods-shipment",
+      "cards": [
+        "goods-shipment",
+        "ebony-mine",
+        "kwama-egg-mine",
+        "hlaalu-councilor",
+        "hlaalu-kinsman",
+        "house-embassy",
+        "house-marketplace",
+        "oathman",
+        "hireling",
+        "currency-exchange",
+        "customs-seizure",
+        "hostile-takeover",
+        "luxury-exports"
+      ],
+      "color": "#daa520"
+    },
+    {
+      "id": "crows",
+      "name": "Duke of Crows",
+      "short": "Crows",
+      "starter": "peck",
+      "cards": [
+        "peck",
+        "blackfeather-knave",
+        "blackfeather-brigand",
+        "murder-of-crows",
+        "scratch",
+        "plunder",
+        "pilfer",
+        "toll-of-silver",
+        "toll-of-flesh",
+        "blackfeather-knight",
+        "law-of-sovereign-roost",
+        "pool-of-shadow",
+        "squawking-oratory"
+      ],
+      "color": "#2f2f2f"
+    },
+    {
+      "id": "celarus",
+      "name": "Psijic Loremaster Celarus",
+      "short": "Celarus",
+      "starter": "mainland-inquiries",
+      "cards": [
+        "mainland-inquiries",
+        "augurs-counsel",
+        "sage-counsel",
+        "ceporahs-insight",
+        "psijics-insight",
+        "prophesy",
+        "prescience",
+        "psijic-relicmaster",
+        "psijic-apprentice",
+        "scrying-globe",
+        "the-dreaming-cave",
+        "time-mastery"
+      ],
+      "color": "#4169e1"
+    },
+    {
+      "id": "hunding",
+      "name": "Ansei Frandar Hunding",
+      "short": "Hunding",
+      "starter": "way-of-the-sword",
+      "cards": [
+        "way-of-the-sword",
+        "anseis-victory",
+        "ansei-assault",
+        "grand-oratory",
+        "battle-meditation",
+        "hel-shira-herald",
+        "no-shira-poet",
+        "hiras-end",
+        "march-on-hattu",
+        "conquest",
+        "shehai-summoning",
+        "warrior-wave"
+      ],
+      "color": "#cd853f"
+    },
+    {
+      "id": "redeagle",
+      "name": "Red Eagle, King of the Reach",
+      "short": "Red Eagle",
+      "starter": "war-song",
+      "cards": [
+        "war-song",
+        "blood-sacrifice",
+        "bloody-offering",
+        "elder-witch",
+        "clan-witch",
+        "hagraven-matron",
+        "hagraven",
+        "imperial-plunder",
+        "imperial-spoils",
+        "bonfire",
+        "briarheart-ritual",
+        "karth-man-hunter",
+        "midnight-raid"
+      ],
+      "color": "#8b0000"
+    },
+    {
+      "id": "orgnum",
+      "name": "Sorcerer-King Orgnum",
+      "short": "Orgnum",
+      "starter": "sea-elf-raid",
+      "cards": [
+        "sea-elf-raid",
+        "pyandonean-war-fleet",
+        "serpentprow-schooner",
+        "sea-serpent-colossus",
+        "ghostscale-sea-serpent",
+        "serpentguard-rider",
+        "storm-shark-wavecaller",
+        "summerset-sacking",
+        "maormer-boarding-party",
+        "king-orgnums-command",
+        "maormer-cutter",
+        "sea-raiders-glory",
+        "snakeskin-freebooter"
+      ],
+      "color": "#20b2aa"
+    },
+    {
+      "id": "rajhin",
+      "name": "Rajhin, the Purring Liar",
+      "short": "Rajhin",
+      "starter": "swipe",
+      "cards": [
+        "swipe",
+        "grand-larceny",
+        "pounce-and-profit",
+        "prowling-shadow",
+        "jeering-shadow",
+        "rings-guile",
+        "bag-of-tricks",
+        "shadows-slumber",
+        "jarring-lullaby",
+        "moonlit-illusion",
+        "slight-of-hand",
+        "stubborn-shadow",
+        "twilight-revelry"
+      ],
+      "color": "#9932cc"
+    },
+    {
+      "id": "druid",
+      "name": "The Druid King",
+      "short": "Druid King",
+      "starter": "ritual-herbs",
+      "cards": [
+        "ritual-herbs",
+        "draoife-ritecaller",
+        "eldertide-fenwitch",
+        "druid-king-vestments",
+        "runes-of-the-draoife",
+        "envoy-of-the-draoife",
+        "stonelore-rockseer",
+        "wispheart-totem",
+        "wispcaller-totem",
+        "deepwoods-ritual",
+        "firesong-haruspex",
+        "forest-wraith",
+        "the-chimera",
+        "whispers-of-the-grove"
+      ],
+      "color": "#228b22"
+    },
+    {
+      "id": "almalexia",
+      "name": "Almalexia",
+      "short": "Almalexia",
+      "starter": "collection-plate",
+      "cards": [
+        "collection-plate",
+        "almsivis-charity",
+        "mothers-mercy",
+        "festival-of-forbearance",
+        "bardic-veneration",
+        "hand-of-almalexia",
+        "devotional-gaoler",
+        "mercymother-elite",
+        "tribunal-sentinel",
+        "mournhold-clergy",
+        "philanthropy",
+        "temple-arbiter",
+        "the-lesson-of-ayem"
+      ],
+      "color": "#ff6347"
+    },
+    {
+      "id": "mora",
+      "name": "Hermaeus Mora",
+      "short": "Mora",
+      "starter": "unsealed-glyphic",
+      "cards": [
+        "unsealed-glyphic",
+        "chromatic-reservoir",
+        "unsettling-aura",
+        "lantern-of-the-endless",
+        "apocryphal-pact",
+        "seeker-aspirant",
+        "cipher-of-the-eye",
+        "unfathomable-secrets",
+        "bargain-for-knowledge",
+        "ink-and-blood",
+        "threads-of-fate",
+        "voracious-tomeshell"
+      ],
+      "color": "#556b2f"
+    },
+    {
+      "id": "alessia",
+      "name": "Saint Alessia",
+      "short": "Alessia",
+      "starter": "alessian-rebel",
+      "cards": [
+        "alessian-rebel",
+        "ayleid-quartermaster",
+        "ayleid-defector",
+        "chainbreaker-captain",
+        "chainbreaker-sergeant",
+        "morihaus-sacred-bull",
+        "morihaus-the-archer",
+        "whitestrake-ascendant",
+        "pelinal-whitestrake",
+        "priestess-of-the-eight",
+        "saints-wrath",
+        "soldier-of-the-empire"
+      ],
+      "color": "#b8860b"
+    }
+  ]
+}

@@ -1,0 +1,285 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A100000000000001 /* TalesOfTributeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000001 /* TalesOfTributeApp.swift */; };
+		A100000000000002 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000002 /* Models.swift */; };
+		A100000000000003 /* GameEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000003 /* GameEngine.swift */; };
+		A100000000000004 /* AIPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000004 /* AIPlayer.swift */; };
+		A100000000000005 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000005 /* RootView.swift */; };
+		A100000000000006 /* cards.json in Resources */ = {isa = PBXBuildFile; fileRef = B100000000000006 /* cards.json */; };
+		A100000000000007 /* patrons.json in Resources */ = {isa = PBXBuildFile; fileRef = B100000000000007 /* patrons.json */; };
+		A100000000000008 /* decks.json in Resources */ = {isa = PBXBuildFile; fileRef = B100000000000008 /* decks.json */; };
+		A100000000000009 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B100000000000009 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		B100000000000001 /* TalesOfTributeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TalesOfTributeApp.swift; sourceTree = "<group>"; };
+		B100000000000002 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		B100000000000003 /* GameEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameEngine.swift; sourceTree = "<group>"; };
+		B100000000000004 /* AIPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIPlayer.swift; sourceTree = "<group>"; };
+		B100000000000005 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		B100000000000006 /* cards.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = cards.json; sourceTree = "<group>"; };
+		B100000000000007 /* patrons.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = patrons.json; sourceTree = "<group>"; };
+		B100000000000008 /* decks.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = decks.json; sourceTree = "<group>"; };
+		B100000000000009 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B10000000000000A /* TalesOfTribute.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TalesOfTribute.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C100000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D100000000000001 = {
+			isa = PBXGroup;
+			children = (
+				D100000000000002 /* TalesOfTribute */,
+				D100000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D100000000000002 /* TalesOfTribute */ = {
+			isa = PBXGroup;
+			children = (
+				B100000000000001 /* TalesOfTributeApp.swift */,
+				D100000000000004 /* Models */,
+				D100000000000005 /* Engine */,
+				D100000000000006 /* Views */,
+				D100000000000007 /* Resources */,
+				B100000000000009 /* Assets.xcassets */,
+			);
+			path = TalesOfTribute;
+			sourceTree = "<group>";
+		};
+		D100000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000A /* TalesOfTribute.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D100000000000004 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				B100000000000002 /* Models.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		D100000000000005 /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				B100000000000003 /* GameEngine.swift */,
+				B100000000000004 /* AIPlayer.swift */,
+			);
+			path = Engine;
+			sourceTree = "<group>";
+		};
+		D100000000000006 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B100000000000005 /* RootView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		D100000000000007 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B100000000000006 /* cards.json */,
+				B100000000000007 /* patrons.json */,
+				B100000000000008 /* decks.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E100000000000001 /* TalesOfTribute */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F100000000000002 /* Build configuration list for PBXNativeTarget "TalesOfTribute" */;
+			buildPhases = (
+				E200000000000001 /* Sources */,
+				C100000000000001 /* Frameworks */,
+				E300000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TalesOfTribute;
+			productName = TalesOfTribute;
+			productReference = B10000000000000A /* TalesOfTribute.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+			};
+			buildConfigurationList = F100000000000001 /* Build configuration list for PBXProject "TalesOfTribute" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D100000000000001;
+			productRefGroup = D100000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E100000000000001 /* TalesOfTribute */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E300000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A100000000000006 /* cards.json in Resources */,
+				A100000000000007 /* patrons.json in Resources */,
+				A100000000000008 /* decks.json in Resources */,
+				A100000000000009 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E200000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A100000000000001 /* TalesOfTributeApp.swift in Sources */,
+				A100000000000002 /* Models.swift in Sources */,
+				A100000000000003 /* GameEngine.swift in Sources */,
+				A100000000000004 /* AIPlayer.swift in Sources */,
+				A100000000000005 /* RootView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		F200000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		F200000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		F200000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_ALLOWED = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Tales of Tribute";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fan.talesoftribute;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = targeted;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F200000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_ALLOWED = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Tales of Tribute";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fan.talesoftribute;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F100000000000001 /* Build configuration list for PBXProject "TalesOfTribute" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F200000000000001 /* Debug */,
+				F200000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F100000000000002 /* Build configuration list for PBXNativeTarget "TalesOfTribute" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F200000000000003 /* Debug */,
+				F200000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F000000000000001 /* Project object */;
+}

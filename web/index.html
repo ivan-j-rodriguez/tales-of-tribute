@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Tales of Tribute — Fan Table</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <section id="splash" class="screen active">
+      <h1>Tales of Tribute</h1>
+      <p class="subtitle">A fan table for the Roister’s Club — two patrons, a tavern of five, and the long road to forty prestige.</p>
+      <div class="actions">
+        <button class="primary" id="btn-play">Sit at the Table</button>
+        <button id="btn-ency">Encyclopedia</button>
+      </div>
+      <p class="disclaimer">Unofficial fan project. Not affiliated with Bethesda Softworks or ZeniMax Online Studios. Not for sale. Card art courtesy of UESP.</p>
+    </section>
+
+    <section id="deckpick" class="screen">
+      <h2>Choose Your Patrons</h2>
+      <p class="hint">Pick <strong>two</strong> for yourself. The remaining two you tap after — or let the house deal the opponent’s pair.</p>
+      <div class="patron-grid" id="patron-grid"></div>
+      <div class="deckpick-bar">
+        <span id="pick-status">0 / 2 selected</span>
+        <button id="btn-ai-rest">AI takes the rest</button>
+        <button class="primary" id="btn-start" disabled>Begin Match</button>
+        <button id="btn-back-splash">Back</button>
+      </div>
+    </section>
+
+    <section id="match" class="screen">
+      <div class="match-top">
+        <div class="resources" id="opp-res"></div>
+        <div class="turn-indicator" id="turn-ind"></div>
+        <div class="resources" id="you-res"></div>
+      </div>
+      <div class="patrons-row" id="patrons-row"></div>
+      <div class="zone-label">Tavern</div>
+      <div class="zone tavern-zone" id="tavern-zone"></div>
+      <div class="zone-label">Opponent agents</div>
+      <div class="zone" id="opp-agents"></div>
+      <div class="zone-label">Your agents</div>
+      <div class="zone" id="you-agents"></div>
+      <div class="hand-zone">
+        <div class="zone-label">Your hand</div>
+        <div class="hand-cards" id="hand-zone"></div>
+        <div class="match-actions">
+          <button id="btn-end">End Turn</button>
+          <button id="btn-concede">Leave Table</button>
+        </div>
+      </div>
+      <div class="log-dock" id="log-dock"></div>
+    </section>
+
+    <section id="encyclopedia" class="screen">
+      <header>
+        <h2>Encyclopedia</h2>
+        <select id="ency-patron"></select>
+        <input id="ency-search" type="search" placeholder="Search cards…" />
+        <button id="btn-ency-back">Back</button>
+      </header>
+      <div class="ency-grid" id="ency-grid"></div>
+    </section>
+
+    <div class="overlay" id="win-overlay">
+      <div class="banner" id="win-banner"></div>
+    </div>
+    <div class="tooltip" id="tooltip">
+      <div id="tip-text"></div>
+      <div class="tip-nav">
+        <button id="tip-next">Next</button>
+        <button id="tip-skip">Skip</button>
+      </div>
+    </div>
+    <div class="modal" id="card-modal">
+      <div class="modal-body" id="card-modal-body"></div>
+    </div>
+  </div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

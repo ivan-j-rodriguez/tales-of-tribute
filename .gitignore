@@ -1,0 +1,11 @@
+.DS_Store
+*.pyc
+__pycache__/
+.idea/
+.vscode/
+web/data/*.uesp.json
+web/data/*.clean.json
+data/*.uesp.json
+data/*.clean.json
+data/uesp-images.json
+web/assets/showcase/
