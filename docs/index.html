@@ -3,33 +3,48 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a0f0a" />
   <title>Tales of Tribute — Fan Table</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <div id="app">
+    <!-- SPLASH -->
     <section id="splash" class="screen active">
-      <h1>Tales of Tribute</h1>
-      <p class="subtitle">A fan table for the Roister’s Club — two patrons, a tavern of five, and the long road to forty prestige.</p>
-      <div class="splash-purse" id="splash-purse"></div>
-      <div class="actions">
-        <button class="primary" id="btn-play">Play vs AI</button>
-        <button id="btn-friend">Play a Friend</button>
-        <button id="btn-club">Club</button>
-        <button id="btn-ency">Encyclopedia</button>
+      <div class="splash-frame">
+        <h1>Tales of Tribute</h1>
+        <p class="subtitle">A fan table for the Roister’s Club — two patrons, a tavern of five, and the long road to forty prestige.</p>
+        <div class="splash-purse" id="splash-purse"></div>
+        <div class="actions">
+          <button class="primary" id="btn-play">Play vs AI</button>
+          <button id="btn-ranked">Ranked</button>
+          <button id="btn-friend">Play a Friend</button>
+          <button id="btn-club">Club</button>
+          <button id="btn-ency">Encyclopedia</button>
+        </div>
+        <div class="splash-toggles">
+          <label class="chk"><input type="checkbox" id="chk-hourglass-splash" /> Hourglass (90s)</label>
+          <button type="button" id="btn-music" class="music-toggle" title="Music">♪ Music: Off</button>
+        </div>
+        <p class="disclaimer">Unofficial fan project. Not affiliated with Bethesda Softworks or ZeniMax Online Studios. Not for sale. Card art courtesy of UESP. No real-money purchases — earn gold at the table.</p>
       </div>
-      <p class="disclaimer">Unofficial fan project. Not affiliated with Bethesda Softworks or ZeniMax Online Studios. Not for sale. Card art courtesy of UESP.</p>
     </section>
 
+    <!-- DECK PICK -->
     <section id="deckpick" class="screen">
       <h2>Choose Your Patrons</h2>
-      <p class="hint">Pick <strong>two</strong> unlocked decks. Locked decks show fragment progress. AI picks from the rest (AI may use locked decks for variety).</p>
+      <p class="hint" id="deckpick-hint">Tap to select, tap again to deselect. Pick <strong>two</strong> for you, then two for your rival — or let the AI finish.</p>
+      <div class="pick-meters">
+        <div class="pick-meter you" id="pick-you-meter"><span class="pm-label">You</span> <span class="pm-count" id="pick-you-count">0 / 2</span><div class="pm-slots" id="pick-you-slots"></div></div>
+        <div class="pick-meter rival" id="pick-opp-meter"><span class="pm-label">Rival</span> <span class="pm-count" id="pick-opp-count">0 / 2</span><div class="pm-slots" id="pick-opp-slots"></div></div>
+      </div>
       <div class="deckpick-modes">
-        <label class="chk"><input type="checkbox" id="chk-random-match" /> Random match (both sides from your unlocked pool; AI may still draw locked)</label>
+        <label class="chk"><input type="checkbox" id="chk-random-match" /> Random from unlocked</label>
+        <label class="chk"><input type="checkbox" id="chk-hourglass-pick" /> Hourglass</label>
       </div>
       <div class="patron-grid" id="patron-grid"></div>
       <div class="deckpick-bar">
-        <span id="pick-status">0 / 2 selected</span>
+        <span id="pick-status">You 0 / Rival 0</span>
         <button id="btn-random-match">Random Match</button>
         <button id="btn-ai-rest">AI takes the rest</button>
         <button class="primary" id="btn-start" disabled>Begin Match</button>
@@ -37,6 +52,7 @@
       </div>
     </section>
 
+    <!-- FRIEND -->
     <section id="friend-lobby" class="screen">
       <h2>Play a Friend</h2>
       <p class="hint">Pass-and-play on one device, or host/join a remote room (PeerJS).</p>
@@ -52,6 +68,7 @@
       </div>
     </section>
 
+    <!-- CLUB -->
     <section id="club" class="screen">
       <header class="club-header">
         <h2>Roister’s Club</h2>
@@ -59,16 +76,38 @@
       </header>
       <div class="club-stats" id="club-stats"></div>
       <div class="club-actions">
-        <button class="primary" id="btn-open-sack">Open Heavy Sack</button>
-        <button id="btn-buy-sack">Buy Sack (40g)</button>
+        <button class="primary" id="btn-open-sack">Open Cutpurse</button>
+        <button id="btn-buy-sack">Buy Purse (40g)</button>
+        <button id="btn-store">Store</button>
         <button id="btn-collection">Collection</button>
       </div>
+      <h3 class="club-section">Ranked</h3>
+      <div id="club-ranked"></div>
       <h3 class="club-section">Daily Challenge</h3>
       <div id="club-daily"></div>
       <h3 class="club-section">Achievements</h3>
       <div id="club-achievements" class="ach-list"></div>
     </section>
 
+    <!-- STORE -->
+    <section id="store" class="screen">
+      <header class="club-header">
+        <h2>Club Store</h2>
+        <span class="store-gold" id="store-gold"></span>
+        <button id="btn-store-back">Back to Club</button>
+      </header>
+      <p class="hint">Spend purse gold only — everything is earnable. No real-money wall.</p>
+      <h3 class="club-section">Table Skins</h3>
+      <div class="store-grid" id="store-skins"></div>
+      <h3 class="club-section">Card Backs</h3>
+      <div class="store-grid" id="store-backs"></div>
+      <h3 class="club-section">Deck Fragments (35g)</h3>
+      <div class="store-grid" id="store-frags"></div>
+      <h3 class="club-section">Card Upgrades (55g)</h3>
+      <div class="store-grid" id="store-upgrades"></div>
+    </section>
+
+    <!-- COLLECTION -->
     <section id="collection" class="screen">
       <header class="club-header">
         <h2>Collection</h2>
@@ -78,30 +117,79 @@
       <div id="collection-detail" class="collection-detail hidden"></div>
     </section>
 
-    <section id="match" class="screen">
-      <div class="match-top">
-        <div class="resources" id="opp-res"></div>
-        <div class="turn-indicator" id="turn-ind"></div>
-        <div class="resources" id="you-res"></div>
-      </div>
-      <div class="patrons-row" id="patrons-row"></div>
-      <div class="zone-label">Tavern</div>
-      <div class="zone tavern-zone" id="tavern-zone"></div>
-      <div class="zone-label">Opponent agents</div>
-      <div class="zone" id="opp-agents"></div>
-      <div class="zone-label">Your agents</div>
-      <div class="zone" id="you-agents"></div>
-      <div class="hand-zone">
-        <div class="zone-label" id="hand-label">Your hand</div>
-        <div class="hand-cards" id="hand-zone"></div>
-        <div class="match-actions">
-          <button id="btn-end">End Turn</button>
-          <button id="btn-concede">Leave Table</button>
+    <!-- MATCH — authentic board -->
+    <section id="match" class="screen skin-high-isle">
+      <div class="board">
+        <div class="board-main">
+          <!-- Opponent strip -->
+          <div class="strip opp-strip">
+            <div class="hud" id="opp-res"></div>
+            <div class="strip-piles">
+              <button type="button" class="pile-btn" id="pile-opp-hand" data-pile="opp-hand" title="Rival hand"><span class="pile-art card-back-face"></span><span class="pile-count" id="cnt-opp-hand">0</span><span class="pile-label">Hand</span></button>
+              <button type="button" class="pile-btn" id="pile-opp-draw" data-pile="opp-draw" title="Rival draw"><span class="pile-art card-back-face"></span><span class="pile-count" id="cnt-opp-draw">0</span><span class="pile-label">Draw</span></button>
+              <button type="button" class="pile-btn" id="pile-opp-cd" data-pile="opp-cooldown" title="Rival cooldown"><span class="pile-art"></span><span class="pile-count" id="cnt-opp-cd">0</span><span class="pile-label">Cooldown</span></button>
+            </div>
+            <div class="agents-row" id="opp-agents"></div>
+          </div>
+
+          <!-- Tavern -->
+          <div class="tavern-band">
+            <button type="button" class="pile-btn tavern-discard" id="pile-tavern-discard" data-pile="tavern-discard" title="Tavern discard"><span class="pile-art"></span><span class="pile-count" id="cnt-tavern-discard">0</span><span class="pile-label">Discard</span></button>
+            <div class="tavern-zone" id="tavern-zone"></div>
+            <div class="turn-chip" id="turn-ind">Your turn</div>
+          </div>
+
+          <!-- You -->
+          <div class="strip you-strip">
+            <div class="agents-row" id="you-agents"></div>
+            <div class="played-row" id="you-played"></div>
+            <div class="hand-row">
+              <div class="hand-cards" id="hand-zone"></div>
+            </div>
+            <div class="you-footer">
+              <div class="strip-piles">
+                <button type="button" class="pile-btn" id="pile-you-draw" data-pile="you-draw" title="Your draw"><span class="pile-art card-back-face"></span><span class="pile-count" id="cnt-you-draw">0</span><span class="pile-label">Draw</span></button>
+                <button type="button" class="pile-btn" id="pile-you-played" data-pile="you-played" title="Played this turn"><span class="pile-art"></span><span class="pile-count" id="cnt-you-played">0</span><span class="pile-label">Played</span></button>
+                <button type="button" class="pile-btn" id="pile-you-cd" data-pile="you-cooldown" title="Your cooldown"><span class="pile-art"></span><span class="pile-count" id="cnt-you-cd">0</span><span class="pile-label">Cooldown</span></button>
+              </div>
+              <div class="hud" id="you-res"></div>
+              <div class="match-actions">
+                <button id="btn-end">End Turn</button>
+                <button id="btn-hg-toggle" title="Hourglass">⌛</button>
+                <button id="btn-concede">Leave</button>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- RIGHT RAIL: patrons + treasury + hourglass -->
+        <aside class="patron-rail" id="patron-rail" aria-label="Patrons">
+          <div class="rail-patrons" id="rail-patrons"></div>
+          <div class="hourglass" id="hourglass" data-on="0">
+            <svg viewBox="0 0 40 64" class="hg-svg" aria-hidden="true">
+              <defs>
+                <linearGradient id="sandGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#f0d060"/>
+                  <stop offset="100%" stop-color="#a07820"/>
+                </linearGradient>
+                <clipPath id="sandClip">
+                  <path d="M8 6 H32 L22 30 L32 58 H8 L18 30 Z"/>
+                </clipPath>
+              </defs>
+              <path class="hg-frame" d="M6 4 H34 V10 L24 30 L34 54 V60 H6 V54 L16 30 L6 10 Z" fill="none" stroke="#d4af37" stroke-width="2"/>
+              <rect class="hg-sand-top" id="hg-sand-top" x="8" y="6" width="24" height="22" fill="url(#sandGrad)" clip-path="url(#sandClip)" opacity="0.9"/>
+              <rect class="hg-sand-bot" id="hg-sand-bot" x="8" y="36" width="24" height="0" fill="url(#sandGrad)" clip-path="url(#sandClip)" opacity="0.95"/>
+              <circle cx="20" cy="30" r="1.5" fill="#f0e6b8"/>
+            </svg>
+            <span class="hg-time" id="hg-time">—</span>
+          </div>
+        </aside>
       </div>
       <div class="log-dock" id="log-dock"></div>
+      <div id="fly-layer" aria-hidden="true"></div>
     </section>
 
+    <!-- ENCYCLOPEDIA -->
     <section id="encyclopedia" class="screen">
       <header>
         <h2>Encyclopedia</h2>
@@ -112,6 +200,7 @@
       <div class="ency-grid" id="ency-grid"></div>
     </section>
 
+    <!-- OVERLAYS -->
     <div class="overlay" id="win-overlay">
       <div class="banner" id="win-banner"></div>
     </div>
@@ -123,13 +212,22 @@
     </div>
     <div class="overlay" id="sack-overlay">
       <div class="sack-modal" id="sack-modal">
-        <div class="sack-anim" id="sack-anim">🎒</div>
+        <div class="sack-anim" id="sack-anim">🪙</div>
+        <div class="sack-rarity" id="sack-rarity"></div>
         <div class="sack-reward" id="sack-reward"></div>
         <button class="primary" id="btn-sack-close">Claim</button>
       </div>
     </div>
+    <div class="overlay" id="pile-overlay">
+      <div class="pile-modal">
+        <h3 id="pile-modal-title">Pile</h3>
+        <div class="pile-modal-grid" id="pile-modal-grid"></div>
+        <button id="btn-pile-close">Close</button>
+      </div>
+    </div>
     <div class="toast" id="toast"></div>
-    <div class="tooltip" id="tooltip">
+    <div class="tooltip eso-hint" id="tooltip">
+      <div class="tip-ornament"></div>
       <div id="tip-text"></div>
       <div class="tip-nav">
         <button id="tip-next">Next</button>

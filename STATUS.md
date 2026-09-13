@@ -1,45 +1,97 @@
 # Status
 
-Playable fan table. Web preview is the priority client.
+Playable fan table rebuilt to feel like the real ESO Tales of Tribute board. Web preview is the priority client. `docs/` mirrors `web/` for GitHub Pages.
 
 ## Counts
 
-- **164 cards** in `data/cards.json` (12 patron decks + Treasury + tokens: Writ of Coin, Bewilderment, Chimera, Sacking, Wisp totems, Alessia-created agents).
-- **13 patrons** (Treasury + 12).
+- **164 cards** in `data/cards.json` (12 patron decks + Treasury + tokens).
+- **13 patrons** (Treasury + 12) — **Hermaeus Mora included** and always visible on the pick grid.
 - **164/164** cards have matching slug art in `web/assets/cards/<id>.png`.
-- **13/13** patron portraits in `web/assets/patrons/`.
-- Extra UESP variants (crops, deck-prefixed names) also sit in the cards folder (~296 pngs total); the UI uses the slug names.
+- **13/13** patron portraits in `web/assets/patrons/` (incl. `mora.png`).
 
-## What you can play
+## Board authenticity (2026-09-13 rebuild)
 
-Full vs-AI match: pick 2 patrons, AI gets 2, shared tavern of 5, Treasury always present. Draw 5, play/buy/call patron/knock out agents, end turn. Combo 2/3/4. 40 last-chance / 80 instant / favor-all-four win. Taunt blocks prestige conversion. Contract actions exile; contract agents exile on defeat.
+Match layout now mirrors ESO ToT, not a generic card site:
 
-Headless AI-vs-AI matches complete (prestige races, last-chance, 80-cap).
+- **Right rail (always vertical):** 4 match patron **coins** (portrait rings) + Treasury coin + hourglass. Portrait: narrow scrollable rail so patrons stay readable (Mora never clipped into a tiny row).
+- **Opponent strip (top):** face-down hand count, draw, cooldown, agents + live HUD.
+- **Center:** 5-card Tavern + tavern discard pile.
+- **You (bottom):** agents, played-this-turn, hand, draw/played/cooldown piles + HUD + End Turn.
+- **Resource HUD:** Coin (septim disc) / Prestige (crown) / Power (fist-gem) with tick animation on change.
+- **Pile modals:** tap Draw / Cooldown / Played / Hand / Tavern discard to list cards.
+- **Fly animations:** play → played zone; buy → your cooldown (WAAPI).
+- **Hourglass:** 90s per turn for Ranked / timed casual; OFF by default for vs AI. Toggle on splash, pick, and in-match. Gold sand drains; auto end turn at 0.
+- **Look:** Cinzel + Crimson Pro, stained wood textures, gold filigree frames, coin rims, candle bloom, ESO-style hint tooltip. Table skins via CSS on `#match`.
 
-## AI
+## Modes (splash)
 
-Heuristic, not random:
+- **Play vs AI** — casual, hourglass off by default
+- **Ranked** — stronger pace, 90s timer, tiers Unranked → Orichalcum → Ebony → Quicksilver → Voidsteel → Rubedite; streak raises cutpurse rarity
+- **Play a Friend** — hotseat + PeerJS remote (unchanged contract)
+- **Club** — collection, store, cutpurses, achievements, daily
+- **Encyclopedia** — all cards including Mora
 
-- Plays curses first; prefers combo suits, agents, knockout, prestige.
-- Buys higher-cost / on-suit / agent cards; cheap economy early.
-- Calls Treasury early; Crows when rich in coin; flips Hunding; hunts 4-patron wins.
-- Knocks taunts before converting power; plays around the 40 prestige clock.
+## Patron pick UX
 
-## Implemented keywords
+- Tap to select, tap again to **deselect** (no Back required)
+- Clear **You 2 / Rival 2** meters with coin slots
+- After your pair: pick rival’s pair **or** “AI takes the rest” / Random
+- Portrait: large patron tiles in a **scrollable** 2-col grid (all 12 + readable art)
+- Landscape: denser grid still showing coin art
 
-Coin, Power, Prestige, Draw, Discard, Donate, Toss, Destroy, Replace, Acquire, Patron extra, Knock Out / Knock Out All, Heal, Sacking, Hand Refresh, Draw Refresh, Setback (coin/power/draw next turn), Confine, Create (Writ, Bewilderment, Sacking, Wisp totems, Chimera, Alessia agents), Druid King while-in-play passives (coin/power/prestige on cooldown / agent play), Morihaus coin-per-knock, Hunding / Alessia choose (AI picks best; player uses first option).
+## Progression / store (no IAP)
 
-## Incomplete / simplified
+`localStorage tot_profile_v1`:
 
-- **Player targeting UI** is auto-resolved for Toss / Destroy / Donate / Confine / Acquire / Replace / Alessia-Hunding choices (AI-style heuristics). You are not prompted to pick *which* card to toss or confine.
-- **Alessia agent HP** is not printed on the Spicy table for several cards; default **2 HP** (1 would also be reasonable).
-- **Philanthropy “1 Power/Discard”** is stored as a while-in-play passive; it is not a standing global if the card is not an agent.
-- **Druid King “1 Coin/Cooldown”** passives apply while those agents are on the board (as intended). Instant cards with `/Cooldown` grant on play only if they are agents.
-- **Almalexia patron “look at top N”** is simplified: move the most valuable of the revealed cards to opponent cooldown.
-- **Mora patron share** auto-picks the strongest tavern action.
-- **iOS** is a working SwiftUI skeleton with a mirrored engine; card *art* on device needs the web assets copied into the app bundle. Web is the complete art experience.
-- No multiplayer, no ranked, no collection unlocks, no sound.
+- gold (start **80**), unlockedDecks (pelin, crows, hlaalu, celarus), ownedUpgrades
+- tableSkin, cardBack, unlockedSkins, unlockedBacks
+- ranked `{ tier, points, placementLeft, winStreak }`
+- purses (queued cutpurses): Common → Legendary from streak
+- Loot: gold, upgrades, deck fragments (5 unlocks a deck **including Mora**), table skins, card backs
+- Store spends gold only — fragments (35g), upgrades (55g), skins, backs; everything earnable
+
+### Table skins
+
+High Isle Oak (free), Clockwork, Coldharbour/Daedra, Apocrypha, Orsinium Anvil, Vestige Hall.
+
+### Card backs
+
+Default Roister + Clockwork / Daedra / Apocrypha / Vestige.
+
+## Audio
+
+Procedural Web Audio tavern bed (`js/music.js`): low drone, soft lute-like plucks, fireplace crackle. **Not** ESO OST. Starts muted; obvious ♪ Music toggle (respects browser autoplay).
+
+## Engine
+
+Existing `GameEngine` kept. `newMatch({ ownedUpgrades })` + `tavernQty` so unupgraded cards are default until owned. Mora cards enter the tavern when Mora is a match patron.
+
+## Files touched this ship
+
+- `web/index.html` — authentic board DOM, ranked/store/hourglass/music shells
+- `web/css/style.css` — full restyle + skins + rail + responsive
+- `web/js/app.js` — board render, deselect pick, fly anims, timer, ranked, store wiring
+- `web/js/profile.js` — ranked, purses, skins, backs, store purchases (gold start 80)
+- `web/js/music.js` — new procedural bed
+- `docs/` — `cp -a web/. docs/` for Pages
+
+## Incomplete / simplified (unchanged engine limits)
+
+- Player targeting for Toss / Destroy / Donate / Confine / Acquire / Replace still auto-resolved
+- Alessia agent HP defaults; some patron abilities simplified (see prior notes)
+- Ranked opponent is still heuristic AI (no human ladder yet)
+- iOS SwiftUI skeleton not updated in this pass
 
 ## How to run
 
 `cd /workspace/tots/web && python3 -m http.server 8080`
+
+Pages: `docs/` (do not git push from this agent — parent pushes).
+
+## Smoke verified
+
+- All 12 patrons on pick grid including **Mora**
+- Select + deselect by tap; AI takes the rest; Begin Match
+- Match rail shows 4 patrons + Treasury; Coin/Prestige/Power HUD present
+- Hourglass toggle works; landscape keeps vertical rail
+- Store: buy Clockwork skin with gold

@@ -1,6 +1,8 @@
 /**
  * Tales of Tribute — rules engine (fan implementation)
  */
+import { tavernQty } from './upgrades.js';
+
 export class GameEngine {
   constructor(cardsById, patronsById) {
     this.cardsById = cardsById;
@@ -21,9 +23,10 @@ export class GameEngine {
     return this.cardsById[slug] || null;
   }
 
-  newMatch({ playerPatrons, aiPatrons, playerFirst = true }) {
+  newMatch({ playerPatrons, aiPatrons, playerFirst = true, ownedUpgrades = [] }) {
     const matchPatrons = [...playerPatrons, ...aiPatrons];
-    const tavernPile = this._buildTavern(matchPatrons);
+    this._ownedUpgrades = ownedUpgrades || [];
+    const tavernPile = this._buildTavern(matchPatrons, this._ownedUpgrades);
     this._shuffle(tavernPile);
 
     const makePlayer = (patrons, isAI) => {
@@ -98,20 +101,14 @@ export class GameEngine {
     };
   }
 
-  _buildTavern(matchPatrons) {
+  _buildTavern(matchPatrons, ownedUpgrades = []) {
     const pile = [];
+    const owned = ownedUpgrades || [];
     const addDeck = (patronId) => {
       for (const c of Object.values(this.cardsById)) {
         if (c.patron !== patronId) continue;
-        if (c.token || c.curse) continue;
-        if (c.starter) continue;
-        if (c.id === 'the-chimera' || c.id === 'gold' || c.id === 'writ-of-coin' || c.id === 'bewilderment') continue;
-        const qty = c.upgradedQty > 0 ? c.upgradedQty : c.baseQty;
-        // Prefer upgraded versions: skip base-only replacements when upgraded exists
-        // Cards with baseQty=0 are upgrades; cards with both use upgradedQty
+        const qty = tavernQty(c, owned);
         if (qty <= 0) continue;
-        // If this is a "base" version that was replaced (upgradedQty=0 and baseQty>0 but an upgrade exists),
-        // spicy table already lists them separately with qtys — use upgradedQty for matches.
         for (let i = 0; i < qty; i++) pile.push(this._inst(c.id));
       }
     };
