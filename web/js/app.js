@@ -49,8 +49,8 @@ let gauntletStopIndex = null;
 let isGauntletMatch = false;
 
 const TURN_SECONDS = 90;
-const HOLD_MS = 1050;
-const HOLD_MOVE_PX = 12;
+const HOLD_MS = 1100;
+const HOLD_MOVE_PX = 14;
 const AGENT_SLOTS = 4;
 const TOUR_KEY = 'tot_tour_v2';
 

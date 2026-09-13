@@ -85,7 +85,7 @@ async function holdPatron(page, pid = 'pelin') {
       || document.querySelector('#rail-patrons .patron-coin[data-side="you"]');
     if (!el) return { ok: false };
     el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', isPrimary: true }));
-    await new Promise(r => setTimeout(r, 1150));
+    await new Promise(r => setTimeout(r, 1250));
     const mid = window.__totTest.snapshot();
     const dossier = document.querySelector('.lift-text-fly')?.innerText || '';
     el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch', isPrimary: true }));
@@ -99,7 +99,7 @@ async function holdHand(page) {
     const el = document.querySelector('#hand-zone .card');
     if (!el) return false;
     el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', isPrimary: true }));
-    await new Promise(r => setTimeout(r, 1150));
+    await new Promise(r => setTimeout(r, 1250));
     el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch', isPrimary: true }));
     el.click();
     return true;
