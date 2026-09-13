@@ -1,12 +1,14 @@
 /**
- * Tales of Tribute audio — real renaissance loop + quiet synthesized SFX.
- * Default loop: Dowland CC0 (OpenGameArt / Of Far Different Nature).
- * Alt: Tourdion (Wikimedia Commons PD).
- * Never falls back to oscillator bed as the music default.
+ * Tribute audio — CC-BY Kevin MacLeod beds (never ESO OST).
+ * tavern: Celtic Impulse · fight: Heroic Age · boss: Five Armies · danger: Dark Fog
  */
 
-const LOOP_SRC = 'assets/audio/dowland-complaints.mp3';
-const ALT_SRC = 'assets/audio/tourdion.mp3';
+const STEMS = {
+  tavern: 'assets/audio/celtic-impulse.mp3',
+  fight: 'assets/audio/heroic-age.mp3',
+  boss: 'assets/audio/five-armies.mp3',
+  danger: 'assets/audio/dark-fog.mp3',
+};
 
 let ctx = null;
 let master = null;
@@ -14,6 +16,8 @@ let sfxGain = null;
 let musicEl = null;
 let playing = false;
 let musicOn = false;
+let currentCue = 'tavern';
+let sfxStyle = 'table';
 
 function ensureCtx() {
   if (ctx) return ctx;
@@ -24,31 +28,22 @@ function ensureCtx() {
   master.gain.value = 1;
   master.connect(ctx.destination);
   sfxGain = ctx.createGain();
-  sfxGain.gain.value = 0.22;
+  sfxGain.gain.value = 0.28;
   sfxGain.connect(master);
   return ctx;
 }
 
 function ensureMusicEl() {
   if (musicEl) return musicEl;
-  musicEl = new Audio(LOOP_SRC);
+  musicEl = new Audio(STEMS.tavern);
   musicEl.loop = true;
   musicEl.preload = 'auto';
-  musicEl.volume = 0.28;
-  musicEl.addEventListener('error', () => {
-    // Prefer Tourdion if Dowland fails to decode/load
-    if (musicEl.src && !musicEl.src.includes('tourdion')) {
-      musicEl.src = ALT_SRC;
-      musicEl.load();
-      if (musicOn) musicEl.play().catch(() => {});
-    }
-  });
+  musicEl.volume = 0.32;
+  musicEl.dataset.cue = 'tavern';
   return musicEl;
 }
 
-export function isMusicOn() {
-  return musicOn && playing;
-}
+export function isMusicOn() { return musicOn && playing; }
 
 export async function setMusicEnabled(on) {
   ensureCtx();
@@ -58,11 +53,7 @@ export async function setMusicEnabled(on) {
   if (on) {
     if (ctx?.state === 'suspended') await ctx.resume();
     playing = true;
-    try {
-      await musicEl.play();
-    } catch {
-      // autoplay blocked until gesture — keep flag for next toggle
-    }
+    try { await musicEl.play(); } catch {}
   } else if (musicEl) {
     musicEl.pause();
     playing = false;
@@ -74,15 +65,34 @@ export function preferMusicFromStorage() {
   try { return localStorage.getItem('tot_music') === '1'; } catch { return false; }
 }
 
-/** Warm decode path; stay silent until unmute. */
+export function setSfxStyle(style) {
+  sfxStyle = style === 'dramatic' ? 'dramatic' : 'table';
+  try { localStorage.setItem('tot_sfx', sfxStyle); } catch {}
+}
+export function getSfxStyle() {
+  try { return localStorage.getItem('tot_sfx') === 'dramatic' ? 'dramatic' : 'table'; } catch { return 'table'; }
+}
+
+export function setMusicCue(cue) {
+  const next = STEMS[cue] ? cue : 'tavern';
+  ensureMusicEl();
+  if (musicEl.dataset.cue === next) return;
+  const was = !musicEl.paused && musicOn;
+  currentCue = next;
+  musicEl.dataset.cue = next;
+  musicEl.src = STEMS[next];
+  musicEl.loop = true;
+  if (was) musicEl.play().catch(() => {});
+}
+
 export function warmMuted() {
   ensureCtx();
   ensureMusicEl();
-  musicEl.volume = 0.28;
-  // do not auto-play
+  sfxStyle = getSfxStyle();
+  musicEl.volume = 0.32;
 }
 
-function beep({ freq = 440, dur = 0.08, type = 'triangle', vol = 0.35, slide = 0, noiseFreq = 0, noiseQ = 1 }) {
+function beep({ freq = 440, dur = 0.08, type = 'triangle', vol = 0.35, slide = 0, filterFreq = 0, filterQ = 1 }) {
   if (!ensureCtx() || !sfxGain) return;
   const t0 = ctx.currentTime;
   const o = ctx.createOscillator();
@@ -117,27 +127,30 @@ function noiseBurst({ dur = 0.06, vol = 0.2, freq = 1200, Q = 0.7 }) {
   src.start();
 }
 
-/** Quiet distinct SFX for engine/UI events. */
 export function playSfx(kind) {
   ensureCtx();
+  sfxStyle = getSfxStyle();
   if (ctx?.state === 'suspended') ctx.resume().catch(() => {});
+  const table = sfxStyle === 'table';
   switch (kind) {
     case 'play':
-      beep({ freq: 320, dur: 0.09, type: 'triangle', vol: 0.28, slide: 80 });
+      if (table) { noiseBurst({ dur: 0.07, vol: 0.22, freq: 900, Q: 0.6 }); beep({ freq: 180, dur: 0.05, type: 'sine', vol: 0.12 }); }
+      else beep({ freq: 320, dur: 0.09, type: 'triangle', vol: 0.28, slide: 80 });
       break;
     case 'buy':
-      beep({ freq: 520, dur: 0.07, type: 'sine', vol: 0.25 });
-      beep({ freq: 780, dur: 0.1, type: 'sine', vol: 0.18, slide: 40 });
+      if (table) { beep({ freq: 980, dur: 0.05, type: 'sine', vol: 0.2 }); beep({ freq: 1310, dur: 0.06, type: 'sine', vol: 0.14 }); }
+      else { beep({ freq: 520, dur: 0.07, type: 'sine', vol: 0.25 }); beep({ freq: 780, dur: 0.1, type: 'sine', vol: 0.18, slide: 40 }); }
+      break;
+    case 'swipe':
+      noiseBurst({ dur: 0.05, vol: 0.16, freq: 1400, Q: 0.8 });
       break;
     case 'contract':
       beep({ freq: 220, dur: 0.14, type: 'sawtooth', vol: 0.16, filterFreq: 900, filterQ: 4 });
       noiseBurst({ dur: 0.08, vol: 0.12, freq: 1400, Q: 2 });
-      beep({ freq: 660, dur: 0.18, type: 'triangle', vol: 0.14, slide: 220 });
       break;
     case 'agent':
       noiseBurst({ dur: 0.05, vol: 0.22, freq: 180, Q: 0.5 });
-      beep({ freq: 90, dur: 0.16, type: 'sine', vol: 0.32, slide: -30 });
-      beep({ freq: 880, dur: 0.12, type: 'sine', vol: 0.12, slide: 120 });
+      beep({ freq: 90, dur: 0.16, type: 'sine', vol: 0.28, slide: -30 });
       break;
     case 'patron':
       beep({ freq: 392, dur: 0.12, type: 'triangle', vol: 0.22 });
@@ -159,7 +172,8 @@ export function playSfx(kind) {
       beep({ freq: 784, dur: 0.28, type: 'sine', vol: 0.16 });
       break;
     case 'tap':
-      beep({ freq: 600, dur: 0.04, type: 'sine', vol: 0.1 });
+      if (table) noiseBurst({ dur: 0.03, vol: 0.1, freq: 1600, Q: 1 });
+      else beep({ freq: 600, dur: 0.04, type: 'sine', vol: 0.1 });
       break;
     default:
       break;

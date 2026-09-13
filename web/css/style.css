@@ -2265,3 +2265,65 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
     --hand-card-h: calc(var(--hand-card-w) * 1.54);
   }
 }
+
+#match, #match .felt-table, #match .card {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+#match .card { cursor: pointer; }
+#match .card img.art, #match .card .cost-badge, #match .card .hp-badge {
+  pointer-events: none;
+}
+
+
+/* Cluster patron coins like the real table — tight stack, yours on your side */
+.patron-rail {
+  justify-content: center;
+  overflow: visible;
+}
+.rail-patrons {
+  flex: 0 0 auto !important;
+  justify-content: center !important;
+  gap: 0.12rem !important;
+  margin: auto 0;
+}
+.rail-group {
+  gap: 0.02rem;
+}
+.rail-group.rail-mid { margin: 0.1rem 0 !important; }
+.rail-group.rail-opp { margin-top: 0; }
+.rail-group.rail-you { margin-bottom: 0; }
+.patron-coin { width: 58px; touch-action: manipulation; }
+.patron-coin img,
+.patron-coin .plabel,
+.patron-coin .pfavor { pointer-events: none; }
+.patron-coin .pfavor {
+  font-size: 0.48rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-top: 1px;
+  line-height: 1;
+  color: #c8b48a;
+}
+.patron-coin.fav-you .pfavor { color: #9be7a6; }
+.patron-coin.fav-opp .pfavor { color: #ffb4b0; }
+.patron-coin.neutral .pfavor { color: #e6d39a; }
+.lift-coin-fly {
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 10px 28px #000a, 0 0 0 3px rgba(212,175,55,0.55);
+}
+.lift-coin-fly img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.current-favor { outline: 1px solid rgba(212,175,55,0.45); border-radius: 6px; padding: 0.15rem 0.2rem; }
+#match { touch-action: manipulation; }
+#match .card img,
+#match .card .cost-badge,
+#match .card .hp-badge,
+#match .card .taunt-badge,
+#match .card .meta { pointer-events: none; }
+.sfx-row { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; }
+.sfx-row select {
+  background: #1a120c; color: #f3e6d0; border: 1px solid rgba(212,175,55,0.45);
+  border-radius: 6px; padding: 0.25rem 0.4rem;
+}

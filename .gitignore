@@ -9,3 +9,6 @@ data/*.uesp.json
 data/*.clean.json
 data/uesp-images.json
 web/assets/showcase/
+
+web/test/node_modules/
+_wip/

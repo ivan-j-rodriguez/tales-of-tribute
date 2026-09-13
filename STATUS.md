@@ -1,6 +1,6 @@
 # Status
 
-**2026-09-13 (quality-critical phone rebuild):** Tap plays/buys only (<350ms). Press-and-hold (≥500ms) lifts a floating card clone from the exact screen rect, scales toward the player to read, and animates back on release — no inspect-overlay dismiss-at-top. Tavern is a single non-wrapping row. Hands are fanned (yours playable at bottom; rival backs at top). Patron rail: rival coins top, Treasury middle, yours bottom. Patron taps open Continue/Cancel confirm (pick + in-match). Locked patrons show greyed art + "???". AI difficulty 1–10 smoky-dot slider (`profile.aiDifficulty`). Daily **Challenge the Provinces** Road of Tamriel gauntlet (10 stops, NY midnight reset). Music is real Dowland CC0 MP3 (Tourdion alt) — not the old oscillator bed. Distinct contract/agent VFX+SFX. Table skins use carved wood rim + felt play surface. Agent slots labeled **Agent**. Engine confirmed: contract actions exile; agents enter agent row; contract agents exile on KO; taunt blocks prestige.
+**2026-09-13 (tap + patron cluster):** Tap plays/buys (including iOS click-only). Hold (≥520ms) lifts to read and never also plays. Draw piles stay sealed. Patron coins sit in a tight right-side cluster — rival pair on their side, Treasury middle, your pair on your side — with Favored / Neutral / Unfavored on the coin. Patron tap = Continue/Cancel call; hold = full favor text. Music beds: Celtic Impulse / Heroic Age / Five Armies / Dark Fog (Kevin MacLeod CC BY 3.0). Settings SFX: card table vs dramatic.
 
 Playable fan table rebuilt to feel like the real ESO Tales of Tribute board. Web preview is the priority client. `docs/` mirrors `web/` for GitHub Pages.
 
@@ -33,8 +33,8 @@ Playable fan table rebuilt to feel like the real ESO Tales of Tribute board. Web
 
 ## Audio
 
-- **Music loop (default):** `web/assets/audio/dowland-complaints.mp3` — John Dowland “If my complaints could passions move” (CC0 via OpenGameArt / Of Far Different Nature). Modest volume (~0.28). Toggle required.
-- **Alt / fallback:** `web/assets/audio/tourdion.mp3` — Tourdion (Quand je bois du vin clairet), Wikimedia Commons public domain.
+- **Music beds (Kevin MacLeod, CC BY 3.0):** Celtic Impulse (tavern), Heroic Age (fight), Five Armies (boss/ranked), Dark Fog (danger). Toggle required.
+- **Unused fallbacks kept:** Dowland CC0, Tourdion public domain. Never ESO OST.
 - **Credits:** `web/assets/audio/CREDITS.txt`
 - **SFX:** quiet synthesized one-shots (play, buy, contract/violet, agent/gold-slam, patron, coin, combo, win) — not the old music.js oscillator bed.
 

@@ -13,7 +13,7 @@ import {
 } from './profile.js';
 import { UPGRADE_TO_BASE, upgradesForPatron } from './upgrades.js';
 import { hostRoom, joinRoom } from './netplay.js';
-import { setMusicEnabled, preferMusicFromStorage, warmMuted, playSfx } from './music.js';
+import { setMusicEnabled, preferMusicFromStorage, warmMuted, playSfx, setMusicCue, setSfxStyle, getSfxStyle } from './music.js';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -82,10 +82,12 @@ function show(id) {
   $(id).classList.add('active');
 }
 
+let lastToast = '';
 function toast(msg) {
+  lastToast = String(msg || '');
   const el = $('#toast');
   if (!el) return;
-  el.textContent = msg;
+  el.textContent = lastToast;
   el.classList.add('show');
   clearTimeout(toast._t);
   toast._t = setTimeout(() => el.classList.remove('show'), 3200);
@@ -155,6 +157,7 @@ function onSplashEnter() {
   refreshSplashPurse();
   applyTableSkin();
   syncHourglassUI();
+  setMusicCue('tavern');
   show('#splash');
 }
 
@@ -226,59 +229,54 @@ function dossierHTML(d) {
  * There is no dead zone between tap and hold.
  */
 function bindCardGesture(el, { onTap, onHoldRead }) {
-  let timer = null;
-  let held = false;
-  let armed = false;
-  const clearTimer = () => { if (timer) { clearTimeout(timer); timer = null; } };
+  let press = null;
+  let lockUntil = 0;
+  const lock = (ms = 420) => { lockUntil = Date.now() + ms; };
+  const clearHold = () => { if (press?.timer) { clearTimeout(press.timer); press.timer = null; } };
 
-  const play = (e) => {
+  const finish = (e) => {
+    if (!press || press.done) return;
+    press.done = true;
+    clearHold();
+    const held = press.held;
+    press = null;
     if (held || liftActive) {
-      e && e.preventDefault();
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      lock(520);
       endLift();
-      held = false;
       return;
     }
-    if (!onTap) return;
-    e && e.preventDefault();
-    e && e.stopPropagation();
-    onTap(e);
+    lock(420);
+    if (onTap) onTap(e);
   };
 
   el.addEventListener('pointerdown', (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
-    held = false;
-    armed = true;
-    clearTimer();
-    timer = setTimeout(() => {
-      held = true;
-      timer = null;
+    clearHold();
+    press = { held: false, done: false, timer: null };
+    press.timer = setTimeout(() => {
+      if (!press || press.done) return;
+      press.held = true;
       if (onHoldRead) onHoldRead(el);
     }, HOLD_MS);
   });
-  el.addEventListener('pointerup', (e) => {
-    if (!armed) return;
-    armed = false;
-    const wasHeld = held;
-    clearTimer();
-    if (wasHeld || liftActive) {
-      e.preventDefault();
-      endLift();
-      held = false;
-      return;
-    }
-    held = false;
-    play(e);
-  });
+  el.addEventListener('pointerup', (e) => finish(e));
   el.addEventListener('pointercancel', () => {
-    armed = false;
-    clearTimer();
-    if (held || liftActive) endLift();
-    held = false;
+    // iOS often cancels a tap; keep press so click/touchend can still play.
+    clearHold();
   });
+  el.addEventListener('touchend', (e) => {
+    if (press && !press.done && !press.held) finish(e);
+  }, { passive: true });
   el.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    // pointerup already played this press
+    if (press && !press.done) { finish(e); return; }
+    // iOS: sometimes the only event is click. Never replay after pointerup/hold.
+    if (!press && !liftActive && Date.now() > lockUntil && onTap) {
+      lock(420);
+      onTap(e);
+    }
   });
   el.addEventListener('contextmenu', (e) => e.preventDefault());
 }
@@ -358,6 +356,86 @@ function endLift(instant = false) {
   ], { duration: 300, easing: 'cubic-bezier(.25,.75,.2,1)', fill: 'forwards' });
   anim.onfinish = () => wrap.remove();
   setTimeout(() => { if (wrap.parentNode) wrap.remove(); }, 360);
+}
+
+function favorKeyForSeat(pid) {
+  const f = engine?.state?.favor?.[pid] || 0;
+  const seat = localSeat();
+  const favYou = (seat === 0 && f === 1) || (seat === 1 && f === -1);
+  const favOpp = (seat === 0 && f === -1) || (seat === 1 && f === 1);
+  return favYou ? 'favored' : favOpp ? 'unfavored' : 'neutral';
+}
+
+function patronDossierHTML(pid) {
+  const pat = patronsById[pid];
+  if (!pat) return '';
+  const unlocked = pid === 'treasury' || isDeckUnlocked(profile, pid);
+  const current = favorKeyForSeat(pid);
+  const alwaysN = !!(pat.alwaysNeutral || pat.abilities?.alwaysNeutral);
+  const rows = alwaysN ? [['neutral', 'Neutral']] : [
+    ['favored', 'Favored'],
+    ['neutral', 'Neutral'],
+    ['unfavored', 'Unfavored'],
+  ];
+  const blocks = rows.map(([key, label]) => {
+    const desc = unlocked
+      ? (pat.abilities?.[key]?.desc || '—')
+      : '???';
+    const on = key === current;
+    return `<div class="dossier-block${on ? ' current-favor' : ''}"><div class="dossier-h">${label}${on ? ' · now' : ''}</div><ul><li>${desc}</li></ul></div>`;
+  }).join('');
+  return `
+    <div class="dossier-text patron-dossier">
+      <div class="dossier-kinds"><span>Patron Coin</span><span>${unlocked ? (pat.short || '') : '???'}</span></div>
+      <h2>${unlocked ? (pat.name || '').toUpperCase() : '???'}</h2>
+      ${blocks}
+    </div>`;
+}
+
+function startPatronLift(fromEl, pid) {
+  endLift(true);
+  if (!fromEl || !pid) return;
+  const rect = fromEl.getBoundingClientRect();
+  if (!rect.width) return;
+  liftActive = true;
+  liftFromRect = { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+  fromEl.classList.add('lift-source');
+  fromEl.style.opacity = '0.12';
+  const layer = $('#lift-layer') || document.body;
+  const wrap = document.createElement('div');
+  wrap.className = 'lift-clone lift-fly';
+  wrap.innerHTML = `
+    <div class="lift-hex-fly lift-coin-fly">
+      <img src="${patronArt(pid)}" alt="" draggable="false" />
+    </div>
+    <div class="lift-text-fly">${patronDossierHTML(pid)}</div>
+  `;
+  layer.appendChild(wrap);
+  liftClone = wrap;
+  const hex = wrap.querySelector('.lift-hex-fly');
+  const text = wrap.querySelector('.lift-text-fly');
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const land = vw > vh;
+  const targetW = Math.min(land ? vw * 0.22 : vw * 0.38, 168);
+  const targetH = targetW;
+  const tx = land ? Math.max(24, vw * 0.10) : (vw - targetW) / 2;
+  const ty = Math.max(16, (vh - targetH) / 2 - (land ? 0 : 48));
+  wrap._to = { left: tx, top: ty, width: targetW, height: targetH };
+  hex.style.left = rect.left + 'px';
+  hex.style.top = rect.top + 'px';
+  hex.style.width = rect.width + 'px';
+  hex.style.height = rect.height + 'px';
+  hex.animate([
+    { left: rect.left + 'px', top: rect.top + 'px', width: rect.width + 'px', height: rect.height + 'px' },
+    { left: tx + 'px', top: ty + 'px', width: targetW + 'px', height: targetH + 'px' },
+  ], { duration: 320, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
+  if (text) {
+    text.style.left = (land ? tx + targetW + 18 : 16) + 'px';
+    text.style.top = (land ? ty : ty + targetH + 10) + 'px';
+    text.style.maxWidth = land ? Math.min(380, vw * 0.5) + 'px' : (vw - 32) + 'px';
+    requestAnimationFrame(() => text.classList.add('show'));
+  }
 }
 
 function renderCard(inst, opts = {}) {
@@ -703,17 +781,21 @@ function renderMatch() {
     const favYou = (seat === 0 && f === 1) || (seat === 1 && f === -1);
     const favOpp = (seat === 0 && f === -1) || (seat === 1 && f === 1);
     const el = document.createElement('div');
-    el.className = 'patron-coin ' + (pid === 'treasury' ? 'treasury ' : '') +
-      (favYou ? 'fav-you' : favOpp ? 'fav-opp' : 'neutral');
+    const favor = favYou ? 'fav-you' : favOpp ? 'fav-opp' : 'neutral';
+    const favorWord = favYou ? 'Favored' : favOpp ? 'Unfavored' : 'Neutral';
+    el.className = 'patron-coin ' + (pid === 'treasury' ? 'treasury ' : '') + favor;
+    el.dataset.pid = pid;
+    el.dataset.favor = favorWord.toLowerCase();
+    el.dataset.side = pid === 'treasury' ? 'mid' : (youPats.includes(pid) ? 'you' : 'opp');
     if (yourTurn && engine.canCallPatron(pid)) el.classList.add('callable');
     el.innerHTML = `
-      <div class="coin-ring"><img src="${patronArt(pid)}" alt="${pat.short}" /></div>
+      <div class="coin-ring"><img src="${patronArt(pid)}" alt="${pat.short}" draggable="false" /></div>
       <div class="plabel">${pat.short}</div>
+      <div class="pfavor">${favorWord}</div>
     `;
-    el.title = (pat.abilities?.neutral?.desc) || pat.name;
-    el.addEventListener('click', () => {
-      if (!canControl()) return;
-      openPatronConfirm(pid, 'call');
+    bindCardGesture(el, {
+      onTap: () => openPatronConfirm(pid, 'call'),
+      onHoldRead: () => startPatronLift(el, pid),
     });
     return el;
   };
@@ -795,8 +877,9 @@ function renderMatch() {
         if (isContract) { playSfx('contract'); flashVfx(el, 'contract'); }
         else if (isAgent) { playSfx('agent'); flashVfx(el, 'agent'); }
         else playSfx('play');
+        const ok = engine.playCard(c.uid);
+        if (!ok) { toast('Cannot play that now'); return; }
         flyCard(el, dest, c, () => {});
-        engine.playCard(c.uid);
         syncAction({ op: 'play', uid: c.uid });
         afterPlayerAction();
       },
@@ -830,6 +913,11 @@ function renderMatch() {
 
   const dock = $('#log-dock');
   if (dock) dock.innerHTML = engine.log.slice(-12).map(l => l.msg).join('<br>');
+  if (s.winner != null) setMusicCue('tavern');
+  else if ((opp.prestige >= 32) || (s.turn > 4 && you.prestige + 8 < opp.prestige)) setMusicCue('danger');
+  else if (isRankedMatch || isGauntletMatch) setMusicCue('boss');
+  else if (s.turn >= 3) setMusicCue('fight');
+  else setMusicCue('tavern');
 }
 
 function layoutFan(container, rival = false) {
@@ -877,13 +965,18 @@ function openPatronConfirm(pid, mode = 'call') {
     art.src = patronArt(pid);
     art.style.filter = unlocked ? '' : 'grayscale(0.85) brightness(0.65)';
   }
-  if (name) name.textContent = unlocked ? (pat.short || pat.name) : '???';
-  const f = engine?.state?.favor?.[pid] || 0;
-  const key = f === 1 ? 'favored' : f === -1 ? 'unfavored' : 'neutral';
+  const key = favorKeyForSeat(pid);
+  const favorWord = key === 'favored' ? 'Favored' : key === 'unfavored' ? 'Unfavored' : 'Neutral';
+  if (name) name.textContent = unlocked ? `${pat.short || pat.name} · ${favorWord}` : '???';
   const desc = unlocked
     ? (pat.abilities?.[key]?.desc || pat.abilities?.neutral?.desc || pat.name || '')
     : 'This patron has not yet revealed their true name.';
   if (abil) abil.textContent = desc;
+  const go = $('#pc-continue');
+  if (go) {
+    const ok = mode === 'pick' || (engine && canControl() && engine.canCallPatron(pid));
+    go.disabled = !ok;
+  }
   overlay.classList.add('show');
 }
 
@@ -940,10 +1033,12 @@ function openPileModal(pileKey) {
   const opp = s.players[1 - seat];
   let cards = [];
   let title = 'Pile';
-  if (pileKey === 'you-draw') { cards = you.draw; title = 'Your draw pile'; }
+  if (pileKey === 'you-draw' || pileKey === 'opp-draw') {
+    toast('The draw pile is sealed.');
+    return;
+  }
   else if (pileKey === 'you-cooldown') { cards = you.cooldown; title = 'Your cooldown'; }
   else if (pileKey === 'you-played') { cards = you.played; title = 'Played this turn'; }
-  else if (pileKey === 'opp-draw') { cards = opp.draw; title = 'Rival draw'; }
   else if (pileKey === 'opp-cooldown') { cards = opp.cooldown; title = 'Rival cooldown'; }
   else if (pileKey === 'opp-hand') { cards = opp.hand; title = 'Rival hand'; }
   else if (pileKey === 'tavern-discard') { cards = s.tavernDiscard; title = 'Tavern discard'; }
@@ -1315,6 +1410,8 @@ function renderSettings() {
   if (music) music.checked = preferMusicFromStorage();
   if (hg) hg.checked = !!profile.hourglassDefault;
   if (bot) bot.checked = !!profile.showBotCards;
+  const sfx = $('#sel-sfx');
+  if (sfx) sfx.value = getSfxStyle();
   mountDiffSlider('#diff-slider-settings', '#diff-val-settings');
   paintDiffAll();
   // Show-bot only meaningful for AI; still listed with note
@@ -2028,6 +2125,10 @@ function bind() {
     await setMusicEnabled(!!e.target.checked);
     updateMusicBtn();
   });
+  $('#sel-sfx')?.addEventListener('change', (e) => {
+    setSfxStyle(e.target.value);
+    playSfx('swipe');
+  });
   $('#chk-settings-hourglass')?.addEventListener('change', (e) => {
     profile = loadProfile();
     profile.hourglassDefault = !!e.target.checked;
@@ -2058,6 +2159,50 @@ function bind() {
   });
 }
 
+function installTestHook() {
+  window.__totTest = {
+    lastToast: () => lastToast,
+    startQuick() {
+      try { localStorage.setItem(TOUR_KEY, '1'); } catch {}
+      pickYou = ['pelin', 'hlaalu'];
+      pickOpp = ['crows', 'celarus'];
+      matchMode = 'ai';
+      isRandomMatch = false;
+      isRankedMatch = false;
+      isGauntletMatch = false;
+      startMatch({ playerFirst: true, difficulty: 1 });
+    },
+    snapshot() {
+      const p = engine?.state?.players[0];
+      const coins = [...document.querySelectorAll('#rail-patrons .patron-coin')].map(el => ({
+        id: el.dataset.pid,
+        side: el.dataset.side,
+        favor: el.dataset.favor,
+      }));
+      const cluster = $('#rail-patrons')?.getBoundingClientRect();
+      const rail = $('#patron-rail')?.getBoundingClientRect();
+      return {
+        hand: p?.hand?.length ?? 0,
+        coin: p?.coin ?? 0,
+        golds: p?.hand?.filter(c => c.id === 'gold').length ?? 0,
+        played: p?.played?.length ?? 0,
+        active: engine?.state?.active ?? null,
+        phase: engine?.state?.phase ?? null,
+        toast: lastToast,
+        liftActive,
+        patronConfirm: !!$('#patron-confirm-overlay')?.classList.contains('show'),
+        patrons: coins,
+        clusterH: cluster?.height || 0,
+        railH: rail?.height || 0,
+      };
+    },
+    clickDraw() {
+      document.querySelector('[data-pile="you-draw"]')?.click();
+      return lastToast;
+    },
+  };
+}
+
 loadData().then(() => {
   profile = loadProfile();
   hourglassOn = !!profile.hourglassDefault;
@@ -2066,9 +2211,11 @@ loadData().then(() => {
   mountDiffSlider('#diff-slider-pick', '#diff-val-pick');
   paintDiffAll();
   warmMuted();
+  setSfxStyle(getSfxStyle());
   updateMusicBtn();
   if (preferMusicFromStorage()) setMusicEnabled(true);
   onSplashEnter();
+  installTestHook();
 }).catch(err => {
   console.error(err);
   const sub = $('#splash .subtitle');
