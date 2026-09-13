@@ -2385,3 +2385,7 @@ button.primary {
   --felt: #24705c;
   --felt-deep: #124038;
 }
+
+.g-marker.solstice .g-dot { background: #1565c0; color: #fff; border-color: #bbdefb; }
+.g-marker .g-name { max-width: 88px; }
+.build-stamp { font-size: 0.7rem; color: #c8e6d0; letter-spacing: 0.08em; }

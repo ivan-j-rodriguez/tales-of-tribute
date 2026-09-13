@@ -4,10 +4,10 @@
  */
 
 const STEMS = {
-  tavern: 'assets/audio/call-to-adventure.mp3',
-  fight: 'assets/audio/heroic-age.mp3',
-  boss: 'assets/audio/five-armies.mp3',
-  danger: 'assets/audio/black-vortex.mp3',
+  tavern: 'assets/audio/tot-bed-menu.mp3?v=17',
+  fight: 'assets/audio/tot-bed-fight.mp3?v=17',
+  boss: 'assets/audio/tot-bed-boss.mp3?v=17',
+  danger: 'assets/audio/tot-bed-danger.mp3?v=17',
 };
 
 let ctx = null;

@@ -9,6 +9,7 @@ import {
   TABLE_SKINS, CARD_BACKS, CARD_BACK_PALETTE, STORE_FRAGMENT_COST, STORE_UPGRADE_COST,
   buyFragment, buyUpgrade, buySkin, buyBack, equipSkin, equipBack, RANK_TIERS,
   GAUNTLET_STOPS, ensureGauntletDay, recordGauntletResult, setAiDifficulty,
+  gauntletCooldownMs, todaysFeatured,
   msUntilNextNyMidnight, nyDateStr,
 } from './profile.js';
 import { UPGRADE_TO_BASE, upgradesForPatron } from './upgrades.js';
@@ -155,6 +156,8 @@ function onSplashEnter() {
     toast(daily.toast);
   }
   refreshSplashPurse();
+  const stamp = document.getElementById('build-stamp');
+  if (stamp) stamp.textContent = 'build 17';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -229,53 +232,29 @@ function dossierHTML(d) {
  * There is no dead zone between tap and hold.
  */
 function bindCardGesture(el, { onTap, onHoldRead }) {
-  let t0 = 0;
+  // iOS: do NOT preventDefault on touchstart — that kills the native click.
+  // Play/buy on click. Hold only inspects; the click after a hold is ignored.
   let held = false;
   let timer = null;
-  let lastTap = 0;
-  const lockMs = 300;
-
   const start = (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
-    if (e.cancelable) e.preventDefault();
     held = false;
-    t0 = Date.now();
     clearTimeout(timer);
     timer = setTimeout(() => {
       held = true;
       if (onHoldRead) onHoldRead(el);
     }, HOLD_MS);
   };
-  const end = (e) => {
-    if (e && e.cancelable) e.preventDefault();
-    if (e) e.stopPropagation();
-    clearTimeout(timer);
-    if (!t0) return;
-    const dt = Date.now() - t0;
-    t0 = 0;
-    if (held || liftActive) {
-      endLift();
-      lastTap = Date.now();
-      return;
-    }
-    if (dt < HOLD_MS && Date.now() - lastTap > lockMs) {
-      lastTap = Date.now();
-      if (onTap) onTap(e);
-    }
-  };
-
-  el.addEventListener('touchstart', start, { passive: false });
-  el.addEventListener('touchend', end, { passive: false });
+  const clear = () => { clearTimeout(timer); };
   el.addEventListener('pointerdown', start);
-  el.addEventListener('pointerup', end);
+  el.addEventListener('touchstart', start, { passive: true });
+  el.addEventListener('pointerup', clear);
+  el.addEventListener('touchend', clear, { passive: true });
   el.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (held || liftActive) { endLift(); lastTap = Date.now(); return; }
-    if (Date.now() - lastTap > lockMs && onTap) {
-      lastTap = Date.now();
-      onTap(e);
-    }
+    if (held || liftActive) { endLift(); held = false; return; }
+    if (onTap) onTap(e);
   });
   el.addEventListener('contextmenu', (e) => e.preventDefault());
 }
@@ -1929,57 +1908,60 @@ function openGauntlet() {
 function renderGauntlet() {
   profile = loadProfile();
   const g = ensureGauntletDay(profile);
+  const featured = todaysFeatured(profile);
+  const cd = gauntletCooldownMs(g);
   const markers = $('#gauntlet-markers');
   if (!markers) return;
   markers.innerHTML = '';
-  GAUNTLET_STOPS.forEach((stop, i) => {
+  GAUNTLET_STOPS.forEach((stop) => {
     const el = document.createElement('button');
     el.type = 'button';
     el.className = 'g-marker';
+    if (stop.id === 'solstice') el.classList.add('solstice');
     el.style.left = stop.x + '%';
     el.style.top = stop.y + '%';
     el.innerHTML = `<span class="g-dot">${stop.difficulty}</span><span class="g-name">${stop.name}</span>`;
     el.title = `${stop.name} · vs ${stop.rival} · ${stop.opp.join(' + ')} · diff ${stop.difficulty}`;
-    if (i < g.cleared) el.classList.add('cleared');
-    else if (i === g.cleared) el.classList.add('current');
+    if (g.lastId === stop.id) el.classList.add('cleared');
+    else if (featured.id === stop.id) el.classList.add('current');
     else el.classList.add('locked');
     el.addEventListener('click', () => {
-      if (i === g.cleared) startGauntletStop(i);
-      else if (i < g.cleared) toast(`${stop.name} already cleared`);
-      else toast(`Clear earlier zones first — next is ${GAUNTLET_STOPS[g.cleared].name}`);
+      if (featured.id !== stop.id) { toast(`Today's challenge is ${featured.name}`); return; }
+      startGauntletStop(stop);
     });
     markers.appendChild(el);
   });
   const st = $('#gauntlet-status');
   const btn = $('#btn-gauntlet-play');
-  if (g.cleared >= GAUNTLET_STOPS.length) {
-    if (st) st.textContent = 'Every marked zone has bowed. The road stays yours.';
-    if (btn) btn.disabled = true;
+  if (cd > 0) {
+    if (st) st.textContent = `Next challenge in ${fmtCountdown(cd)}. Today's zone is ${featured.name} — vs ${featured.rival}.`;
+    if (btn) { btn.disabled = true; btn.textContent = 'On cooldown'; }
   } else {
-    const next = GAUNTLET_STOPS[g.cleared];
-    if (st) st.textContent = `Next: ${next.name} — vs ${next.rival}. Their decks: ${next.opp.join(' + ')}. Difficulty ${next.difficulty}.`;
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = `Play ${next.name}`;
-    }
+    if (st) st.textContent = `Today: ${featured.name} — vs ${featured.rival}. Decks ${featured.opp.join(' + ')}. Diff ${featured.difficulty}. Then 24 hours.`;
+    if (btn) { btn.disabled = false; btn.textContent = `Challenge ${featured.name}`; }
   }
 }
 
-function startGauntletStop(index) {
-  const stop = GAUNTLET_STOPS[index];
+function startGauntletStop(stop) {
+  if (typeof stop === 'number') stop = GAUNTLET_STOPS[stop];
   if (!stop) return;
   profile = loadProfile();
   const g = ensureGauntletDay(profile);
-  if (index !== g.cleared) return;
+  const featured = todaysFeatured(profile);
+  if (stop.id !== featured.id) { toast(`Today's challenge is ${featured.name}`); return; }
+  const cd = gauntletCooldownMs(g);
+  if (cd > 0) { toast(`Wait ${fmtCountdown(cd)}`); return; }
+  g.lastPlayAt = Date.now();
+  g.lastId = stop.id;
+  saveProfile(profile);
   isGauntletMatch = true;
   isRankedMatch = false;
   isRandomMatch = false;
-  gauntletStopIndex = index;
+  gauntletStopIndex = GAUNTLET_STOPS.findIndex(s => s.id === stop.id);
   matchMode = 'ai';
   pickYou = [...stop.you];
   pickOpp = [...stop.opp];
   setHourglass(false);
-  // Temporarily boost difficulty for this match via opts
   startMatch({ difficulty: stop.difficulty });
 }
 
@@ -1994,7 +1976,7 @@ function bind() {
   $('#btn-gauntlet-play')?.addEventListener('click', () => {
     profile = loadProfile();
     const g = ensureGauntletDay(profile);
-    if (g.cleared < GAUNTLET_STOPS.length) startGauntletStop(g.cleared);
+    startGauntletStop(todaysFeatured(profile));
   });
   $('#btn-ranked').onclick = beginRanked;
   $('#btn-friend').onclick = () => { $('#friend-status').textContent = ''; show('#friend-lobby'); };

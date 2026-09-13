@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
   <meta name="theme-color" content="#1e4a48" />
   <title>Tales of Tribute — Fan Table</title>
-  <link rel="stylesheet" href="css/style.css?v=15" />
+  <link rel="stylesheet" href="css/style.css?v=17" />
 </head>
 <body>
   <div id="app">
@@ -28,6 +30,7 @@
           <label class="chk"><input type="checkbox" id="chk-hourglass-splash" /> Hourglass (90s)</label>
           <button type="button" id="btn-music" class="music-toggle" title="Music">♪ Music: Off</button>
         </div>
+        <p class="build-stamp" id="build-stamp">build 17</p>
         <p class="disclaimer">Unofficial fan project. Not affiliated with Bethesda Softworks or ZeniMax Online Studios. Not for sale. Card art courtesy of UESP. No real-money purchases — earn gold at the table.</p>
       </div>
     </section>
@@ -65,7 +68,7 @@
         <h2>Challenge the Provinces</h2>
         <button id="btn-gauntlet-back">Back</button>
       </header>
-      <p class="hint" id="gauntlet-hint">The map of Tamriel. One marker per zone — beat them in order. Each rival brings a harder pair of decks.</p>
+      <p class="hint" id="gauntlet-hint">The map of Tamriel. One pin per zone, including Solstice. Today's challenge is random. Then wait 24 hours.</p>
       <div class="gauntlet-map-wrap">
         <img class="gauntlet-map" id="gauntlet-map-img" src="assets/ui/tamriel-map.jpg" alt="Map of Tamriel — provinces" />
         <div class="gauntlet-markers" id="gauntlet-markers"></div>
@@ -342,6 +345,6 @@
       <div class="modal-body" id="card-modal-body"></div>
     </div>
   </div>
-  <script type="module" src="js/app.js?v=15"></script>
+  <script type="module" src="js/app.js?v=17"></script>
 </body>
 </html>
