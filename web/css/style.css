@@ -2867,3 +2867,110 @@ button.card:active, #match button.card:active { transform: none !important; }
 #match .card { position: relative; }
 
 body:has(#match.screen.active) #toast { display: none !important; }
+
+/* ===== build 25 table lock — empty === filled; no jump between turns ===== */
+#match button.card:active,
+button.card:active {
+  transform: none !important;
+}
+
+.felt-opp-agents,
+.felt-you-agents {
+  flex: 0 0 calc(var(--card-h) * 0.62 + 12px) !important;
+  min-height: calc(var(--card-h) * 0.62 + 12px) !important;
+  max-height: calc(var(--card-h) * 0.62 + 12px) !important;
+  overflow: visible;
+}
+
+#match .agents-row {
+  min-height: calc(var(--card-h) * 0.62 + 12px) !important;
+  height: calc(var(--card-h) * 0.62 + 12px) !important;
+  align-items: center;
+}
+
+#match .agent-slot,
+#match .agent-slot.empty,
+#match .agent-slot.filled {
+  width: calc(var(--card-w) * 0.62) !important;
+  height: calc(var(--card-h) * 0.62) !important;
+  flex: 0 0 calc(var(--card-w) * 0.62) !important;
+  box-sizing: border-box;
+}
+
+#match .agent-slot.filled .card,
+#match .agent-slot .card.agent-board {
+  width: calc(var(--card-w) * 0.62) !important;
+  height: calc(var(--card-h) * 0.62) !important;
+}
+
+#match .felt-tavern,
+#match #tavern-zone.tavern-zone,
+#match .tavern-zone {
+  flex: 0 0 calc(var(--card-h) + 16px) !important;
+  min-height: calc(var(--card-h) + 16px) !important;
+  height: calc(var(--card-h) + 16px) !important;
+  max-height: calc(var(--card-h) + 16px) !important;
+}
+
+#match .tavern-zone .tavern-slot.empty {
+  width: clamp(50px, 13.5vw, 80px);
+  height: calc(clamp(50px, 13.5vw, 80px) * 1.54);
+  flex: 0 0 clamp(50px, 13.5vw, 80px);
+  border: 1.5px dashed rgba(232, 200, 120, 0.45);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  opacity: 0.85;
+}
+#match .tavern-zone .tavern-slot.empty .slot-label {
+  font-size: 0.55rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(232, 200, 120, 0.7);
+}
+
+#match #opp-res,
+#match #you-res {
+  flex: 0 0 44px !important;
+  min-height: 44px !important;
+  height: 44px !important;
+  max-height: 44px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  box-sizing: border-box;
+}
+
+#match .felt-played,
+#match #you-played {
+  flex: 0 0 calc(var(--card-h) * 0.55 + 10px) !important;
+  min-height: calc(var(--card-h) * 0.55 + 10px) !important;
+  height: calc(var(--card-h) * 0.55 + 10px) !important;
+}
+
+#match #events-list,
+#match .events-list {
+  min-height: 36px !important;
+}
+
+@media (orientation: landscape) {
+  .felt-opp-agents,
+  .felt-you-agents {
+    flex-basis: calc(var(--card-h) * 0.62 + 12px) !important;
+    min-height: calc(var(--card-h) * 0.62 + 12px) !important;
+    max-height: calc(var(--card-h) * 0.62 + 12px) !important;
+  }
+  #match .agent-slot.empty {
+    width: calc(var(--card-w) * 0.62) !important;
+    height: calc(var(--card-h) * 0.62) !important;
+  }
+}
+@media (orientation: portrait) {
+  #match .agent-slot.empty {
+    width: calc(var(--card-w) * 0.62) !important;
+    height: calc(var(--card-h) * 0.62) !important;
+  }
+}

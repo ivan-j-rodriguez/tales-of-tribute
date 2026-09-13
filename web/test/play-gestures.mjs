@@ -44,15 +44,15 @@ async function snap(page) {
 function tapEvents(kind) {
   if (kind === 'full') {
     return `
-      el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', isPrimary: true }));
-      el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch', isPrimary: true }));
+      el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 1, clientX: 12, clientY: 12 }));
+      el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 1, clientX: 12, clientY: 12 }));
       el.click();
     `;
   }
   if (kind === 'ios') {
     return `
-      el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', isPrimary: true }));
-      el.dispatchEvent(new PointerEvent('pointercancel', { bubbles: true, pointerType: 'touch', isPrimary: true }));
+      el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 1, clientX: 12, clientY: 12 }));
+      el.dispatchEvent(new PointerEvent('pointercancel', { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 1, clientX: 12, clientY: 12 }));
       el.click();
     `;
   }
@@ -84,11 +84,11 @@ async function holdPatron(page, pid = 'pelin') {
     const el = document.querySelector(`#rail-patrons .patron-coin[data-pid="${want}"]`)
       || document.querySelector('#rail-patrons .patron-coin[data-side="you"]');
     if (!el) return { ok: false };
-    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', isPrimary: true }));
-    await new Promise(r => setTimeout(r, 920));
+    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 1, clientX: 12, clientY: 12 }));
+    await new Promise(r => setTimeout(r, 1250));
     const mid = window.__totTest.snapshot();
     const dossier = document.querySelector('.lift-text-fly')?.innerText || '';
-    el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch', isPrimary: true }));
+    el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 1, clientX: 12, clientY: 12 }));
     el.click();
     return { ok: true, mid, dossier };
   }, pid);
@@ -96,13 +96,16 @@ async function holdPatron(page, pid = 'pelin') {
 
 async function holdHand(page) {
   return page.evaluate(async () => {
-    const el = document.querySelector('#hand-zone .card');
-    if (!el) return false;
-    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', isPrimary: true }));
-    await new Promise(r => setTimeout(r, 920));
-    el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch', isPrimary: true }));
+    const el = document.querySelector('#hand-zone .card[data-id="gold"]')
+      || document.querySelector('#hand-zone .card');
+    if (!el) return { ok: false };
+    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 1, clientX: 12, clientY: 12 }));
+    await new Promise(r => setTimeout(r, 1250));
+    const mid = window.__totTest.snapshot();
+    const dossier = document.querySelector('.lift-text-fly')?.innerText || '';
+    el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 1, clientX: 12, clientY: 12 }));
     el.click();
-    return true;
+    return { ok: true, mid, dossier };
   });
 }
 
@@ -141,6 +144,7 @@ let b = await snap(page);
 assert('full tap plays one card', b.hand === hand0 - 1 && b.played >= 1, b);
 assert('full tap does not double-play', b.hand === hand0 - 1, b);
 assert('gold pays a coin', b.golds === golds0 - 1 && b.coin === coin0 + 1, b);
+assert('short tap never lifts', b.liftActive === false, b);
 
 // 2. iOS click-only still plays
 await start(page);
@@ -149,14 +153,21 @@ await tapHand(page, 'ios');
 await new Promise(r => setTimeout(r, 80));
 b = await snap(page);
 assert('ios click-only plays one card', b.hand === a.hand - 1 && b.coin === a.coin + 1, { a, b });
+assert('ios tap never lifts', b.liftActive === false, b);
 
 // 3. hold inspects, does not play
 await start(page);
 a = await snap(page);
-await holdHand(page);
+const heldHand = await holdHand(page);
 await new Promise(r => setTimeout(r, 80));
 b = await snap(page);
 assert('hold does not play', b.hand === a.hand && b.coin === a.coin, { a, b });
+assert('hold inspects', !!(heldHand.mid && heldHand.mid.liftActive), heldHand);
+assert(
+  'gold dossier official sentence',
+  /Gain 1 Coin/i.test(heldHand.dossier || ''),
+  heldHand.dossier
+);
 
 // 4. draw pile sealed
 await start(page);

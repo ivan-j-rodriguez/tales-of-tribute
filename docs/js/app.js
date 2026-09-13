@@ -1,6 +1,7 @@
 import { GameEngine } from './engine.js';
 import { TributeAI } from './ai.js';
 import { normalizeCatalog, nameSlug } from './normalize.js';
+import { overlayOfficialCardText, overlayOfficialPatronText } from './officialText.js';
 import {
   loadProfile, saveProfile, doDailyCheckIn, ensureDailyChallengeReset,
   recordMatchResult, openPurse, buySack, claimAchievement, claimDailyChallenge,
@@ -48,7 +49,8 @@ let gauntletStopIndex = null;
 let isGauntletMatch = false;
 
 const TURN_SECONDS = 90;
-const HOLD_MS = 850;
+const HOLD_MS = 1100;
+const HOLD_MOVE_PX = 14;
 const AGENT_SLOTS = 4;
 const TOUR_KEY = 'tot_tour_v2';
 
@@ -65,15 +67,19 @@ const TOUR_STEPS = [
 ];
 
 async function loadData() {
-  const [c, p, d] = await Promise.all([
+  const [c, p, d, cu, pu] = await Promise.all([
     fetch('data/cards.json').then(r => r.json()),
     fetch('data/patrons.json').then(r => r.json()),
     fetch('data/decks.json').then(r => r.json()),
+    fetch('data/cards.uesp.json').then(r => r.json()).catch(() => null),
+    fetch('data/patrons.uesp.json').then(r => r.json()).catch(() => null),
   ]);
   const norm = normalizeCatalog(c, p, d);
   DATA.cards = norm.cards;
   DATA.patrons = norm.patrons;
   DATA.decks = norm.decks;
+  if (cu?.cards) overlayOfficialCardText(DATA.cards, cu.cards);
+  if (pu?.patrons) overlayOfficialPatronText(DATA.patrons, pu.patrons);
   cardsById = Object.fromEntries(DATA.cards.map(x => [x.id, x]));
   patronsById = Object.fromEntries(DATA.patrons.map(x => [x.id, x]));
 }
@@ -157,7 +163,7 @@ function onSplashEnter() {
   }
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 19';
+  if (stamp) stamp.textContent = 'build 25';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -232,31 +238,58 @@ function dossierHTML(d) {
 }
 
 /**
- * Phone-first gestures:
- * - Any press that is NOT a hold = play / buy / claim (onTap).
- * - Hold (>=520ms, little movement): lift-to-read; release returns the card.
- * There is no dead zone between tap and hold.
+ * Phone-first gestures (pointer events only):
+ * - Short press / click = play / buy / claim (onTap). Never lifts.
+ * - Hold (>=HOLD_MS, same pointer still down, move < HOLD_MOVE_PX): inspect.
+ * - After a successful hold, the following click must not play.
  */
 function bindCardGesture(el, { onTap, onHoldRead }) {
-  // iOS click plays. Hold (850ms, still down) inspects. A slow tap must never lift.
   let held = false;
   let timer = null;
   let t0 = 0;
-  const start = (e) => {
+  let pointerId = null;
+  let sx = 0;
+  let sy = 0;
+  let stillDown = false;
+
+  const clearHoldTimer = () => { clearTimeout(timer); timer = null; };
+
+  const onPointerDown = (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     held = false;
+    stillDown = true;
     t0 = Date.now();
-    clearTimeout(timer);
+    pointerId = e.pointerId;
+    sx = e.clientX;
+    sy = e.clientY;
+    clearHoldTimer();
     timer = setTimeout(() => {
+      if (!stillDown || pointerId == null) return;
       held = true;
       if (onHoldRead) onHoldRead(el);
     }, HOLD_MS);
   };
-  const clearHoldTimer = () => { clearTimeout(timer); timer = null; };
-  el.addEventListener('pointerdown', start);
-  el.addEventListener('touchstart', start, { passive: true });
-  el.addEventListener('pointerup', clearHoldTimer);
-  el.addEventListener('touchend', clearHoldTimer, { passive: true });
+
+  const onPointerMove = (e) => {
+    if (!stillDown || pointerId == null || e.pointerId !== pointerId) return;
+    const dx = e.clientX - sx;
+    const dy = e.clientY - sy;
+    if ((dx * dx + dy * dy) > (HOLD_MOVE_PX * HOLD_MOVE_PX)) {
+      clearHoldTimer();
+    }
+  };
+
+  const onPointerUpOrCancel = (e) => {
+    if (pointerId != null && e.pointerId !== pointerId) return;
+    stillDown = false;
+    clearHoldTimer();
+    pointerId = null;
+  };
+
+  el.addEventListener('pointerdown', onPointerDown);
+  el.addEventListener('pointermove', onPointerMove);
+  el.addEventListener('pointerup', onPointerUpOrCancel);
+  el.addEventListener('pointercancel', onPointerUpOrCancel);
   el.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -731,9 +764,8 @@ function renderAgentRow(row, agents, { attackable = false, onAttack = null } = {
     if (a) {
       slot.appendChild(renderCard(a, {
         extraClass: 'agent-board' + (a.taunt ? ' has-taunt' : ''),
-        onTap: (_inst, el) => {
+        onTap: () => {
           if (attackable && onAttack) onAttack(a);
-          else startLift(el, cardsById[a.id]);
         },
         onHoldRead: (_inst, el) => startLift(el, cardsById[a.id]),
       }));
@@ -766,8 +798,9 @@ function renderEventsRail(you, s) {
     el.className = 'event-hex' + (it.combo ? ' combo' : '');
     if (it.def) {
       el.innerHTML = `<img src="${artFor(it.def)}" alt="" /><span class="ev-pip">${it.pip}</span>`;
-      el.addEventListener('pointerdown', (e) => { e.stopPropagation(); startLift(el, it.def); });
-      el.addEventListener('pointerup', (e) => { e.stopPropagation(); endLift(); });
+      bindCardGesture(el, {
+        onHoldRead: () => startLift(el, it.def),
+      });
     } else {
       el.innerHTML = `<span class="ev-pip">${it.pip}</span>`;
     }
@@ -864,10 +897,18 @@ function renderMatch() {
   for (const pid of youPats) { const c = makeCoin(pid); if (c) gYou.appendChild(c); }
   rail.appendChild(gOpp); rail.appendChild(gMid); rail.appendChild(gYou);
 
-  // Tavern — tap to buy if affordable; hold to inspect (never buys on hold)
+  // Tavern — always 5 hexes; tap to buy if affordable; hold to inspect (never buys on hold)
   const tz = $('#tavern-zone');
   tz.innerHTML = '';
-  s.tavern.forEach((c, i) => {
+  for (let i = 0; i < 5; i++) {
+    const c = s.tavern[i];
+    if (!c) {
+      const slot = document.createElement('div');
+      slot.className = 'tavern-slot empty';
+      slot.innerHTML = '<span class="slot-label">Tavern</span>';
+      tz.appendChild(slot);
+      continue;
+    }
     const aff = yourTurn && engine.canBuy(i);
     tz.appendChild(renderCard(c, {
       affordable: aff,
@@ -886,7 +927,7 @@ function renderMatch() {
       },
       onHoldRead: (_inst, el) => startLift(el, cardsById[c.id]),
     }));
-  });
+  }
 
   // Agent rows — always show dashed/gold Agent slot outlines
   renderAgentRow($('#opp-agents'), opp.agents, {
@@ -911,7 +952,7 @@ function renderMatch() {
     if (def?.type === 'agent') return; // agents live in agents row
     yp.appendChild(renderCard(c, {
       extraClass: 'played-card',
-      onTap: (_i, el) => startLift(el, cardsById[c.id]),
+      onTap: () => {},
       onHoldRead: (_i, el) => startLift(el, cardsById[c.id]),
     }));
   });
@@ -955,7 +996,7 @@ function renderMatch() {
         const def = cardsById[c.id];
         ohz.appendChild(renderCard(c, {
           extraClass: 'rival-card',
-          onTap: (_i, e) => startLift(e, def),
+          onTap: () => {},
           onHoldRead: (_i, e) => startLift(e, def),
         }));
       } else {
@@ -1125,7 +1166,7 @@ function openPileModal(pileKey) {
         grid.appendChild(el);
       } else {
         grid.appendChild(renderCard(c, {
-          onTap: (_i, el) => startLift(el, cardsById[c.id]),
+          onTap: () => {},
           onHoldRead: (_i, el) => startLift(el, cardsById[c.id]),
         }));
       }
