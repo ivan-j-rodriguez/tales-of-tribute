@@ -14,7 +14,7 @@
             "coin": 2
           },
           "effect": "sacrifice_for_writ",
-          "desc": "Pay 2 Coin, sacrifice a played card, create Writ of Coin in cooldown."
+          "desc": "Pay 2 Coin and sacrifice 1 card from hand or played cards: create Writ of Coin in cooldown."
         },
         "unfavored": null,
         "lockFavored": false,
@@ -34,21 +34,21 @@
             "power": 2
           },
           "effect": "agent_to_draw",
-          "desc": "Pay 2 Power: move an Agent from cooldown to top of draw."
+          "desc": "Pay 2 Power with an agent in cooldown: refresh up to 1 agent."
         },
         "neutral": {
           "cost": {
             "power": 2
           },
           "effect": "agent_to_draw",
-          "desc": "Pay 2 Power: move an Agent from cooldown to top of draw."
+          "desc": "Pay 2 Power with an agent in cooldown: refresh up to 1 agent; this Patron favors you."
         },
         "unfavored": {
           "cost": {
             "power": 2
           },
           "effect": "agent_to_draw",
-          "desc": "Pay 2 Power: move an Agent from cooldown to top of draw."
+          "desc": "Pay 2 Power with an agent in cooldown: refresh up to 1 agent; this Patron becomes Neutral."
         },
         "lockFavored": false
       },
@@ -64,17 +64,17 @@
         "favored": {
           "cost": {},
           "effect": "sacrifice_prestige",
-          "desc": "Sacrifice a card: gain Prestige = cost \u2212 1."
+          "desc": "Sacrifice one owned in-play card costing at least 1 Coin: gain Prestige equal to its cost minus 1."
         },
         "neutral": {
           "cost": {},
           "effect": "sacrifice_prestige",
-          "desc": "Sacrifice a card: gain Prestige = cost \u2212 1."
+          "desc": "Sacrifice one owned in-play card costing at least 1 Coin: gain Prestige equal to its cost minus 1; this Patron favors you."
         },
         "unfavored": {
           "cost": {},
           "effect": "sacrifice_prestige",
-          "desc": "Sacrifice a card: gain Prestige = cost \u2212 1."
+          "desc": "Sacrifice one owned in-play card costing at least 1 Coin: gain Prestige equal to its cost minus 1; this Patron becomes Neutral."
         },
         "lockFavored": false
       },
@@ -91,12 +91,12 @@
         "neutral": {
           "cost": {},
           "effect": "coin_to_power",
-          "desc": "Sacrifice all Coin, gain Power = Coin \u2212 1."
+          "desc": "Pay all Coin: gain Power equal to Coin paid minus 1; this Patron favors you."
         },
         "unfavored": {
           "cost": {},
           "effect": "coin_to_power",
-          "desc": "Sacrifice all Coin, gain Power = Coin \u2212 1."
+          "desc": "Pay all Coin: gain Power equal to Coin paid minus 1; this Patron becomes Neutral."
         },
         "lockFavored": true
       },
@@ -114,21 +114,21 @@
             "coin": 4
           },
           "effect": "knockout_agent",
-          "desc": "Pay 4 Coin: knock out an opponent agent."
+          "desc": "If opponent has an active agent, pay 4 Coin: knock it out."
         },
         "neutral": {
           "cost": {
             "coin": 4
           },
           "effect": "knockout_agent",
-          "desc": "Pay 4 Coin: knock out an opponent agent."
+          "desc": "If opponent has an active agent, pay 4 Coin: knock it out; this Patron favors you."
         },
         "unfavored": {
           "cost": {
             "coin": 4
           },
           "effect": "knockout_agent",
-          "desc": "Pay 4 Coin: knock out an opponent agent."
+          "desc": "If opponent has an active agent, pay 4 Coin: knock it out; this Patron becomes Neutral."
         },
         "lockFavored": false
       },
@@ -144,7 +144,7 @@
         "favored": {
           "passive": "start_coin",
           "n": 1,
-          "desc": "Can't be used. Gain 1 Coin at start of each turn."
+          "desc": "If you hold this favor until the start of your turn, gain 1 Coin."
         },
         "neutral": {
           "cost": {
@@ -152,7 +152,7 @@
           },
           "effect": "gain_coin",
           "n": 1,
-          "desc": "Pay 2 Power, gain 1 Coin."
+          "desc": "Pay 2 Power: gain 1 Coin; this Patron favors you."
         },
         "unfavored": {
           "cost": {
@@ -160,7 +160,7 @@
           },
           "effect": "gain_coin_favor",
           "n": 1,
-          "desc": "Pay 2 Power, gain 1 Coin, flip to Favored."
+          "desc": "Pay 2 Power: gain 1 Coin; this Patron becomes Neutral."
         },
         "lockFavored": true,
         "flipUnfavoredToFavored": true
@@ -180,7 +180,7 @@
           },
           "effect": "draw",
           "n": 1,
-          "desc": "Pay 2 Power, Draw 1."
+          "desc": "Pay 2 Power: draw 1."
         },
         "neutral": {
           "cost": {
@@ -188,7 +188,7 @@
           },
           "effect": "draw",
           "n": 1,
-          "desc": "Pay 2 Power, Draw 1."
+          "desc": "Pay 2 Power: draw 1; this Patron favors you."
         },
         "unfavored": {
           "cost": {
@@ -196,7 +196,7 @@
           },
           "effect": "draw",
           "n": 1,
-          "desc": "Pay 2 Power, Draw 1."
+          "desc": "Pay 2 Power: draw 1; this Patron becomes Neutral."
         },
         "lockFavored": false
       },
@@ -214,14 +214,14 @@
             "coin": 3
           },
           "effect": "orgnum_favored",
-          "desc": "Pay 3 Coin: +1 Power per 4 cards owned; create Summerset Sacking."
+          "desc": "Pay 3 Coin: gain 1 Power per 4 owned cards; create Summerset Sacking."
         },
         "neutral": {
           "cost": {
             "coin": 2
           },
           "effect": "orgnum_neutral",
-          "desc": "Pay 2 Coin: +1 Power per 6 cards owned."
+          "desc": "Pay 2 Coin: gain 1 Power per 6 owned cards; this Patron favors you."
         },
         "unfavored": {
           "cost": {
@@ -229,7 +229,7 @@
           },
           "effect": "power",
           "n": 2,
-          "desc": "Pay 1 Coin, gain 2 Power."
+          "desc": "Pay 1 Coin: gain 2 Power; this Patron becomes Neutral."
         },
         "lockFavored": false
       },
@@ -247,21 +247,21 @@
             "coin": 3
           },
           "effect": "bewilderment",
-          "desc": "Pay 3 Coin: create Bewilderment for opponent."
+          "desc": "Pay 3 Coin: create Bewilderment in opponent cooldown."
         },
         "neutral": {
           "cost": {
             "coin": 3
           },
           "effect": "bewilderment",
-          "desc": "Pay 3 Coin: create Bewilderment for opponent."
+          "desc": "Pay 3 Coin: create Bewilderment in opponent cooldown; this Patron favors you."
         },
         "unfavored": {
           "cost": {
             "coin": 3
           },
           "effect": "bewilderment",
-          "desc": "Pay 3 Coin: create Bewilderment for opponent."
+          "desc": "Pay 3 Coin: create Bewilderment in opponent cooldown; this Patron becomes Neutral."
         },
         "lockFavored": false
       },
@@ -281,7 +281,7 @@
           "effect": "tavern_remove",
           "n": 2,
           "chimeraCombo": 4,
-          "desc": "Pay 2 Power: remove up to 2 tavern cards. Combo 4 \u2192 Chimera."
+          "desc": "Passive Combo 4: add The Chimera to your cooldown. Also pay 2 Power to replace up to 2 Tavern cards."
         },
         "neutral": {
           "cost": {
@@ -290,7 +290,7 @@
           "effect": "tavern_remove",
           "n": 2,
           "chimeraCombo": 5,
-          "desc": "Pay 2 Power: remove up to 2 tavern cards. Combo 5 \u2192 Chimera."
+          "desc": "Passive Combo 5: add The Chimera to your cooldown. Also pay 2 Power to replace up to 2 Tavern cards; this Patron favors you."
         },
         "unfavored": {
           "cost": {
@@ -298,7 +298,7 @@
           },
           "effect": "tavern_remove",
           "n": 2,
-          "desc": "Pay 2 Power: remove up to 2 tavern cards."
+          "desc": "Pay 2 Power: replace up to 2 Tavern cards; this Patron becomes Neutral."
         },
         "lockFavored": false
       },
@@ -318,7 +318,7 @@
           },
           "effect": "look_confine",
           "n": 5,
-          "desc": "Pay 1 Coin + discard: look at top 5 of opp draw, move 1 to cooldown."
+          "desc": "Pay 1 Coin and discard a card: Reprieve 5."
         },
         "neutral": {
           "cost": {
@@ -326,7 +326,7 @@
           },
           "effect": "look_confine",
           "n": 4,
-          "desc": "Discard: look at top 4 of opp draw, move 1 to cooldown."
+          "desc": "Discard a card: Reprieve 4; this Patron favors you."
         },
         "unfavored": {
           "cost": {
@@ -334,7 +334,7 @@
           },
           "effect": "look_confine",
           "n": 3,
-          "desc": "Pay 1 Coin: look at top 3 of opp draw, move 1 to cooldown."
+          "desc": "Pay 1 Coin: Reprieve 3; this Patron becomes Neutral."
         },
         "lockFavored": false
       },
@@ -346,27 +346,28 @@
       "short": "Mora",
       "color": "#556b2f",
       "starter": "unsealed-glyphic",
+      "alwaysNeutral": true,
       "abilities": {
         "favored": {
           "cost": {
             "power": 3
           },
           "effect": "mora_share",
-          "desc": "Pay 3 Power: put a tavern Action into both cooldowns."
+          "desc": "Pay 3 Power: Bargain."
         },
         "neutral": {
           "cost": {
             "power": 3
           },
           "effect": "mora_share",
-          "desc": "Pay 3 Power: put a tavern Action into both cooldowns."
+          "desc": "Pay 3 Power: Bargain; this Patron favors you."
         },
         "unfavored": {
           "cost": {
             "power": 2
           },
           "effect": "mora_share",
-          "desc": "Pay 2 Power: put a tavern Action into both cooldowns."
+          "desc": "Pay 2 Power: Bargain; this Patron becomes Neutral."
         },
         "lockFavored": false
       },
@@ -393,7 +394,7 @@
           },
           "effect": "create_agent",
           "card": "Soldier of the Empire",
-          "desc": "Pay 4 Coin: create Soldier of the Empire in cooldown."
+          "desc": "Pay 4 Coin: create Soldier of the Empire in cooldown; this Patron favors you."
         },
         "unfavored": {
           "cost": {
@@ -401,7 +402,7 @@
           },
           "effect": "power",
           "n": 2,
-          "desc": "Pay 3 Coin, gain 2 Power."
+          "desc": "Pay 3 Coin: gain 2 Power; this Patron becomes Neutral."
         },
         "lockFavored": false
       },

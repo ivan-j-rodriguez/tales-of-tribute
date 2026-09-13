@@ -1,7 +1,6 @@
 import { GameEngine } from './engine.js';
 import { TributeAI } from './ai.js';
 import { normalizeCatalog, nameSlug } from './normalize.js';
-import { overlayOfficialCardText, overlayOfficialPatronText } from './officialText.js';
 import {
   loadProfile, saveProfile, doDailyCheckIn, ensureDailyChallengeReset,
   recordMatchResult, openPurse, buySack, claimAchievement, claimDailyChallenge,
@@ -16,6 +15,7 @@ import {
 import { UPGRADE_TO_BASE, upgradesForPatron } from './upgrades.js';
 import { hostRoom, joinRoom } from './netplay.js';
 import { setMusicEnabled, preferMusicFromStorage, warmMuted, playSfx, setMusicCue, setSfxStyle, getSfxStyle } from './music.js';
+import { cardPlayLines, cardComboLines, applyOfficialPatronText, resourceClass } from './texts.js?v=26';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -67,19 +67,15 @@ const TOUR_STEPS = [
 ];
 
 async function loadData() {
-  const [c, p, d, cu, pu] = await Promise.all([
+  const [c, p, d] = await Promise.all([
     fetch('data/cards.json').then(r => r.json()),
     fetch('data/patrons.json').then(r => r.json()),
     fetch('data/decks.json').then(r => r.json()),
-    fetch('data/cards.uesp.json').then(r => r.json()).catch(() => null),
-    fetch('data/patrons.uesp.json').then(r => r.json()).catch(() => null),
   ]);
   const norm = normalizeCatalog(c, p, d);
   DATA.cards = norm.cards;
-  DATA.patrons = norm.patrons;
+  DATA.patrons = applyOfficialPatronText(norm.patrons);
   DATA.decks = norm.decks;
-  if (cu?.cards) overlayOfficialCardText(DATA.cards, cu.cards);
-  if (pu?.patrons) overlayOfficialPatronText(DATA.patrons, pu.patrons);
   cardsById = Object.fromEntries(DATA.cards.map(x => [x.id, x]));
   patronsById = Object.fromEntries(DATA.patrons.map(x => [x.id, x]));
 }
@@ -163,7 +159,7 @@ function onSplashEnter() {
   }
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 25';
+  if (stamp) stamp.textContent = 'build 26';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -191,17 +187,14 @@ function dossierKind(d) {
   return 'Action';
 }
 
-function effectBullets(text) {
-  if (!text) return '<li>—</li>';
-  const parts = String(text).split(/[;\n]|(?<=\.)\s+/).map(s => s.trim()).filter(Boolean);
+function effectBullets(lines) {
+  const parts = Array.isArray(lines)
+    ? lines
+    : String(lines || '').split(/[;\n]|(?<=\.)\s+/).map((s) => s.trim()).filter(Boolean);
+  if (!parts.length) return '<li>—</li>';
   return parts.map((s) => {
-    let cls = '';
-    if (/setback/i.test(s)) cls = 'setback';
-    else if (/power/i.test(s)) cls = 'power';
-    else if (/prestige/i.test(s)) cls = 'prestige';
-    else if (/coin/i.test(s)) cls = 'coin';
-    const line = s.endsWith('.') ? s : s + '.';
-    return `<li class="${cls}">${line}</li>`;
+    const line = /[.!?]$/.test(s) ? s : `${s}.`;
+    return `<li class="${resourceClass(line)}">${line}</li>`;
   }).join('');
 }
 
@@ -209,11 +202,11 @@ function dossierHTML(d) {
   const pat = patronsById[d.patron];
   const patronName = pat?.name || d.patron || '';
   const icon = d.patron ? patronArt(d.patron) : '';
-  const combos = [
-    d.combo2Text && ['COMBO 2', d.combo2Text],
-    d.combo3Text && ['COMBO 3', d.combo3Text],
-    d.combo4Text && ['COMBO 4', d.combo4Text],
-  ].filter(Boolean);
+  const combos = [2, 3, 4].map((n) => {
+    const lines = cardComboLines(d, n);
+    return lines.length ? [`COMBO ${n}`, lines] : null;
+  }).filter(Boolean);
+  const playLines = cardPlayLines(d);
   return `
     <div class="eso-tip">
       <div class="eso-tip-head">
@@ -222,7 +215,7 @@ function dossierHTML(d) {
           <div class="eso-tip-type">${dossierKind(d)}</div>
         </div>
         <div class="eso-tip-patron">
-          ${icon ? `<img src="${icon}" alt="" />` : ''}
+          ${icon ? `<img src="${icon}" alt="" draggable="false" />` : ''}
           <span>${patronName}</span>
         </div>
       </div>
@@ -230,7 +223,7 @@ function dossierHTML(d) {
       ${d.cost != null ? `<div class="eso-tip-cost">COIN COST <b>${d.cost}</b></div>` : ''}
       <div class="eso-tip-block dossier-block">
         <div class="eso-tip-h dossier-h">PLAY EFFECT</div>
-        <ul>${effectBullets(d.playText)}</ul>
+        <ul>${effectBullets(playLines)}</ul>
       </div>
       ${combos.map(([h, tx]) => `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">${h}</div><ul>${effectBullets(tx)}</ul></div>`).join('')}
       ${d.hp != null ? `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">HEALTH</div><ul><li>${d.hp}${d.taunt ? ' · Taunt' : ''}</li></ul></div>` : ''}
@@ -238,58 +231,42 @@ function dossierHTML(d) {
 }
 
 /**
- * Phone-first gestures (pointer events only):
- * - Short press / click = play / buy / claim (onTap). Never lifts.
- * - Hold (>=HOLD_MS, same pointer still down, move < HOLD_MOVE_PX): inspect.
- * - After a successful hold, the following click must not play.
+ * Phone-first gestures:
+ * - Any press that is NOT a hold = play / buy / claim (onTap).
+ * - Hold (>=520ms, little movement): lift-to-read; release returns the card.
+ * There is no dead zone between tap and hold.
  */
 function bindCardGesture(el, { onTap, onHoldRead }) {
+  // Pointer-only: iOS click still plays. Hold (~1s, little movement) inspects.
+  // A normal tap must never lift, scale, or flicker-zoom.
   let held = false;
   let timer = null;
   let t0 = 0;
-  let pointerId = null;
   let sx = 0;
   let sy = 0;
-  let stillDown = false;
-
   const clearHoldTimer = () => { clearTimeout(timer); timer = null; };
-
-  const onPointerDown = (e) => {
+  const start = (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     held = false;
-    stillDown = true;
     t0 = Date.now();
-    pointerId = e.pointerId;
-    sx = e.clientX;
-    sy = e.clientY;
+    sx = e.clientX ?? 0;
+    sy = e.clientY ?? 0;
     clearHoldTimer();
     timer = setTimeout(() => {
-      if (!stillDown || pointerId == null) return;
       held = true;
       if (onHoldRead) onHoldRead(el);
     }, HOLD_MS);
   };
-
-  const onPointerMove = (e) => {
-    if (!stillDown || pointerId == null || e.pointerId !== pointerId) return;
-    const dx = e.clientX - sx;
-    const dy = e.clientY - sy;
-    if ((dx * dx + dy * dy) > (HOLD_MOVE_PX * HOLD_MOVE_PX)) {
-      clearHoldTimer();
-    }
+  const move = (e) => {
+    if (!timer) return;
+    const dx = (e.clientX ?? sx) - sx;
+    const dy = (e.clientY ?? sy) - sy;
+    if ((dx * dx + dy * dy) > HOLD_MOVE_PX * HOLD_MOVE_PX) clearHoldTimer();
   };
-
-  const onPointerUpOrCancel = (e) => {
-    if (pointerId != null && e.pointerId !== pointerId) return;
-    stillDown = false;
-    clearHoldTimer();
-    pointerId = null;
-  };
-
-  el.addEventListener('pointerdown', onPointerDown);
-  el.addEventListener('pointermove', onPointerMove);
-  el.addEventListener('pointerup', onPointerUpOrCancel);
-  el.addEventListener('pointercancel', onPointerUpOrCancel);
+  el.addEventListener('pointerdown', start);
+  el.addEventListener('pointermove', move);
+  el.addEventListener('pointerup', clearHoldTimer);
+  el.addEventListener('pointercancel', clearHoldTimer);
   el.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -306,6 +283,7 @@ function bindCardGesture(el, { onTap, onHoldRead }) {
     if (onTap) onTap(e);
   });
   el.addEventListener('contextmenu', (e) => e.preventDefault());
+  el.addEventListener('dragstart', (e) => e.preventDefault());
 }
 
 function placeInspectStage(wrap, rect, kind) {
@@ -453,8 +431,7 @@ function patronDossierHTML(pid) {
     const ab = pat.abilities?.[key];
     const on = key === current;
     const cost = unlocked ? patronCostLine(ab) : '???';
-    let desc = unlocked ? (ab?.desc || (ab ? '—' : 'Cannot be used.')) : '???';
-    if (unlocked && desc) desc = desc.replace(/^Pay [^:]+:\s*/i, '');
+    const desc = unlocked ? (ab?.desc || (ab ? '—' : 'Cannot be used.')) : '???';
     const turn = unlocked ? patronTurnLine(pid, key, pat) : '';
     return `
       <div class="eso-tip-block dossier-block${on ? ' current-favor' : ''}">
@@ -721,20 +698,22 @@ function flyCard(fromEl, toEl, cardInst, onDone) {
   flyer.style.left = fr.left + 'px';
   flyer.style.top = fr.top + 'px';
   if (d) {
-    flyer.innerHTML = `<img src="${artFor(d)}" style="width:100%;height:100%;object-fit:cover;object-position:top" alt="" />`;
+    flyer.innerHTML = `<img src="${artFor(d)}" alt="" draggable="false" />`;
   } else {
-    flyer.style.background = 'linear-gradient(160deg,#3a2818,#1a1008)';
+    flyer.classList.add('card-back-face');
   }
-  document.body.appendChild(flyer);
+  const layer = $('#fly-layer') || document.body;
+  layer.appendChild(flyer);
   const dx = tr.left + tr.width / 2 - (fr.left + fr.width / 2);
   const dy = tr.top + tr.height / 2 - (fr.top + fr.height / 2);
   const anim = flyer.animate([
     { transform: 'translate(0,0) scale(1)', opacity: 1 },
-    { transform: `translate(${dx * 0.5}px, ${dy * 0.5 - 40}px) scale(1.05)`, opacity: 1, offset: 0.45 },
-    { transform: `translate(${dx}px, ${dy}px) scale(${Math.max(0.35, tr.width / fr.width)})`, opacity: 0.85 },
-  ], { duration: 620, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'forwards' });
+    { transform: `translate(${dx * 0.42}px, ${dy * 0.42 - 28}px) scale(1.04)`, opacity: 1, offset: 0.4 },
+    { transform: `translate(${dx}px, ${dy}px) scale(${Math.max(0.32, tr.width / fr.width)})`, opacity: 0.9 },
+  ], { duration: 560, easing: 'cubic-bezier(.22,.7,.2,1)', fill: 'forwards' });
+  playSfx('swipe');
   anim.onfinish = () => { flyer.remove(); onDone && onDone(); };
-  setTimeout(() => { if (flyer.parentNode) { flyer.remove(); onDone && onDone(); } }, 750);
+  setTimeout(() => { if (flyer.parentNode) { flyer.remove(); onDone && onDone(); } }, 680);
 }
 
 function pileEl(which) {
@@ -764,7 +743,7 @@ function renderAgentRow(row, agents, { attackable = false, onAttack = null } = {
     if (a) {
       slot.appendChild(renderCard(a, {
         extraClass: 'agent-board' + (a.taunt ? ' has-taunt' : ''),
-        onTap: () => {
+        onTap: (_inst, el) => {
           if (attackable && onAttack) onAttack(a);
         },
         onHoldRead: (_inst, el) => startLift(el, cardsById[a.id]),
@@ -781,31 +760,49 @@ function renderEventsRail(you, s) {
   const comboEl = $('#events-combo');
   if (!list) return;
   list.innerHTML = '';
-  const played = (you?.played || []).filter(c => {
-    const d = cardsById[c.id];
-    return d && d.type !== 'agent';
-  });
+  const played = you?.playedThisTurn?.length ? you.playedThisTurn : (you?.played || []);
   const suits = you?.suitsPlayed || {};
   const topCombo = Math.max(0, ...Object.values(suits));
   if (comboEl) comboEl.textContent = topCombo >= 2 ? `Combo ${topCombo}` : '';
-  const turnLog = (engine.log || []).filter(l => l.t === s.turn && l.a === s.active).slice(-8);
-  const items = played.length ? played.map((c, i) => {
+  const running = {};
+  for (const c of played) {
     const d = cardsById[c.id];
-    return { def: d, pip: d?.playText || '', combo: topCombo >= 2 && i === played.length - 1 };
-  }) : turnLog.map(l => ({ def: null, pip: l.msg, combo: /combo/i.test(l.msg) }));
-  for (const it of items) {
-    const el = document.createElement('div');
-    el.className = 'event-hex' + (it.combo ? ' combo' : '');
-    if (it.def) {
-      el.innerHTML = `<img src="${artFor(it.def)}" alt="" /><span class="ev-pip">${it.pip}</span>`;
-      bindCardGesture(el, {
-        onHoldRead: () => startLift(el, it.def),
-      });
-    } else {
-      el.innerHTML = `<span class="ev-pip">${it.pip}</span>`;
-    }
+    if (!d) continue;
+    const suit = d.patron || c.patron || 'treasury';
+    running[suit] = (running[suit] || 0) + 1;
+    const comboN = running[suit];
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'event-hex' + (comboN >= 2 ? ' combo' : '');
+    el.innerHTML = `<img src="${artFor(d)}" alt="" draggable="false" />${comboN >= 2 ? `<span class="ev-combo">×${comboN}</span>` : ''}`;
+    bindCardGesture(el, {
+      onTap: () => {},
+      onHoldRead: () => startLift(el, d),
+    });
     list.appendChild(el);
   }
+}
+
+function paintPile(sel, count, { sealed = true, top = null } = {}) {
+  const btn = $(sel);
+  if (!btn) return;
+  const art = btn.querySelector('.pile-art');
+  if (!art) return;
+  btn.classList.toggle('pile-empty', count <= 0);
+  btn.classList.toggle('pile-thick', count >= 8);
+  if (count <= 0) {
+    art.className = 'pile-art card-back-face';
+    art.innerHTML = '';
+    return;
+  }
+  if (sealed || !top) {
+    art.className = 'pile-art card-back-face';
+    art.innerHTML = '';
+    return;
+  }
+  const def = cardsById[top.id] || top;
+  art.className = 'pile-art pile-face';
+  art.innerHTML = `<img src="${artFor(def)}" alt="" draggable="false" />`;
 }
 
 function renderMatch() {
@@ -836,6 +833,15 @@ function renderMatch() {
   $('#cnt-tavern-discard').textContent = s.tavernDiscard.length;
   const tdraw = $('#cnt-tavern-draw');
   if (tdraw) tdraw.textContent = (s.tavernPile || []).length;
+  paintPile('#pile-opp-draw', opp.draw.length, { sealed: true });
+  paintPile('#pile-you-draw', you.draw.length, { sealed: true });
+  paintPile('#pile-tavern-draw', (s.tavernPile || []).length, { sealed: true });
+  paintPile('#pile-opp-cd', opp.cooldown.length, { sealed: true, top: opp.cooldown.at(-1) });
+  paintPile('#pile-you-cd', you.cooldown.length, { sealed: true, top: you.cooldown.at(-1) });
+  paintPile('#pile-tavern-discard', s.tavernDiscard.length, {
+    sealed: false,
+    top: s.tavernDiscard.at(-1),
+  });
   renderEventsRail(you, s);
 
   // Patron rail: opp patrons TOP, treasury MIDDLE, your patrons BOTTOM
@@ -854,7 +860,7 @@ function renderMatch() {
     const el = document.createElement('div');
     const favor = favYou ? 'fav-you' : favOpp ? 'fav-opp' : 'neutral';
     const favorWord = favYou ? 'Favored' : favOpp ? 'Unfavored' : 'Neutral';
-    el.className = 'patron-coin ' + (pid === 'treasury' ? 'treasury ' : '') + favor;
+    el.className = 'patron-coin ' + (pid === 'treasury' ? 'treasury ' : '') + (pid === 'mora' ? 'mora ' : '') + favor;
     el.dataset.pid = pid;
     el.dataset.favor = favorWord.toLowerCase();
     el.dataset.side = pid === 'treasury' ? 'mid' : (youPats.includes(pid) ? 'you' : 'opp');
@@ -897,18 +903,10 @@ function renderMatch() {
   for (const pid of youPats) { const c = makeCoin(pid); if (c) gYou.appendChild(c); }
   rail.appendChild(gOpp); rail.appendChild(gMid); rail.appendChild(gYou);
 
-  // Tavern — always 5 hexes; tap to buy if affordable; hold to inspect (never buys on hold)
+  // Tavern — tap to buy if affordable; hold to inspect (never buys on hold)
   const tz = $('#tavern-zone');
   tz.innerHTML = '';
-  for (let i = 0; i < 5; i++) {
-    const c = s.tavern[i];
-    if (!c) {
-      const slot = document.createElement('div');
-      slot.className = 'tavern-slot empty';
-      slot.innerHTML = '<span class="slot-label">Tavern</span>';
-      tz.appendChild(slot);
-      continue;
-    }
+  s.tavern.forEach((c, i) => {
     const aff = yourTurn && engine.canBuy(i);
     tz.appendChild(renderCard(c, {
       affordable: aff,
@@ -927,7 +925,7 @@ function renderMatch() {
       },
       onHoldRead: (_inst, el) => startLift(el, cardsById[c.id]),
     }));
-  }
+  });
 
   // Agent rows — always show dashed/gold Agent slot outlines
   renderAgentRow($('#opp-agents'), opp.agents, {
@@ -971,20 +969,20 @@ function renderMatch() {
         const isContract = !!def?.contract;
         const dest = isAgent
           ? ($('#you-agents') || pileEl('played'))
-          : (pileEl('played') || pileEl('you-played'));
+          : ($('#events-list') || pileEl('played') || pileEl('you-played'));
         if (isContract) { playSfx('contract'); flashVfx(el, 'contract'); }
         else if (isAgent) { playSfx('agent'); flashVfx(el, 'agent'); }
         else playSfx('play');
         const ok = engine.playCard(c.uid);
         if (!ok) { toast('Cannot play that now'); return; }
-        flyCard(el, dest, c, () => {});
+        flyCard(el, dest || $('#events-list'), c, () => {});
         syncAction({ op: 'play', uid: c.uid });
         afterPlayerAction();
       },
       onHoldRead: (_i, el) => startLift(el, def),
     }));
   });
-  // Player hand is a flex row — layoutFan stacks them.
+  layoutFan(hz, false);
 
   // Rival fanned backs (top)
   const ohz = $('#opp-hand-zone');
@@ -1023,16 +1021,18 @@ function layoutFan(container, rival = false) {
   const cards = [...container.children];
   const n = cards.length;
   if (!n) return;
-  const spread = rival ? Math.min(36, 8 + n * 4) : Math.min(28, 6 + n * 3);
+  const spread = rival ? Math.min(40, 10 + n * 5) : Math.min(34, 8 + n * 4);
   const start = -spread / 2;
   const step = n === 1 ? 0 : spread / (n - 1);
-  const overlap = rival ? 22 : Math.max(36, Math.min(52, 220 / n));
+  const overlap = rival ? 24 : Math.max(40, Math.min(56, 240 / n));
   cards.forEach((card, i) => {
     const rot = start + step * i;
     const x = (i - (n - 1) / 2) * overlap;
     const y = Math.abs(rot) * (rival ? 0.35 : 0.45);
+    const tf = `translate(calc(-50% + ${x}px), ${rival ? y : -y}px) rotate(${rot}deg)`;
     card.style.zIndex = String(i + 1);
-    card.style.transform = `translate(calc(-50% + ${x}px), ${rival ? y : -y}px) rotate(${rot}deg)`;
+    card.style.setProperty('--fan-tf', tf);
+    card.style.transform = tf;
   });
 }
 
@@ -1140,7 +1140,10 @@ function openPileModal(pileKey) {
   else if (pileKey === 'opp-cooldown') { cards = opp.cooldown; title = 'Rival cooldown'; }
   else if (pileKey === 'opp-hand') { cards = opp.hand; title = 'Rival hand'; }
   else if (pileKey === 'tavern-discard') { cards = s.tavernDiscard; title = 'Tavern discard'; }
-  else if (pileKey === 'tavern-draw') { cards = s.tavernPile || []; title = 'Tavern deck'; }
+  else if (pileKey === 'tavern-draw') {
+    toast('The tavern deck is sealed.');
+    return;
+  }
 
   const grid = $('#pile-modal-grid');
   grid.innerHTML = '';
@@ -2105,6 +2108,8 @@ function startGauntletStop(stop) {
 
 /* ——— Wire ——— */
 function bind() {
+  document.documentElement.classList.toggle('has-touch', 'ontouchstart' in window || navigator.maxTouchPoints > 0);
+  document.addEventListener('gesturestart', (e) => e.preventDefault());
   $('#btn-play').onclick = () => {
     setHourglass($('#chk-hourglass-splash')?.checked || !!profile?.hourglassDefault);
     beginDeckPick('ai');
@@ -2289,24 +2294,43 @@ function installTestHook() {
       }));
       const cluster = $('#rail-patrons')?.getBoundingClientRect();
       const rail = $('#patron-rail')?.getBoundingClientRect();
+      const drawArt = document.querySelector('#pile-you-draw .pile-art');
+      const tavern = document.querySelector('#tavern-zone')?.getBoundingClientRect();
+      const felt = document.querySelector('.felt-table')?.getBoundingClientRect();
+      const drawBg = drawArt ? getComputedStyle(drawArt).backgroundImage : '';
       return {
         hand: p?.hand?.length ?? 0,
         coin: p?.coin ?? 0,
         golds: p?.hand?.filter(c => c.id === 'gold').length ?? 0,
         played: p?.played?.length ?? 0,
+        playedThisTurn: p?.playedThisTurn?.length ?? 0,
         active: engine?.state?.active ?? null,
         phase: engine?.state?.phase ?? null,
         toast: lastToast,
         liftActive,
+        liftLayer: !!document.querySelector('.lift-fly'),
         patronConfirm: !!$('#patron-confirm-overlay')?.classList.contains('show'),
         patrons: coins,
         clusterH: cluster?.height || 0,
         railH: rail?.height || 0,
+        comboHexes: document.querySelectorAll('#events-list .event-hex img').length,
+        pileBack: /card-back|url\(/i.test(drawBg),
+        pileEmpty: document.querySelector('#pile-you-draw')?.classList.contains('pile-empty') || false,
+        tavernCenter: !!(tavern && felt && Math.abs((tavern.top + tavern.height / 2) - (felt.top + felt.height / 2)) < felt.height * 0.18),
+        goldTip: dossierHTML(cardsById.gold || { name: 'Gold', play: [{ op: 'coin', n: 1 }], cost: 0, patron: 'treasury' }),
       };
     },
     clickDraw() {
       document.querySelector('[data-pile="you-draw"]')?.click();
       return lastToast;
+    },
+    clickTavernDeck() {
+      document.querySelector('[data-pile="tavern-draw"]')?.click();
+      return lastToast;
+    },
+    dossier(id) {
+      const d = cardsById[id];
+      return d ? dossierHTML(d) : '';
     },
   };
 }
