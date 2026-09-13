@@ -565,7 +565,14 @@ button.primary {
     inset 2px 2px 0 rgba(240,230,184,0.25),
     inset -2px -2px 0 rgba(100,70,20,0.3);
 }
-.card:hover { transform: translateY(-6px) scale(1.04); z-index: 5; box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
+@media (hover: hover) and (pointer: fine) {
+  .card:hover { transform: translateY(-6px) scale(1.04); z-index: 5; box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
+}
+.card {
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
 .card img.art {
   width: 100%; height: 68%; object-fit: cover; object-position: top; display: block;
   background: #0a0604;
@@ -577,6 +584,7 @@ button.primary {
   font-size: 0.62rem; line-height: 1.15; text-align: center;
 }
 .card .cname { font-family: 'Cinzel', serif; color: var(--gold-bright); font-size: 0.58rem; }
+.card .ctype { color: var(--candle); font-size: 0.5rem; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.9; }
 .card .ceffect { color: var(--ink-dim); font-size: 0.55rem; max-height: 2.4em; overflow: hidden; }
 .card .cost-badge {
   position: absolute; top: 4px; left: 4px;
@@ -724,7 +732,7 @@ button.primary {
 .tooltip button { padding: 0.25rem 0.6rem; font-size: 0.75rem; }
 
 /* Club / store / collection / friend */
-#club, #collection, #friend-lobby, #store, #encyclopedia {
+#club, #collection, #friend-lobby, #store, #encyclopedia, #settings {
   background: linear-gradient(180deg, #160e08, #24160e);
   padding: 1rem;
   overflow: auto;
@@ -734,7 +742,7 @@ button.primary {
   margin-bottom: 0.75rem; position: sticky; top: 0;
   background: #160e08ee; z-index: 2; padding: 0.4rem 0;
 }
-.club-header h2, #friend-lobby h2, #collection h2, #store h2 {
+.club-header h2, #friend-lobby h2, #collection h2, #store h2, #settings h2 {
   font-family: 'Cinzel', serif; color: var(--gold); margin-right: auto;
 }
 .store-gold { font-family: 'Cinzel', serif; color: var(--gold-bright); margin-right: 0.5rem; }
@@ -916,3 +924,180 @@ button.primary {
   to { transform: none; opacity: 1; }
 }
 .hidden { display: none !important; }
+
+
+/* ——— Agent slot outlines (empty seats) ——— */
+.agents-row {
+  display: flex; gap: 0.4rem; justify-content: center; align-items: flex-end;
+  flex-wrap: wrap; min-height: calc(var(--card-h) * 0.5);
+  padding: 0.15rem 0;
+}
+.agent-slot {
+  width: calc(var(--card-w) * 0.78);
+  height: calc(var(--card-h) * 0.72);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+.agent-slot.empty {
+  border: 2px dashed rgba(212, 175, 55, 0.55);
+  background:
+    linear-gradient(160deg, rgba(212,175,55,0.06), transparent 60%),
+    rgba(0,0,0,0.2);
+  box-shadow: inset 0 0 12px rgba(212,175,55,0.08);
+}
+.agent-slot.empty .slot-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(212,175,55,0.55);
+  pointer-events: none;
+}
+.agent-slot.filled {
+  border: 1px solid transparent;
+}
+.agent-slot .card.agent-board {
+  width: 100%; height: 100%;
+}
+.card.agent-board.has-taunt {
+  box-shadow: 0 0 12px rgba(240, 180, 60, 0.55);
+  border-color: var(--gold);
+}
+
+/* ——— Inspect zoom (toward player) ——— */
+.inspect-overlay {
+  position: fixed; inset: 0; z-index: 90;
+  display: none; align-items: flex-end; justify-content: center;
+  padding: 0 0.75rem 8vh;
+  pointer-events: auto;
+}
+.inspect-overlay.show { display: flex; }
+.inspect-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.72);
+}
+.inspect-card {
+  position: relative; z-index: 1;
+  width: min(320px, 88vw);
+  max-height: 78vh;
+  overflow: auto;
+  background: var(--panel);
+  border: 2px solid var(--gold);
+  border-radius: 14px;
+  padding: 0.75rem;
+  box-shadow: 0 16px 48px #000c, 0 0 30px rgba(212,175,55,0.25);
+  transform: translateY(40px) scale(0.85);
+  opacity: 0;
+  transition: transform 0.28s cubic-bezier(.2,.8,.2,1), opacity 0.28s ease;
+}
+.inspect-card.zoomed {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+.inspect-art {
+  width: 100%; border-radius: 8px; display: block;
+  max-height: 42vh; object-fit: cover; object-position: top;
+  border: 1px solid var(--gold-dim);
+}
+.inspect-meta h3 {
+  font-family: 'Cinzel', serif; color: var(--gold-bright);
+  margin: 0.55rem 0 0.25rem; font-size: 1.15rem;
+}
+.inspect-type {
+  font-size: 0.78rem; color: var(--candle); margin: 0 0 0.4rem;
+  text-transform: capitalize;
+}
+.inspect-play { font-size: 0.9rem; color: var(--ink); margin: 0.35rem 0; }
+.inspect-combo { font-size: 0.8rem; color: var(--ink-dim); margin: 0.25rem 0; }
+.inspect-hint {
+  margin-top: 0.65rem; font-size: 0.7rem; color: var(--ink-dim);
+  text-align: center; font-family: 'Cinzel', serif; letter-spacing: 0.04em;
+}
+
+/* Card backs in pile modal */
+.card-back-only .card-back-face,
+.pile-modal-grid .card-back-face {
+  background:
+    linear-gradient(135deg, rgba(212,175,55,0.25), transparent 50%),
+    repeating-linear-gradient(45deg, var(--back-hue), var(--back-hue) 4px, color-mix(in srgb, var(--back-accent) 30%, var(--back-hue)) 4px, color-mix(in srgb, var(--back-accent) 30%, var(--back-hue)) 5px);
+  border: 1px solid var(--back-accent);
+  border-radius: 4px;
+}
+
+/* ——— Guided tour spotlight ——— */
+.tour-root {
+  position: fixed; inset: 0; z-index: 95;
+  pointer-events: none;
+}
+.tour-root[hidden] { display: none !important; }
+.tour-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.55);
+  pointer-events: auto;
+}
+.tour-hole {
+  position: fixed;
+  border-radius: 10px;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.62), 0 0 0 2px var(--gold), 0 0 24px rgba(212,175,55,0.5);
+  pointer-events: none;
+  display: none;
+  z-index: 96;
+  transition: left 0.25s, top 0.25s, width 0.25s, height 0.25s;
+}
+.tour-hole.show { display: block; }
+.tour-panel {
+  position: fixed; z-index: 97;
+  pointer-events: auto;
+  max-width: min(340px, 92vw);
+  background: linear-gradient(180deg, rgba(40,28,14,0.98), rgba(18,12,8,0.98));
+  border: 1px solid var(--gold);
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+  font-size: 0.92rem; color: var(--ink);
+  box-shadow: 0 8px 28px #000c;
+  left: 50%; transform: translateX(-50%);
+  bottom: 24px;
+}
+.tour-step {
+  font-family: 'Cinzel', serif; font-size: 0.7rem;
+  color: var(--gold); letter-spacing: 0.08em; margin-bottom: 0.35rem;
+}
+.tour-panel .tip-nav {
+  margin-top: 0.65rem; display: flex; gap: 0.5rem; justify-content: flex-end;
+}
+.tour-panel .tip-nav button { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
+
+/* ——— Settings ——— */
+#settings { overflow: auto; }
+.settings-block {
+  background: var(--panel); border: var(--border); border-radius: 10px;
+  padding: 0.75rem 1rem; margin-bottom: 1rem;
+}
+.settings-row {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.45rem 0; font-size: 0.95rem;
+  border-bottom: 1px solid rgba(212,175,55,0.12);
+}
+.settings-row:last-of-type { border-bottom: none; }
+.hint-inline { font-size: 0.75rem; color: var(--ink-dim); font-weight: 400; }
+.settings-row-btn {
+  margin-top: 0.65rem; width: 100%;
+}
+.store-item.locked { opacity: 0.85; }
+.store-item.locked .price { color: #c09060; }
+.back-swatch {
+  height: 56px; border-radius: 6px; margin-bottom: 0.5rem;
+  border: 1px solid rgba(212,175,55,0.35);
+  background:
+    linear-gradient(135deg, rgba(212,175,55,0.2), transparent 50%),
+    repeating-linear-gradient(45deg, #1a1008, #1a1008 4px, #2a2010 4px, #2a2010 5px);
+}
+.back-swatch.back-default { background: linear-gradient(135deg, #3a2818, #1a1008); }
+.back-swatch.back-clockwork { background: linear-gradient(135deg, #3a3420, #1a1810 60%, #8a7020); }
+.back-swatch.back-daedra { background: linear-gradient(135deg, #3a1010, #1a0808 60%, #8b1a1a); }
+.back-swatch.back-apocrypha { background: linear-gradient(135deg, #142820, #0a1810 60%, #2a8050); }
+.back-swatch.back-vestige { background: linear-gradient(135deg, #1a2840, #101828 60%, #4080c0); }
+
+#btn-match-settings { padding: 0.4rem 0.55rem; font-size: 1rem; }

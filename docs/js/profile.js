@@ -70,6 +70,8 @@ export function defaultProfile() {
     cardBack: 'default',
     unlockedSkins: ['high-isle'],
     unlockedBacks: ['default'],
+    hourglassDefault: false,
+    showBotCards: false,
     ranked: { tier: 'Unranked', points: 0, placementLeft: 5, winStreak: 0 },
     purses: [{ rarity: 'Common' }], // queued cutpurses
     lastCheckIn: null,
@@ -104,6 +106,8 @@ export function loadProfile() {
     p.unlockedBacks = Array.isArray(p.unlockedBacks) ? p.unlockedBacks : ['default'];
     p.tableSkin = p.tableSkin || 'high-isle';
     p.cardBack = p.cardBack || 'default';
+    p.hourglassDefault = !!p.hourglassDefault;
+    p.showBotCards = !!p.showBotCards;
     p.ranked = { tier: 'Unranked', points: 0, placementLeft: 5, winStreak: 0, ...(p.ranked || {}) };
     p.purses = Array.isArray(p.purses) ? p.purses : [];
     // migrate legacy sacks → purses

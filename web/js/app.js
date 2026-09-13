@@ -25,8 +25,6 @@ let profile = null;
 let pickYou = [];
 let pickOpp = [];
 let pickPhase = 'you';
-let tutorialOn = true;
-let tipStep = 0;
 let matchMode = 'ai'; // ai | ranked | hotseat | remote-host | remote-guest
 let isRandomMatch = false;
 let isRankedMatch = false;
@@ -36,14 +34,26 @@ let hgTimer = null;
 let net = null;
 let lastRes = { you: {}, opp: {} };
 let animating = false;
+let tourStep = 0;
+let tourActive = false;
+let settingsReturnScreen = '#splash';
+let inspectOpen = false;
 
 const TURN_SECONDS = 90;
+const HOLD_MS = 400;
+const AGENT_SLOTS = 4;
+const TOUR_KEY = 'tot_tour_v2';
 
-const TIPS = [
-  { text: "Play cards from your hand. Coin buys from the tavern; leftover Power becomes Prestige — unless an enemy Taunt still stands." },
-  { text: "The tavern shows five cards. Tap one you can afford to send it to your cooldown. Watch it fly across the table." },
-  { text: "Call one Patron per turn from the coin rail on the right. Neutral becomes yours; an enemy's favor returns to Neutral. Favor all four to win instantly." },
-  { text: "End at 80 Prestige to win outright. Reach 40 and your opponent gets one last chance to surpass you. Toggle the Hourglass for a 90s turn clock." },
+/** Guided first-match walkthrough — plain language, one spotlight at a time. */
+const TOUR_STEPS = [
+  { sel: '#hand-zone', text: 'This is your hand. Tap a card to play it. Hold (~half a second) to zoom in and read name, cost, type, and effects.' },
+  { sel: '#tavern-zone', text: 'Coin buys from the tavern — the five cards in the middle. Tap one you can afford; it flies to your cooldown pile.' },
+  { sel: '#you-res', text: 'Power fights enemy agents. Leftover Power becomes Prestige at end of turn — unless a Taunt agent is still standing in their way.' },
+  { sel: '#pile-you-draw', text: 'Your draw pile is cards you have not seen yet. Bought cards wait in cooldown until the deck reshuffles — then they join your draw again.' },
+  { sel: '#you-agents', text: 'Agents sit in these slots and stay until knocked out. Empty gold outlines show open seats. Taunt agents must be hit first.' },
+  { sel: '#tavern-zone', text: 'Contract cards are one-and-done — they exile after use (or when a contract agent is defeated). They do not come back through cooldown.' },
+  { sel: '#patron-rail', text: 'Patron coins live on the right (plus Treasury). You get one patron call per turn — flip favor toward yourself.' },
+  { sel: '#turn-ind', text: 'You win at 40 prestige if they cannot pass you on their last chance, at 80 outright, or by favoring all 4 patrons.' },
 ];
 
 async function loadData() {
@@ -144,6 +154,65 @@ function onSplashEnter() {
   show('#splash');
 }
 
+function botRevealAllowed() {
+  // Coach mode: vs AI casual only — never ranked or friend play
+  return matchMode === 'ai' && !!(profile && profile.showBotCards);
+}
+
+function typeLabel(d) {
+  const bits = [];
+  if (d.contract) bits.push('Contract');
+  if (d.type === 'agent') bits.push('Agent');
+  else if (d.type === 'action') bits.push('Action');
+  else if (d.type) bits.push(d.type);
+  return bits.join(' · ') || 'Card';
+}
+
+/**
+ * Phone-first: short tap fires onTap; ~400ms hold fires onInspect and NEVER also taps.
+ */
+function bindCardGesture(el, { onTap, onInspect }) {
+  let timer = null;
+  let held = false;
+  let sx = 0, sy = 0;
+  const clear = () => { if (timer) { clearTimeout(timer); timer = null; } };
+  const cancelHold = () => { clear(); };
+
+  el.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    held = false;
+    sx = e.clientX; sy = e.clientY;
+    try { el.setPointerCapture(e.pointerId); } catch {}
+    clear();
+    timer = setTimeout(() => {
+      held = true;
+      timer = null;
+      if (onInspect) onInspect();
+    }, HOLD_MS);
+  });
+  el.addEventListener('pointermove', (e) => {
+    if (!timer) return;
+    if (Math.hypot(e.clientX - sx, e.clientY - sy) > 14) cancelHold();
+  });
+  el.addEventListener('pointerup', (e) => {
+    const wasHeld = held;
+    clear();
+    held = false;
+    try { el.releasePointerCapture(e.pointerId); } catch {}
+    if (wasHeld) {
+      e.preventDefault();
+      e.stopPropagation();
+      // Release closes inspect; never also play/buy
+      closeInspect();
+      return;
+    }
+    if (inspectOpen) return;
+    if (onTap) onTap(e);
+  });
+  el.addEventListener('pointercancel', () => { clear(); held = false; });
+  el.addEventListener('contextmenu', (e) => e.preventDefault());
+}
+
 function renderCard(inst, opts = {}) {
   const d = cardsById[inst.id] || inst;
   const el = document.createElement('div');
@@ -155,20 +224,66 @@ function renderCard(inst, opts = {}) {
   el.dataset.id = inst.id;
   const hp = inst.hp != null ? inst.hp : d.hp;
   el.innerHTML = `
-    <img class="art" src="${artFor(d)}" alt="${d.name}" onerror="this.style.background='#2a1810'" />
+    <img class="art" src="${artFor(d)}" alt="${d.name}" draggable="false" onerror="this.style.background='#2a1810'" />
     ${d.cost != null ? `<div class="cost-badge">${d.cost}</div>` : ''}
     ${hp != null ? `<div class="hp-badge">${hp}${d.taunt || inst.taunt ? ' T' : ''}</div>` : ''}
     ${(d.taunt || inst.taunt) ? `<div class="taunt-badge">TAUNT</div>` : ''}
     <div class="meta">
       <div class="cname">${d.name}</div>
+      <div class="ctype">${typeLabel(d)}</div>
       <div class="ceffect">${d.playText || ''}</div>
     </div>
   `;
-  el.addEventListener('click', (ev) => {
-    ev.stopPropagation();
-    opts.onClick && opts.onClick(inst, el);
-  });
+  const inspect = () => {
+    if (opts.onInspect) opts.onInspect(inst, el);
+    else showInspect(d, el);
+  };
+  const tap = (ev) => {
+    ev && ev.stopPropagation();
+    if (opts.onTap) opts.onTap(inst, el);
+    else if (opts.onClick) opts.onClick(inst, el);
+  };
+  bindCardGesture(el, { onTap: tap, onInspect: inspect });
   return el;
+}
+
+function showInspect(d, fromEl) {
+  if (!d) return;
+  closeInspect();
+  const overlay = $('#inspect-overlay');
+  const card = $('#inspect-card');
+  if (!overlay || !card) {
+    showCardModal(d);
+    return;
+  }
+  inspectOpen = true;
+  const hp = d.hp;
+  card.innerHTML = `
+    <img class="inspect-art" src="${artFor(d)}" alt="${d.name}" draggable="false" />
+    <div class="inspect-meta">
+      <h3>${d.name}</h3>
+      <p class="inspect-type">${d.patron || ''} · ${typeLabel(d)} · cost ${d.cost ?? '—'}${hp != null ? ' · HP ' + hp : ''}${d.taunt ? ' · Taunt' : ''}</p>
+      <p class="inspect-play">${d.playText || '—'}</p>
+      ${d.combo2Text ? `<p class="inspect-combo"><strong>Combo 2:</strong> ${d.combo2Text}</p>` : ''}
+      ${d.combo3Text ? `<p class="inspect-combo"><strong>Combo 3:</strong> ${d.combo3Text}</p>` : ''}
+      ${d.combo4Text ? `<p class="inspect-combo"><strong>Combo 4:</strong> ${d.combo4Text}</p>` : ''}
+      <p class="inspect-hint">Release or tap outside to close</p>
+    </div>
+  `;
+  overlay.hidden = false;
+  overlay.classList.add('show');
+  // Zoom toward player (bottom of screen)
+  requestAnimationFrame(() => card.classList.add('zoomed'));
+}
+
+function closeInspect() {
+  const overlay = $('#inspect-overlay');
+  const card = $('#inspect-card');
+  if (!overlay) return;
+  inspectOpen = false;
+  card?.classList.remove('zoomed');
+  overlay.classList.remove('show');
+  overlay.hidden = true;
 }
 
 function unlockedPool() {
@@ -369,6 +484,30 @@ function pileEl(which) {
   return $(map[which] || which);
 }
 
+function renderAgentRow(row, agents, { attackable = false, onAttack = null } = {}) {
+  if (!row) return;
+  row.innerHTML = '';
+  const slots = Math.max(AGENT_SLOTS, agents.length);
+  for (let i = 0; i < slots; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'agent-slot' + (agents[i] ? ' filled' : ' empty');
+    const a = agents[i];
+    if (a) {
+      slot.appendChild(renderCard(a, {
+        extraClass: 'agent-board' + (a.taunt ? ' has-taunt' : ''),
+        onTap: () => {
+          if (attackable && onAttack) onAttack(a);
+          else showInspect(cardsById[a.id]);
+        },
+        onInspect: () => showInspect(cardsById[a.id]),
+      }));
+    } else {
+      slot.innerHTML = '<span class="slot-label">Seat</span>';
+    }
+    row.appendChild(slot);
+  }
+}
+
 function renderMatch() {
   if (!engine?.state) return;
   const s = engine.state;
@@ -425,48 +564,43 @@ function renderMatch() {
     rail.appendChild(el);
   }
 
-  // Tavern
+  // Tavern — tap to buy if affordable; hold to inspect (never buys on hold)
   const tz = $('#tavern-zone');
   tz.innerHTML = '';
   s.tavern.forEach((c, i) => {
     const aff = yourTurn && engine.canBuy(i);
     tz.appendChild(renderCard(c, {
       affordable: aff,
-      onClick: (inst, el) => {
-        if (!canControl()) { showCardModal(cardsById[c.id]); return; }
+      onTap: (inst, el) => {
+        if (!canControl()) return;
         if (engine.canBuy(i)) {
           const dest = pileEl('you-cooldown');
           flyCard(el, dest, c, () => {});
           engine.buy(i);
           syncAction({ op: 'buy', i });
           afterPlayerAction();
-        } else showCardModal(cardsById[c.id]);
-      }
+        } else {
+          toast(`Need ${cardsById[c.id]?.cost ?? '?'} coin`);
+        }
+      },
+      onInspect: () => showInspect(cardsById[c.id]),
     }));
   });
 
-  // Agents
-  const oa = $('#opp-agents');
-  oa.innerHTML = '';
-  opp.agents.forEach(a => {
-    oa.appendChild(renderCard(a, {
-      extraClass: 'agent-board',
-      onClick: () => {
-        if (!canControl()) return;
-        engine.knockoutWithPower(a.uid);
+  // Agent rows — always show dashed/gold slot outlines (empty seats)
+  renderAgentRow($('#opp-agents'), opp.agents, {
+    attackable: yourTurn,
+    onAttack: (a) => {
+      if (!canControl()) return;
+      if (engine.knockoutWithPower(a.uid)) {
         syncAction({ op: 'knockout', uid: a.uid });
         afterPlayerAction();
+      } else {
+        toast('Need enough Power — and Taunt must be hit first');
       }
-    }));
+    },
   });
-  const ya = $('#you-agents');
-  ya.innerHTML = '';
-  you.agents.forEach(a => {
-    ya.appendChild(renderCard(a, {
-      extraClass: 'agent-board',
-      onClick: () => showCardModal(cardsById[a.id]),
-    }));
-  });
+  renderAgentRow($('#you-agents'), you.agents, { attackable: false });
 
   // Played this turn
   const yp = $('#you-played');
@@ -476,25 +610,31 @@ function renderMatch() {
     if (def?.type === 'agent') return; // agents live in agents row
     yp.appendChild(renderCard(c, {
       extraClass: 'played-card',
-      onClick: () => showCardModal(cardsById[c.id]),
+      onTap: () => showInspect(cardsById[c.id]),
+      onInspect: () => showInspect(cardsById[c.id]),
     }));
   });
 
-  // Hand
+  // Hand — tap plays, hold inspects (hold never also plays)
   const hz = $('#hand-zone');
   hz.innerHTML = '';
   you.hand.forEach(c => {
+    const def = cardsById[c.id];
     hz.appendChild(renderCard(c, {
       playable: yourTurn,
       deal: true,
-      onClick: (inst, el) => {
+      onTap: (inst, el) => {
         if (!canControl()) return;
-        const dest = pileEl('played') || pileEl('you-played');
+        const isAgent = def?.type === 'agent';
+        const dest = isAgent
+          ? ($('#you-agents') || pileEl('played'))
+          : (pileEl('played') || pileEl('you-played'));
         flyCard(el, dest, c, () => {});
         engine.playCard(c.uid);
         syncAction({ op: 'play', uid: c.uid });
         afterPlayerAction();
-      }
+      },
+      onInspect: () => showInspect(def),
     }));
   });
 
@@ -542,25 +682,38 @@ function openPileModal(pileKey) {
   if (pileKey === 'you-draw') { cards = you.draw; title = 'Your draw pile'; }
   else if (pileKey === 'you-cooldown') { cards = you.cooldown; title = 'Your cooldown'; }
   else if (pileKey === 'you-played') { cards = you.played; title = 'Played this turn'; }
-  else if (pileKey === 'opp-draw') { cards = opp.draw; title = 'Rival draw (facedown order hidden)'; }
+  else if (pileKey === 'opp-draw') { cards = opp.draw; title = 'Rival draw'; }
   else if (pileKey === 'opp-cooldown') { cards = opp.cooldown; title = 'Rival cooldown'; }
-  else if (pileKey === 'opp-hand') { cards = opp.hand; title = matchMode === 'hotseat' ? 'Rival hand' : 'Rival hand (hidden)'; }
+  else if (pileKey === 'opp-hand') { cards = opp.hand; title = 'Rival hand'; }
   else if (pileKey === 'tavern-discard') { cards = s.tavernDiscard; title = 'Tavern discard'; }
 
   const grid = $('#pile-modal-grid');
   grid.innerHTML = '';
-  const hideFaces = pileKey === 'opp-hand' && matchMode !== 'hotseat';
+  // Rival hand/draw: card BACKS unless hotseat or vs-AI coach "Show bot cards".
+  // Rival cooldown stays peekable (real table lets you look at piles).
+  const secretPile = pileKey === 'opp-hand' || pileKey === 'opp-draw';
+  const revealSecrets = matchMode === 'hotseat' || botRevealAllowed();
+  const hideFaces = secretPile && !revealSecrets;
+  if (hideFaces) {
+    title += ' (backs only)';
+  } else if (secretPile && botRevealAllowed()) {
+    title += ' (coach reveal)';
+  }
+
   if (!cards.length) {
     grid.innerHTML = '<p style="color:var(--ink-dim);text-align:center">Empty</p>';
   } else {
     for (const c of cards) {
       if (hideFaces) {
         const el = document.createElement('div');
-        el.className = 'card';
-        el.innerHTML = `<div class="art card-back-face" style="height:100%;background:linear-gradient(135deg,#3a2818,#1a1008)"></div>`;
+        el.className = 'card card-back-only';
+        el.innerHTML = `<div class="art card-back-face" style="height:100%"></div>`;
         grid.appendChild(el);
       } else {
-        grid.appendChild(renderCard(c, { onClick: () => showCardModal(cardsById[c.id]) }));
+        grid.appendChild(renderCard(c, {
+          onTap: () => showInspect(cardsById[c.id]),
+          onInspect: () => showInspect(cardsById[c.id]),
+        }));
       }
     }
   }
@@ -652,9 +805,8 @@ function startMatch(opts = {}) {
   lastRes = { you: {}, opp: {} };
   show('#match');
   renderMatch();
-  if (tutorialOn && !localStorage.getItem('tot_tips_done') && (matchMode === 'ai' || matchMode === 'ranked')) {
-    tipStep = 0;
-    showTip();
+  if (!localStorage.getItem(TOUR_KEY) && matchMode === 'ai') {
+    setTimeout(() => startTour(), 350);
   }
   if (hourglassOn && canControl()) startHourglass();
   else syncHourglassUI();
@@ -768,18 +920,153 @@ async function doEndTurn() {
   }
 }
 
-function showTip() {
-  const tip = $('#tooltip');
-  if (tipStep >= TIPS.length) {
-    tip.classList.remove('show');
-    localStorage.setItem('tot_tips_done', '1');
+function startTour(force = false) {
+  if (!force && localStorage.getItem(TOUR_KEY)) return;
+  tourStep = 0;
+  tourActive = true;
+  const root = $('#tour-root');
+  if (root) root.hidden = false;
+  showTourStep();
+}
+
+function endTour() {
+  tourActive = false;
+  const root = $('#tour-root');
+  if (root) root.hidden = true;
+  $('#tour-hole')?.classList.remove('show');
+  localStorage.setItem(TOUR_KEY, '1');
+}
+
+function showTourStep() {
+  const root = $('#tour-root');
+  const panel = $('#tour-panel');
+  const hole = $('#tour-hole');
+  if (!root || !panel) return;
+  if (tourStep >= TOUR_STEPS.length) {
+    endTour();
     return;
   }
-  $('#tip-text').textContent = TIPS[tipStep].text;
-  tip.style.left = '12px';
-  tip.style.bottom = '100px';
-  tip.style.top = 'auto';
-  tip.classList.add('show');
+  const step = TOUR_STEPS[tourStep];
+  $('#tour-text').textContent = step.text;
+  $('#tour-step').textContent = `${tourStep + 1} / ${TOUR_STEPS.length}`;
+  root.hidden = false;
+
+  // Spotlight target
+  const target = step.sel ? document.querySelector(step.sel) : null;
+  if (target && hole) {
+    const r = target.getBoundingClientRect();
+    const pad = 8;
+    hole.style.left = Math.max(4, r.left - pad) + 'px';
+    hole.style.top = Math.max(4, r.top - pad) + 'px';
+    hole.style.width = Math.min(window.innerWidth - 8, r.width + pad * 2) + 'px';
+    hole.style.height = Math.min(window.innerHeight - 8, r.height + pad * 2) + 'px';
+    hole.classList.add('show');
+    // Place panel opposite the spotlight when possible
+    const spaceBelow = window.innerHeight - (r.bottom + 12);
+    if (spaceBelow > 160) {
+      panel.style.top = (r.bottom + 12) + 'px';
+      panel.style.bottom = 'auto';
+    } else {
+      panel.style.bottom = Math.max(12, window.innerHeight - r.top + 12) + 'px';
+      panel.style.top = 'auto';
+    }
+    panel.style.left = '50%';
+    panel.style.transform = 'translateX(-50%)';
+  } else if (hole) {
+    hole.classList.remove('show');
+    panel.style.top = 'auto';
+    panel.style.bottom = '24px';
+    panel.style.left = '50%';
+    panel.style.transform = 'translateX(-50%)';
+  }
+}
+
+function nextTourStep() {
+  tourStep += 1;
+  showTourStep();
+}
+
+/* ——— Settings ——— */
+function openSettings(from = '#splash') {
+  settingsReturnScreen = from;
+  profile = loadProfile();
+  renderSettings();
+  show('#settings');
+}
+
+function renderSettings() {
+  profile = loadProfile();
+  const music = $('#chk-settings-music');
+  const hg = $('#chk-settings-hourglass');
+  const bot = $('#chk-settings-botcards');
+  if (music) music.checked = preferMusicFromStorage();
+  if (hg) hg.checked = !!profile.hourglassDefault;
+  if (bot) bot.checked = !!profile.showBotCards;
+  // Show-bot only meaningful for AI; still listed with note
+  const row = $('#row-show-bot');
+  if (row) row.classList.toggle('dim', false);
+
+  const skins = $('#settings-skins');
+  if (skins) {
+    skins.innerHTML = '';
+    for (const s of TABLE_SKINS) {
+      const owned = profile.unlockedSkins.includes(s.id);
+      const eq = profile.tableSkin === s.id;
+      const el = document.createElement('div');
+      el.className = 'store-item' + (owned ? ' owned' : ' locked') + (eq ? ' equipped' : '');
+      el.innerHTML = `
+        <div class="skin-swatch ${s.id}"></div>
+        <h4>${s.name}</h4>
+        <p>${s.desc}</p>
+        <div class="price">${owned ? (eq ? 'Equipped' : 'Owned') : `🔒 ${s.price}g`}</div>
+        <button type="button">${owned ? (eq ? 'Equipped' : 'Equip') : 'Buy & equip'}</button>
+      `;
+      el.querySelector('button').onclick = () => {
+        const res = owned ? equipSkin(profile, s.id) : buySkin(profile, s.id);
+        if (res.error) toast(res.error);
+        else { toast(owned ? `Equipped ${s.name}` : `Bought ${s.name}`); applyTableSkin(); renderSettings(); refreshSplashPurse(); }
+      };
+      skins.appendChild(el);
+    }
+  }
+
+  const backs = $('#settings-backs');
+  if (backs) {
+    backs.innerHTML = '';
+    for (const b of CARD_BACKS) {
+      const owned = profile.unlockedBacks.includes(b.id);
+      const eq = profile.cardBack === b.id;
+      const el = document.createElement('div');
+      el.className = 'store-item' + (owned ? ' owned' : ' locked') + (eq ? ' equipped' : '');
+      el.innerHTML = `
+        <div class="back-swatch back-${b.id}"></div>
+        <h4>${b.name}</h4>
+        <p>${b.desc}</p>
+        <div class="price">${owned ? (eq ? 'Equipped' : 'Owned') : `🔒 ${b.price}g`}</div>
+        <button type="button">${owned ? (eq ? 'Equipped' : 'Equip') : 'Buy & equip'}</button>
+      `;
+      el.querySelector('button').onclick = () => {
+        const res = owned ? equipBack(profile, b.id) : buyBack(profile, b.id);
+        if (res.error) toast(res.error);
+        else { toast(owned ? `Equipped ${b.name}` : `Bought ${b.name}`); applyTableSkin(); renderSettings(); refreshSplashPurse(); }
+      };
+      backs.appendChild(el);
+    }
+  }
+}
+
+function leaveSettings() {
+  const dest = settingsReturnScreen || '#splash';
+  if (dest === '#match' && engine?.state) {
+    applyTableSkin();
+    show('#match');
+    renderMatch();
+  } else if (dest === '#club') {
+    renderClub();
+    show('#club');
+  } else {
+    onSplashEnter();
+  }
 }
 
 /* ——— Club / Store / Collection ——— */
@@ -1148,13 +1435,16 @@ async function updateMusicBtn() {
 /* ——— Wire ——— */
 function bind() {
   $('#btn-play').onclick = () => {
-    setHourglass($('#chk-hourglass-splash')?.checked || false);
+    setHourglass($('#chk-hourglass-splash')?.checked || !!profile?.hourglassDefault);
     beginDeckPick('ai');
   };
   $('#btn-ranked').onclick = beginRanked;
   $('#btn-friend').onclick = () => { $('#friend-status').textContent = ''; show('#friend-lobby'); };
   $('#btn-club').onclick = () => { renderClub(); show('#club'); };
   $('#btn-ency').onclick = () => { renderEncy(); show('#encyclopedia'); };
+  $('#btn-settings').onclick = () => openSettings('#splash');
+  $('#btn-settings-back').onclick = () => leaveSettings();
+  $('#btn-match-settings')?.addEventListener('click', () => openSettings('#match'));
   $('#btn-ency-back').onclick = () => onSplashEnter();
   $('#btn-back-splash').onclick = () => onSplashEnter();
   $('#btn-club-back').onclick = () => onSplashEnter();
@@ -1247,11 +1537,48 @@ function bind() {
     showWin({ reason: 'concede' });
   };
 
-  $('#tip-next').onclick = () => { tipStep++; showTip(); };
-  $('#tip-skip').onclick = () => { tipStep = 99; showTip(); };
+  $('#tour-next')?.addEventListener('click', () => nextTourStep());
+  $('#tour-skip')?.addEventListener('click', () => endTour());
 
   $('#btn-pile-close').onclick = () => $('#pile-overlay').classList.remove('show');
   $('#pile-overlay').onclick = (e) => { if (e.target.id === 'pile-overlay') e.target.classList.remove('show'); };
+
+  // Inspect: tap backdrop to close; pointerup after hold also closes if over backdrop
+  $('#inspect-backdrop')?.addEventListener('pointerup', () => closeInspect());
+  $('#inspect-overlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'inspect-overlay' || e.target.id === 'inspect-backdrop') closeInspect();
+  });
+
+  // Settings toggles
+  $('#chk-settings-music')?.addEventListener('change', async (e) => {
+    warmMuted();
+    await setMusicEnabled(!!e.target.checked);
+    updateMusicBtn();
+  });
+  $('#chk-settings-hourglass')?.addEventListener('change', (e) => {
+    profile = loadProfile();
+    profile.hourglassDefault = !!e.target.checked;
+    saveProfile(profile);
+    setHourglass(profile.hourglassDefault);
+    const splash = $('#chk-hourglass-splash');
+    if (splash) splash.checked = profile.hourglassDefault;
+  });
+  $('#chk-settings-botcards')?.addEventListener('change', (e) => {
+    profile = loadProfile();
+    profile.showBotCards = !!e.target.checked;
+    saveProfile(profile);
+    toast(profile.showBotCards ? 'Bot cards visible in vs AI (coach)' : 'Bot cards hidden');
+  });
+  $('#btn-replay-tour')?.addEventListener('click', () => {
+    localStorage.removeItem(TOUR_KEY);
+    const returnTo = settingsReturnScreen;
+    leaveSettings();
+    if (returnTo === '#match' && engine?.state) {
+      setTimeout(() => startTour(true), 200);
+    } else {
+      toast('Tour will play on your next vs AI match.');
+    }
+  });
 
   $$('.pile-btn').forEach(btn => {
     btn.addEventListener('click', () => openPileModal(btn.dataset.pile));
@@ -1260,6 +1587,7 @@ function bind() {
 
 loadData().then(() => {
   profile = loadProfile();
+  hourglassOn = !!profile.hourglassDefault;
   bind();
   warmMuted();
   updateMusicBtn();

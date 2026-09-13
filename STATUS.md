@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-13 (phone UX pass):** Tap plays/buys; ~400ms hold inspects (never double-fires). Empty agent slot outlines. Rival hand/draw stay face-down unless Settings → Show bot cards (vs AI only). Settings equips table skins + card backs, music, hourglass default, replay tour. First-match guided tour (`tot_tour_v2`) replaces old tooltips. Engine: agents leave played into agent row; contract actions exile; contract agents exile on KO; taunt still blocks Power→Prestige.
+
 Playable fan table rebuilt to feel like the real ESO Tales of Tribute board. Web preview is the priority client. `docs/` mirrors `web/` for GitHub Pages.
 
 ## Counts
@@ -18,8 +20,12 @@ Match layout now mirrors ESO ToT, not a generic card site:
 - **Center:** 5-card Tavern + tavern discard pile.
 - **You (bottom):** agents, played-this-turn, hand, draw/played/cooldown piles + HUD + End Turn.
 - **Resource HUD:** Coin (septim disc) / Prestige (crown) / Power (fist-gem) with tick animation on change.
-- **Pile modals:** tap Draw / Cooldown / Played / Hand / Tavern discard to list cards.
-- **Fly animations:** play → played zone; buy → your cooldown (WAAPI).
+- **Pile modals:** tap Draw / Cooldown / Played / Hand / Tavern discard. Rival hand/draw show backs unless Settings → Show bot cards (vs AI).
+- **Fly animations:** play → played/agents; buy → your cooldown (WAAPI).
+- **Tap vs hold:** tap plays/buys; ~400ms hold inspects (release/backdrop closes; hold never plays).
+- **Agent slots:** dashed gold empty seats always visible.
+- **Settings:** splash + in-match gear — music, hourglass default, bot cards, equip table skin & card back, replay tour.
+- **Tour:** `tot_tour_v2` first-match spotlight walkthrough.
 - **Hourglass:** 90s per turn for Ranked / timed casual; OFF by default for vs AI. Toggle on splash, pick, and in-match. Gold sand drains; auto end turn at 0.
 - **Look:** Cinzel + Crimson Pro, stained wood textures, gold filigree frames, coin rims, candle bloom, ESO-style hint tooltip. Table skins via CSS on `#match`.
 

@@ -257,15 +257,20 @@ export class GameEngine {
     // Druid Chimera check
     this._checkChimera(comboCount, suit);
 
-    // Agent enters board
+    // Agents sit on YOUR agent row until knocked out (not in played/cooldown while alive).
     if (def.type === 'agent') {
-      const agent = { ...card, hp: def.hp || 2, maxHp: def.hp || 2, taunt: !!def.taunt, confined: [] };
-      p.agents.push(agent);
-      this._triggerPassives(p, 'agent_play', agent);
-      this.emit('agentEnter', { agent });
+      const pi = p.played.findIndex(c => c.uid === card.uid);
+      if (pi >= 0) p.played.splice(pi, 1);
+      card.hp = def.hp || card.hp || 2;
+      card.maxHp = def.hp || card.maxHp || 2;
+      card.taunt = !!def.taunt;
+      card.confined = card.confined || [];
+      p.agents.push(card);
+      this._triggerPassives(p, 'agent_play', card);
+      this.emit('agentEnter', { agent: card });
     }
 
-    // Contract action → exile (remove from played)
+    // Contract actions: resolve then EXILE (never cooldown). Contract agents exile on defeat.
     if (def.contract && def.type === 'action') {
       const pi = p.played.findIndex(c => c.uid === card.uid);
       if (pi >= 0) p.played.splice(pi, 1);

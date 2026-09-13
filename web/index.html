@@ -21,6 +21,7 @@
           <button id="btn-friend">Play a Friend</button>
           <button id="btn-club">Club</button>
           <button id="btn-ency">Encyclopedia</button>
+          <button id="btn-settings">Settings</button>
         </div>
         <div class="splash-toggles">
           <label class="chk"><input type="checkbox" id="chk-hourglass-splash" /> Hourglass (90s)</label>
@@ -117,6 +118,27 @@
       <div id="collection-detail" class="collection-detail hidden"></div>
     </section>
 
+
+    <!-- SETTINGS -->
+    <section id="settings" class="screen">
+      <header class="club-header">
+        <h2>Settings</h2>
+        <button id="btn-settings-back">Back</button>
+      </header>
+      <p class="hint">Equip cosmetics here. The Club store still sells them with purse gold.</p>
+      <div class="settings-block">
+        <h3 class="club-section">Table</h3>
+        <label class="chk settings-row"><input type="checkbox" id="chk-settings-music" /> Music</label>
+        <label class="chk settings-row"><input type="checkbox" id="chk-settings-hourglass" /> Hourglass default (90s)</label>
+        <label class="chk settings-row" id="row-show-bot"><input type="checkbox" id="chk-settings-botcards" /> Show bot cards <span class="hint-inline">(vs AI coach mode — never in ranked/friend)</span></label>
+        <button type="button" id="btn-replay-tour" class="settings-row-btn">Replay first-match tour</button>
+      </div>
+      <h3 class="club-section">Choose table skin</h3>
+      <div class="store-grid" id="settings-skins"></div>
+      <h3 class="club-section">Choose card back</h3>
+      <div class="store-grid" id="settings-backs"></div>
+    </section>
+
     <!-- MATCH — authentic board -->
     <section id="match" class="screen skin-high-isle">
       <div class="board">
@@ -156,6 +178,7 @@
               <div class="match-actions">
                 <button id="btn-end">End Turn</button>
                 <button id="btn-hg-toggle" title="Hourglass">⌛</button>
+                <button id="btn-match-settings" title="Settings">⚙</button>
                 <button id="btn-concede">Leave</button>
               </div>
             </div>
@@ -226,13 +249,22 @@
       </div>
     </div>
     <div class="toast" id="toast"></div>
-    <div class="tooltip eso-hint" id="tooltip">
-      <div class="tip-ornament"></div>
-      <div id="tip-text"></div>
-      <div class="tip-nav">
-        <button id="tip-next">Next</button>
-        <button id="tip-skip">Skip</button>
+    <div id="tour-root" class="tour-root" hidden>
+      <div class="tour-backdrop" id="tour-backdrop"></div>
+      <div class="tour-hole" id="tour-hole" aria-hidden="true"></div>
+      <div class="tour-panel eso-hint" id="tour-panel">
+        <div class="tip-ornament"></div>
+        <div class="tour-step" id="tour-step">1 / 8</div>
+        <div id="tour-text"></div>
+        <div class="tip-nav">
+          <button type="button" id="tour-skip">Skip</button>
+          <button type="button" class="primary" id="tour-next">Next</button>
+        </div>
       </div>
+    </div>
+    <div class="inspect-overlay" id="inspect-overlay" hidden>
+      <div class="inspect-backdrop" id="inspect-backdrop"></div>
+      <div class="inspect-card" id="inspect-card"></div>
     </div>
     <div class="modal" id="card-modal">
       <div class="modal-body" id="card-modal-body"></div>
