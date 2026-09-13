@@ -1,0 +1,6475 @@
+{
+  "cards": [
+    {
+      "id": "almalexia__starter__collection_plate",
+      "name": "Collection Plate",
+      "deckId": "almalexia",
+      "type": "action",
+      "category": "starter",
+      "cost": null,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "donate",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Coin] | Combo 3 | [Donate]",
+      "imageUrl": "https://images.uesp.net/e/ee/ON-tribute-almalexia-Collection_Plate.png",
+      "imageFile": "ON-tribute-almalexia-Collection Plate.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "isStarter": true,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "almalexia__bardic_veneration",
+      "name": "Bardic Veneration",
+      "deckId": "almalexia",
+      "type": "action",
+      "category": "base",
+      "cost": 3,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "donate",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "donate",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin 2] | [Donate] | Combo 2 | [Donate]",
+      "imageUrl": "https://images.uesp.net/2/21/ON-tribute-almalexia-Bardic_Veneration.png",
+      "imageFile": "ON-tribute-almalexia-Bardic Veneration.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "almalexia__devotional_gaoler",
+      "name": "Devotional Gaoler",
+      "deckId": "almalexia",
+      "type": "contractAgent",
+      "category": "base",
+      "cost": 6,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": 3,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "activate"
+        },
+        {
+          "op": "confine",
+          "amount": 1,
+          "from": "opponentCooldown",
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "confine",
+          "amount": 1,
+          "from": "opponentCooldown",
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Power] | Combo 2 | [Confine] | Combo 3 | [Confine]",
+      "imageUrl": "https://images.uesp.net/5/57/ON-tribute-almalexia-Devotional_Gaoler.png",
+      "imageFile": "ON-tribute-almalexia-Devotional Gaoler.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "almalexia__mothers_mercy",
+      "name": "Mother's Mercy",
+      "deckId": "almalexia",
+      "type": "action",
+      "category": "base",
+      "cost": 5,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "refresh",
+          "amount": 1,
+          "from": "cooldown",
+          "to": "topOfDraw",
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Power] | [Refresh]",
+      "imageUrl": "https://images.uesp.net/2/28/ON-tribute-almalexia-Mother%27s_Mercy.png",
+      "imageFile": "ON-tribute-almalexia-Mother's Mercy.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "almalexia__mournhold_clergy",
+      "name": "Mournhold Clergy",
+      "deckId": "almalexia",
+      "type": "contractAgent",
+      "category": "base",
+      "cost": 5,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": 3,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "whileInPlay",
+          "trigger": "you discard any card",
+          "effects": [
+            {
+              "op": "gainPrestige",
+              "amount": 2
+            }
+          ],
+          "timing": "passive"
+        },
+        {
+          "op": "donate",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "confine",
+          "amount": 1,
+          "from": "opponentCooldown",
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "This card has no play effect. | [While you discard any card] [Prestige 2] | Combo 2 | [Donate] | [Confine]",
+      "imageUrl": "https://images.uesp.net/f/fe/ON-tribute-almalexia-Mournhold_Clergy.png",
+      "imageFile": "ON-tribute-almalexia-Mournhold Clergy.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "almalexia__philanthropy",
+      "name": "Philanthropy",
+      "deckId": "almalexia",
+      "type": "action",
+      "category": "base",
+      "cost": 3,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "whileInPlay",
+          "trigger": "you discard any card",
+          "effects": [
+            {
+              "op": "gainPower",
+              "amount": 1
+            }
+          ],
+          "timing": "onPlay"
+        },
+        {
+          "op": "donate",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "donate",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Coin] | [While you discard any card] [Power] | Combo 2 | [Donate] | Combo 3 | [Donate]",
+      "imageUrl": "https://images.uesp.net/e/e3/ON-tribute-almalexia-Philanthropy.png",
+      "imageFile": "ON-tribute-almalexia-Philanthropy.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "almalexia__temple_arbiter",
+      "name": "Temple Arbiter",
+      "deckId": "almalexia",
+      "type": "agent",
+      "category": "base",
+      "cost": 6,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": 2,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "activate"
+        },
+        {
+          "op": "confine",
+          "amount": 1,
+          "from": "opponentCooldown",
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "confine",
+          "amount": 1,
+          "from": "opponentCooldown",
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Coin 2] | Combo 2 | [Confine] | Combo 3 | [Confine]",
+      "imageUrl": "https://images.uesp.net/4/41/ON-tribute-almalexia-Temple_Arbiter.png",
+      "imageFile": "ON-tribute-almalexia-Temple Arbiter.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "almalexia__the_lesson_of_ayem",
+      "name": "The Lesson of Ayem",
+      "deckId": "almalexia",
+      "type": "action",
+      "category": "base",
+      "cost": 4,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "donate",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "donate",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Donate] | Combo 2 | [Draw] | Combo 3 | [Donate]",
+      "imageUrl": "https://images.uesp.net/3/33/ON-tribute-almalexia-The_Lesson_of_Ayem.png",
+      "imageFile": "ON-tribute-almalexia-The Lesson of Ayem.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "almalexia__tribunal_sentinel",
+      "name": "Tribunal Sentinel",
+      "deckId": "almalexia",
+      "type": "agent",
+      "category": "base",
+      "cost": 8,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": 5,
+      "taunt": true,
+      "effects": [
+        {
+          "op": "noop",
+          "note": "no play effect",
+          "timing": "activate"
+        },
+        {
+          "op": "extraPatronCall",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "taunt",
+          "timing": "passive"
+        }
+      ],
+      "rawEffect": "This card has no play effect. | Combo 2 | [Patron] | [Taunt]",
+      "imageUrl": "https://images.uesp.net/b/b8/ON-tribute-almalexia-Tribunal_Sentinel.png",
+      "imageFile": "ON-tribute-almalexia-Tribunal Sentinel.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "almalexia__upgrade__almsivis_charity",
+      "name": "ALMSIVI's Charity",
+      "deckId": "almalexia",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 5,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "refresh",
+          "amount": 1,
+          "from": "cooldown",
+          "to": "topOfDraw",
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Power] | [Refresh] | Combo 2 | [Coin]",
+      "imageUrl": "https://images.uesp.net/2/2d/ON-tribute-almalexia-ALMSIVI%27s_Charity.png",
+      "imageFile": "ON-tribute-almalexia-ALMSIVI's Charity.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Mother's Mercy (1)",
+      "obtainedFrom": "Achievement: Play the Paramount",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "almalexia__upgrade__festival_of_forbearance",
+      "name": "Festival of Forbearance",
+      "deckId": "almalexia",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 3,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "donate",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "donate",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin 2] | [Donate] | Combo 2 | [Power] | [Donate]",
+      "imageUrl": "https://images.uesp.net/4/4f/ON-tribute-almalexia-Festival_of_Forbearance.png",
+      "imageFile": "ON-tribute-almalexia-Festival of Forbearance.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Bardic Veneration (2)",
+      "obtainedFrom": "Achievement: The Gaze of Ayem",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "almalexia__upgrade__hand_of_almalexia",
+      "name": "Hand of Almalexia",
+      "deckId": "almalexia",
+      "type": "contractAgent",
+      "category": "upgrade",
+      "cost": 6,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": 3,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "activate"
+        },
+        {
+          "op": "confine",
+          "amount": 2,
+          "from": "opponentCooldown",
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Power] | Combo 2 | [Confine 2]",
+      "imageUrl": "https://images.uesp.net/8/84/ON-tribute-almalexia-Hand_of_Almalexia.png",
+      "imageFile": "ON-tribute-almalexia-Hand of Almalexia.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Devotional Gaoler (2)",
+      "obtainedFrom": "Found in the Telvanni Peninsula after obtaining the Hand of Almalexia Clue",
+      "isContract": true,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "almalexia__upgrade__mercymother_elite",
+      "name": "Mercymother Elite",
+      "deckId": "almalexia",
+      "type": "agent",
+      "category": "upgrade",
+      "cost": 8,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": 5,
+      "taunt": true,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "activate"
+        },
+        {
+          "op": "extraPatronCall",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "taunt",
+          "timing": "passive"
+        }
+      ],
+      "rawEffect": "[Coin] | Combo 2 | [Patron] | [Taunt]",
+      "imageUrl": "https://images.uesp.net/e/eb/ON-tribute-almalexia-Mercymother_Elite.png",
+      "imageFile": "ON-tribute-almalexia-Mercymother Elite.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Tribunal Sentinel (1)",
+      "obtainedFrom": "Found in Deshaan after obtaining the Mercymother Elite Clue",
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "celarus__starter__mainland_inquiries",
+      "name": "Mainland Inquiries",
+      "deckId": "celarus",
+      "type": "action",
+      "category": "starter",
+      "cost": null,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Coin]",
+      "imageUrl": "https://images.uesp.net/2/2f/ON-tribute-card-Mainland_Inquiries.png",
+      "imageFile": "ON-tribute-card-Mainland Inquiries.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isStarter": true,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "celarus__prescience",
+      "name": "Prescience",
+      "deckId": "celarus",
+      "type": "action",
+      "category": "base",
+      "cost": 4,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 3,
+          "timing": "onPlay"
+        },
+        {
+          "op": "replaceTavern",
+          "amount": 1,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Coin 3] | [Replace]",
+      "imageUrl": "https://images.uesp.net/f/fa/ON-tribute-card-Prescience.png",
+      "imageFile": "ON-tribute-card-Prescience.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "celarus__psijic_apprentice",
+      "name": "Psijic Apprentice",
+      "deckId": "celarus",
+      "type": "agent",
+      "category": "base",
+      "cost": 6,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": 3,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "toss",
+          "lookAt": 4,
+          "timing": "activate"
+        }
+      ],
+      "rawEffect": "[Toss 4]",
+      "imageUrl": "https://images.uesp.net/a/a7/ON-tribute-card-Psijic_Apprentice.png",
+      "imageFile": "ON-tribute-card-Psijic Apprentice.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "celarus__psijics_insight",
+      "name": "Psijic's Insight",
+      "deckId": "celarus",
+      "type": "action",
+      "category": "base",
+      "cost": 5,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "toss",
+          "lookAt": 4,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin 2] | [Toss 4] | Combo 2 | [Power 2]",
+      "imageUrl": "https://images.uesp.net/6/64/ON-tribute-card-Psijic%27s_Insight.png",
+      "imageFile": "ON-tribute-card-Psijic%27s Insight.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "celarus__sage_counsel",
+      "name": "Sage Counsel",
+      "deckId": "celarus",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 3,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "toss",
+          "lookAt": 3,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Toss 3] | Combo 2 | [Power]",
+      "imageUrl": "https://images.uesp.net/e/ee/ON-tribute-card-Sage_Counsel.png",
+      "imageFile": "ON-tribute-card-Sage Counsel.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "celarus__scrying_globe",
+      "name": "Scrying Globe",
+      "deckId": "celarus",
+      "type": "action",
+      "category": "base",
+      "cost": 2,
+      "copies": 4,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "toss",
+          "lookAt": 2,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Coin 2] | [Toss 2]",
+      "imageUrl": "https://images.uesp.net/d/d1/ON-tribute-card-Scrying_Globe.png",
+      "imageFile": "ON-tribute-card-Scrying Globe.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "celarus__the_dreaming_cave",
+      "name": "The Dreaming Cave",
+      "deckId": "celarus",
+      "type": "action",
+      "category": "base",
+      "cost": 6,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "toss",
+          "lookAt": 4,
+          "timing": "onPlay"
+        },
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "16px Draw 1 card. | [Toss 4] | Combo 2 | [Power 2]",
+      "imageUrl": "https://images.uesp.net/f/f4/ON-tribute-card-The_Dreaming_Cave.png",
+      "imageFile": "ON-tribute-card-The Dreaming Cave.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "celarus__time_mastery",
+      "name": "Time Mastery",
+      "deckId": "celarus",
+      "type": "action",
+      "category": "base",
+      "cost": 3,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "toss",
+          "lookAt": 5,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Toss 5] | Combo 2 | [Coin 2]",
+      "imageUrl": "https://images.uesp.net/4/41/ON-tribute-card-Time_Mastery.png",
+      "imageFile": "ON-tribute-card-Time Mastery.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "celarus__upgrade__augurs_counsel",
+      "name": "Augur's Counsel",
+      "deckId": "celarus",
+      "type": "contractAction",
+      "category": "upgrade",
+      "cost": 3,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "toss",
+          "lookAt": 3,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Toss 3] | Combo 2 | [Power 2]",
+      "imageUrl": "https://images.uesp.net/5/5a/ON-tribute-card-Augur%27s_Counsel.png",
+      "imageFile": "ON-tribute-card-Augur's Counsel.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Sage Counsel (2)",
+      "obtainedFrom": "Achievement: Roister's Club Regular",
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "celarus__upgrade__ceporahs_insight",
+      "name": "Ceporah's Insight",
+      "deckId": "celarus",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 5,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "toss",
+          "lookAt": 4,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin 2] | [Toss 4] | Combo 2 | [Power 3]",
+      "imageUrl": "https://images.uesp.net/5/5b/ON-tribute-card-Ceporah%27s_Insight.png",
+      "imageFile": "ON-tribute-card-Ceporah's Insight.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Psijic's Insight (1)",
+      "obtainedFrom": "Found in Coldharbour after obtaining the Ceporah's Insight Clue",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "celarus__upgrade__prophesy",
+      "name": "Prophesy",
+      "deckId": "celarus",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 4,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 3,
+          "timing": "onPlay"
+        },
+        {
+          "op": "replaceTavern",
+          "amount": 2,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Coin 3] | [Replace 2]",
+      "imageUrl": "https://images.uesp.net/7/76/ON-tribute-card-Prophesy.png",
+      "imageFile": "ON-tribute-card-Prophesy.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "replaces": "Prescience (2)",
+      "obtainedFrom": "Achievement: Artaeum Assault",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "celarus__upgrade__psijic_relicmaster",
+      "name": "Psijic Relicmaster",
+      "deckId": "celarus",
+      "type": "agent",
+      "category": "upgrade",
+      "cost": 6,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": 3,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "activate"
+        },
+        {
+          "op": "toss",
+          "lookAt": 4,
+          "timing": "activate"
+        }
+      ],
+      "rawEffect": "[Coin] | [Toss 4]",
+      "imageUrl": "https://images.uesp.net/9/90/ON-tribute-card-Psijic_Relicmaster.png",
+      "imageFile": "ON-tribute-card-Psijic Relicmaster.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "replaces": "Psijic Apprentice (1)",
+      "obtainedFrom": "Found in Auridon after obtaining the Psijic Relicmaster Clue",
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "druid_king__starter__ritual_herbs",
+      "name": "Ritual Herbs",
+      "deckId": "druid_king",
+      "type": "action",
+      "category": "starter",
+      "cost": null,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Coin]",
+      "imageUrl": "https://images.uesp.net/e/ee/ON-tribute-druid-Ritual_Herbs.png",
+      "imageFile": "ON-tribute-druid-Ritual Herbs.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isStarter": true,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "druid_king__deepwoods_ritual",
+      "name": "Deepwoods Ritual",
+      "deckId": "druid_king",
+      "type": "action",
+      "category": "base",
+      "cost": 4,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "replaceTavern",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainPrestige",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Power 2] | Combo 2 | [Replace] | Combo 3 | [Prestige 3]",
+      "imageUrl": "https://images.uesp.net/c/c6/ON-tribute-druid-Deepwoods_Ritual.png",
+      "imageFile": "ON-tribute-druid-Deepwoods Ritual.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "druid_king__eldertide_fenwitch",
+      "name": "Eldertide Fenwitch",
+      "deckId": "druid_king",
+      "type": "agent",
+      "category": "base",
+      "cost": 6,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": 3,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "whileInPlay",
+          "trigger": "any card, including this one, is placed in your cooldown",
+          "effects": [
+            {
+              "op": "gainCoin",
+              "amount": 1
+            }
+          ],
+          "timing": "passive"
+        },
+        {
+          "op": "createCard",
+          "cardName": "Wispcaller Totem",
+          "destination": "cooldown",
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[While any card, including this one, is placed in your cooldown] [Coin] | Combo 2 | [Create Wispcaller Totem]",
+      "imageUrl": "https://images.uesp.net/d/dd/ON-tribute-druid-Eldertide_Fenwitch.png",
+      "imageFile": "ON-tribute-druid-Eldertide Fenwitch.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "druid_king__firesong_haruspex",
+      "name": "Firesong Haruspex",
+      "deckId": "druid_king",
+      "type": "agent",
+      "category": "base",
+      "cost": 5,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": 1,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPrestige",
+          "amount": 1,
+          "timing": "activate"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "activate"
+        },
+        {
+          "op": "whileInPlay",
+          "trigger": "an agent, excluding this one, is placed in your cooldown",
+          "effects": [
+            {
+              "op": "gainPrestige",
+              "amount": 1
+            }
+          ],
+          "timing": "passive"
+        }
+      ],
+      "rawEffect": "[Prestige] | [Coin] | [While an agent, excluding this one, is placed in your cooldown] [Prestige]",
+      "imageUrl": "https://images.uesp.net/d/dc/ON-tribute-druid-Firesong_Haruspex.png",
+      "imageFile": "ON-tribute-druid-Firesong Haruspex.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "druid_king__forest_wraith",
+      "name": "Forest Wraith",
+      "deckId": "druid_king",
+      "type": "contractAgent",
+      "category": "base",
+      "cost": 4,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": 3,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "activate"
+        },
+        {
+          "op": "whileInPlay",
+          "trigger": "any card is placed in your cooldown",
+          "effects": [
+            {
+              "op": "gainPower",
+              "amount": 1
+            }
+          ],
+          "timing": "passive"
+        }
+      ],
+      "rawEffect": "[Power] | [While any card is placed in your cooldown] [Power]",
+      "imageUrl": "https://images.uesp.net/c/c0/ON-tribute-druid-Forest_Wraith.png",
+      "imageFile": "ON-tribute-druid-Forest Wraith.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "druid_king__runes_of_the_draoife",
+      "name": "Runes of the Draoife",
+      "deckId": "druid_king",
+      "type": "action",
+      "category": "base",
+      "cost": 2,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "whileInPlay",
+          "trigger": "an agent is placed in your cooldown",
+          "effects": [
+            {
+              "op": "gainPower",
+              "amount": 1
+            }
+          ],
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Coin 2] | [While an agent is placed in your cooldown] [Power]",
+      "imageUrl": "https://images.uesp.net/e/e6/ON-tribute-druid-Runes_of_the_Draoife.png",
+      "imageFile": "ON-tribute-druid-Runes of the Draoife.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "druid_king__stonelore_rockseer",
+      "name": "Stonelore Rockseer",
+      "deckId": "druid_king",
+      "type": "agent",
+      "category": "base",
+      "cost": 5,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": 2,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "activate"
+        },
+        {
+          "op": "whileInPlay",
+          "trigger": "an agent, including this one, is activated or played",
+          "effects": [
+            {
+              "op": "gainCoin",
+              "amount": 1
+            }
+          ],
+          "timing": "passive"
+        }
+      ],
+      "rawEffect": "[Power] | [While an agent, including this one, is activated or played] [Coin]",
+      "imageUrl": "https://images.uesp.net/1/1d/ON-tribute-druid-Stonelore_Rockseer.png",
+      "imageFile": "ON-tribute-druid-Stonelore Rockseer.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "druid_king__whispers_of_the_grove",
+      "name": "Whispers of the Grove",
+      "deckId": "druid_king",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 2,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "replaceTavern",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Replace] | Combo 3 | [Coin 2]",
+      "imageUrl": "https://images.uesp.net/0/0f/ON-tribute-druid-Whispers_of_the_Grove.png",
+      "imageFile": "ON-tribute-druid-Whispers of the Grove.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "druid_king__wispcaller_totem",
+      "name": "Wispcaller Totem",
+      "deckId": "druid_king",
+      "type": "action",
+      "category": "base",
+      "cost": 3,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 4
+        }
+      ],
+      "rawEffect": "[Coin] | Combo 2 | [Coin 2] | Combo 4 | [Coin 2]",
+      "imageUrl": "https://images.uesp.net/5/52/ON-tribute-druid-Wispcaller_Totem.png",
+      "imageFile": "ON-tribute-druid-Wispcaller Totem.png",
+      "comboRequirement": [
+        2,
+        4
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false,
+      "alsoCreatedByCard": true
+    },
+    {
+      "id": "druid_king__upgrade__draoife_ritecaller",
+      "name": "Draoife Ritecaller",
+      "deckId": "druid_king",
+      "type": "agent",
+      "category": "upgrade",
+      "cost": 6,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": 3,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "whileInPlay",
+          "trigger": "any card, including this one, is placed in your cooldown",
+          "effects": [
+            {
+              "op": "gainCoin",
+              "amount": 1
+            }
+          ],
+          "timing": "passive"
+        },
+        {
+          "op": "createCard",
+          "cardName": "Wispheart Totem",
+          "destination": "cooldown",
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[While any card, including this one, is placed in your cooldown] [Coin] | Combo 2 | [Create Wispheart Totem]",
+      "imageUrl": "https://images.uesp.net/d/d8/ON-tribute-druid-Draoife_Ritecaller.png",
+      "imageFile": "ON-tribute-druid-Draoife Ritecaller.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Eldertide Fenwitch (1)",
+      "obtainedFrom": "Achievement: By the Will of the Green",
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "druid_king__upgrade__druid_king_vestments",
+      "name": "Druid King Vestments",
+      "deckId": "druid_king",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 2,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "whileInPlay",
+          "trigger": "any card is placed in your cooldown",
+          "effects": [
+            {
+              "op": "gainPower",
+              "amount": 1
+            }
+          ],
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Coin 2] | [While any card is placed in your cooldown] [Power]",
+      "imageUrl": "https://images.uesp.net/2/2b/ON-tribute-druid-Druid_King_Vestments.png",
+      "imageFile": "ON-tribute-druid-Druid King Vestments.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "replaces": "Runes of the Draoife (2)",
+      "obtainedFrom": "Found in Galen after obtaining the Druid King Vestments Clue",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "druid_king__upgrade__envoy_of_the_draoife",
+      "name": "Envoy of the Draoife",
+      "deckId": "druid_king",
+      "type": "agent",
+      "category": "upgrade",
+      "cost": 5,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": 3,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "activate"
+        },
+        {
+          "op": "whileInPlay",
+          "trigger": "an agent, including this one, is activated or played",
+          "effects": [
+            {
+              "op": "gainCoin",
+              "amount": 1
+            }
+          ],
+          "timing": "passive"
+        }
+      ],
+      "rawEffect": "[Power] | [While an agent, including this one, is activated or played] [Coin]",
+      "imageUrl": "https://images.uesp.net/8/84/ON-tribute-druid-Envoy_of_the_Draoife.png",
+      "imageFile": "ON-tribute-druid-Envoy of the Draoife.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "replaces": "Stonelore Rockseeer (2)",
+      "obtainedFrom": "Achievement: Broken Braigh",
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "druid_king__upgrade__wispheart_totem",
+      "name": "Wispheart Totem",
+      "deckId": "druid_king",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 3,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 3
+        },
+        {
+          "op": "gainCoin",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 4
+        }
+      ],
+      "rawEffect": "[Coin] | Combo 2 | [Coin 2] | Combo 3 | [Coin 2] | Combo 4 | [Coin 3]",
+      "imageUrl": "https://images.uesp.net/f/f7/ON-tribute-druid-Wispheart_Totem.png",
+      "imageFile": "ON-tribute-druid-Wispheart Totem.png",
+      "comboRequirement": [
+        2,
+        3,
+        4
+      ],
+      "needsReview": false,
+      "replaces": "Wispcaller Totem (2)",
+      "obtainedFrom": "Found in Rivenspire after obtaining the Wispheart Totem Clue",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false,
+      "alsoCreatedByCard": true
+    },
+    {
+      "id": "druid_king__created__the_chimera",
+      "name": "The Chimera",
+      "deckId": "druid_king",
+      "type": "agent",
+      "category": "created",
+      "cost": null,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": 5,
+      "taunt": true,
+      "effects": [
+        {
+          "op": "noop",
+          "note": "no play effect",
+          "timing": "activate"
+        },
+        {
+          "op": "replaceTavern",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 3
+        },
+        {
+          "op": "gainPrestige",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 4
+        },
+        {
+          "op": "taunt",
+          "timing": "passive"
+        }
+      ],
+      "rawEffect": "This card has no play effect. | Combo 2 | [Replace] | Combo 3 | [Power 2] | Combo 4 | [Prestige 3] | [Taunt]",
+      "imageUrl": "https://images.uesp.net/f/f5/ON-tribute-druid-The_Chimera.png",
+      "imageFile": "ON-tribute-druid-The Chimera.png",
+      "comboRequirement": [
+        2,
+        3,
+        4
+      ],
+      "needsReview": false,
+      "isCreated": true,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "duke_of_crows__starter__peck",
+      "name": "Peck",
+      "deckId": "duke_of_crows",
+      "type": "action",
+      "category": "starter",
+      "cost": null,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Coin]",
+      "imageUrl": "https://images.uesp.net/a/af/ON-tribute-card-Peck.png",
+      "imageFile": "ON-tribute-card-Peck.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isStarter": true,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "duke_of_crows__blackfeather_brigand",
+      "name": "Blackfeather Brigand",
+      "deckId": "duke_of_crows",
+      "type": "agent",
+      "category": "base",
+      "cost": 6,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": 2,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "activate"
+        },
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Coin]\nCombo 3 | [Draw]",
+      "imageUrl": "https://images.uesp.net/8/81/ON-tribute-card-Blackfeather_Brigand.png",
+      "imageFile": "ON-tribute-card-Blackfeather Brigand.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "duke_of_crows__blackfeather_knight",
+      "name": "Blackfeather Knight",
+      "deckId": "duke_of_crows",
+      "type": "agent",
+      "category": "base",
+      "cost": 6,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": 3,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "activate"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 3
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Coin]\nCombo 3 | [Coin 2] | [Power 2]",
+      "imageUrl": "https://images.uesp.net/9/96/ON-tribute-card-Blackfeather_Knight.png",
+      "imageFile": "ON-tribute-card-Blackfeather Knight.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "duke_of_crows__law_of_sovereign_roost",
+      "name": "Law of Sovereign Roost",
+      "deckId": "duke_of_crows",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 4,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "opponentDiscard",
+          "amount": 1,
+          "when": "startOfTheirTurn",
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Draw]\nCombo 3 | [Discard]",
+      "imageUrl": "https://images.uesp.net/d/db/ON-tribute-card-Law_of_Sovereign_Roost.png",
+      "imageFile": "ON-tribute-card-Law of Sovereign Roost.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "duke_of_crows__pilfer",
+      "name": "Pilfer",
+      "deckId": "duke_of_crows",
+      "type": "action",
+      "category": "base",
+      "cost": 5,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Draw]\nCombo 2 | [Draw]",
+      "imageUrl": "https://images.uesp.net/7/7d/ON-tribute-card-Pilfer.png",
+      "imageFile": "ON-tribute-card-Pilfer.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "duke_of_crows__pool_of_shadow",
+      "name": "Pool of Shadow",
+      "deckId": "duke_of_crows",
+      "type": "action",
+      "category": "base",
+      "cost": 4,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainCoin",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 4
+        }
+      ],
+      "rawEffect": "[Power 2]\nCombo 2 | [Draw]\n\nCombo 4 | [Coin 3]",
+      "imageUrl": "https://images.uesp.net/e/ef/ON-tribute-card-Pool_of_Shadow.png",
+      "imageFile": "ON-tribute-card-Pool of Shadow.png",
+      "comboRequirement": [
+        2,
+        4
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "duke_of_crows__scratch",
+      "name": "Scratch",
+      "deckId": "duke_of_crows",
+      "type": "action",
+      "category": "base",
+      "cost": 4,
+      "copies": 4,
+      "copiesAfterUpgrade": 2,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin]\nCombo 2 | [Coin 2] | [Power 2]",
+      "imageUrl": "https://images.uesp.net/8/80/ON-tribute-card-Scratch.png",
+      "imageFile": "ON-tribute-card-Scratch.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "duke_of_crows__squawking_oratory",
+      "name": "Squawking Oratory",
+      "deckId": "duke_of_crows",
+      "type": "action",
+      "category": "base",
+      "cost": 6,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 3
+        },
+        {
+          "op": "gainPower",
+          "amount": 4,
+          "timing": "combo",
+          "comboRequirement": 4
+        }
+      ],
+      "rawEffect": "[Draw]\nCombo 3 | [Draw]\n\nCombo 4 | [Power 4]",
+      "imageUrl": "https://images.uesp.net/9/96/ON-tribute-card-Squawking_Oratory.png",
+      "imageFile": "ON-tribute-card-Squawking Oratory.png",
+      "comboRequirement": [
+        3,
+        4
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "duke_of_crows__toll_of_flesh",
+      "name": "Toll of Flesh",
+      "deckId": "duke_of_crows",
+      "type": "action",
+      "category": "base",
+      "cost": 4,
+      "copies": 4,
+      "copiesAfterUpgrade": 2,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin 2]\nCombo 2 | [Draw]",
+      "imageUrl": "https://images.uesp.net/7/74/ON-tribute-card-Toll_of_Flesh.png",
+      "imageFile": "ON-tribute-card-Toll of Flesh.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "duke_of_crows__upgrade__blackfeather_knave",
+      "name": "Blackfeather Knave",
+      "deckId": "duke_of_crows",
+      "type": "agent",
+      "category": "upgrade",
+      "cost": 6,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": 2,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "activate"
+        },
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Coin 2]\nCombo 3 | [Draw]",
+      "imageUrl": "https://images.uesp.net/9/97/ON-tribute-card-Blackfeather_Knave.png",
+      "imageFile": "ON-tribute-card-Blackfeather Knave.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "replaces": "Blackfeather Brigand (1)",
+      "obtainedFrom": "Found in Crow's Wood after obtaining the Blackfeather Knave Clue",
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "duke_of_crows__upgrade__murder_of_crows",
+      "name": "Murder of Crows",
+      "deckId": "duke_of_crows",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 4,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Coin]\nCombo 2 | [Coin 2] | [Power 2] | Combo 3 | [Power 2]",
+      "imageUrl": "https://images.uesp.net/f/f2/ON-tribute-card-Murder_of_Crows.png",
+      "imageFile": "ON-tribute-card-Murder of Crows.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "replaces": "Scratch (2)",
+      "obtainedFrom": "Found in Glenumbra after obtaining the Murder of Crows Clue",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "duke_of_crows__upgrade__plunder",
+      "name": "Plunder",
+      "deckId": "duke_of_crows",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 6,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 4
+        }
+      ],
+      "rawEffect": "[Draw]\nCombo 2 | [Draw]\n\nCombo 4 | [Draw]",
+      "imageUrl": "https://images.uesp.net/4/4d/ON-tribute-card-Plunder.png",
+      "imageFile": "ON-tribute-card-Plunder.png",
+      "comboRequirement": [
+        2,
+        4
+      ],
+      "needsReview": false,
+      "replaces": "Pilfer (1)",
+      "obtainedFrom": "Achievement: Dictum of the Duke",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "duke_of_crows__upgrade__toll_of_silver",
+      "name": "Toll of Silver",
+      "deckId": "duke_of_crows",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 4,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Coin 2]\nCombo 2 | [Draw]\n\nCombo 3 | [Coin]",
+      "imageUrl": "https://images.uesp.net/1/12/ON-tribute-card-Toll_of_Silver.png",
+      "imageFile": "ON-tribute-card-Toll of Silver.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "replaces": "Toll of Flesh (2)",
+      "obtainedFrom": "Achievement: Roister's Club Trainee",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hermaeus_mora__starter__unsealed_glyphic",
+      "name": "Unsealed Glyphic",
+      "deckId": "hermaeus_mora",
+      "type": "action",
+      "category": "starter",
+      "cost": null,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Power] | Combo 3 | [Coin]",
+      "imageUrl": "https://images.uesp.net/9/91/ON-tribute-mora-Unsealed_Glyphic.png",
+      "imageFile": "ON-tribute-mora-Unsealed Glyphic.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "isStarter": true,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hermaeus_mora__apocryphal_pact",
+      "name": "Apocryphal Pact",
+      "deckId": "hermaeus_mora",
+      "type": "action",
+      "category": "base",
+      "cost": 4,
+      "copies": 4,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "setback",
+          "opponentOp": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Power 2] | [Coin] | [Setback Coin|2] | Combo 2 | [Power 2] | Combo 3 | [Power]",
+      "imageUrl": "https://images.uesp.net/c/ca/ON-tribute-mora-Apocryphal_Pact.png",
+      "imageFile": "ON-tribute-mora-Apocryphal Pact.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hermaeus_mora__bargain_for_knowledge",
+      "name": "Bargain for Knowledge",
+      "deckId": "hermaeus_mora",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 4,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 5,
+          "timing": "onPlay"
+        },
+        {
+          "op": "setback",
+          "opponentOp": "draw",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Power 5] | [Setback Draw] | Combo 2 | [Coin] | Combo 3 | [Coin 2]",
+      "imageUrl": "https://images.uesp.net/1/18/ON-tribute-mora-Bargain_for_Knowledge.png",
+      "imageFile": "ON-tribute-mora-Bargain for Knowledge.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hermaeus_mora__cipher_of_the_eye",
+      "name": "Cipher of the Eye",
+      "deckId": "hermaeus_mora",
+      "type": "contractAgent",
+      "category": "base",
+      "cost": 5,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": 2,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "destroyOwnCard",
+          "amount": 1,
+          "from": [
+            "hand",
+            "inPlay"
+          ],
+          "timing": "activate"
+        },
+        {
+          "op": "setback",
+          "opponentOp": "gainCoin",
+          "amount": 3,
+          "timing": "activate"
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Destroy] | [Setback Coin|3] | Combo 2 | [Power 2]",
+      "imageUrl": "https://images.uesp.net/e/eb/ON-tribute-mora-Cipher_of_the_Eye.png",
+      "imageFile": "ON-tribute-mora-Cipher of the Eye.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "hermaeus_mora__ink_and_blood",
+      "name": "Ink and Blood",
+      "deckId": "hermaeus_mora",
+      "type": "action",
+      "category": "base",
+      "cost": 2,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "setback",
+          "opponentOp": "gainPower",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin 2] | [Setback Power] | Combo 2 | [Power 2] | [Coin]",
+      "imageUrl": "https://images.uesp.net/b/b1/ON-tribute-mora-Ink_and_Blood.png",
+      "imageFile": "ON-tribute-mora-Ink and Blood.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hermaeus_mora__threads_of_fate",
+      "name": "Threads of Fate",
+      "deckId": "hermaeus_mora",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 2,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "setback",
+          "opponentOp": "gainCoin",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Power 2] | [Setback Coin] | Combo 2 | [Power] | Combo 3 | [Coin]",
+      "imageUrl": "https://images.uesp.net/3/35/ON-tribute-mora-Threads_of_Fate.png",
+      "imageFile": "ON-tribute-mora-Threads of Fate.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hermaeus_mora__unsettling_aura",
+      "name": "Unsettling Aura",
+      "deckId": "hermaeus_mora",
+      "type": "action",
+      "category": "base",
+      "cost": 6,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 4,
+          "timing": "onPlay"
+        },
+        {
+          "op": "setback",
+          "opponentOp": "draw",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 3
+        },
+        {
+          "op": "gainPower",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 4
+        }
+      ],
+      "rawEffect": "[Power 4] | [Setback Draw] | Combo 2 | [Power 2]Combo 3 | [Power 2] | Combo 4 | [Power 3]",
+      "imageUrl": "https://images.uesp.net/f/f5/ON-tribute-mora-Unsettling_Aura.png",
+      "imageFile": "ON-tribute-mora-Unsettling Aura.png",
+      "comboRequirement": [
+        2,
+        3,
+        4
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hermaeus_mora__voracious_tomeshell",
+      "name": "Voracious Tomeshell",
+      "deckId": "hermaeus_mora",
+      "type": "action",
+      "category": "base",
+      "cost": 3,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "destroyOwnCard",
+          "amount": 2,
+          "from": [
+            "hand",
+            "inPlay"
+          ],
+          "timing": "onPlay"
+        },
+        {
+          "op": "setback",
+          "opponentOp": "draw",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Destroy 2] | [Setback Draw] | Combo 2 | [Power 3]",
+      "imageUrl": "https://images.uesp.net/8/86/ON-tribute-mora-Voracious_Tomeshell.png",
+      "imageFile": "ON-tribute-mora-Voracious Tomeshell.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hermaeus_mora__upgrade__chromatic_reservoir",
+      "name": "Chromatic Reservoir",
+      "deckId": "hermaeus_mora",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 6,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 4,
+          "timing": "onPlay"
+        },
+        {
+          "op": "setback",
+          "opponentOp": "draw",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 3
+        },
+        {
+          "op": "gainPower",
+          "amount": 4,
+          "timing": "combo",
+          "comboRequirement": 4
+        }
+      ],
+      "rawEffect": "[Power 4] | [Setback Draw] | Combo 2 | [Power 2] | Combo 3 | [Power 2] | Combo 4 | [Power 4]",
+      "imageUrl": "https://images.uesp.net/f/f8/ON-tribute-mora-Chromatic_Reservoir.png",
+      "imageFile": "ON-tribute-mora-Chromatic Reservoir.png",
+      "comboRequirement": [
+        2,
+        3,
+        4
+      ],
+      "needsReview": false,
+      "replaces": "Unsettling Aura (1)",
+      "obtainedFrom": "Achievement: Metrand Met His Match",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hermaeus_mora__upgrade__lantern_of_the_endless",
+      "name": "Lantern of the Endless",
+      "deckId": "hermaeus_mora",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 4,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "setback",
+          "opponentOp": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Power 2] | [Coin] | [Setback Coin|2] | Combo 2 | [Power 2] | Combo 3 | [Power 2]",
+      "imageUrl": "https://images.uesp.net/e/ec/ON-tribute-mora-Lantern_of_the_Endless.png",
+      "imageFile": "ON-tribute-mora-Lantern of the Endless.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "replaces": "Apocryphal Pact (3)",
+      "obtainedFrom": "Found in Reaper's March after obtaining the Lantern of the Infinite Clue",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hermaeus_mora__upgrade__seeker_aspirant",
+      "name": "Seeker Aspirant",
+      "deckId": "hermaeus_mora",
+      "type": "contractAgent",
+      "category": "upgrade",
+      "cost": 5,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": 2,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "destroyOwnCard",
+          "amount": 1,
+          "from": [
+            "hand",
+            "inPlay"
+          ],
+          "timing": "activate"
+        },
+        {
+          "op": "setback",
+          "opponentOp": "gainCoin",
+          "amount": 3,
+          "timing": "activate"
+        },
+        {
+          "op": "gainPower",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Destroy] | [Setback Coin|3] | Combo 2 | [Power 3]",
+      "imageUrl": "https://images.uesp.net/8/8c/ON-tribute-mora-Seeker_Aspirant.png",
+      "imageFile": "ON-tribute-mora-Seeker Aspirant.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Cipher of the Eye (1)",
+      "obtainedFrom": "Achievement: Tentacles in Every Tavern",
+      "isContract": true,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "hermaeus_mora__upgrade__unfathomable_secrets",
+      "name": "Unfathomable Secrets",
+      "deckId": "hermaeus_mora",
+      "type": "agent",
+      "category": "upgrade",
+      "cost": 4,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": 5,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 5,
+          "timing": "activate"
+        },
+        {
+          "op": "setback",
+          "opponentOp": "draw",
+          "amount": 1,
+          "timing": "activate"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Power 5] | [Setback Draw] | Combo 2 | [Coin 2] | Combo 3 | [Coin 2]",
+      "imageUrl": "https://images.uesp.net/2/24/ON-tribute-mora-Unfathomable_Secrets.png",
+      "imageFile": "ON-tribute-mora-Unfathomable Secrets.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "replaces": "Bargain for Knowledge (2)",
+      "obtainedFrom": "Found in The Rift after obtaining the Unfathomable Secrets Clue",
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "hlaalu__starter__goods_shipment",
+      "name": "Goods Shipment",
+      "deckId": "hlaalu",
+      "type": "action",
+      "category": "starter",
+      "cost": null,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Coin]",
+      "imageUrl": "https://images.uesp.net/b/bc/ON-tribute-card-Goods_Shipment.png",
+      "imageFile": "ON-tribute-card-Goods Shipment.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isStarter": true,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hlaalu__currency_exchange",
+      "name": "Currency Exchange",
+      "deckId": "hlaalu",
+      "type": "action",
+      "category": "base",
+      "cost": 7,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "replaceTavern",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 5,
+          "timing": "onPlay"
+        },
+        {
+          "op": "extraPatronCall",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Replace] | [Coin 5]\nCombo 2 | [Patron]",
+      "imageUrl": "https://images.uesp.net/c/ca/ON-tribute-card-Currency_Exchange.png",
+      "imageFile": "ON-tribute-card-Currency Exchange.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hlaalu__customs_seizure",
+      "name": "Customs Seizure",
+      "deckId": "hlaalu",
+      "type": "action",
+      "category": "base",
+      "cost": 4,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "acquireFromTavern",
+          "maxCost": 6,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Acquire 6]",
+      "imageUrl": "https://images.uesp.net/1/17/ON-tribute-card-Customs_Seizure.png",
+      "imageFile": "ON-tribute-card-Customs Seizure.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hlaalu__hireling",
+      "name": "Hireling",
+      "deckId": "hlaalu",
+      "type": "agent",
+      "category": "base",
+      "cost": 6,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": 2,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "activate"
+        },
+        {
+          "op": "acquireFromTavern",
+          "maxCost": 5,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin 2]\nCombo 2 | [Acquire 5]",
+      "imageUrl": "https://images.uesp.net/a/a8/ON-tribute-card-Hireling.png",
+      "imageFile": "ON-tribute-card-Hireling.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "hlaalu__hlaalu_kinsman",
+      "name": "Hlaalu Kinsman",
+      "deckId": "hlaalu",
+      "type": "agent",
+      "category": "base",
+      "cost": 10,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": 1,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "acquireFromTavern",
+          "maxCost": 9,
+          "timing": "activate"
+        },
+        {
+          "op": "replaceTavern",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Acquire 9]\nCombo 2 | [Replace]",
+      "imageUrl": "https://images.uesp.net/1/19/ON-tribute-card-Hlaalu_Kinsman.png",
+      "imageFile": "ON-tribute-card-Hlaalu Kinsman.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "hlaalu__hostile_takeover",
+      "name": "Hostile Takeover",
+      "deckId": "hlaalu",
+      "type": "action",
+      "category": "base",
+      "cost": 5,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "acquireFromTavern",
+          "maxCost": 7,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Power]\nCombo 2 | [Acquire 7]",
+      "imageUrl": "https://images.uesp.net/b/b9/ON-tribute-card-Hostile_Takeover.png",
+      "imageFile": "ON-tribute-card-Hostile Takeover.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hlaalu__house_marketplace",
+      "name": "House Marketplace",
+      "deckId": "hlaalu",
+      "type": "action",
+      "category": "base",
+      "cost": 8,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 6,
+          "timing": "onPlay"
+        },
+        {
+          "op": "acquireFromTavern",
+          "maxCost": 7,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin 6]\nCombo 2 | [Acquire 7]",
+      "imageUrl": "https://images.uesp.net/e/ed/ON-tribute-card-House_Marketplace.png",
+      "imageFile": "ON-tribute-card-House Marketplace.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hlaalu__kwama_egg_mine",
+      "name": "Kwama Egg Mine",
+      "deckId": "hlaalu",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 3,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Coin 2]\nCombo 3 | [Coin 3]",
+      "imageUrl": "https://images.uesp.net/4/41/ON-tribute-card-Kwama_Egg_Mine.png",
+      "imageFile": "ON-tribute-card-Kwama Egg Mine.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hlaalu__luxury_exports",
+      "name": "Luxury Exports",
+      "deckId": "hlaalu",
+      "type": "action",
+      "category": "base",
+      "cost": 2,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 3,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Coin 3]",
+      "imageUrl": "https://images.uesp.net/1/1b/ON-tribute-card-Luxury_Exports.png",
+      "imageFile": "ON-tribute-card-Luxury Exports.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hlaalu__upgrade__ebony_mine",
+      "name": "Ebony Mine",
+      "deckId": "hlaalu",
+      "type": "contractAction",
+      "category": "upgrade",
+      "cost": 3,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 4,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Coin 2]\nCombo 3 | [Coin 4]",
+      "imageUrl": "https://images.uesp.net/5/50/ON-tribute-card-Ebony_Mine.png",
+      "imageFile": "ON-tribute-card-Ebony Mine.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "replaces": "Kwama Egg Mine (2)",
+      "obtainedFrom": "Achievement: Roister's Club Novice",
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hlaalu__upgrade__hlaalu_councilor",
+      "name": "Hlaalu Councilor",
+      "deckId": "hlaalu",
+      "type": "agent",
+      "category": "upgrade",
+      "cost": 10,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": 2,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "acquireFromTavern",
+          "maxCost": 9,
+          "timing": "activate"
+        },
+        {
+          "op": "replaceTavern",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Acquire 9]\nCombo 2 | [Replace]",
+      "imageUrl": "https://images.uesp.net/2/21/ON-tribute-card-Hlaalu_Councilor.png",
+      "imageFile": "ON-tribute-card-Hlaalu Councilor.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Hlaalu Kinsman (1)",
+      "obtainedFrom": "Found in Deshaan after obtaining the Hlaalu Councilor Clue",
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "hlaalu__upgrade__house_embassy",
+      "name": "House Embassy",
+      "deckId": "hlaalu",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 8,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 7,
+          "timing": "onPlay"
+        },
+        {
+          "op": "acquireFromTavern",
+          "maxCost": 7,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin 7]\nCombo 2 | [Acquire 7]",
+      "imageUrl": "https://images.uesp.net/2/22/ON-tribute-card-House_Embassy.png",
+      "imageFile": "ON-tribute-card-House Embassy.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "House Marketplace (1)",
+      "obtainedFrom": "Found in Vvardenfell after obtaining the House Embassy Clue",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hlaalu__upgrade__oathman",
+      "name": "Oathman",
+      "deckId": "hlaalu",
+      "type": "agent",
+      "category": "upgrade",
+      "cost": 6,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": 2,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "activate"
+        },
+        {
+          "op": "acquireFromTavern",
+          "maxCost": 6,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin 2]\nCombo 2 | [Acquire 6]",
+      "imageUrl": "https://images.uesp.net/9/99/ON-tribute-card-Oathman.png",
+      "imageFile": "ON-tribute-card-Oathman.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Hireling (2)",
+      "obtainedFrom": "Achievement: Great House's Mandate",
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "hunding__starter__way_of_the_sword",
+      "name": "Way of the Sword",
+      "deckId": "hunding",
+      "type": "action",
+      "category": "starter",
+      "cost": null,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "onPlay",
+          "options": [
+            [
+              {
+                "op": "gainCoin",
+                "amount": 1
+              }
+            ],
+            [
+              {
+                "op": "gainPower",
+                "amount": 1
+              }
+            ]
+          ]
+        }
+      ],
+      "rawEffect": "[Choose]\n: [Coin]\n: [Power]",
+      "imageUrl": "https://images.uesp.net/5/5d/ON-tribute-card-Way_of_the_Sword.png",
+      "imageFile": "ON-tribute-card-Way of the Sword.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isStarter": true,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hunding__ansei_assault",
+      "name": "Ansei Assault",
+      "deckId": "hunding",
+      "type": "action",
+      "category": "base",
+      "cost": 9,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "onPlay",
+          "options": [
+            [
+              {
+                "op": "gainPower",
+                "amount": 5
+              }
+            ],
+            [
+              {
+                "op": "acquireFromTavern",
+                "maxCost": 9
+              }
+            ]
+          ]
+        }
+      ],
+      "rawEffect": "[Choose]\n: [Power 5]\n: [Acquire 9]",
+      "imageUrl": "https://images.uesp.net/f/f5/ON-tribute-card-Ansei_Assault.png",
+      "imageFile": "ON-tribute-card-Ansei Assault.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hunding__battle_meditation",
+      "name": "Battle Meditation",
+      "deckId": "hunding",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 3,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "onPlay",
+          "options": [
+            [
+              {
+                "op": "gainPower",
+                "amount": 2
+              }
+            ],
+            [
+              {
+                "op": "refresh",
+                "amount": 1,
+                "from": "cooldown",
+                "to": "topOfDraw"
+              }
+            ]
+          ]
+        }
+      ],
+      "rawEffect": "[Choose]\n: [Power 2]\n: [Refresh]",
+      "imageUrl": "https://images.uesp.net/e/e0/ON-tribute-card-Battle_Meditation.png",
+      "imageFile": "ON-tribute-card-Battle Meditation.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hunding__conquest",
+      "name": "Conquest",
+      "deckId": "hunding",
+      "type": "action",
+      "category": "base",
+      "cost": 4,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "onPlay",
+          "options": [
+            [
+              {
+                "op": "gainPower",
+                "amount": 3
+              }
+            ],
+            [
+              {
+                "op": "acquireFromTavern",
+                "maxCost": 4
+              }
+            ]
+          ]
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Choose]\n: [Power 3]\n: [Acquire 4]\n\nCombo 2 | [Power 2]",
+      "imageUrl": "https://images.uesp.net/a/aa/ON-tribute-card-Conquest.png",
+      "imageFile": "ON-tribute-card-Conquest.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hunding__march_on_hattu",
+      "name": "March on Hattu",
+      "deckId": "hunding",
+      "type": "action",
+      "category": "base",
+      "cost": 6,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "onPlay",
+          "options": [
+            [
+              {
+                "op": "gainPower",
+                "amount": 4
+              }
+            ],
+            [
+              {
+                "op": "refresh",
+                "amount": 3,
+                "from": "cooldown",
+                "to": "topOfDraw"
+              }
+            ]
+          ]
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Choose]\n: [Power 4]\n: [Refresh 3]\n\nCombo 2 | [Power 2]",
+      "imageUrl": "https://images.uesp.net/c/cf/ON-tribute-card-March_on_Hattu.png",
+      "imageFile": "ON-tribute-card-March on Hattu.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hunding__no_shira_poet",
+      "name": "No Shira Poet",
+      "deckId": "hunding",
+      "type": "agent",
+      "category": "base",
+      "cost": 6,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": 3,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "refresh",
+          "amount": 1,
+          "from": "cooldown",
+          "to": "topOfDraw",
+          "timing": "activate"
+        },
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Refresh]\n\nCombo 2 | [Power]",
+      "imageUrl": "https://images.uesp.net/b/b8/ON-tribute-card-No_Shira_Poet.png",
+      "imageFile": "ON-tribute-card-No Shira Poet.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "hunding__shehai_summoning",
+      "name": "Shehai Summoning",
+      "deckId": "hunding",
+      "type": "action",
+      "category": "base",
+      "cost": 5,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "onPlay",
+          "options": [
+            [
+              {
+                "op": "refresh",
+                "amount": 2,
+                "from": "cooldown",
+                "to": "topOfDraw"
+              }
+            ],
+            [
+              {
+                "op": "acquireFromTavern",
+                "maxCost": 5
+              }
+            ]
+          ]
+        },
+        {
+          "op": "refresh",
+          "amount": 1,
+          "from": "cooldown",
+          "to": "topOfDraw",
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Choose]\n: [Refresh 2]\n: [Acquire 5]\n\nCombo 2 | [Refresh]",
+      "imageUrl": "https://images.uesp.net/3/39/ON-tribute-card-Shehai_Summoning.png",
+      "imageFile": "ON-tribute-card-Shehai Summoning.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hunding__warrior_wave",
+      "name": "Warrior Wave",
+      "deckId": "hunding",
+      "type": "action",
+      "category": "base",
+      "cost": 4,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "onPlay",
+          "options": [
+            [
+              {
+                "op": "gainPower",
+                "amount": 3
+              }
+            ],
+            [
+              {
+                "op": "gainCoin",
+                "amount": 3
+              }
+            ]
+          ]
+        }
+      ],
+      "rawEffect": "[Choose]\n: [Power 3]\n: [Coin 3]",
+      "imageUrl": "https://images.uesp.net/4/49/ON-tribute-card-Warrior_Wave.png",
+      "imageFile": "ON-tribute-card-Warrior Wave.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hunding__upgrade__anseis_victory",
+      "name": "Ansei's Victory",
+      "deckId": "hunding",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 9,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "onPlay",
+          "options": [
+            [
+              {
+                "op": "gainPower",
+                "amount": 6
+              }
+            ],
+            [
+              {
+                "op": "acquireFromTavern",
+                "maxCost": 10
+              }
+            ]
+          ]
+        }
+      ],
+      "rawEffect": "[Choose]\n: [Power 6]\n: [Acquire 10]",
+      "imageUrl": "https://images.uesp.net/b/b1/ON-tribute-card-Ansei%27s_Victory.png",
+      "imageFile": "ON-tribute-card-Ansei's Victory.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "replaces": "Ansei Assault (1)",
+      "obtainedFrom": "Found in the Alik'r Desert after obtaining the Ansei's Victory Clue",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hunding__upgrade__grand_oratory",
+      "name": "Grand Oratory",
+      "deckId": "hunding",
+      "type": "contractAction",
+      "category": "upgrade",
+      "cost": 3,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "onPlay",
+          "options": [
+            [
+              {
+                "op": "gainPower",
+                "amount": 2
+              }
+            ],
+            [
+              {
+                "op": "refresh",
+                "amount": 1,
+                "from": "cooldown",
+                "to": "topOfDraw"
+              }
+            ]
+          ]
+        },
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Choose]\n: [Power 2]\n: [Refresh]\n\nCombo 2 | [Coin 2]",
+      "imageUrl": "https://images.uesp.net/5/55/ON-tribute-card-Grand_Oratory.png",
+      "imageFile": "ON-tribute-card-Grand Oratory.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Battle Meditation (2)",
+      "obtainedFrom": "Found in Stros M'Kai after obtaining the Grand Oratory Clue",
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "hunding__upgrade__hel_shira_herald",
+      "name": "Hel Shira Herald",
+      "deckId": "hunding",
+      "type": "agent",
+      "category": "upgrade",
+      "cost": 6,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": 3,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "refresh",
+          "amount": 1,
+          "from": "cooldown",
+          "to": "topOfDraw",
+          "timing": "activate"
+        },
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Refresh 2]\n\nCombo 2 | 16px Gain 1 Power.",
+      "imageUrl": "https://images.uesp.net/a/a9/ON-tribute-card-Hel_Shira_Herald.png",
+      "imageFile": "ON-tribute-card-Hel Shira Herald.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "No Shira Poet (2)",
+      "obtainedFrom": "Achievement: Roister's Club Master",
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "hunding__upgrade__hiras_end",
+      "name": "Hira's End",
+      "deckId": "hunding",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 6,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "onPlay",
+          "options": [
+            [
+              {
+                "op": "gainPower",
+                "amount": 4
+              }
+            ],
+            [
+              {
+                "op": "refresh",
+                "amount": 3,
+                "from": "cooldown",
+                "to": "topOfDraw"
+              }
+            ]
+          ]
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Choose]\n: [Power 4]\n: [Refresh 3]\n\nCombo 2 | [Power 2]",
+      "imageUrl": "https://images.uesp.net/a/a1/ON-tribute-card-Hira%27s_End.png",
+      "imageFile": "ON-tribute-card-Hira's End.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "March on Hattu (2)",
+      "obtainedFrom": "Achievement: Swordmaster's Splendor",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "orgnum__starter__sea_elf_raid",
+      "name": "Sea Elf Raid",
+      "deckId": "orgnum",
+      "type": "action",
+      "category": "starter",
+      "cost": null,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Coin] | Combo 3 | [Power]",
+      "imageUrl": "https://images.uesp.net/d/d6/ON-tribute-card-Sea_Elf_Raid.png",
+      "imageFile": "ON-tribute-card-Sea Elf Raid.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "isStarter": true,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "orgnum__ghostscale_sea_serpent",
+      "name": "Ghostscale Sea Serpent",
+      "deckId": "orgnum",
+      "type": "action",
+      "category": "base",
+      "cost": 2,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPrestige",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin] | [Prestige] | Combo 2 | [Power]",
+      "imageUrl": "https://images.uesp.net/5/5f/ON-tribute-card-Ghostscale_Sea_Serpent.png",
+      "imageFile": "ON-tribute-card-Ghostscale Sea Serpent.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "orgnum__king_orgnums_command",
+      "name": "King Orgnum's Command",
+      "deckId": "orgnum",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 2,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "extraPatronCall",
+          "amount": 1,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Patron]",
+      "imageUrl": "https://images.uesp.net/e/ee/ON-tribute-card-King_Orgnum%27s_Command.png",
+      "imageFile": "ON-tribute-card-King Orgnum's Command.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "orgnum__maormer_boarding_party",
+      "name": "Maormer Boarding Party",
+      "deckId": "orgnum",
+      "type": "action",
+      "category": "base",
+      "cost": 2,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPrestige",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPrestige",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Prestige] | Combo 2 | [Prestige]",
+      "imageUrl": "https://images.uesp.net/c/c2/ON-tribute-card-Maormer_Boarding_Party.png",
+      "imageFile": "ON-tribute-card-Maormer Boarding Party.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false,
+      "alsoCreatedByCard": true
+    },
+    {
+      "id": "orgnum__maormer_cutter",
+      "name": "Maormer Cutter",
+      "deckId": "orgnum",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 2,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Power] | Combo 2 | [Power] | Combo 3 | [Power 2]",
+      "imageUrl": "https://images.uesp.net/b/b6/ON-tribute-card-Maormer_Cutter.png",
+      "imageFile": "ON-tribute-card-Maormer Cutter.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "orgnum__sea_raiders_glory",
+      "name": "Sea Raider's Glory",
+      "deckId": "orgnum",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 2,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPrestige",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPrestige",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Prestige] | Combo 3 | [Prestige 3]",
+      "imageUrl": "https://images.uesp.net/4/4b/ON-tribute-card-Sea_Raider%27s_Glory.png",
+      "imageFile": "ON-tribute-card-Sea Raider's Glory.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "orgnum__serpentprow_schooner",
+      "name": "Serpentprow Schooner",
+      "deckId": "orgnum",
+      "type": "action",
+      "category": "base",
+      "cost": 3,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Power 2] | Combo 3 | [Power 2]",
+      "imageUrl": "https://images.uesp.net/2/2d/ON-tribute-card-Serpentprow_Schooner.png",
+      "imageFile": "ON-tribute-card-Serpentprow Schooner.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "orgnum__snakeskin_freebooter",
+      "name": "Snakeskin Freebooter",
+      "deckId": "orgnum",
+      "type": "agent",
+      "category": "base",
+      "cost": 5,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": 3,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "activate"
+        },
+        {
+          "op": "createCard",
+          "cardName": "Maormer Boarding Party",
+          "destination": "cooldown",
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin] | Combo 2 | [Create Maormer Boarding Party]",
+      "imageUrl": "https://images.uesp.net/f/ff/ON-tribute-card-Snakeskin_Freebooter.png",
+      "imageFile": "ON-tribute-card-Snakeskin Freebooter.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "orgnum__storm_shark_wavecaller",
+      "name": "Storm Shark Wavecaller",
+      "deckId": "orgnum",
+      "type": "agent",
+      "category": "base",
+      "cost": 5,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": 2,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "activate"
+        },
+        {
+          "op": "replaceTavern",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Power 2] | Combo 2 | [Replace]",
+      "imageUrl": "https://images.uesp.net/b/b2/ON-tribute-card-Storm_Shark_Wavecaller.png",
+      "imageFile": "ON-tribute-card-Storm Shark Wavecaller.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "orgnum__upgrade__pyandonean_war_fleet",
+      "name": "Pyandonean War Fleet",
+      "deckId": "orgnum",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 3,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Power 2] | Combo 3 | [Power 3]",
+      "imageUrl": "https://images.uesp.net/d/d1/ON-tribute-card-Pyandonean_War_Fleet.png",
+      "imageFile": "ON-tribute-card-Pyandonean War Fleet.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "replaces": "Serpentprow Schooner (2)",
+      "obtainedFrom": "Achievement: Roister's Club Veteran",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "orgnum__upgrade__sea_serpent_colossus",
+      "name": "Sea Serpent Colossus",
+      "deckId": "orgnum",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 2,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPrestige",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin] | [Prestige] | Combo 2 | [Power 2]",
+      "imageUrl": "https://images.uesp.net/f/f5/ON-tribute-card-Sea_Serpent_Colossus.png",
+      "imageFile": "ON-tribute-card-Sea Serpent Colossus.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Ghostscale Sea Serpent (2)",
+      "obtainedFrom": "Achievement: Power of Pyandonea",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "orgnum__upgrade__serpentguard_rider",
+      "name": "Serpentguard Rider",
+      "deckId": "orgnum",
+      "type": "agent",
+      "category": "upgrade",
+      "cost": 5,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": 2,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "activate"
+        },
+        {
+          "op": "replaceTavern",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Power 2] | Combo 2 | [Replace] | [Power]",
+      "imageUrl": "https://images.uesp.net/6/65/ON-tribute-card-Serpentguard_Rider.png",
+      "imageFile": "ON-tribute-card-Serpentguard Rider.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Storm Shark Wavecaller (2)",
+      "obtainedFrom": "Found in Greenshade after obtaining the Serpentguard Rider Clue",
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "orgnum__upgrade__summerset_sacking",
+      "name": "Summerset Sacking",
+      "deckId": "orgnum",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 2,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPrestige",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPrestige",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Prestige] | Combo 2 | [Prestige] | Combo 3 | [Coin]",
+      "imageUrl": "https://images.uesp.net/e/e3/ON-tribute-card-Summerset_Sacking.png",
+      "imageFile": "ON-tribute-card-Summerset Sacking.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "replaces": "Maormer Boarding Party (2)",
+      "obtainedFrom": "Found in Auridon after obtaining the Summerset Sacking Clue",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false,
+      "alsoCreatedByPatron": true
+    },
+    {
+      "id": "rajhin__starter__swipe",
+      "name": "Swipe",
+      "deckId": "rajhin",
+      "type": "action",
+      "category": "starter",
+      "cost": null,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Coin]",
+      "imageUrl": "https://images.uesp.net/8/81/ON-tribute-card-Swipe.png",
+      "imageFile": "ON-tribute-card-Swipe.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isStarter": true,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "rajhin__bag_of_tricks",
+      "name": "Bag of Tricks",
+      "deckId": "rajhin",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 7,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "opponentDiscard",
+          "amount": 1,
+          "when": "startOfTheirTurn",
+          "timing": "onPlay"
+        },
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "opponentDiscard",
+          "amount": 1,
+          "when": "startOfTheirTurn",
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Discard] | Combo 2 | [Draw] | Combo 3 | [Discard]",
+      "imageUrl": "https://images.uesp.net/1/18/ON-tribute-card-Bag_of_Tricks.png",
+      "imageFile": "ON-tribute-card-Bag of Tricks.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "rajhin__jarring_lullaby",
+      "name": "Jarring Lullaby",
+      "deckId": "rajhin",
+      "type": "action",
+      "category": "base",
+      "cost": 7,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "knockOut",
+          "amount": 2,
+          "target": "opponentAgent",
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "opponentDiscard",
+          "amount": 1,
+          "when": "startOfTheirTurn",
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Knock Out 2] | [Coin 2] | Combo 2 | [Coin 2] | Combo 3 | [Discard]",
+      "imageUrl": "https://images.uesp.net/4/4a/ON-tribute-card-Jarring_Lullaby.png",
+      "imageFile": "ON-tribute-card-Jarring Lullaby.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "rajhin__jeering_shadow",
+      "name": "Jeering Shadow",
+      "deckId": "rajhin",
+      "type": "agent",
+      "category": "base",
+      "cost": 4,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": 2,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "activate"
+        },
+        {
+          "op": "opponentLosePrestige",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin] | Combo 2 | [Lose Prestige]",
+      "imageUrl": "https://images.uesp.net/2/2d/ON-tribute-card-Jeering_Shadow.png",
+      "imageFile": "ON-tribute-card-Jeering Shadow.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "rajhin__moonlit_illusion",
+      "name": "Moonlit Illusion",
+      "deckId": "rajhin",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 3,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "destroyOwnCard",
+          "amount": 1,
+          "from": [
+            "hand",
+            "inPlay"
+          ],
+          "timing": "onPlay"
+        },
+        {
+          "op": "opponentLosePrestige",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Destroy] | Combo 3 | [Lose Prestige]",
+      "imageUrl": "https://images.uesp.net/d/d0/ON-tribute-card-Moonlit_Illusion.png",
+      "imageFile": "ON-tribute-card-Moonlit Illusion.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "rajhin__pounce_and_profit",
+      "name": "Pounce and Profit",
+      "deckId": "rajhin",
+      "type": "action",
+      "category": "base",
+      "cost": 5,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 4,
+          "timing": "onPlay"
+        },
+        {
+          "op": "knockOut",
+          "amount": 1,
+          "target": "opponentAgent",
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin 4] | Combo 2 | [Knock Out]",
+      "imageUrl": "https://images.uesp.net/8/88/ON-tribute-card-Pounce_and_Profit.png",
+      "imageFile": "ON-tribute-card-Pounce and Profit.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "rajhin__sleight_of_hand",
+      "name": "Sleight of Hand",
+      "deckId": "rajhin",
+      "type": "action",
+      "category": "base",
+      "cost": 2,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "replaceTavern",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin 2] | Combo 2 | [Replace]",
+      "imageUrl": "https://images.uesp.net/8/8f/ON-tribute-card-Slight_of_Hand.png",
+      "imageFile": "ON-tribute-card-Slight of Hand.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "rajhin__stubborn_shadow",
+      "name": "Stubborn Shadow",
+      "deckId": "rajhin",
+      "type": "agent",
+      "category": "base",
+      "cost": 6,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": 3,
+      "taunt": true,
+      "effects": [
+        {
+          "op": "noop",
+          "note": "no play effect",
+          "timing": "activate"
+        },
+        {
+          "op": "opponentLosePrestige",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "taunt",
+          "timing": "passive"
+        }
+      ],
+      "rawEffect": "This card has no play effect. | Combo 2 | [Lose Prestige 2] | [Taunt]",
+      "imageUrl": "https://images.uesp.net/2/23/ON-tribute-card-Stubborn_Shadow.png",
+      "imageFile": "ON-tribute-card-Stubborn Shadow.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "rajhin__twilight_revelry",
+      "name": "Twilight Revelry",
+      "deckId": "rajhin",
+      "type": "action",
+      "category": "base",
+      "cost": 10,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "opponentDiscard",
+          "amount": 1,
+          "when": "startOfTheirTurn",
+          "timing": "onPlay"
+        },
+        {
+          "op": "replaceTavern",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "opponentLosePrestige",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 3
+        },
+        {
+          "op": "draw",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 4
+        }
+      ],
+      "rawEffect": "[Discard] | Combo 2 | [Replace 3] | Combo 3 | [Lose Prestige 3] | Combo 4 | [Draw 3]",
+      "imageUrl": "https://images.uesp.net/5/5f/ON-tribute-card-Twilight_Revelry.png",
+      "imageFile": "ON-tribute-card-Twilight Revelry.png",
+      "comboRequirement": [
+        2,
+        3,
+        4
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "rajhin__upgrade__grand_larceny",
+      "name": "Grand Larceny",
+      "deckId": "rajhin",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 5,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 4,
+          "timing": "onPlay"
+        },
+        {
+          "op": "knockOut",
+          "amount": 1,
+          "target": "opponentAgent",
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "opponentLosePrestige",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin 4] | Combo 2 | [Knock Out] | [Lose Prestige]",
+      "imageUrl": "https://images.uesp.net/5/5c/ON-tribute-card-Grand_Larceny.png",
+      "imageFile": "ON-tribute-card-Grand Larceny.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Pounce and Profit (2)",
+      "obtainedFrom": "Found in Grahtwood after obtaining the Grand Larceny Clue",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "rajhin__upgrade__prowling_shadow",
+      "name": "Prowling Shadow",
+      "deckId": "rajhin",
+      "type": "agent",
+      "category": "upgrade",
+      "cost": 4,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": 2,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "activate"
+        },
+        {
+          "op": "opponentLosePrestige",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin 2] | Combo 2 | [Lose Prestige]",
+      "imageUrl": "https://images.uesp.net/c/c3/ON-tribute-card-Prowling_Shadow.png",
+      "imageFile": "ON-tribute-card-Prowling Shadow.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Jeering Shadow (2)",
+      "obtainedFrom": "Achievement: Roister's Club Expert",
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "rajhin__upgrade__rings_guile",
+      "name": "Ring's Guile",
+      "deckId": "rajhin",
+      "type": "contractAction",
+      "category": "upgrade",
+      "cost": 7,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "opponentDiscard",
+          "amount": 1,
+          "when": "startOfTheirTurn",
+          "timing": "onPlay"
+        },
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "opponentDiscard",
+          "amount": 1,
+          "when": "startOfTheirTurn",
+          "timing": "combo",
+          "comboRequirement": 3
+        },
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Discard] | Combo 2 | [Draw] | Combo 3 | [Discard] | [Draw]",
+      "imageUrl": "https://images.uesp.net/1/16/ON-tribute-card-Ring%27s_Guile.png",
+      "imageFile": "ON-tribute-card-Ring's Guile.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "replaces": "Bag of Tricks (1)",
+      "obtainedFrom": "Found in Reaper's March after obtaining the Ring's Guile Clue",
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "rajhin__upgrade__shadows_slumber",
+      "name": "Shadow's Slumber",
+      "deckId": "rajhin",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 7,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "knockOut",
+          "amount": 2,
+          "target": "opponentAgent",
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "opponentDiscard",
+          "amount": 1,
+          "when": "startOfTheirTurn",
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Knock Out 2] | [Coin 2] | Combo 2 | [Coin 3] | Combo 3 | [Discard]",
+      "imageUrl": "https://images.uesp.net/e/e7/ON-tribute-card-Shadow%27s_Slumber.png",
+      "imageFile": "ON-tribute-card-Shadow's Slumber.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "replaces": "Jarring Lullaby (1)",
+      "obtainedFrom": "Achievement: Rajhin's Trickery",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "rajhin__created__bewilderment",
+      "name": "Bewilderment",
+      "deckId": "rajhin",
+      "type": "curseAction",
+      "category": "created",
+      "cost": null,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "noop",
+          "note": "no play effect",
+          "timing": "onPlay"
+        },
+        {
+          "op": "rule",
+          "rule": "curseMustPlayFirst",
+          "text": "Curse cards must be played before non-curse cards.",
+          "timing": "passive"
+        }
+      ],
+      "rawEffect": "This card has no play effect. | Curse cards must be played before non-curse cards.",
+      "imageUrl": "https://images.uesp.net/a/ae/ON-tribute-card-Bewilderment.png",
+      "imageFile": "ON-tribute-card-Bewilderment.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isCreated": true,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": true
+    },
+    {
+      "id": "red_eagle__starter__war_song",
+      "name": "War Song",
+      "deckId": "red_eagle",
+      "type": "action",
+      "category": "starter",
+      "cost": null,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Power]",
+      "imageUrl": "https://images.uesp.net/0/0f/ON-tribute-card-War_Song.png",
+      "imageFile": "ON-tribute-card-War Song.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isStarter": true,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "red_eagle__bloody_offering",
+      "name": "Bloody Offering",
+      "deckId": "red_eagle",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 6,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "destroyOwnCard",
+          "amount": 1,
+          "from": [
+            "hand",
+            "inPlay"
+          ],
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Destroy] | [Power 2] | Combo 2 | [Draw]",
+      "imageUrl": "https://images.uesp.net/e/ef/ON-tribute-card-Bloody_Offering.png",
+      "imageFile": "ON-tribute-card-Bloody Offering.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "red_eagle__bonfire",
+      "name": "Bonfire",
+      "deckId": "red_eagle",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 3,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "destroyOwnCard",
+          "amount": 1,
+          "from": [
+            "hand",
+            "inPlay"
+          ],
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Destroy]",
+      "imageUrl": "https://images.uesp.net/9/94/ON-tribute-card-Bonfire.png",
+      "imageFile": "ON-tribute-card-Bonfire.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "red_eagle__briarheart_ritual",
+      "name": "Briarheart Ritual",
+      "deckId": "red_eagle",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 5,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "onPlay"
+        },
+        {
+          "op": "destroyOwnCard",
+          "amount": 2,
+          "from": [
+            "hand",
+            "inPlay"
+          ],
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Power] | [Destroy 2]",
+      "imageUrl": "https://images.uesp.net/c/cc/ON-tribute-card-Briarheart_Ritual.png",
+      "imageFile": "ON-tribute-card-Briarheart Ritual.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "red_eagle__clan_witch",
+      "name": "Clan-Witch",
+      "deckId": "red_eagle",
+      "type": "contractAgent",
+      "category": "base",
+      "cost": 6,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": 4,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "destroyOwnCard",
+          "amount": 1,
+          "from": [
+            "hand",
+            "inPlay"
+          ],
+          "timing": "activate"
+        }
+      ],
+      "rawEffect": "[Destroy]",
+      "imageUrl": "https://images.uesp.net/3/34/ON-tribute-card-Clan-Witch.png",
+      "imageFile": "ON-tribute-card-Clan-Witch.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "red_eagle__hagraven",
+      "name": "Hagraven",
+      "deckId": "red_eagle",
+      "type": "agent",
+      "category": "base",
+      "cost": 9,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": 4,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "destroyOwnCard",
+          "amount": 1,
+          "from": [
+            "hand",
+            "inPlay"
+          ],
+          "timing": "activate"
+        },
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Destroy] | Combo 2 | [Power]",
+      "imageUrl": "https://images.uesp.net/d/df/ON-tribute-card-Hagraven.png",
+      "imageFile": "ON-tribute-card-Hagraven.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "red_eagle__imperial_spoils",
+      "name": "Imperial Spoils",
+      "deckId": "red_eagle",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 3,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "replaceTavern",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Replace 2] | Combo 2 | [Coin]",
+      "imageUrl": "https://images.uesp.net/e/e4/ON-tribute-card-Imperial_Spoils.png",
+      "imageFile": "ON-tribute-card-Imperial Spoils.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "red_eagle__karth_man_hunter",
+      "name": "Karth Man-Hunter",
+      "deckId": "red_eagle",
+      "type": "contractAgent",
+      "category": "base",
+      "cost": 5,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": 2,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "activate"
+        },
+        {
+          "op": "destroyOwnCard",
+          "amount": 1,
+          "from": [
+            "hand",
+            "inPlay"
+          ],
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Power] | Combo 2 | [Destroy]",
+      "imageUrl": "https://images.uesp.net/d/d1/ON-tribute-card-Karth_Man-Hunter.png",
+      "imageFile": "ON-tribute-card-Karth Man-Hunter.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "red_eagle__midnight_raid",
+      "name": "Midnight Raid",
+      "deckId": "red_eagle",
+      "type": "action",
+      "category": "base",
+      "cost": 4,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 3,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Power 3] | Combo 2 | [Power 2]",
+      "imageUrl": "https://images.uesp.net/c/cc/ON-tribute-card-Midnight_Raid.png",
+      "imageFile": "ON-tribute-card-Midnight Raid.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "red_eagle__upgrade__blood_sacrifice",
+      "name": "Blood Sacrifice",
+      "deckId": "red_eagle",
+      "type": "contractAction",
+      "category": "upgrade",
+      "cost": 6,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "destroyOwnCard",
+          "amount": 1,
+          "from": [
+            "hand",
+            "inPlay"
+          ],
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 3,
+          "timing": "onPlay"
+        },
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Destroy] | [Power 3] | Combo 2 | [Draw]",
+      "imageUrl": "https://images.uesp.net/b/b5/ON-tribute-card-Blood_Sacrifice.png",
+      "imageFile": "ON-tribute-card-Blood Sacrifice.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Bloody Offering (1)",
+      "obtainedFrom": "Found in The Rift after obtaining the Blood Sacrifice Clue",
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "red_eagle__upgrade__elder_witch",
+      "name": "Elder Witch",
+      "deckId": "red_eagle",
+      "type": "contractAgent",
+      "category": "upgrade",
+      "cost": 6,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": 4,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "destroyOwnCard",
+          "amount": 1,
+          "from": [
+            "hand",
+            "inPlay"
+          ],
+          "timing": "activate"
+        },
+        {
+          "op": "replaceTavern",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Destroy] | Combo 2 | [Replace]",
+      "imageUrl": "https://images.uesp.net/f/fb/ON-tribute-card-Elder_Witch.png",
+      "imageFile": "ON-tribute-card-Elder Witch.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Clan-Witch (2)",
+      "obtainedFrom": "Achievement: Hircine's Bounty",
+      "isContract": true,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "red_eagle__upgrade__hagraven_matron",
+      "name": "Hagraven Matron",
+      "deckId": "red_eagle",
+      "type": "agent",
+      "category": "upgrade",
+      "cost": 9,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": 4,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "destroyOwnCard",
+          "amount": 1,
+          "from": [
+            "hand",
+            "inPlay"
+          ],
+          "timing": "activate"
+        },
+        {
+          "op": "gainPower",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Destroy] | Combo 2 | [Power 3]",
+      "imageUrl": "https://images.uesp.net/a/a0/ON-tribute-card-Hagraven_Matron.png",
+      "imageFile": "ON-tribute-card-Hagraven Matron.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Hagraven (1)",
+      "obtainedFrom": "Found in Wrothgar after obtaining the Hagraven Matron Clue",
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "red_eagle__upgrade__imperial_plunder",
+      "name": "Imperial Plunder",
+      "deckId": "red_eagle",
+      "type": "contractAction",
+      "category": "upgrade",
+      "cost": 3,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "replaceTavern",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Replace 2] | Combo 2 | [Coin 2]",
+      "imageUrl": "https://images.uesp.net/f/fc/ON-tribute-card-Imperial_Plunder.png",
+      "imageFile": "ON-tribute-card-Imperial Plunder.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Imperial Spoils (2)",
+      "obtainedFrom": "Achievement: Roister's Club Adept",
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "saint_alessia__starter__alessian_rebel",
+      "name": "Alessian Rebel",
+      "deckId": "saint_alessia",
+      "type": "action",
+      "category": "starter",
+      "cost": null,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "noop",
+          "note": "no play effect",
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "This card has no play effect. | Combo 2 | [Coin]",
+      "imageUrl": "https://images.uesp.net/7/73/ON-tribute-alessia-Alessian_Rebel.png",
+      "imageFile": "ON-tribute-alessia-Alessian Rebel.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isStarter": true,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "saint_alessia__ayleid_defector",
+      "name": "Ayleid Defector",
+      "deckId": "saint_alessia",
+      "type": "contractAgent",
+      "category": "base",
+      "cost": 5,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": 1,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "activate",
+          "options": [
+            [
+              {
+                "op": "draw",
+                "amount": 1
+              }
+            ],
+            [
+              {
+                "op": "knockOut",
+                "amount": "all",
+                "target": "allAgents"
+              }
+            ]
+          ]
+        },
+        {
+          "op": "gainPrestige",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Choose] | [Draw] | [Knock Out All] | Combo 3 | [Prestige]",
+      "imageUrl": "https://images.uesp.net/2/23/ON-tribute-alessia-Ayleid_Defector.png",
+      "imageFile": "ON-tribute-alessia-Ayleid Defector.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "saint_alessia__chainbreaker_sergeant",
+      "name": "Chainbreaker Sergeant",
+      "deckId": "saint_alessia",
+      "type": "agent",
+      "category": "base",
+      "cost": 4,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": 1,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "activate",
+          "options": [
+            [
+              {
+                "op": "gainCoin",
+                "amount": 3
+              }
+            ],
+            [
+              {
+                "op": "gainPower",
+                "amount": 2
+              }
+            ]
+          ]
+        }
+      ],
+      "rawEffect": "[Choose] | [Coin 3] | [Power 2]",
+      "imageUrl": "https://images.uesp.net/c/cd/ON-tribute-alessia-Chainbreaker_Sergeant.png",
+      "imageFile": "ON-tribute-alessia-Chainbreaker Sergeant.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false,
+      "alsoCreatedByPatron": true
+    },
+    {
+      "id": "saint_alessia__morihaus_the_archer",
+      "name": "Morihaus, the Archer",
+      "deckId": "saint_alessia",
+      "type": "agent",
+      "category": "base",
+      "cost": 5,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": 1,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "knockOut",
+          "amount": 1,
+          "target": "opponentAgent",
+          "timing": "activate"
+        },
+        {
+          "op": "whileInPlay",
+          "trigger": "an agent other than this one is Knocked Out",
+          "effects": [
+            {
+              "op": "gainCoin",
+              "amount": 1
+            }
+          ],
+          "timing": "passive"
+        },
+        {
+          "op": "gainPrestige",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Knock Out] | [While an agent other than this one is Knocked Out] [Coin] | Combo 3 | [Prestige 2]",
+      "imageUrl": "https://images.uesp.net/9/94/ON-tribute-alessia-Morihaus%2C_the_Archer.png",
+      "imageFile": "ON-tribute-alessia-Morihaus, the Archer.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "saint_alessia__pelinal_whitestrake",
+      "name": "Pelinal Whitestrake",
+      "deckId": "saint_alessia",
+      "type": "agent",
+      "category": "base",
+      "cost": 7,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": 2,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "activate",
+          "options": [
+            [
+              {
+                "op": "knockOut",
+                "amount": 2,
+                "target": "opponentAgent"
+              }
+            ],
+            [
+              {
+                "op": "refresh",
+                "amount": 4,
+                "cardType": "agent",
+                "from": "cooldown",
+                "to": "topOfDraw"
+              }
+            ]
+          ]
+        },
+        {
+          "op": "gainPrestige",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Choose] | [Knock Out 2] | [Refresh 4|agent] | Combo 3 | [Prestige 3]",
+      "imageUrl": "https://images.uesp.net/f/f9/ON-tribute-alessia-Pelinal_Whitestrake.png",
+      "imageFile": "ON-tribute-alessia-Pelinal Whitestrake.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "saint_alessia__priestess_of_the_eight",
+      "name": "Priestess of the Eight",
+      "deckId": "saint_alessia",
+      "type": "agent",
+      "category": "base",
+      "cost": 5,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": 1,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "activate",
+          "options": [
+            [
+              {
+                "op": "replaceTavern",
+                "amount": 1
+              }
+            ],
+            [
+              {
+                "op": "donate",
+                "amount": 2
+              }
+            ]
+          ]
+        },
+        {
+          "op": "gainPrestige",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Choose] | [Replace] | [Donate 2] | Combo 2 | [Prestige]",
+      "imageUrl": "https://images.uesp.net/5/54/ON-tribute-alessia-Priestess_of_the_Eight.png",
+      "imageFile": "ON-tribute-alessia-Priestess of the Eight.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "saint_alessia__saints_wrath",
+      "name": "Saint's Wrath",
+      "deckId": "saint_alessia",
+      "type": "action",
+      "category": "base",
+      "cost": 4,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "onPlay",
+          "options": [
+            [
+              {
+                "op": "knockOut",
+                "amount": "all",
+                "target": "allAgents"
+              }
+            ],
+            [
+              {
+                "op": "refresh",
+                "amount": 3,
+                "from": "cooldown",
+                "to": "topOfDraw"
+              }
+            ]
+          ]
+        }
+      ],
+      "rawEffect": "[Choose] | [Knock Out All] | [Refresh 3]",
+      "imageUrl": "https://images.uesp.net/5/57/ON-tribute-alessia-Saint%27s_Wrath.png",
+      "imageFile": "ON-tribute-alessia-Saint's Wrath.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "saint_alessia__soldier_of_the_empire",
+      "name": "Soldier of the Empire",
+      "deckId": "saint_alessia",
+      "type": "agent",
+      "category": "base",
+      "cost": 3,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": 1,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "activate",
+          "options": [
+            [
+              {
+                "op": "gainCoin",
+                "amount": 2
+              }
+            ],
+            [
+              {
+                "op": "gainPower",
+                "amount": 1
+              }
+            ]
+          ]
+        }
+      ],
+      "rawEffect": "[Choose] | [Coin 2] | [Power]",
+      "imageUrl": "https://images.uesp.net/c/c5/ON-tribute-alessia-Soldier_of_the_Empire.png",
+      "imageFile": "ON-tribute-alessia-Soldier of the Empire.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false,
+      "alsoCreatedByPatron": true
+    },
+    {
+      "id": "saint_alessia__upgrade__ayleid_quartermaster",
+      "name": "Ayleid Quartermaster",
+      "deckId": "saint_alessia",
+      "type": "contractAgent",
+      "category": "upgrade",
+      "cost": 5,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": 1,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "activate",
+          "options": [
+            [
+              {
+                "op": "draw",
+                "amount": 1
+              }
+            ],
+            [
+              {
+                "op": "knockOut",
+                "amount": "all",
+                "target": "allAgents"
+              }
+            ]
+          ]
+        },
+        {
+          "op": "gainPrestige",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Choose] | [Draw] | [Knock Out All] | Combo 3 | [Prestige 2]",
+      "imageUrl": "https://images.uesp.net/8/8a/ON-tribute-alessia-Ayleid_Quartermaster.png",
+      "imageFile": "ON-tribute-alessia-Ayleid Quartermaster.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "replaces": "Ayleid Defector (2)",
+      "obtainedFrom": "Achievement: Caledonia Called Out",
+      "isContract": true,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "saint_alessia__upgrade__chainbreaker_captain",
+      "name": "Chainbreaker Captain",
+      "deckId": "saint_alessia",
+      "type": "agent",
+      "category": "upgrade",
+      "cost": 4,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": 1,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "activate",
+          "options": [
+            [
+              {
+                "op": "gainCoin",
+                "amount": 3
+              }
+            ],
+            [
+              {
+                "op": "gainPower",
+                "amount": 2
+              }
+            ]
+          ]
+        },
+        {
+          "op": "gainPrestige",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Choose] | [Coin 3] | [Power 2] | Combo 3 | [Prestige]",
+      "imageUrl": "https://images.uesp.net/8/87/ON-tribute-alessia-Chainbreaker_Captain.png",
+      "imageFile": "ON-tribute-alessia-Chainbreaker Captain.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "replaces": "Chainbreaker Sergeant (2)",
+      "obtainedFrom": "Achievement: A Toast to the Mother of Mortals",
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false,
+      "alsoCreatedByPatron": true
+    },
+    {
+      "id": "saint_alessia__upgrade__morihaus_sacred_bull",
+      "name": "Morihaus, Sacred Bull",
+      "deckId": "saint_alessia",
+      "type": "agent",
+      "category": "upgrade",
+      "cost": 5,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": 1,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "knockOut",
+          "amount": 1,
+          "target": "opponentAgent",
+          "timing": "activate"
+        },
+        {
+          "op": "whileInPlay",
+          "trigger": "an agent other than this one is Knocked Out",
+          "effects": [
+            {
+              "op": "gainCoin",
+              "amount": 1
+            }
+          ],
+          "timing": "passive"
+        },
+        {
+          "op": "gainPrestige",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Knock Out] | [While an agent other than this one is Knocked Out] [Coin] | Combo 3 | [Prestige 3]",
+      "imageUrl": "https://images.uesp.net/7/7e/ON-tribute-alessia-Morihaus%2C_Sacred_Bull.png",
+      "imageFile": "ON-tribute-alessia-Morihaus, Sacred Bull.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": false,
+      "replaces": "Morihaus, the Archer (1)",
+      "obtainedFrom": "Found in West Weald after obtained the Morihaus, Sacred Bull Clue",
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "saint_alessia__upgrade__whitestrake_ascendant",
+      "name": "Whitestrake Ascendant",
+      "deckId": "saint_alessia",
+      "type": "agent",
+      "category": "upgrade",
+      "cost": 7,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": 2,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "chooseOne",
+          "timing": "activate",
+          "options": [
+            [
+              {
+                "op": "knockOut",
+                "amount": 2,
+                "target": "opponentAgent"
+              }
+            ],
+            [
+              {
+                "op": "refresh",
+                "amount": 4,
+                "cardType": "agent",
+                "from": "cooldown",
+                "to": "topOfDraw"
+              }
+            ]
+          ]
+        },
+        {
+          "op": "gainPrestige",
+          "amount": 4,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Choose] | [Knock Out 2] | [Refresh 4|agent] | Combo 3 | [Prestige 4]",
+      "imageUrl": "https://images.uesp.net/d/df/ON-tribute-alessia-Whitestrake_Ascendant.png",
+      "imageFile": "ON-tribute-alessia-Whitestrake Ascendant.png",
+      "comboRequirement": [
+        3
+      ],
+      "needsReview": true,
+      "replaces": "Pelinal Whitestrake (1)",
+      "obtainedFrom": "Found in West Weald after obtaining the Whitestrake Ascendant Clue",
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false,
+      "sourceConflict": {
+        "uespTableCopies": 2,
+        "selectedCopies": 1,
+        "reason": "UESP table yields an impossible 21-card upgraded deck; independent in-game-oriented dataset and 20-card deck invariant indicate 1."
+      }
+    },
+    {
+      "id": "saint_pelin__starter__fortify",
+      "name": "Fortify",
+      "deckId": "saint_pelin",
+      "type": "action",
+      "category": "starter",
+      "cost": null,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Power]",
+      "imageUrl": "https://images.uesp.net/4/4c/ON-tribute-card-Fortify.png",
+      "imageFile": "ON-tribute-card-Fortify.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isStarter": true,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "saint_pelin__archers_volley",
+      "name": "Archer's Volley",
+      "deckId": "saint_pelin",
+      "type": "action",
+      "category": "base",
+      "cost": 4,
+      "copies": 4,
+      "copiesAfterUpgrade": 2,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 3,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Power 3]\nCombo 2 | [Coin]",
+      "imageUrl": "https://images.uesp.net/7/79/ON-tribute-card-Archers%27_Volley.png",
+      "imageFile": "ON-tribute-card-Archers' Volley.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "saint_pelin__bangkorai_sentries",
+      "name": "Bangkorai Sentries",
+      "deckId": "saint_pelin",
+      "type": "agent",
+      "category": "base",
+      "cost": 7,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": 4,
+      "taunt": true,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "activate"
+        },
+        {
+          "op": "taunt",
+          "timing": "passive"
+        }
+      ],
+      "rawEffect": "[Coin]\n[Taunt]",
+      "imageUrl": "https://images.uesp.net/5/56/ON-tribute-card-Bangkorai_Sentries.png",
+      "imageFile": "ON-tribute-card-Bangkorai Sentries.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "saint_pelin__banneret",
+      "name": "Banneret",
+      "deckId": "saint_pelin",
+      "type": "agent",
+      "category": "base",
+      "cost": 9,
+      "copies": 2,
+      "copiesAfterUpgrade": 1,
+      "hp": 5,
+      "taunt": true,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 3,
+          "timing": "activate"
+        },
+        {
+          "op": "taunt",
+          "timing": "passive"
+        }
+      ],
+      "rawEffect": "[Power 3]\n[Taunt]",
+      "imageUrl": "https://images.uesp.net/a/ac/ON-tribute-card-Banneret.png",
+      "imageFile": "ON-tribute-card-Banneret.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "saint_pelin__rally",
+      "name": "Rally",
+      "deckId": "saint_pelin",
+      "type": "action",
+      "category": "base",
+      "cost": 8,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 6,
+          "timing": "onPlay"
+        },
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Power 6]\nCombo 2 | [Draw]",
+      "imageUrl": "https://images.uesp.net/b/b1/ON-tribute-card-Rally.png",
+      "imageFile": "ON-tribute-card-Rally.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "saint_pelin__reinforcements",
+      "name": "Reinforcements",
+      "deckId": "saint_pelin",
+      "type": "action",
+      "category": "base",
+      "cost": 3,
+      "copies": 3,
+      "copiesAfterUpgrade": 1,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 3
+        }
+      ],
+      "rawEffect": "[Coin 2]\nCombo 2 | [Power 2] | Combo 3 | [Power]",
+      "imageUrl": "https://images.uesp.net/0/03/ON-tribute-card-Reinforcements.png",
+      "imageFile": "ON-tribute-card-Reinforcements.png",
+      "comboRequirement": [
+        2,
+        3
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "saint_pelin__shield_bearer",
+      "name": "Shield Bearer",
+      "deckId": "saint_pelin",
+      "type": "contractAgent",
+      "category": "base",
+      "cost": 6,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": 5,
+      "taunt": true,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "activate"
+        },
+        {
+          "op": "taunt",
+          "timing": "passive"
+        }
+      ],
+      "rawEffect": "[Power]\n[Taunt]",
+      "imageUrl": "https://images.uesp.net/9/98/ON-tribute-card-Shield_Bearer.png",
+      "imageFile": "ON-tribute-card-Shield Bearer.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "saint_pelin__the_armory",
+      "name": "The Armory",
+      "deckId": "saint_pelin",
+      "type": "action",
+      "category": "base",
+      "cost": 6,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 5,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Power 5]\nCombo 2 | [Coin]",
+      "imageUrl": "https://images.uesp.net/7/74/ON-tribute-card-The_Armory.png",
+      "imageFile": "ON-tribute-card-The Armory.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "saint_pelin__the_portcullis",
+      "name": "The Portcullis",
+      "deckId": "saint_pelin",
+      "type": "action",
+      "category": "base",
+      "cost": 2,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Power 2]\nCombo 2 | [Coin]",
+      "imageUrl": "https://images.uesp.net/f/f5/ON-tribute-card-The_Portcullis.png",
+      "imageFile": "ON-tribute-card-The Portcullis.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "saint_pelin__upgrade__knight_commander",
+      "name": "Knight Commander",
+      "deckId": "saint_pelin",
+      "type": "agent",
+      "category": "upgrade",
+      "cost": 9,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": 5,
+      "taunt": true,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 3,
+          "timing": "activate"
+        },
+        {
+          "op": "healAgent",
+          "amount": 2,
+          "target": "self",
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "taunt",
+          "timing": "passive"
+        }
+      ],
+      "rawEffect": "[Power 3]\nCombo 2 | [Heal 2] | [Taunt]",
+      "imageUrl": "https://images.uesp.net/e/ea/ON-tribute-card-Knight_Commander.png",
+      "imageFile": "ON-tribute-card-Knight Commander.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Banneret (1)",
+      "obtainedFrom": "Found in High Isle after obtaining the Knight Commander Clue",
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "saint_pelin__upgrade__knights_of_saint_pelin",
+      "name": "Knights of Saint Pelin",
+      "deckId": "saint_pelin",
+      "type": "agent",
+      "category": "upgrade",
+      "cost": 7,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": 4,
+      "taunt": true,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "activate"
+        },
+        {
+          "op": "gainPower",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        },
+        {
+          "op": "taunt",
+          "timing": "passive"
+        }
+      ],
+      "rawEffect": "[Coin]\nCombo 2 | [Power] | [Taunt]",
+      "imageUrl": "https://images.uesp.net/c/ce/ON-tribute-card-Knights_of_Saint_Pelin.png",
+      "imageFile": "ON-tribute-card-Knights of Saint Pelin.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Bangkorai Sentries (1)",
+      "obtainedFrom": "Found in Bangkorai after obtaining the Knights of Saint Pelin Clue",
+      "isContract": false,
+      "isAgent": true,
+      "isCurse": false
+    },
+    {
+      "id": "saint_pelin__upgrade__legions_arrival",
+      "name": "Legion's Arrival",
+      "deckId": "saint_pelin",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 3,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainPower",
+          "amount": 3,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Coin 2]\nCombo 2 | [Power 3]",
+      "imageUrl": "https://images.uesp.net/9/9a/ON-tribute-card-Legion%27s_Arrival.png",
+      "imageFile": "ON-tribute-card-Legion's Arrival.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Reinforcements (2)",
+      "obtainedFrom": "Found in Bangkorai after obtaining the Legion's Arrival Clue",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "saint_pelin__upgrade__siege_weapon_volley",
+      "name": "Siege Weapon Volley",
+      "deckId": "saint_pelin",
+      "type": "action",
+      "category": "upgrade",
+      "cost": 4,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 4,
+          "timing": "onPlay"
+        },
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "combo",
+          "comboRequirement": 2
+        }
+      ],
+      "rawEffect": "[Power 4]\nCombo 2 | [Coin]",
+      "imageUrl": "https://images.uesp.net/4/41/ON-tribute-card-Siege_Weapon_Volley.png",
+      "imageFile": "ON-tribute-card-Siege Weapon Volley.png",
+      "comboRequirement": [
+        2
+      ],
+      "needsReview": false,
+      "replaces": "Archer's Volley (2)",
+      "obtainedFrom": "Achievement: Blood Benediction",
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "treasury__starter__gold",
+      "name": "Gold",
+      "deckId": "treasury",
+      "type": "action",
+      "category": "starter",
+      "cost": null,
+      "copies": 6,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 1,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Coin]",
+      "imageUrl": "https://images.uesp.net/c/c5/ON-tribute-card-Gold.png",
+      "imageFile": "ON-tribute-card-Gold.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isStarter": true,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "treasury__ambush",
+      "name": "Ambush",
+      "deckId": "treasury",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 3,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "knockOut",
+          "amount": 2,
+          "target": "opponentAgent",
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Knock Out 2]",
+      "imageUrl": "https://images.uesp.net/3/3a/ON-tribute-card-Ambush.png",
+      "imageFile": "ON-tribute-card-Ambush.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "treasury__barterer",
+      "name": "Barterer",
+      "deckId": "treasury",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 1,
+      "copies": 4,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "replaceTavern",
+          "amount": 1,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Replace]",
+      "imageUrl": "https://images.uesp.net/5/5a/ON-tribute-card-Barterer.png",
+      "imageFile": "ON-tribute-card-Barterer.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "treasury__black_sacrament",
+      "name": "Black Sacrament",
+      "deckId": "treasury",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 2,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "knockOut",
+          "amount": 1,
+          "target": "opponentAgent",
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Knock Out]",
+      "imageUrl": "https://images.uesp.net/8/87/ON-tribute-card-Black_Sacrament.png",
+      "imageFile": "ON-tribute-card-Black Sacrament.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "treasury__blackmail",
+      "name": "Blackmail",
+      "deckId": "treasury",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 3,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 2,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Power 2]",
+      "imageUrl": "https://images.uesp.net/c/c0/ON-tribute-card-Blackmail.png",
+      "imageFile": "ON-tribute-card-Blackmail.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "treasury__harvest_season",
+      "name": "Harvest Season",
+      "deckId": "treasury",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 2,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "draw",
+          "amount": 1,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Draw]",
+      "imageUrl": "https://images.uesp.net/2/21/ON-tribute-card-Harvest_Season.png",
+      "imageFile": "ON-tribute-card-Harvest Season.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "treasury__imprisonment",
+      "name": "Imprisonment",
+      "deckId": "treasury",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 5,
+      "copies": 3,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainPower",
+          "amount": 4,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Power 4]",
+      "imageUrl": "https://images.uesp.net/d/df/ON-tribute-card-Imprisonment.png",
+      "imageFile": "ON-tribute-card-Imprisonment.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "treasury__ragpicker",
+      "name": "Ragpicker",
+      "deckId": "treasury",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 3,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "destroyOwnCard",
+          "amount": 1,
+          "from": [
+            "hand",
+            "inPlay"
+          ],
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Destroy]",
+      "imageUrl": "https://images.uesp.net/b/b8/ON-tribute-card-Ragpicker.png",
+      "imageFile": "ON-tribute-card-Ragpicker.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "treasury__tithe",
+      "name": "Tithe",
+      "deckId": "treasury",
+      "type": "contractAction",
+      "category": "base",
+      "cost": 3,
+      "copies": 2,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "extraPatronCall",
+          "amount": 1,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Patron]",
+      "imageUrl": "https://images.uesp.net/a/a3/ON-tribute-card-Tithe.png",
+      "imageFile": "ON-tribute-card-Tithe.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isContract": true,
+      "isAgent": false,
+      "isCurse": false
+    },
+    {
+      "id": "treasury__created__writ_of_coin",
+      "name": "Writ of Coin",
+      "deckId": "treasury",
+      "type": "action",
+      "category": "created",
+      "cost": null,
+      "copies": 1,
+      "copiesAfterUpgrade": null,
+      "hp": null,
+      "taunt": false,
+      "effects": [
+        {
+          "op": "gainCoin",
+          "amount": 2,
+          "timing": "onPlay"
+        }
+      ],
+      "rawEffect": "[Coin 2]",
+      "imageUrl": "https://images.uesp.net/d/df/ON-tribute-card-Writ_of_Coin.png",
+      "imageFile": "ON-tribute-card-Writ of Coin.png",
+      "comboRequirement": null,
+      "needsReview": false,
+      "isCreated": true,
+      "isContract": false,
+      "isAgent": false,
+      "isCurse": false
+    }
+  ],
+  "count": 164
+}

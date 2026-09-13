@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Tales of Tribute — Fan Table</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <section id="splash" class="screen active">
+      <h1>Tales of Tribute</h1>
+      <p class="subtitle">A fan table for the Roister’s Club — two patrons, a tavern of five, and the long road to forty prestige.</p>
+      <div class="splash-purse" id="splash-purse"></div>
+      <div class="actions">
+        <button class="primary" id="btn-play">Play vs AI</button>
+        <button id="btn-friend">Play a Friend</button>
+        <button id="btn-club">Club</button>
+        <button id="btn-ency">Encyclopedia</button>
+      </div>
+      <p class="disclaimer">Unofficial fan project. Not affiliated with Bethesda Softworks or ZeniMax Online Studios. Not for sale. Card art courtesy of UESP.</p>
+    </section>
+
+    <section id="deckpick" class="screen">
+      <h2>Choose Your Patrons</h2>
+      <p class="hint">Pick <strong>two</strong> unlocked decks. Locked decks show fragment progress. AI picks from the rest (AI may use locked decks for variety).</p>
+      <div class="deckpick-modes">
+        <label class="chk"><input type="checkbox" id="chk-random-match" /> Random match (both sides from your unlocked pool; AI may still draw locked)</label>
+      </div>
+      <div class="patron-grid" id="patron-grid"></div>
+      <div class="deckpick-bar">
+        <span id="pick-status">0 / 2 selected</span>
+        <button id="btn-random-match">Random Match</button>
+        <button id="btn-ai-rest">AI takes the rest</button>
+        <button class="primary" id="btn-start" disabled>Begin Match</button>
+        <button id="btn-back-splash">Back</button>
+      </div>
+    </section>
+
+    <section id="friend-lobby" class="screen">
+      <h2>Play a Friend</h2>
+      <p class="hint">Pass-and-play on one device, or host/join a remote room (PeerJS).</p>
+      <div class="friend-modes">
+        <button class="primary" id="btn-hotseat">Pass &amp; Play (Hotseat)</button>
+        <button id="btn-host-room">Host Remote Room</button>
+        <div class="join-row">
+          <input id="join-code" maxlength="4" placeholder="CODE" />
+          <button id="btn-join-room">Join Room</button>
+        </div>
+        <p class="hint" id="friend-status"></p>
+        <button id="btn-friend-back">Back</button>
+      </div>
+    </section>
+
+    <section id="club" class="screen">
+      <header class="club-header">
+        <h2>Roister’s Club</h2>
+        <button id="btn-club-back">Back</button>
+      </header>
+      <div class="club-stats" id="club-stats"></div>
+      <div class="club-actions">
+        <button class="primary" id="btn-open-sack">Open Heavy Sack</button>
+        <button id="btn-buy-sack">Buy Sack (40g)</button>
+        <button id="btn-collection">Collection</button>
+      </div>
+      <h3 class="club-section">Daily Challenge</h3>
+      <div id="club-daily"></div>
+      <h3 class="club-section">Achievements</h3>
+      <div id="club-achievements" class="ach-list"></div>
+    </section>
+
+    <section id="collection" class="screen">
+      <header class="club-header">
+        <h2>Collection</h2>
+        <button id="btn-collection-back">Back to Club</button>
+      </header>
+      <div class="patron-grid" id="collection-grid"></div>
+      <div id="collection-detail" class="collection-detail hidden"></div>
+    </section>
+
+    <section id="match" class="screen">
+      <div class="match-top">
+        <div class="resources" id="opp-res"></div>
+        <div class="turn-indicator" id="turn-ind"></div>
+        <div class="resources" id="you-res"></div>
+      </div>
+      <div class="patrons-row" id="patrons-row"></div>
+      <div class="zone-label">Tavern</div>
+      <div class="zone tavern-zone" id="tavern-zone"></div>
+      <div class="zone-label">Opponent agents</div>
+      <div class="zone" id="opp-agents"></div>
+      <div class="zone-label">Your agents</div>
+      <div class="zone" id="you-agents"></div>
+      <div class="hand-zone">
+        <div class="zone-label" id="hand-label">Your hand</div>
+        <div class="hand-cards" id="hand-zone"></div>
+        <div class="match-actions">
+          <button id="btn-end">End Turn</button>
+          <button id="btn-concede">Leave Table</button>
+        </div>
+      </div>
+      <div class="log-dock" id="log-dock"></div>
+    </section>
+
+    <section id="encyclopedia" class="screen">
+      <header>
+        <h2>Encyclopedia</h2>
+        <select id="ency-patron"></select>
+        <input id="ency-search" type="search" placeholder="Search cards…" />
+        <button id="btn-ency-back">Back</button>
+      </header>
+      <div class="ency-grid" id="ency-grid"></div>
+    </section>
+
+    <div class="overlay" id="win-overlay">
+      <div class="banner" id="win-banner"></div>
+    </div>
+    <div class="overlay" id="hand-device-overlay">
+      <div class="banner">
+        <p>Hand the device to the next player</p>
+        <button class="primary" id="btn-hand-done">Ready</button>
+      </div>
+    </div>
+    <div class="overlay" id="sack-overlay">
+      <div class="sack-modal" id="sack-modal">
+        <div class="sack-anim" id="sack-anim">🎒</div>
+        <div class="sack-reward" id="sack-reward"></div>
+        <button class="primary" id="btn-sack-close">Claim</button>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <div class="tooltip" id="tooltip">
+      <div id="tip-text"></div>
+      <div class="tip-nav">
+        <button id="tip-next">Next</button>
+        <button id="tip-skip">Skip</button>
+      </div>
+    </div>
+    <div class="modal" id="card-modal">
+      <div class="modal-body" id="card-modal-body"></div>
+    </div>
+  </div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

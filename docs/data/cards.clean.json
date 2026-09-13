@@ -1,0 +1,5971 @@
+{
+  "cards": [
+    {
+      "id": "collection-plate",
+      "name": "Collection Plate",
+      "patron": "almalexia",
+      "type": "action",
+      "contract": false,
+      "cost": 0,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Coin",
+      "combo2Text": null,
+      "combo3Text": "Donate 1",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "donate",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 1,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": true,
+      "token": false,
+      "art": "cards/collection-plate.png"
+    },
+    {
+      "id": "almsivis-charity",
+      "name": "ALMSIVI's Charity",
+      "patron": "almalexia",
+      "type": "action",
+      "contract": false,
+      "cost": 5,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Power AND Hand Refresh 1",
+      "combo2Text": "1 Coin",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 1
+        },
+        {
+          "op": "hand_refresh",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/almsivis-charity.png"
+    },
+    {
+      "id": "mothers-mercy",
+      "name": "Mother's Mercy",
+      "patron": "almalexia",
+      "type": "action",
+      "contract": false,
+      "cost": 5,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Power AND Hand Refresh 1",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 1
+        },
+        {
+          "op": "hand_refresh",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/mothers-mercy.png"
+    },
+    {
+      "id": "festival-of-forbearance",
+      "name": "Festival of Forbearance",
+      "patron": "almalexia",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Coin AND Donate 1",
+      "combo2Text": "1 Power AND Donate 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        },
+        {
+          "op": "donate",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 1
+        },
+        {
+          "op": "donate",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/festival-of-forbearance.png"
+    },
+    {
+      "id": "bardic-veneration",
+      "name": "Bardic Veneration",
+      "patron": "almalexia",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Coin AND Donate 1",
+      "combo2Text": "Donate 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        },
+        {
+          "op": "donate",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "donate",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/bardic-veneration.png"
+    },
+    {
+      "id": "hand-of-almalexia",
+      "name": "Hand of Almalexia",
+      "patron": "almalexia",
+      "type": "agent",
+      "contract": true,
+      "cost": 6,
+      "hp": 3,
+      "taunt": false,
+      "playText": "1 Power",
+      "combo2Text": "Confine 2",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "confine",
+          "n": 2
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/hand-of-almalexia.png"
+    },
+    {
+      "id": "devotional-gaoler",
+      "name": "Devotional Gaoler",
+      "patron": "almalexia",
+      "type": "agent",
+      "contract": true,
+      "cost": 6,
+      "hp": 3,
+      "taunt": false,
+      "playText": "1 Power",
+      "combo2Text": "Confine 1",
+      "combo3Text": "Confine 1",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "confine",
+          "n": 1
+        }
+      ],
+      "combo3": [
+        {
+          "op": "confine",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/devotional-gaoler.png"
+    },
+    {
+      "id": "mercymother-elite",
+      "name": "Mercymother Elite",
+      "patron": "almalexia",
+      "type": "agent",
+      "contract": false,
+      "cost": 8,
+      "hp": 5,
+      "taunt": true,
+      "playText": "1 Coin",
+      "combo2Text": "Patron 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "patron_extra",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/mercymother-elite.png"
+    },
+    {
+      "id": "tribunal-sentinel",
+      "name": "Tribunal Sentinel",
+      "patron": "almalexia",
+      "type": "agent",
+      "contract": false,
+      "cost": 8,
+      "hp": 5,
+      "taunt": true,
+      "playText": "",
+      "combo2Text": "Patron 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [],
+      "combo2": [
+        {
+          "op": "patron_extra",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/tribunal-sentinel.png"
+    },
+    {
+      "id": "mournhold-clergy",
+      "name": "Mournhold Clergy",
+      "patron": "almalexia",
+      "type": "agent",
+      "contract": true,
+      "cost": 6,
+      "hp": 3,
+      "taunt": false,
+      "playText": "2 Prestige/Discard",
+      "combo2Text": "Donate 1 and Confine 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "passive",
+          "trigger": "discard",
+          "resource": "prestige",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "donate",
+          "n": 1
+        },
+        {
+          "op": "confine",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/mournhold-clergy.png"
+    },
+    {
+      "id": "philanthropy",
+      "name": "Philanthropy",
+      "patron": "almalexia",
+      "type": "action",
+      "contract": false,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Power/Discard AND 1 Coin",
+      "combo2Text": "Donate 1",
+      "combo3Text": "Donate 1",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "passive",
+          "trigger": "discard",
+          "resource": "power",
+          "n": 1
+        },
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "donate",
+          "n": 1
+        }
+      ],
+      "combo3": [
+        {
+          "op": "donate",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/philanthropy.png"
+    },
+    {
+      "id": "temple-arbiter",
+      "name": "Temple Arbiter",
+      "patron": "almalexia",
+      "type": "agent",
+      "contract": false,
+      "cost": 6,
+      "hp": 2,
+      "taunt": false,
+      "playText": "2 Coin",
+      "combo2Text": "Confine 1",
+      "combo3Text": "Confine 1",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "confine",
+          "n": 1
+        }
+      ],
+      "combo3": [
+        {
+          "op": "confine",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/temple-arbiter.png"
+    },
+    {
+      "id": "the-lesson-of-ayem",
+      "name": "The Lesson of Ayem",
+      "patron": "almalexia",
+      "type": "action",
+      "contract": false,
+      "cost": 5,
+      "hp": null,
+      "taunt": false,
+      "playText": "Donate 1",
+      "combo2Text": "Draw 1",
+      "combo3Text": "Donate 1",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "donate",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo3": [
+        {
+          "op": "donate",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/the-lesson-of-ayem.png"
+    },
+    {
+      "id": "way-of-the-sword",
+      "name": "Way of the Sword",
+      "patron": "hunding",
+      "type": "action",
+      "contract": false,
+      "cost": 0,
+      "hp": null,
+      "taunt": false,
+      "playText": "Choose: 1 Coin OR 1 Power",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "coin",
+                "n": 1
+              }
+            ],
+            [
+              {
+                "op": "power",
+                "n": 1
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 1,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": true,
+      "token": false,
+      "art": "cards/way-of-the-sword.png"
+    },
+    {
+      "id": "anseis-victory",
+      "name": "Ansei's Victory",
+      "patron": "hunding",
+      "type": "action",
+      "contract": false,
+      "cost": 9,
+      "hp": null,
+      "taunt": false,
+      "playText": "Choose: 6 Power OR Acquire 10",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "power",
+                "n": 6
+              }
+            ],
+            [
+              {
+                "op": "acquire",
+                "n": 10
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/anseis-victory.png"
+    },
+    {
+      "id": "ansei-assault",
+      "name": "Ansei Assault",
+      "patron": "hunding",
+      "type": "action",
+      "contract": false,
+      "cost": 9,
+      "hp": null,
+      "taunt": false,
+      "playText": "Choose: 5 Power OR Acquire 9",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "power",
+                "n": 5
+              }
+            ],
+            [
+              {
+                "op": "acquire",
+                "n": 9
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/ansei-assault.png"
+    },
+    {
+      "id": "grand-oratory",
+      "name": "Grand Oratory",
+      "patron": "hunding",
+      "type": "action",
+      "contract": true,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "Choose: 2 Power OR Draw Refresh 1",
+      "combo2Text": "2 Coin",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "power",
+                "n": 2
+              }
+            ],
+            [
+              {
+                "op": "draw_refresh",
+                "n": 1
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/grand-oratory.png"
+    },
+    {
+      "id": "battle-meditation",
+      "name": "Battle Meditation",
+      "patron": "hunding",
+      "type": "action",
+      "contract": true,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "Choose: 2 Power OR Draw Refresh 1",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "power",
+                "n": 2
+              }
+            ],
+            [
+              {
+                "op": "draw_refresh",
+                "n": 1
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/battle-meditation.png"
+    },
+    {
+      "id": "hel-shira-herald",
+      "name": "Hel Shira Herald",
+      "patron": "hunding",
+      "type": "agent",
+      "contract": false,
+      "cost": 6,
+      "hp": 3,
+      "taunt": false,
+      "playText": "Draw Refresh 2",
+      "combo2Text": "1 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "draw_refresh",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/hel-shira-herald.png"
+    },
+    {
+      "id": "no-shira-poet",
+      "name": "No Shira Poet",
+      "patron": "hunding",
+      "type": "agent",
+      "contract": false,
+      "cost": 6,
+      "hp": 3,
+      "taunt": false,
+      "playText": "Draw Refresh 1",
+      "combo2Text": "1 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "draw_refresh",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/no-shira-poet.png"
+    },
+    {
+      "id": "hiras-end",
+      "name": "Hira's End",
+      "patron": "hunding",
+      "type": "action",
+      "contract": false,
+      "cost": 6,
+      "hp": null,
+      "taunt": false,
+      "playText": "Choose: 4 Power OR Draw Refresh 3",
+      "combo2Text": "2 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "power",
+                "n": 4
+              }
+            ],
+            [
+              {
+                "op": "draw_refresh",
+                "n": 3
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/hiras-end.png"
+    },
+    {
+      "id": "march-on-hattu",
+      "name": "March on Hattu",
+      "patron": "hunding",
+      "type": "action",
+      "contract": false,
+      "cost": 6,
+      "hp": null,
+      "taunt": false,
+      "playText": "Choose: 4 Power OR Draw Refresh 3",
+      "combo2Text": "1 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "power",
+                "n": 4
+              }
+            ],
+            [
+              {
+                "op": "draw_refresh",
+                "n": 3
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/march-on-hattu.png"
+    },
+    {
+      "id": "conquest",
+      "name": "Conquest",
+      "patron": "hunding",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "Choose: 3 Power OR Acquire 4",
+      "combo2Text": "1 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "power",
+                "n": 3
+              }
+            ],
+            [
+              {
+                "op": "acquire",
+                "n": 4
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/conquest.png"
+    },
+    {
+      "id": "shehai-summoning",
+      "name": "Shehai Summoning",
+      "patron": "hunding",
+      "type": "action",
+      "contract": false,
+      "cost": 5,
+      "hp": null,
+      "taunt": false,
+      "playText": "Choose: Draw Refresh 2 OR Acquire 5",
+      "combo2Text": "Draw Refresh 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "draw_refresh",
+                "n": 2
+              }
+            ],
+            [
+              {
+                "op": "acquire",
+                "n": 5
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [
+        {
+          "op": "draw_refresh",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/shehai-summoning.png"
+    },
+    {
+      "id": "warrior-wave",
+      "name": "Warrior Wave",
+      "patron": "hunding",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "Choose: 3 Coin OR 3 Power",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "coin",
+                "n": 3
+              }
+            ],
+            [
+              {
+                "op": "power",
+                "n": 3
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/warrior-wave.png"
+    },
+    {
+      "id": "peck",
+      "name": "Peck",
+      "patron": "crows",
+      "type": "action",
+      "contract": false,
+      "cost": 0,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Coin",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 1,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": true,
+      "token": false,
+      "art": "cards/peck.png"
+    },
+    {
+      "id": "blackfeather-knave",
+      "name": "Blackfeather Knave",
+      "patron": "crows",
+      "type": "agent",
+      "contract": false,
+      "cost": 6,
+      "hp": 2,
+      "taunt": false,
+      "playText": "2 Coin",
+      "combo2Text": null,
+      "combo3Text": "Draw 1",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/blackfeather-knave.png"
+    },
+    {
+      "id": "blackfeather-brigand",
+      "name": "Blackfeather Brigand",
+      "patron": "crows",
+      "type": "agent",
+      "contract": false,
+      "cost": 6,
+      "hp": 2,
+      "taunt": false,
+      "playText": "1 Coin",
+      "combo2Text": null,
+      "combo3Text": "Draw 1",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/blackfeather-brigand.png"
+    },
+    {
+      "id": "murder-of-crows",
+      "name": "Murder of Crows",
+      "patron": "crows",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Coin",
+      "combo2Text": "2 Coin AND 2 Power",
+      "combo3Text": "2 Power",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "coin",
+          "n": 2
+        },
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo3": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/murder-of-crows.png"
+    },
+    {
+      "id": "scratch",
+      "name": "Scratch",
+      "patron": "crows",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Coin",
+      "combo2Text": "2 Coin AND 2 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "coin",
+          "n": 2
+        },
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 4,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/scratch.png"
+    },
+    {
+      "id": "plunder",
+      "name": "Plunder",
+      "patron": "crows",
+      "type": "action",
+      "contract": false,
+      "cost": 6,
+      "hp": null,
+      "taunt": false,
+      "playText": "Draw 1",
+      "combo2Text": null,
+      "combo3Text": "Draw 1",
+      "combo4Text": "Draw 1",
+      "play": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo4": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/plunder.png"
+    },
+    {
+      "id": "pilfer",
+      "name": "Pilfer",
+      "patron": "crows",
+      "type": "action",
+      "contract": false,
+      "cost": 6,
+      "hp": null,
+      "taunt": false,
+      "playText": "Draw 1",
+      "combo2Text": null,
+      "combo3Text": "Draw 1",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/pilfer.png"
+    },
+    {
+      "id": "toll-of-silver",
+      "name": "Toll of Silver",
+      "patron": "crows",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Coin",
+      "combo2Text": "Draw 1",
+      "combo3Text": "1 Coin",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo3": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/toll-of-silver.png"
+    },
+    {
+      "id": "toll-of-flesh",
+      "name": "Toll of Flesh",
+      "patron": "crows",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Coin",
+      "combo2Text": "Draw 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 4,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/toll-of-flesh.png"
+    },
+    {
+      "id": "blackfeather-knight",
+      "name": "Blackfeather Knight",
+      "patron": "crows",
+      "type": "agent",
+      "contract": false,
+      "cost": 6,
+      "hp": 3,
+      "taunt": false,
+      "playText": "1 Coin",
+      "combo2Text": null,
+      "combo3Text": "2 Coin AND 2 Power",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "coin",
+          "n": 2
+        },
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/blackfeather-knight.png"
+    },
+    {
+      "id": "law-of-sovereign-roost",
+      "name": "Law of Sovereign Roost",
+      "patron": "crows",
+      "type": "action",
+      "contract": true,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "Draw 1",
+      "combo2Text": null,
+      "combo3Text": "Discard 1",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "discard",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/law-of-sovereign-roost.png"
+    },
+    {
+      "id": "pool-of-shadow",
+      "name": "Pool of Shadow",
+      "patron": "crows",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Power",
+      "combo2Text": "Draw 1",
+      "combo3Text": null,
+      "combo4Text": "3 Coin",
+      "play": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [
+        {
+          "op": "coin",
+          "n": 3
+        }
+      ],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/pool-of-shadow.png"
+    },
+    {
+      "id": "squawking-oratory",
+      "name": "Squawking Oratory",
+      "patron": "crows",
+      "type": "action",
+      "contract": false,
+      "cost": 6,
+      "hp": null,
+      "taunt": false,
+      "playText": "Draw 1",
+      "combo2Text": null,
+      "combo3Text": "Draw 1",
+      "combo4Text": "4 Power",
+      "play": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo4": [
+        {
+          "op": "power",
+          "n": 4
+        }
+      ],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/squawking-oratory.png"
+    },
+    {
+      "id": "goods-shipment",
+      "name": "Goods Shipment",
+      "patron": "hlaalu",
+      "type": "action",
+      "contract": false,
+      "cost": 0,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Coin",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 1,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": true,
+      "token": false,
+      "art": "cards/goods-shipment.png"
+    },
+    {
+      "id": "ebony-mine",
+      "name": "Ebony Mine",
+      "patron": "hlaalu",
+      "type": "action",
+      "contract": true,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Coin",
+      "combo2Text": null,
+      "combo3Text": "4 Coin",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "coin",
+          "n": 4
+        }
+      ],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/ebony-mine.png"
+    },
+    {
+      "id": "kwama-egg-mine",
+      "name": "Kwama Egg Mine",
+      "patron": "hlaalu",
+      "type": "action",
+      "contract": true,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Coin",
+      "combo2Text": null,
+      "combo3Text": "3 Coin",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "coin",
+          "n": 3
+        }
+      ],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/kwama-egg-mine.png"
+    },
+    {
+      "id": "hlaalu-councilor",
+      "name": "Hlaalu Councilor",
+      "patron": "hlaalu",
+      "type": "agent",
+      "contract": false,
+      "cost": 10,
+      "hp": 2,
+      "taunt": false,
+      "playText": "Acquire 9",
+      "combo2Text": "Replace 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "acquire",
+          "n": 9
+        }
+      ],
+      "combo2": [
+        {
+          "op": "replace",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/hlaalu-councilor.png"
+    },
+    {
+      "id": "hlaalu-kinsman",
+      "name": "Hlaalu Kinsman",
+      "patron": "hlaalu",
+      "type": "agent",
+      "contract": false,
+      "cost": 10,
+      "hp": 1,
+      "taunt": false,
+      "playText": "Acquire 9",
+      "combo2Text": "Replace 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "acquire",
+          "n": 9
+        }
+      ],
+      "combo2": [
+        {
+          "op": "replace",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/hlaalu-kinsman.png"
+    },
+    {
+      "id": "house-embassy",
+      "name": "House Embassy",
+      "patron": "hlaalu",
+      "type": "action",
+      "contract": false,
+      "cost": 8,
+      "hp": null,
+      "taunt": false,
+      "playText": "7 Coin",
+      "combo2Text": "Acquire 7",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 7
+        }
+      ],
+      "combo2": [
+        {
+          "op": "acquire",
+          "n": 7
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/house-embassy.png"
+    },
+    {
+      "id": "house-marketplace",
+      "name": "House Marketplace",
+      "patron": "hlaalu",
+      "type": "action",
+      "contract": false,
+      "cost": 8,
+      "hp": null,
+      "taunt": false,
+      "playText": "6 Coin",
+      "combo2Text": "Acquire 7",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 6
+        }
+      ],
+      "combo2": [
+        {
+          "op": "acquire",
+          "n": 7
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/house-marketplace.png"
+    },
+    {
+      "id": "oathman",
+      "name": "Oathman",
+      "patron": "hlaalu",
+      "type": "agent",
+      "contract": false,
+      "cost": 6,
+      "hp": 2,
+      "taunt": false,
+      "playText": "2 Coin",
+      "combo2Text": "Acquire 6",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "acquire",
+          "n": 6
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/oathman.png"
+    },
+    {
+      "id": "hireling",
+      "name": "Hireling",
+      "patron": "hlaalu",
+      "type": "agent",
+      "contract": false,
+      "cost": 6,
+      "hp": 2,
+      "taunt": false,
+      "playText": "2 Coin",
+      "combo2Text": "Acquire 5",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "acquire",
+          "n": 5
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/hireling.png"
+    },
+    {
+      "id": "currency-exchange",
+      "name": "Currency Exchange",
+      "patron": "hlaalu",
+      "type": "action",
+      "contract": false,
+      "cost": 7,
+      "hp": null,
+      "taunt": false,
+      "playText": "Replace 1 AND 5 Coin",
+      "combo2Text": "Patron 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "replace",
+          "n": 1
+        },
+        {
+          "op": "coin",
+          "n": 5
+        }
+      ],
+      "combo2": [
+        {
+          "op": "patron_extra",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/currency-exchange.png"
+    },
+    {
+      "id": "customs-seizure",
+      "name": "Customs Seizure",
+      "patron": "hlaalu",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "Acquire 5",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "acquire",
+          "n": 5
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/customs-seizure.png"
+    },
+    {
+      "id": "hostile-takeover",
+      "name": "Hostile Takeover",
+      "patron": "hlaalu",
+      "type": "action",
+      "contract": false,
+      "cost": 5,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Power",
+      "combo2Text": "Acquire 7",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "acquire",
+          "n": 7
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/hostile-takeover.png"
+    },
+    {
+      "id": "luxury-exports",
+      "name": "Luxury Exports",
+      "patron": "hlaalu",
+      "type": "action",
+      "contract": false,
+      "cost": 2,
+      "hp": null,
+      "taunt": false,
+      "playText": "3 Coin",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 3
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/luxury-exports.png"
+    },
+    {
+      "id": "unsealed-glyphic",
+      "name": "Unsealed Glyphic",
+      "patron": "mora",
+      "type": "action",
+      "contract": false,
+      "cost": 0,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Power",
+      "combo2Text": null,
+      "combo3Text": "1 Coin",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 1,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": true,
+      "token": false,
+      "art": "cards/unsealed-glyphic.png"
+    },
+    {
+      "id": "chromatic-reservoir",
+      "name": "Chromatic Reservoir",
+      "patron": "mora",
+      "type": "action",
+      "contract": false,
+      "cost": 6,
+      "hp": null,
+      "taunt": false,
+      "playText": "4 Power AND Setback Draw 1",
+      "combo2Text": "2 Power",
+      "combo3Text": "2 Power",
+      "combo4Text": "4 Power",
+      "play": [
+        {
+          "op": "power",
+          "n": 4
+        },
+        {
+          "op": "setback_draw",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo3": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo4": [
+        {
+          "op": "power",
+          "n": 4
+        }
+      ],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/chromatic-reservoir.png"
+    },
+    {
+      "id": "unsettling-aura",
+      "name": "Unsettling Aura",
+      "patron": "mora",
+      "type": "action",
+      "contract": false,
+      "cost": 6,
+      "hp": null,
+      "taunt": false,
+      "playText": "4 Power AND Setback Draw 1",
+      "combo2Text": "2 Power",
+      "combo3Text": "2 Power",
+      "combo4Text": "3 Power",
+      "play": [
+        {
+          "op": "power",
+          "n": 4
+        },
+        {
+          "op": "setback_draw",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo3": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo4": [
+        {
+          "op": "power",
+          "n": 3
+        }
+      ],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/unsettling-aura.png"
+    },
+    {
+      "id": "lantern-of-the-endless",
+      "name": "Lantern of the Endless",
+      "patron": "mora",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Power AND 1 Coin AND Setback 2 Coin",
+      "combo2Text": "2 Power",
+      "combo3Text": "2 Power",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 2
+        },
+        {
+          "op": "coin",
+          "n": 1
+        },
+        {
+          "op": "setback_coin",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo3": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/lantern-of-the-endless.png"
+    },
+    {
+      "id": "apocryphal-pact",
+      "name": "Apocryphal Pact",
+      "patron": "mora",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Power AND 1 Coin AND Setback 2 Coin",
+      "combo2Text": "2 Power",
+      "combo3Text": "1 Power",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 2
+        },
+        {
+          "op": "coin",
+          "n": 1
+        },
+        {
+          "op": "setback_coin",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo3": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 4,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/apocryphal-pact.png"
+    },
+    {
+      "id": "seeker-aspirant",
+      "name": "Seeker Aspirant",
+      "patron": "mora",
+      "type": "agent",
+      "contract": true,
+      "cost": 5,
+      "hp": 2,
+      "taunt": false,
+      "playText": "Destroy 1 AND Setback 3 Coin",
+      "combo2Text": "3 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "destroy",
+          "n": 1
+        },
+        {
+          "op": "setback_coin",
+          "n": 3
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 3
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/seeker-aspirant.png"
+    },
+    {
+      "id": "cipher-of-the-eye",
+      "name": "Cipher of the Eye",
+      "patron": "mora",
+      "type": "agent",
+      "contract": true,
+      "cost": 5,
+      "hp": 2,
+      "taunt": false,
+      "playText": "Destroy 1 AND Setback 3 Coin",
+      "combo2Text": "2 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "destroy",
+          "n": 1
+        },
+        {
+          "op": "setback_coin",
+          "n": 3
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/cipher-of-the-eye.png"
+    },
+    {
+      "id": "unfathomable-secrets",
+      "name": "Unfathomable Secrets",
+      "patron": "mora",
+      "type": "action",
+      "contract": true,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "5 Power AND Setback Draw 1",
+      "combo2Text": "2 Coin",
+      "combo3Text": "2 Coin",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 5
+        },
+        {
+          "op": "setback_draw",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo3": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/unfathomable-secrets.png"
+    },
+    {
+      "id": "bargain-for-knowledge",
+      "name": "Bargain for Knowledge",
+      "patron": "mora",
+      "type": "action",
+      "contract": true,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "5 Power AND Setback Draw 1",
+      "combo2Text": "1 Coin",
+      "combo3Text": "2 Coin",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 5
+        },
+        {
+          "op": "setback_draw",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo3": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/bargain-for-knowledge.png"
+    },
+    {
+      "id": "ink-and-blood",
+      "name": "Ink and Blood",
+      "patron": "mora",
+      "type": "action",
+      "contract": false,
+      "cost": 2,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Coin AND Setback 1 Power",
+      "combo2Text": "2 Power AND 1 Coin",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        },
+        {
+          "op": "setback_power",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 2
+        },
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/ink-and-blood.png"
+    },
+    {
+      "id": "threads-of-fate",
+      "name": "Threads of Fate",
+      "patron": "mora",
+      "type": "action",
+      "contract": true,
+      "cost": 2,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Power AND Setback 1 Coin",
+      "combo2Text": "1 Power",
+      "combo3Text": "1 Coin",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 2
+        },
+        {
+          "op": "setback_coin",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo3": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/threads-of-fate.png"
+    },
+    {
+      "id": "voracious-tomeshell",
+      "name": "Voracious Tomeshell",
+      "patron": "mora",
+      "type": "action",
+      "contract": false,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "Destroy 2 AND Setback Draw 1",
+      "combo2Text": "3 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "destroy",
+          "n": 2
+        },
+        {
+          "op": "setback_draw",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 3
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/voracious-tomeshell.png"
+    },
+    {
+      "id": "mainland-inquiries",
+      "name": "Mainland Inquiries",
+      "patron": "celarus",
+      "type": "action",
+      "contract": false,
+      "cost": 0,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Coin",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 1,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": true,
+      "token": false,
+      "art": "cards/mainland-inquiries.png"
+    },
+    {
+      "id": "augurs-counsel",
+      "name": "Augur's Counsel",
+      "patron": "celarus",
+      "type": "action",
+      "contract": true,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "Toss 3",
+      "combo2Text": "2 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "toss",
+          "n": 3
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/augurs-counsel.png"
+    },
+    {
+      "id": "sage-counsel",
+      "name": "Sage Counsel",
+      "patron": "celarus",
+      "type": "action",
+      "contract": true,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "Toss 3",
+      "combo2Text": "1 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "toss",
+          "n": 3
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/sage-counsel.png"
+    },
+    {
+      "id": "ceporahs-insight",
+      "name": "Ceporah's Insight",
+      "patron": "celarus",
+      "type": "action",
+      "contract": false,
+      "cost": 5,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Coin AND Toss 4",
+      "combo2Text": "3 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        },
+        {
+          "op": "toss",
+          "n": 4
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 3
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/ceporahs-insight.png"
+    },
+    {
+      "id": "psijics-insight",
+      "name": "Psijic's Insight",
+      "patron": "celarus",
+      "type": "action",
+      "contract": false,
+      "cost": 5,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Coin AND Toss 4",
+      "combo2Text": "2 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        },
+        {
+          "op": "toss",
+          "n": 4
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/psijics-insight.png"
+    },
+    {
+      "id": "prophesy",
+      "name": "Prophesy",
+      "patron": "celarus",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "3 Coin AND Replace 2",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 3
+        },
+        {
+          "op": "replace",
+          "n": 2
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/prophesy.png"
+    },
+    {
+      "id": "prescience",
+      "name": "Prescience",
+      "patron": "celarus",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "3 Coin AND Replace 1",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 3
+        },
+        {
+          "op": "replace",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/prescience.png"
+    },
+    {
+      "id": "psijic-relicmaster",
+      "name": "Psijic Relicmaster",
+      "patron": "celarus",
+      "type": "agent",
+      "contract": false,
+      "cost": 6,
+      "hp": 3,
+      "taunt": false,
+      "playText": "1 Coin AND Toss 4",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        },
+        {
+          "op": "toss",
+          "n": 4
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/psijic-relicmaster.png"
+    },
+    {
+      "id": "psijic-apprentice",
+      "name": "Psijic Apprentice",
+      "patron": "celarus",
+      "type": "agent",
+      "contract": false,
+      "cost": 6,
+      "hp": 3,
+      "taunt": false,
+      "playText": "Toss 4",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "toss",
+          "n": 4
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/psijic-apprentice.png"
+    },
+    {
+      "id": "scrying-globe",
+      "name": "Scrying Globe",
+      "patron": "celarus",
+      "type": "action",
+      "contract": false,
+      "cost": 2,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Coin AND Toss 2",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        },
+        {
+          "op": "toss",
+          "n": 2
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 4,
+      "upgradedQty": 4,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/scrying-globe.png"
+    },
+    {
+      "id": "the-dreaming-cave",
+      "name": "The Dreaming Cave",
+      "patron": "celarus",
+      "type": "action",
+      "contract": false,
+      "cost": 6,
+      "hp": null,
+      "taunt": false,
+      "playText": "Draw 1 AND Toss 4",
+      "combo2Text": "2 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "draw",
+          "n": 1
+        },
+        {
+          "op": "toss",
+          "n": 4
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/the-dreaming-cave.png"
+    },
+    {
+      "id": "time-mastery",
+      "name": "Time Mastery",
+      "patron": "celarus",
+      "type": "action",
+      "contract": false,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "Toss 5",
+      "combo2Text": "2 Coin",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "toss",
+          "n": 5
+        }
+      ],
+      "combo2": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/time-mastery.png"
+    },
+    {
+      "id": "swipe",
+      "name": "Swipe",
+      "patron": "rajhin",
+      "type": "action",
+      "contract": false,
+      "cost": 0,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Coin",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 1,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": true,
+      "token": false,
+      "art": "cards/swipe.png"
+    },
+    {
+      "id": "grand-larceny",
+      "name": "Grand Larceny",
+      "patron": "rajhin",
+      "type": "action",
+      "contract": false,
+      "cost": 5,
+      "hp": null,
+      "taunt": false,
+      "playText": "4 Coin",
+      "combo2Text": "Knock Out 1 AND -1 Prestige",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 4
+        }
+      ],
+      "combo2": [
+        {
+          "op": "knockout",
+          "n": 1
+        },
+        {
+          "op": "opp_prestige",
+          "n": -1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/grand-larceny.png"
+    },
+    {
+      "id": "pounce-and-profit",
+      "name": "Pounce and Profit",
+      "patron": "rajhin",
+      "type": "action",
+      "contract": false,
+      "cost": 5,
+      "hp": null,
+      "taunt": false,
+      "playText": "4 Coin",
+      "combo2Text": "Knock Out 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 4
+        }
+      ],
+      "combo2": [
+        {
+          "op": "knockout",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/pounce-and-profit.png"
+    },
+    {
+      "id": "prowling-shadow",
+      "name": "Prowling Shadow",
+      "patron": "rajhin",
+      "type": "agent",
+      "contract": false,
+      "cost": 4,
+      "hp": 1,
+      "taunt": false,
+      "playText": "2 Coin",
+      "combo2Text": "-1 Prestige",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "opp_prestige",
+          "n": -1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/prowling-shadow.png"
+    },
+    {
+      "id": "jeering-shadow",
+      "name": "Jeering Shadow",
+      "patron": "rajhin",
+      "type": "agent",
+      "contract": false,
+      "cost": 4,
+      "hp": 1,
+      "taunt": false,
+      "playText": "1 Coin",
+      "combo2Text": "-1 Prestige",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "opp_prestige",
+          "n": -1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/jeering-shadow.png"
+    },
+    {
+      "id": "rings-guile",
+      "name": "Ring's Guile",
+      "patron": "rajhin",
+      "type": "action",
+      "contract": true,
+      "cost": 7,
+      "hp": null,
+      "taunt": false,
+      "playText": "Discard 1",
+      "combo2Text": "Draw 1",
+      "combo3Text": "Discard 1 AND Draw 1",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "discard",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo3": [
+        {
+          "op": "discard",
+          "n": 1
+        },
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/rings-guile.png"
+    },
+    {
+      "id": "bag-of-tricks",
+      "name": "Bag of Tricks",
+      "patron": "rajhin",
+      "type": "action",
+      "contract": true,
+      "cost": 7,
+      "hp": null,
+      "taunt": false,
+      "playText": "Discard 1",
+      "combo2Text": "Draw 1",
+      "combo3Text": "Discard 1",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "discard",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo3": [
+        {
+          "op": "discard",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/bag-of-tricks.png"
+    },
+    {
+      "id": "shadows-slumber",
+      "name": "Shadow's Slumber",
+      "patron": "rajhin",
+      "type": "action",
+      "contract": false,
+      "cost": 7,
+      "hp": null,
+      "taunt": false,
+      "playText": "Knock Out 2 AND 2 Coin",
+      "combo2Text": "3 Coin",
+      "combo3Text": "Discard 1",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "knockout",
+          "n": 2
+        },
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "coin",
+          "n": 3
+        }
+      ],
+      "combo3": [
+        {
+          "op": "discard",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/shadows-slumber.png"
+    },
+    {
+      "id": "jarring-lullaby",
+      "name": "Jarring Lullaby",
+      "patron": "rajhin",
+      "type": "action",
+      "contract": false,
+      "cost": 7,
+      "hp": null,
+      "taunt": false,
+      "playText": "Knock Out 2 AND 2 Coin",
+      "combo2Text": "2 Coin",
+      "combo3Text": "Discard 1",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "knockout",
+          "n": 2
+        },
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo3": [
+        {
+          "op": "discard",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/jarring-lullaby.png"
+    },
+    {
+      "id": "moonlit-illusion",
+      "name": "Moonlit Illusion",
+      "patron": "rajhin",
+      "type": "action",
+      "contract": true,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "Destroy 1",
+      "combo2Text": null,
+      "combo3Text": "-1 Prestige",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "destroy",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "opp_prestige",
+          "n": -1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/moonlit-illusion.png"
+    },
+    {
+      "id": "slight-of-hand",
+      "name": "Slight of Hand",
+      "patron": "rajhin",
+      "type": "action",
+      "contract": false,
+      "cost": 2,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Coin",
+      "combo2Text": "Replace 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "replace",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/slight-of-hand.png"
+    },
+    {
+      "id": "stubborn-shadow",
+      "name": "Stubborn Shadow",
+      "patron": "rajhin",
+      "type": "agent",
+      "contract": false,
+      "cost": 6,
+      "hp": 3,
+      "taunt": true,
+      "playText": "",
+      "combo2Text": "-2 Prestige",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [],
+      "combo2": [
+        {
+          "op": "opp_prestige",
+          "n": -2
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/stubborn-shadow.png"
+    },
+    {
+      "id": "twilight-revelry",
+      "name": "Twilight Revelry",
+      "patron": "rajhin",
+      "type": "action",
+      "contract": false,
+      "cost": 10,
+      "hp": null,
+      "taunt": false,
+      "playText": "Discard 1",
+      "combo2Text": "Replace 3",
+      "combo3Text": "-3 Prestige",
+      "combo4Text": "Draw 3",
+      "play": [
+        {
+          "op": "discard",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "replace",
+          "n": 3
+        }
+      ],
+      "combo3": [
+        {
+          "op": "opp_prestige",
+          "n": -3
+        }
+      ],
+      "combo4": [
+        {
+          "op": "draw",
+          "n": 3
+        }
+      ],
+      "baseQty": 1,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/twilight-revelry.png"
+    },
+    {
+      "id": "war-song",
+      "name": "War Song",
+      "patron": "redeagle",
+      "type": "action",
+      "contract": false,
+      "cost": 0,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Power",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 1,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": true,
+      "token": false,
+      "art": "cards/war-song.png"
+    },
+    {
+      "id": "blood-sacrifice",
+      "name": "Blood Sacrifice",
+      "patron": "redeagle",
+      "type": "action",
+      "contract": true,
+      "cost": 6,
+      "hp": null,
+      "taunt": false,
+      "playText": "Destroy 1 AND 3 Power",
+      "combo2Text": "Draw 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "destroy",
+          "n": 1
+        },
+        {
+          "op": "power",
+          "n": 3
+        }
+      ],
+      "combo2": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/blood-sacrifice.png"
+    },
+    {
+      "id": "bloody-offering",
+      "name": "Bloody Offering",
+      "patron": "redeagle",
+      "type": "action",
+      "contract": true,
+      "cost": 6,
+      "hp": null,
+      "taunt": false,
+      "playText": "Destroy 1 AND 2 Power",
+      "combo2Text": "Draw 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "destroy",
+          "n": 1
+        },
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/bloody-offering.png"
+    },
+    {
+      "id": "elder-witch",
+      "name": "Elder Witch",
+      "patron": "redeagle",
+      "type": "agent",
+      "contract": true,
+      "cost": 6,
+      "hp": 3,
+      "taunt": false,
+      "playText": "Destroy 1",
+      "combo2Text": "Replace 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "destroy",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "replace",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/elder-witch.png"
+    },
+    {
+      "id": "clan-witch",
+      "name": "Clan-Witch",
+      "patron": "redeagle",
+      "type": "agent",
+      "contract": true,
+      "cost": 6,
+      "hp": 3,
+      "taunt": false,
+      "playText": "Destroy 1",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "destroy",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/clan-witch.png"
+    },
+    {
+      "id": "hagraven-matron",
+      "name": "Hagraven Matron",
+      "patron": "redeagle",
+      "type": "agent",
+      "contract": false,
+      "cost": 9,
+      "hp": 3,
+      "taunt": false,
+      "playText": "Destroy 1",
+      "combo2Text": "3 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "destroy",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 3
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/hagraven-matron.png"
+    },
+    {
+      "id": "hagraven",
+      "name": "Hagraven",
+      "patron": "redeagle",
+      "type": "agent",
+      "contract": false,
+      "cost": 9,
+      "hp": 3,
+      "taunt": false,
+      "playText": "Destroy 1",
+      "combo2Text": "1 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "destroy",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/hagraven.png"
+    },
+    {
+      "id": "imperial-plunder",
+      "name": "Imperial Plunder",
+      "patron": "redeagle",
+      "type": "action",
+      "contract": true,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "Replace 2",
+      "combo2Text": "2 Coin",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "replace",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/imperial-plunder.png"
+    },
+    {
+      "id": "imperial-spoils",
+      "name": "Imperial Spoils",
+      "patron": "redeagle",
+      "type": "action",
+      "contract": true,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "Replace 2",
+      "combo2Text": "1 Coin",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "replace",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/imperial-spoils.png"
+    },
+    {
+      "id": "bonfire",
+      "name": "Bonfire",
+      "patron": "redeagle",
+      "type": "action",
+      "contract": true,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "Destroy 1",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "destroy",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/bonfire.png"
+    },
+    {
+      "id": "briarheart-ritual",
+      "name": "Briarheart Ritual",
+      "patron": "redeagle",
+      "type": "action",
+      "contract": true,
+      "cost": 5,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Power AND Destroy 2",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 1
+        },
+        {
+          "op": "destroy",
+          "n": 2
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/briarheart-ritual.png"
+    },
+    {
+      "id": "karth-man-hunter",
+      "name": "Karth Man-Hunter",
+      "patron": "redeagle",
+      "type": "agent",
+      "contract": true,
+      "cost": 5,
+      "hp": 2,
+      "taunt": false,
+      "playText": "1 Power",
+      "combo2Text": "Destroy 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "destroy",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/karth-man-hunter.png"
+    },
+    {
+      "id": "midnight-raid",
+      "name": "Midnight Raid",
+      "patron": "redeagle",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "3 Power",
+      "combo2Text": "2 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 3
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/midnight-raid.png"
+    },
+    {
+      "id": "alessian-rebel",
+      "name": "Alessian Rebel",
+      "patron": "alessia",
+      "type": "agent",
+      "contract": false,
+      "cost": 0,
+      "hp": 2,
+      "taunt": false,
+      "playText": "",
+      "combo2Text": "1 Coin",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [],
+      "combo2": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 1,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": true,
+      "token": false,
+      "art": "cards/alessian-rebel.png"
+    },
+    {
+      "id": "ayleid-quartermaster",
+      "name": "Ayleid Quartermaster",
+      "patron": "alessia",
+      "type": "agent",
+      "contract": true,
+      "cost": 5,
+      "hp": 1,
+      "taunt": false,
+      "playText": "Draw 1 OR Knock Out All",
+      "combo2Text": null,
+      "combo3Text": "2 Prestige",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "draw",
+                "n": 1
+              }
+            ],
+            [
+              {
+                "op": "knockout_all"
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "prestige",
+          "n": 2
+        }
+      ],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/ayleid-quartermaster.png"
+    },
+    {
+      "id": "ayleid-defector",
+      "name": "Ayleid Defector",
+      "patron": "alessia",
+      "type": "agent",
+      "contract": true,
+      "cost": 5,
+      "hp": 1,
+      "taunt": false,
+      "playText": "Draw 1 OR Knock Out All",
+      "combo2Text": null,
+      "combo3Text": "1 Prestige",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "draw",
+                "n": 1
+              }
+            ],
+            [
+              {
+                "op": "knockout_all"
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "prestige",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/ayleid-defector.png"
+    },
+    {
+      "id": "chainbreaker-captain",
+      "name": "Chainbreaker Captain",
+      "patron": "alessia",
+      "type": "agent",
+      "contract": false,
+      "cost": 4,
+      "hp": 2,
+      "taunt": false,
+      "playText": "3 Coin OR 2 Power",
+      "combo2Text": null,
+      "combo3Text": "1 Prestige",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "coin",
+                "n": 3
+              }
+            ],
+            [
+              {
+                "op": "power",
+                "n": 2
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "prestige",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/chainbreaker-captain.png"
+    },
+    {
+      "id": "chainbreaker-sergeant",
+      "name": "Chainbreaker Sergeant",
+      "patron": "alessia",
+      "type": "agent",
+      "contract": false,
+      "cost": 4,
+      "hp": 2,
+      "taunt": false,
+      "playText": "3 Coin OR 2 Power",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "coin",
+                "n": 3
+              }
+            ],
+            [
+              {
+                "op": "power",
+                "n": 2
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/chainbreaker-sergeant.png"
+    },
+    {
+      "id": "morihaus-sacred-bull",
+      "name": "Morihaus, Sacred Bull",
+      "patron": "alessia",
+      "type": "agent",
+      "contract": false,
+      "cost": 5,
+      "hp": 2,
+      "taunt": false,
+      "playText": "Knock Out 1 AND 1 Coin/AgentKnocked",
+      "combo2Text": null,
+      "combo3Text": "3 Prestige",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "knockout",
+          "n": 1
+        },
+        {
+          "op": "raw",
+          "text": "1 Coin/AgentKnocked"
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "prestige",
+          "n": 3
+        }
+      ],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/morihaus-sacred-bull.png"
+    },
+    {
+      "id": "morihaus-the-archer",
+      "name": "Morihaus, the Archer",
+      "patron": "alessia",
+      "type": "agent",
+      "contract": false,
+      "cost": 5,
+      "hp": 2,
+      "taunt": false,
+      "playText": "Knock Out 1 AND 1 Coin/AgentKnocked",
+      "combo2Text": null,
+      "combo3Text": "2 Prestige",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "knockout",
+          "n": 1
+        },
+        {
+          "op": "raw",
+          "text": "1 Coin/AgentKnocked"
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "prestige",
+          "n": 2
+        }
+      ],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/morihaus-the-archer.png"
+    },
+    {
+      "id": "whitestrake-ascendant",
+      "name": "Whitestrake Ascendant",
+      "patron": "alessia",
+      "type": "agent",
+      "contract": false,
+      "cost": 7,
+      "hp": 2,
+      "taunt": false,
+      "playText": "Knock Out 2 OR Draw Refresh 4 Agents",
+      "combo2Text": null,
+      "combo3Text": "4 Prestige",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "knockout",
+                "n": 2
+              }
+            ],
+            [
+              {
+                "op": "draw_refresh_agents",
+                "n": 4
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "prestige",
+          "n": 4
+        }
+      ],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/whitestrake-ascendant.png"
+    },
+    {
+      "id": "pelinal-whitestrake",
+      "name": "Pelinal Whitestrake",
+      "patron": "alessia",
+      "type": "agent",
+      "contract": false,
+      "cost": 7,
+      "hp": 2,
+      "taunt": false,
+      "playText": "Knock Out 2 OR Draw Refresh 4 Agents",
+      "combo2Text": null,
+      "combo3Text": "3 Prestige",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "knockout",
+                "n": 2
+              }
+            ],
+            [
+              {
+                "op": "draw_refresh_agents",
+                "n": 4
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "prestige",
+          "n": 3
+        }
+      ],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/pelinal-whitestrake.png"
+    },
+    {
+      "id": "priestess-of-the-eight",
+      "name": "Priestess of the Eight",
+      "patron": "alessia",
+      "type": "agent",
+      "contract": false,
+      "cost": 5,
+      "hp": 2,
+      "taunt": false,
+      "playText": "Replace 1 OR Donate 2",
+      "combo2Text": "1 Prestige",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "replace",
+                "n": 1
+              }
+            ],
+            [
+              {
+                "op": "donate",
+                "n": 2
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [
+        {
+          "op": "prestige",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/priestess-of-the-eight.png"
+    },
+    {
+      "id": "saints-wrath",
+      "name": "Saint's Wrath",
+      "patron": "alessia",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "Knock Out All OR Draw Refresh 3",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "knockout_all"
+              }
+            ],
+            [
+              {
+                "op": "draw_refresh",
+                "n": 3
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/saints-wrath.png"
+    },
+    {
+      "id": "soldier-of-the-empire",
+      "name": "Soldier of the Empire",
+      "patron": "alessia",
+      "type": "agent",
+      "contract": false,
+      "cost": 3,
+      "hp": 2,
+      "taunt": false,
+      "playText": "2 Coin OR 1 Power",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "choose",
+          "options": [
+            [
+              {
+                "op": "coin",
+                "n": 2
+              }
+            ],
+            [
+              {
+                "op": "power",
+                "n": 1
+              }
+            ]
+          ]
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/soldier-of-the-empire.png"
+    },
+    {
+      "id": "fortify",
+      "name": "Fortify",
+      "patron": "pelin",
+      "type": "action",
+      "contract": false,
+      "cost": 0,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Power",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 1,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": true,
+      "token": false,
+      "art": "cards/fortify.png"
+    },
+    {
+      "id": "knight-commander",
+      "name": "Knight Commander",
+      "patron": "pelin",
+      "type": "agent",
+      "contract": false,
+      "cost": 9,
+      "hp": 5,
+      "taunt": true,
+      "playText": "3 Power",
+      "combo2Text": "Heal 2",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 3
+        }
+      ],
+      "combo2": [
+        {
+          "op": "heal",
+          "n": 2
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/knight-commander.png"
+    },
+    {
+      "id": "banneret",
+      "name": "Banneret",
+      "patron": "pelin",
+      "type": "agent",
+      "contract": false,
+      "cost": 9,
+      "hp": 5,
+      "taunt": true,
+      "playText": "3 Power",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 3
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/banneret.png"
+    },
+    {
+      "id": "knights-of-saint-pelin",
+      "name": "Knights of Saint Pelin",
+      "patron": "pelin",
+      "type": "agent",
+      "contract": false,
+      "cost": 7,
+      "hp": 4,
+      "taunt": true,
+      "playText": "1 Coin AND 1 Power",
+      "combo2Text": "1 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        },
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/knights-of-saint-pelin.png"
+    },
+    {
+      "id": "bangkorai-sentries",
+      "name": "Bangkorai Sentries",
+      "patron": "pelin",
+      "type": "agent",
+      "contract": false,
+      "cost": 7,
+      "hp": 4,
+      "taunt": true,
+      "playText": "1 Coin AND 1 Power",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        },
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/bangkorai-sentries.png"
+    },
+    {
+      "id": "legions-arrival",
+      "name": "Legion's Arrival",
+      "patron": "pelin",
+      "type": "action",
+      "contract": false,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Coin",
+      "combo2Text": "3 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 3
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/legions-arrival.png"
+    },
+    {
+      "id": "reinforcements",
+      "name": "Reinforcements",
+      "patron": "pelin",
+      "type": "action",
+      "contract": false,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Coin",
+      "combo2Text": "2 Power",
+      "combo3Text": "1 Power",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo3": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/reinforcements.png"
+    },
+    {
+      "id": "siege-weapon-volley",
+      "name": "Siege Weapon Volley",
+      "patron": "pelin",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "4 Power",
+      "combo2Text": "1 Coin",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 4
+        }
+      ],
+      "combo2": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/siege-weapon-volley.png"
+    },
+    {
+      "id": "archers-volley",
+      "name": "Archer's Volley",
+      "patron": "pelin",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "3 Power",
+      "combo2Text": "1 Coin",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 3
+        }
+      ],
+      "combo2": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 4,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/archers-volley.png"
+    },
+    {
+      "id": "rally",
+      "name": "Rally",
+      "patron": "pelin",
+      "type": "action",
+      "contract": false,
+      "cost": 8,
+      "hp": null,
+      "taunt": false,
+      "playText": "5 Power",
+      "combo2Text": "Draw 1 AND 1 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 5
+        }
+      ],
+      "combo2": [
+        {
+          "op": "draw",
+          "n": 1
+        },
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/rally.png"
+    },
+    {
+      "id": "shield-bearer",
+      "name": "Shield Bearer",
+      "patron": "pelin",
+      "type": "agent",
+      "contract": true,
+      "cost": 6,
+      "hp": 5,
+      "taunt": true,
+      "playText": "1 Power",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/shield-bearer.png"
+    },
+    {
+      "id": "the-armory",
+      "name": "The Armory",
+      "patron": "pelin",
+      "type": "action",
+      "contract": false,
+      "cost": 6,
+      "hp": null,
+      "taunt": false,
+      "playText": "5 Power",
+      "combo2Text": "1 Coin",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 5
+        }
+      ],
+      "combo2": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/the-armory.png"
+    },
+    {
+      "id": "the-portcullis",
+      "name": "The Portcullis",
+      "patron": "pelin",
+      "type": "action",
+      "contract": false,
+      "cost": 2,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Power",
+      "combo2Text": "1 Coin",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/the-portcullis.png"
+    },
+    {
+      "id": "sea-elf-raid",
+      "name": "Sea Elf Raid",
+      "patron": "orgnum",
+      "type": "action",
+      "contract": false,
+      "cost": 0,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Coin",
+      "combo2Text": null,
+      "combo3Text": "1 Power",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 1,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": true,
+      "token": false,
+      "art": "cards/sea-elf-raid.png"
+    },
+    {
+      "id": "pyandonean-war-fleet",
+      "name": "Pyandonean War Fleet",
+      "patron": "orgnum",
+      "type": "action",
+      "contract": false,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Power",
+      "combo2Text": null,
+      "combo3Text": "3 Power",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "power",
+          "n": 3
+        }
+      ],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/pyandonean-war-fleet.png"
+    },
+    {
+      "id": "serpentprow-schooner",
+      "name": "Serpentprow Schooner",
+      "patron": "orgnum",
+      "type": "action",
+      "contract": false,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Power",
+      "combo2Text": null,
+      "combo3Text": "2 Power",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/serpentprow-schooner.png"
+    },
+    {
+      "id": "sea-serpent-colossus",
+      "name": "Sea Serpent Colossus",
+      "patron": "orgnum",
+      "type": "action",
+      "contract": false,
+      "cost": 2,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Coin AND 1 Prestige",
+      "combo2Text": "2 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        },
+        {
+          "op": "prestige",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/sea-serpent-colossus.png"
+    },
+    {
+      "id": "ghostscale-sea-serpent",
+      "name": "Ghostscale Sea Serpent",
+      "patron": "orgnum",
+      "type": "action",
+      "contract": false,
+      "cost": 2,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Coin AND 1 Prestige",
+      "combo2Text": "1 Power",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        },
+        {
+          "op": "prestige",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/ghostscale-sea-serpent.png"
+    },
+    {
+      "id": "serpentguard-rider",
+      "name": "Serpentguard Rider",
+      "patron": "orgnum",
+      "type": "agent",
+      "contract": false,
+      "cost": 5,
+      "hp": 2,
+      "taunt": false,
+      "playText": "2 Power",
+      "combo2Text": "1 Power AND Replace 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 1
+        },
+        {
+          "op": "replace",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/serpentguard-rider.png"
+    },
+    {
+      "id": "storm-shark-wavecaller",
+      "name": "Storm Shark Wavecaller",
+      "patron": "orgnum",
+      "type": "agent",
+      "contract": false,
+      "cost": 5,
+      "hp": 2,
+      "taunt": false,
+      "playText": "2 Power",
+      "combo2Text": "Replace 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "replace",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/storm-shark-wavecaller.png"
+    },
+    {
+      "id": "summerset-sacking",
+      "name": "Summerset Sacking",
+      "patron": "orgnum",
+      "type": "action",
+      "contract": false,
+      "cost": 2,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Prestige",
+      "combo2Text": "1 Prestige",
+      "combo3Text": "1 Coin",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "prestige",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "prestige",
+          "n": 1
+        }
+      ],
+      "combo3": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/summerset-sacking.png"
+    },
+    {
+      "id": "maormer-boarding-party",
+      "name": "Maormer Boarding Party",
+      "patron": "orgnum",
+      "type": "action",
+      "contract": false,
+      "cost": 2,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Prestige",
+      "combo2Text": "1 Prestige",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "prestige",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "prestige",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/maormer-boarding-party.png"
+    },
+    {
+      "id": "king-orgnums-command",
+      "name": "King Orgnum's Command",
+      "patron": "orgnum",
+      "type": "action",
+      "contract": true,
+      "cost": 2,
+      "hp": null,
+      "taunt": false,
+      "playText": "Patron 1",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "patron_extra",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/king-orgnums-command.png"
+    },
+    {
+      "id": "maormer-cutter",
+      "name": "Maormer Cutter",
+      "patron": "orgnum",
+      "type": "action",
+      "contract": true,
+      "cost": 2,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Power",
+      "combo2Text": "1 Power",
+      "combo3Text": "2 Power",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "power",
+          "n": 1
+        }
+      ],
+      "combo3": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/maormer-cutter.png"
+    },
+    {
+      "id": "sea-raiders-glory",
+      "name": "Sea Raider's Glory",
+      "patron": "orgnum",
+      "type": "action",
+      "contract": true,
+      "cost": 2,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Prestige",
+      "combo2Text": null,
+      "combo3Text": "3 Prestige",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "prestige",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "prestige",
+          "n": 3
+        }
+      ],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/sea-raiders-glory.png"
+    },
+    {
+      "id": "snakeskin-freebooter",
+      "name": "Snakeskin Freebooter",
+      "patron": "orgnum",
+      "type": "agent",
+      "contract": false,
+      "cost": 5,
+      "hp": 3,
+      "taunt": false,
+      "playText": "1 Coin",
+      "combo2Text": "Sacking 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "sacking",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/snakeskin-freebooter.png"
+    },
+    {
+      "id": "ritual-herbs",
+      "name": "Ritual Herbs",
+      "patron": "druid",
+      "type": "action",
+      "contract": false,
+      "cost": 0,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Coin",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 1,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": true,
+      "token": false,
+      "art": "cards/ritual-herbs.png"
+    },
+    {
+      "id": "draoife-ritecaller",
+      "name": "Draoife Ritecaller",
+      "patron": "druid",
+      "type": "agent",
+      "contract": false,
+      "cost": 6,
+      "hp": 3,
+      "taunt": false,
+      "playText": "1 Coin/Cooldown",
+      "combo2Text": "Wispheart 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "passive",
+          "trigger": "cooldown",
+          "resource": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "create",
+          "card": "Wispheart Totem",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/draoife-ritecaller.png"
+    },
+    {
+      "id": "eldertide-fenwitch",
+      "name": "Eldertide Fenwitch",
+      "patron": "druid",
+      "type": "agent",
+      "contract": false,
+      "cost": 6,
+      "hp": 3,
+      "taunt": false,
+      "playText": "1 Coin/Cooldown",
+      "combo2Text": "Wispcaller 1",
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "passive",
+          "trigger": "cooldown",
+          "resource": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "create",
+          "card": "Wispcaller Totem",
+          "n": 1
+        }
+      ],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/eldertide-fenwitch.png"
+    },
+    {
+      "id": "druid-king-vestments",
+      "name": "Druid King Vestments",
+      "patron": "druid",
+      "type": "action",
+      "contract": false,
+      "cost": 2,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Coin AND 1 Power/Cooldown",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        },
+        {
+          "op": "passive",
+          "trigger": "cooldown",
+          "resource": "power",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/druid-king-vestments.png"
+    },
+    {
+      "id": "runes-of-the-draoife",
+      "name": "Runes of the Draoife",
+      "patron": "druid",
+      "type": "action",
+      "contract": false,
+      "cost": 2,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Coin AND 1 Power/AgentCooldown",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        },
+        {
+          "op": "passive",
+          "trigger": "agent_cooldown",
+          "resource": "power",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/runes-of-the-draoife.png"
+    },
+    {
+      "id": "envoy-of-the-draoife",
+      "name": "Envoy of the Draoife",
+      "patron": "druid",
+      "type": "agent",
+      "contract": false,
+      "cost": 5,
+      "hp": 3,
+      "taunt": false,
+      "playText": "1 Power AND 1 Coin/Agent",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 1
+        },
+        {
+          "op": "passive",
+          "trigger": "agent_play",
+          "resource": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/envoy-of-the-draoife.png"
+    },
+    {
+      "id": "stonelore-rockseer",
+      "name": "Stonelore Rockseer",
+      "patron": "druid",
+      "type": "agent",
+      "contract": false,
+      "cost": 5,
+      "hp": 2,
+      "taunt": false,
+      "playText": "1 Power AND 1 Coin/Agent",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 1
+        },
+        {
+          "op": "passive",
+          "trigger": "agent_play",
+          "resource": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/stonelore-rockseer.png"
+    },
+    {
+      "id": "wispheart-totem",
+      "name": "Wispheart Totem",
+      "patron": "druid",
+      "type": "action",
+      "contract": false,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Coin",
+      "combo2Text": "2 Coin",
+      "combo3Text": "2 Coin",
+      "combo4Text": "3 Coin",
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo3": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo4": [
+        {
+          "op": "coin",
+          "n": 3
+        }
+      ],
+      "baseQty": 0,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/wispheart-totem.png"
+    },
+    {
+      "id": "wispcaller-totem",
+      "name": "Wispcaller Totem",
+      "patron": "druid",
+      "type": "action",
+      "contract": false,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Coin",
+      "combo2Text": "2 Coin",
+      "combo3Text": "2 Coin",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo3": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/wispcaller-totem.png"
+    },
+    {
+      "id": "deepwoods-ritual",
+      "name": "Deepwoods Ritual",
+      "patron": "druid",
+      "type": "action",
+      "contract": false,
+      "cost": 4,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Power",
+      "combo2Text": "Replace 1",
+      "combo3Text": "3 Prestige",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo2": [
+        {
+          "op": "replace",
+          "n": 1
+        }
+      ],
+      "combo3": [
+        {
+          "op": "prestige",
+          "n": 3
+        }
+      ],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/deepwoods-ritual.png"
+    },
+    {
+      "id": "firesong-haruspex",
+      "name": "Firesong Haruspex",
+      "patron": "druid",
+      "type": "agent",
+      "contract": false,
+      "cost": 5,
+      "hp": 2,
+      "taunt": false,
+      "playText": "1 Prestige AND 1 Coin AND 1 Prestige/AgentCooldown",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "prestige",
+          "n": 1
+        },
+        {
+          "op": "coin",
+          "n": 1
+        },
+        {
+          "op": "passive",
+          "trigger": "agent_cooldown",
+          "resource": "prestige",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/firesong-haruspex.png"
+    },
+    {
+      "id": "forest-wraith",
+      "name": "Forest Wraith",
+      "patron": "druid",
+      "type": "agent",
+      "contract": true,
+      "cost": 4,
+      "hp": 3,
+      "taunt": false,
+      "playText": "1 Power AND 1 Power/Cooldown",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 1
+        },
+        {
+          "op": "passive",
+          "trigger": "cooldown",
+          "resource": "power",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/forest-wraith.png"
+    },
+    {
+      "id": "the-chimera",
+      "name": "The Chimera",
+      "patron": "druid",
+      "type": "agent",
+      "contract": false,
+      "cost": 0,
+      "hp": 5,
+      "taunt": true,
+      "playText": "",
+      "combo2Text": "Replace 1",
+      "combo3Text": "2 Power",
+      "combo4Text": "3 Prestige",
+      "play": [],
+      "combo2": [
+        {
+          "op": "replace",
+          "n": 1
+        }
+      ],
+      "combo3": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo4": [
+        {
+          "op": "prestige",
+          "n": 3
+        }
+      ],
+      "baseQty": 0,
+      "upgradedQty": 0,
+      "upgraded": false,
+      "starter": false,
+      "token": false,
+      "art": "cards/the-chimera.png"
+    },
+    {
+      "id": "whispers-of-the-grove",
+      "name": "Whispers of the Grove",
+      "patron": "druid",
+      "type": "action",
+      "contract": true,
+      "cost": 2,
+      "hp": null,
+      "taunt": false,
+      "playText": "Replace 1",
+      "combo2Text": null,
+      "combo3Text": "2 Coin",
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "replace",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/whispers-of-the-grove.png"
+    },
+    {
+      "id": "gold",
+      "name": "Gold",
+      "patron": "treasury",
+      "type": "action",
+      "contract": false,
+      "cost": 0,
+      "hp": null,
+      "taunt": false,
+      "playText": "1 Coin",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 6,
+      "upgradedQty": 6,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/gold.png"
+    },
+    {
+      "id": "ambush",
+      "name": "Ambush",
+      "patron": "treasury",
+      "type": "action",
+      "contract": true,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "Knock Out 2",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "knockout",
+          "n": 2
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 1,
+      "upgradedQty": 1,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/ambush.png"
+    },
+    {
+      "id": "barterer",
+      "name": "Barterer",
+      "patron": "treasury",
+      "type": "action",
+      "contract": true,
+      "cost": 1,
+      "hp": null,
+      "taunt": false,
+      "playText": "Replace 1",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "replace",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 4,
+      "upgradedQty": 4,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/barterer.png"
+    },
+    {
+      "id": "black-sacrament",
+      "name": "Black Sacrament",
+      "patron": "treasury",
+      "type": "action",
+      "contract": true,
+      "cost": 2,
+      "hp": null,
+      "taunt": false,
+      "playText": "Knock Out 1",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "knockout",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/black-sacrament.png"
+    },
+    {
+      "id": "blackmail",
+      "name": "Blackmail",
+      "patron": "treasury",
+      "type": "action",
+      "contract": true,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Power",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 2
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/blackmail.png"
+    },
+    {
+      "id": "harvest-season",
+      "name": "Harvest Season",
+      "patron": "treasury",
+      "type": "action",
+      "contract": true,
+      "cost": 2,
+      "hp": null,
+      "taunt": false,
+      "playText": "Draw 1",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "draw",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/harvest-season.png"
+    },
+    {
+      "id": "imprisonment",
+      "name": "Imprisonment",
+      "patron": "treasury",
+      "type": "action",
+      "contract": true,
+      "cost": 5,
+      "hp": null,
+      "taunt": false,
+      "playText": "4 Power",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "power",
+          "n": 4
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 3,
+      "upgradedQty": 3,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/imprisonment.png"
+    },
+    {
+      "id": "ragpicker",
+      "name": "Ragpicker",
+      "patron": "treasury",
+      "type": "action",
+      "contract": true,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "Destroy 1",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "destroy",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/ragpicker.png"
+    },
+    {
+      "id": "tithe",
+      "name": "Tithe",
+      "patron": "treasury",
+      "type": "action",
+      "contract": true,
+      "cost": 3,
+      "hp": null,
+      "taunt": false,
+      "playText": "Patron 1",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "patron_extra",
+          "n": 1
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 2,
+      "upgradedQty": 2,
+      "upgraded": true,
+      "starter": false,
+      "token": false,
+      "art": "cards/tithe.png"
+    },
+    {
+      "id": "writ-of-coin",
+      "name": "Writ of Coin",
+      "patron": "treasury",
+      "type": "action",
+      "contract": false,
+      "cost": 0,
+      "hp": null,
+      "taunt": false,
+      "playText": "2 Coin",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [
+        {
+          "op": "coin",
+          "n": 2
+        }
+      ],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 0,
+      "upgraded": true,
+      "starter": false,
+      "token": true,
+      "curse": false,
+      "art": "cards/writ-of-coin.png"
+    },
+    {
+      "id": "bewilderment",
+      "name": "Bewilderment",
+      "patron": "rajhin",
+      "type": "action",
+      "contract": false,
+      "cost": 0,
+      "hp": null,
+      "taunt": false,
+      "playText": "",
+      "combo2Text": null,
+      "combo3Text": null,
+      "combo4Text": null,
+      "play": [],
+      "combo2": [],
+      "combo3": [],
+      "combo4": [],
+      "baseQty": 0,
+      "upgradedQty": 0,
+      "upgraded": true,
+      "starter": false,
+      "token": true,
+      "curse": true,
+      "art": "cards/bewilderment.png"
+    }
+  ],
+  "version": 1,
+  "source": "spicyeconomics.com/tribute"
+}
