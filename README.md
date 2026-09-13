@@ -2,30 +2,34 @@
 
 **Unofficial fan project.** Not affiliated with Bethesda Softworks, ZeniMax Online Studios, or The Elder Scrolls Online. Not for sale. No assets are redistributed for commercial use.
 
-A playable two-player Tales of Tribute table: **web preview** (play today in a browser) and a **SwiftUI iOS 17+ skeleton** that shares the same JSON rules data.
+A playable two-player Tales of Tribute table:
 
-## Play the web preview
+- **iOS 17+ (priority)** — SwiftUI landscape client that matches the live ESO board (wooden pendants, hourglass, fanned hand).
+- **Web preview** — static SPA (AI, daily gauntlet, shop, ranked, hotseat).
+
+## iOS (Xcode 15+, Mac)
+
+1. Open `ios/TalesOfTribute/TalesOfTribute.xcodeproj`
+2. Run on an iPhone / iPad simulator (iOS 17+). Orientation is **landscape only**.
+3. Local package `ios/TributeCore` holds the rules engine, AI 1–10, club profile, and daily road.
+4. Details and stubs: `ios/TalesOfTribute/README.md`
+
+This repo’s Linux CI / Cloud Agent environment **cannot** run the Simulator. Engine checks that *can* run here:
+
+```bash
+node scripts/test_ios_engine.mjs
+```
+
+On a Mac: `cd ios/TributeCore && swift test`
+
+## Web preview
 
 ```bash
 cd web
 python3 -m http.server 8080
 ```
 
-Open http://localhost:8080
-
-- **Sit at the Table** → pick two patrons (or “AI takes the rest”) → play vs a heuristic AI.
-- **Encyclopedia** → every card with UESP art, filter by patron.
-- Works at iPhone portrait (390×844), landscape (844×390), and desktop.
-
-Do **not** open `index.html` as a `file://` URL — fetch of `data/*.json` needs a local server.
-
-## Open the iOS project
-
-On a Mac with Xcode 15+:
-
-1. Open `ios/TalesOfTribute/TalesOfTribute.xcodeproj`
-2. Run on an iPhone simulator (iOS 17+).
-3. Shared card/patron JSON is in `TalesOfTribute/Resources/`. See `ios/TalesOfTribute/README.md`.
+Open http://localhost:8080 — do **not** open `index.html` as `file://`.
 
 ## Data
 
@@ -51,8 +55,10 @@ Card and patron portraits are from **UESP** (`ON-tribute-*` files) via the Media
 ## Layout
 
 ```
-data/     JSON + rules
-web/      static SPA (index.html, css/, js/, assets/, data/)
-ios/      SwiftUI project
-scripts/  data + art generators
+data/              JSON + rules
+web/               static SPA
+ios/TributeCore    Swift rules package + XCTest
+ios/TalesOfTribute SwiftUI app
+ios/preview        HTML board/map check (no Simulator)
+scripts/           data + art generators + Linux engine spec
 ```

@@ -1,64 +1,62 @@
 # Status
 
-**2026-09-13 (tap + patron cluster):** Tap plays/buys (including iOS click-only). Hold (≥520ms) lifts to read and never also plays. Draw piles stay sealed. Patron coins sit in a tight right-side cluster — rival pair on their side, Treasury middle, your pair on your side — with Favored / Neutral / Unfavored on the coin. Patron tap = Continue/Cancel call; hold = full favor text. Music beds: Celtic Impulse / Heroic Age / Five Armies / Dark Fog (Kevin MacLeod CC BY 3.0). Settings SFX: card table vs dramatic.
+**2026-09-13 (iOS-first authenticity):** The SwiftUI client is the priority deliverable. It follows the user’s ESO reference board (vertical wooden pendants, point toward the felt, hourglass to the right of that column, fanned hand) even when that disagrees with the web preview’s patron-coin cluster. The web SPA remains playable; its rail was **not** rewritten in this pass.
 
-Playable fan table rebuilt to feel like the real ESO Tales of Tribute board. Web preview is the priority client. `docs/` mirrors `web/` for GitHub Pages.
+**Unofficial fan project.** Not affiliated with Bethesda / ZeniMax / ESO. Not for sale.
 
 ## Counts
 
 - **164 cards** in `data/cards.json` (12 patron decks + Treasury + tokens).
-- **13 patrons** (Treasury + 12) — **Hermaeus Mora included** and always visible on the pick grid.
-- **164/164** cards have matching slug art in `web/assets/cards/<id>.png`.
-- **13/13** patron portraits in `web/assets/patrons/` (incl. `mora.png`).
+- **13 patrons** (Treasury + 12) — Hermaeus Mora included.
+- Art lives in `web/assets/` and is bundled into iOS via `ios/TalesOfTribute/TalesOfTribute/Resources/assets` → `web/assets`.
 
-## Board authenticity
+## iOS client (priority)
 
-- **Right rail (vertical):** opponent’s two patron coins (top) · Treasury (middle) · your two (bottom) · hourglass.
-- **Opponent strip:** fanned card-backs, draw/cooldown piles, agents + HUD.
-- **Center:** single-row 5-card Tavern + discard.
-- **You:** agents, played, fanned hand, piles + HUD + End Turn.
-- **Tap vs hold:** short tap = play/buy; hold = lift-to-read (never also plays).
-- **Patron confirm:** portrait + ability + green Continue / red Cancel.
-- **Hourglass:** 90s for Ranked / timed casual; OFF by default for vs AI.
-- **Look:** Cinzel + Crimson Pro, carved wood rim, gold inlay, felt center (skin-tinted), candle bloom.
+Playable end-to-end vs AI on iOS 17+ (landscape locked).
 
-## Modes (splash)
+| Feature | Notes |
+|---|---|
+| Board | Dark teal felt, wood rim, candle bloom. Opponent top / you bottom. Tavern 5 center. Draw bottom-left, cooldown bottom-right. Played-effects strip left. Coin / Prestige / Power hexes. |
+| Patrons | Far-right **vertical plaques**: silver medallion + wooden banner with **triangular point LEFT**. Blue/red favor triangles on the point. Treasury (chest) stays Neutral — no pointer. |
+| Hourglass | Right of the pendant column. Lime/yellow glow + “End Turn” when it is your turn. |
+| Hand | Bottom, overlapping arc, larger than board cards. Tap = play; hold = inspect. |
+| Patron tap | Detail overlay (Treasury-style) + Activate / Close. |
+| AI | Difficulty 1–10 (ported heuristic from `web/js/ai.js`). |
+| Unlocks | Starter four (Pelin, Crows, Hlaalu, Celarus). Others greyed with fragment / progress hints. |
+| Daily | Parchment Tamriel map; pins on real zones; **NY-date seeded path** (High Isle first, rest shuffled). Difficulty 1–10 per stop. Win gold + purse; streak raises rarity. **Fail locks the remaining NY day** (resets at America/New_York midnight). |
+| Shop | Gold buys table themes + card backs; equipped skin tints the felt. |
+| Collection | Encyclopedia lite of the JSON catalog. |
+| Menu | Fan-made · Unofficial disclaimer. |
 
-- **Play vs AI** — casual; difficulty slider 1–10
-- **Challenge the Provinces** — daily Road of Tamriel gauntlet (America/New_York midnight reset)
-- **Ranked** — stronger pace, 90s timer, tiers Unranked → Rubedite
-- **Play a Friend** — hotseat + PeerJS remote
-- **Club** — collection, store, cutpurses, achievements, daily wins
-- **Encyclopedia** — all cards including Mora
+### Engine corrections vs the web port
 
-## Audio
+`ios/TributeCore` starts from `web/js/engine.js` and applies official loop fixes (`data/rules.md`):
 
-- **Music beds (Kevin MacLeod, CC BY 3.0):** Celtic Impulse (tavern), Heroic Age (fight), Five Armies (boss/ranked), Dark Fog (danger). Toggle required.
-- **Unused fallbacks kept:** Dowland CC0, Tourdion public domain. Never ESO OST.
-- **Credits:** `web/assets/audio/CREDITS.txt`
-- **SFX:** quiet synthesized one-shots (play, buy, contract/violet, agent/gold-slam, patron, coin, combo, win) — not the old music.js oscillator bed.
+1. Both players start with **6 Gold + all four match-patron starters** (10-card decks).
+2. Second player gets **+1 Coin** on their first turn.
+3. Draw **up to 5** at start of turn (leftovers stay). The web still draws +5 each turn.
+4. **Contracts play immediately** when bought.
+5. **Bewilderment** must be played before any non-curse card.
+6. Patron sweep is checked after a call and at end of turn.
+7. Last chance: opponent must **strictly exceed** the 40-holder (equal → 40-holder wins).
 
-## Daily gauntlet
+Web layout/engine were left as-is so this ship would not regress the browser table.
 
-`profile.gauntlet` tracks `{ date, cleared, failed, failedStop }` keyed to `nyDateStr()` (America/New_York). Fail locks the day’s run until next NY midnight. Wins grant gold + purse; stops are scripted patron pairs difficulty 1→10.
+## Web (still ships)
 
-## Engine
+Modes, music, ranked, hotseat, PeerJS, club cosmetics — unchanged. Right rail remains the coin cluster documented in the previous status note.
 
-`GameEngine` confirmed: agents leave played into agent row; contract actions exile; contract agents exile on KO; taunt still blocks Power→Prestige.
+## Tests
 
-## Files touched this ship
+- Linux: `node scripts/test_ios_engine.mjs` (catalog, seeded path, rarity, web AI vs AI).
+- Mac: `cd ios/TributeCore && swift test` (setup, treasury, taunt, 40/80, curse, AI finish, gauntlet lock, shop).
 
-- `web/js/music.js` — Dowland file loop + SFX
-- `web/js/ai.js` — difficulty 1–10 scaling + visible pacing
-- `web/js/profile.js` — `aiDifficulty`, gauntlet helpers
-- `web/js/app.js` — lift gestures, fans, rail, confirm, gauntlet, VFX
-- `web/css/style.css` — felt table, tavern row, fans, diff dots, map
-- `web/index.html` — gauntlet screen, lift layer, patron confirm, fans
-- `web/assets/audio/*`, `web/assets/ui/tamriel-map.svg`
-- `docs/` — `cp -a web/. docs/`
+This Cloud VM has **no Xcode / Simulator / Swift**. The Xcode project is intended to build on a Mac.
 
 ## How to run
 
-`cd /workspace/tots/web && python3 -m http.server 8080`
+**Web:** `cd web && python3 -m http.server 8080`
 
-Pages: `docs/` (do not git push from this agent — parent pushes).
+**iOS:** Open `ios/TalesOfTribute/TalesOfTribute.xcodeproj` in Xcode 15+, run on iOS 17+.
+
+**Layout preview (browser, no Simulator):** `cd ios/preview && python3 -m http.server 8090` then open `/board.html` and `/map.html`.

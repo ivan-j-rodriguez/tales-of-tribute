@@ -12,3 +12,7 @@ web/assets/showcase/
 
 web/test/node_modules/
 _wip/
+ios/TributeCore/.build/
+ios/**/.swiftpm/
+*.xcuserstate
+xcuserdata/

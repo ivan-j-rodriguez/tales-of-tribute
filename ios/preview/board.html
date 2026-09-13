@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>iOS board preview — Tales of Tribute (fan)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Crimson+Pro:wght@400;600&display=swap');
+  html,body{margin:0;height:100%;background:#0a0704;color:#f0e6ce;font-family:'Crimson Pro',Georgia,serif;overflow:hidden}
+  .stage{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center}
+  .table{
+    width:min(1280px,100vw);height:min(720px,100vh);
+    background:
+      radial-gradient(ellipse at 30% 40%, rgba(255,200,90,.08), transparent 40%),
+      radial-gradient(ellipse at 80% 70%, rgba(255,180,60,.07), transparent 35%),
+      radial-gradient(ellipse at 50% 50%, #123230, #071412 70%);
+    border:14px solid #5a3a18;box-shadow:inset 0 0 0 2px #c9a24a, 0 20px 50px #000;
+    position:relative;overflow:hidden;border-radius:10px;
+  }
+  .opp{position:absolute;top:10px;left:16px;right:220px;height:78px;display:flex;align-items:center;gap:10px}
+  .fan-back{display:flex}
+  .fan-back .mini{width:34px;height:54px;margin-right:-16px;transform:rotate(-8deg)}
+  .fan-back .mini:nth-child(2){transform:rotate(-2deg)}
+  .fan-back .mini:nth-child(3){transform:rotate(4deg)}
+  .tavern{position:absolute;top:118px;left:70px;right:220px;display:flex;align-items:center;gap:10px}
+  .hand{
+    position:absolute;bottom:8px;left:90px;right:230px;height:168px;
+    display:flex;justify-content:center;align-items:flex-end;
+  }
+  .hand .card{margin:0 -28px;transform-origin:bottom center}
+  .hand .card:nth-child(1){transform:rotate(-12deg) translateY(14px)}
+  .hand .card:nth-child(2){transform:rotate(-6deg) translateY(6px)}
+  .hand .card:nth-child(3){transform:rotate(0deg)}
+  .hand .card:nth-child(4){transform:rotate(6deg) translateY(6px)}
+  .hand .card:nth-child(5){transform:rotate(12deg) translateY(14px)}
+  .card,.mini{
+    background:#e6d3a8;border:1px solid #c9a24a;clip-path:polygon(12% 0,88% 0,100% 8%,100% 92%,88% 100%,12% 100%,0 92%,0 8%);
+    box-shadow:0 4px 8px #0008;overflow:hidden;position:relative;
+  }
+  .card{width:92px;height:150px}
+  .card img,.mini img{width:100%;height:100%;object-fit:cover}
+  .back{background:linear-gradient(#1a1008,#2a1a0c);display:flex;align-items:center;justify-content:center;color:#d4af37;font-size:18px}
+  .pile{width:48px;text-align:center;font-size:11px;opacity:.8}
+  .pile .mini{width:36px;height:56px;margin:0 auto 2px}
+  .hud{position:absolute;bottom:178px;left:90px;display:flex;gap:14px;align-items:center}
+  .hex{width:46px;height:40px;background:#1a1208cc;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);
+    display:flex;align-items:center;justify-content:center;font-family:Cinzel,serif;font-weight:700}
+  .hex.coin{color:#ebc747;border:0}
+  .hex.pres{color:#f0b84a}
+  .hex.pow{color:#73d2f2}
+  .lbl{font-size:9px;text-align:center;opacity:.75;margin-top:2px}
+  .played{position:absolute;left:8px;top:100px;width:54px;display:flex;flex-direction:column;gap:4px}
+  .played .card{width:46px;height:74px}
+  .rail{position:absolute;right:78px;top:86px;display:flex;flex-direction:column;gap:8px}
+  .pendant{width:158px;height:40px;position:relative;filter:drop-shadow(0 2px 3px #0008)}
+  .wood{
+    position:absolute;inset:0;
+    background:linear-gradient(#7a5229,#523214 45%,#6a4520);
+    clip-path:polygon(0 50%, 16% 0, 92% 0, 100% 50%, 92% 100%, 16% 100%);
+    box-shadow:inset 0 0 0 1px #c9a24a88;
+  }
+  .medal{
+    position:absolute;right:4px;top:2px;width:36px;height:36px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, #d8d4c8, #6a665c);
+    border:1.2px solid #d2c8a0;overflow:hidden;
+  }
+  .medal img{width:100%;height:100%;object-fit:cover}
+  .pname{position:absolute;left:22px;right:42px;top:12px;font:700 9px Cinzel,serif;color:#eed9ad;letter-spacing:.04em}
+  .fav{position:absolute;left:2px;top:13px;width:0;height:0;border-style:solid;border-width:7px 11px 7px 0}
+  .fav.blue{border-color:transparent #3a82e8 transparent transparent}
+  .fav.red{border-color:transparent #d32d2d transparent transparent}
+  .glass{
+    position:absolute;right:14px;top:210px;width:56px;text-align:center;cursor:pointer;
+  }
+  .hg{
+    width:42px;height:68px;margin:0 auto;position:relative;
+    filter:drop-shadow(0 0 10px #d6e85a);
+  }
+  .hg svg{width:42px;height:68px}
+  .glass label{display:block;margin-top:4px;font:600 10px Cinzel,serif;color:#e8f08a}
+  .turn{position:absolute;left:10px;top:12px;font:600 12px Cinzel,serif;color:#d4af37}
+  .note{position:absolute;left:10px;bottom:6px;font-size:10px;opacity:.45}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="table">
+    <div class="turn">Your turn</div>
+    <div class="opp">
+      <div class="pile"><div class="mini back">✦</div>Draw</div>
+      <div class="fan-back">
+        <div class="mini back">✦</div><div class="mini back">✦</div><div class="mini back">✦</div><div class="mini back">✦</div>
+      </div>
+      <div class="pile"><div class="mini back">✦</div>Cooldown</div>
+    </div>
+    <div class="played">
+      <div class="card"><img src="../../web/assets/cards/gold.png" alt="Gold"/></div>
+    </div>
+    <div class="tavern">
+      <div class="pile"><div class="mini back">✦</div>Tavern</div>
+      <div class="card"><img src="../../web/assets/cards/reinforcements.png" alt="Reinforcements"/></div>
+      <div class="card"><img src="../../web/assets/cards/goods-shipment.png" alt="Goods"/></div>
+      <div class="card"><img src="../../web/assets/cards/peck.png" alt="Peck"/></div>
+      <div class="card"><img src="../../web/assets/cards/mainland-inquiries.png" alt="Mainland"/></div>
+      <div class="card"><img src="../../web/assets/cards/writ-of-coin.png" alt="Writ"/></div>
+      <div class="pile"><div class="mini back">✦</div>Discard</div>
+    </div>
+    <div class="hud">
+      <div class="pile"><div class="mini back">✦</div>Draw</div>
+      <div><div class="hex coin">3</div><div class="lbl">Coin</div></div>
+      <div><div class="hex pres">12</div><div class="lbl">Prestige</div></div>
+      <div><div class="hex pow">2</div><div class="lbl">Power</div></div>
+      <div class="pile"><div class="mini back">✦</div>Cooldown</div>
+    </div>
+    <div class="hand">
+      <div class="card"><img src="../../web/assets/cards/gold.png" alt="Gold"/></div>
+      <div class="card"><img src="../../web/assets/cards/fortify.png" alt="Fortify"/></div>
+      <div class="card"><img src="../../web/assets/cards/gold.png" alt="Gold"/></div>
+      <div class="card"><img src="../../web/assets/cards/goods-shipment.png" alt="Goods"/></div>
+      <div class="card"><img src="../../web/assets/cards/peck.png" alt="Peck"/></div>
+    </div>
+    <div class="rail">
+      <div class="pendant"><div class="wood"></div><div class="fav red"></div><div class="pname">CROWS</div><div class="medal"><img src="../../web/assets/patrons/crows.png" alt="Crows"/></div></div>
+      <div class="pendant"><div class="wood"></div><div class="pname">CELARUS</div><div class="medal"><img src="../../web/assets/patrons/celarus.png" alt="Celarus"/></div></div>
+      <div class="pendant"><div class="wood"></div><div class="pname">TREASURY</div><div class="medal"><img src="../../web/assets/patrons/treasury.png" alt="Treasury"/></div></div>
+      <div class="pendant"><div class="wood"></div><div class="fav blue"></div><div class="pname">PELIN</div><div class="medal"><img src="../../web/assets/patrons/pelin.png" alt="Pelin"/></div></div>
+      <div class="pendant"><div class="wood"></div><div class="pname">HLAALU</div><div class="medal"><img src="../../web/assets/patrons/hlaalu.png" alt="Hlaalu"/></div></div>
+    </div>
+    <div class="glass">
+      <div class="hg">
+        <svg viewBox="0 0 42 68">
+          <path d="M4 2 H38 L23.5 34 L38 66 H4 L18.5 34 Z" fill="#2a2010aa" stroke="#d2b85a" stroke-width="2"/>
+          <ellipse cx="21" cy="16" rx="8" ry="5" fill="#e8c85a"/>
+          <ellipse cx="21" cy="54" rx="9" ry="6" fill="#d4a83a"/>
+        </svg>
+      </div>
+      <label>End Turn</label>
+    </div>
+    <div class="note">Layout preview of the iOS client — landscape felt, left-pointing pendants, hourglass to the right of the column, fanned hand. Fan-made · unofficial.</div>
+  </div>
+</div>
+</body>
+</html>

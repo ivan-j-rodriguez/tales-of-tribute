@@ -8,27 +8,41 @@
 
 /* Begin PBXBuildFile section */
 		A100000000000001 /* TalesOfTributeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000001 /* TalesOfTributeApp.swift */; };
-		A100000000000002 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000002 /* Models.swift */; };
-		A100000000000003 /* GameEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000003 /* GameEngine.swift */; };
-		A100000000000004 /* AIPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000004 /* AIPlayer.swift */; };
+		A10000000000000B /* GameSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000B /* GameSession.swift */; };
+		A10000000000000C /* TableTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000C /* TableTheme.swift */; };
 		A100000000000005 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000005 /* RootView.swift */; };
+		A10000000000000D /* MenuViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000D /* MenuViews.swift */; };
+		A10000000000000E /* TamrielMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000E /* TamrielMapView.swift */; };
+		A10000000000000F /* MatchBoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000F /* MatchBoardView.swift */; };
+		A100000000000010 /* PatronRailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000010 /* PatronRailView.swift */; };
+		A100000000000011 /* CardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000011 /* CardViews.swift */; };
+		A100000000000012 /* OverlayViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000012 /* OverlayViews.swift */; };
 		A100000000000006 /* cards.json in Resources */ = {isa = PBXBuildFile; fileRef = B100000000000006 /* cards.json */; };
 		A100000000000007 /* patrons.json in Resources */ = {isa = PBXBuildFile; fileRef = B100000000000007 /* patrons.json */; };
 		A100000000000008 /* decks.json in Resources */ = {isa = PBXBuildFile; fileRef = B100000000000008 /* decks.json */; };
 		A100000000000009 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B100000000000009 /* Assets.xcassets */; };
+		A100000000000013 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = B100000000000013 /* assets */; };
+		A100000000000014 /* TributeCore in Frameworks */ = {isa = PBXBuildFile; productRef = P200000000000001 /* TributeCore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		B100000000000001 /* TalesOfTributeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TalesOfTributeApp.swift; sourceTree = "<group>"; };
-		B100000000000002 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
-		B100000000000003 /* GameEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameEngine.swift; sourceTree = "<group>"; };
-		B100000000000004 /* AIPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIPlayer.swift; sourceTree = "<group>"; };
 		B100000000000005 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		B100000000000006 /* cards.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = cards.json; sourceTree = "<group>"; };
 		B100000000000007 /* patrons.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = patrons.json; sourceTree = "<group>"; };
 		B100000000000008 /* decks.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = decks.json; sourceTree = "<group>"; };
 		B100000000000009 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B10000000000000A /* TalesOfTribute.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TalesOfTribute.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000000000000B /* GameSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSession.swift; sourceTree = "<group>"; };
+		B10000000000000C /* TableTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableTheme.swift; sourceTree = "<group>"; };
+		B10000000000000D /* MenuViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuViews.swift; sourceTree = "<group>"; };
+		B10000000000000E /* TamrielMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TamrielMapView.swift; sourceTree = "<group>"; };
+		B10000000000000F /* MatchBoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchBoardView.swift; sourceTree = "<group>"; };
+		B100000000000010 /* PatronRailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatronRailView.swift; sourceTree = "<group>"; };
+		B100000000000011 /* CardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardViews.swift; sourceTree = "<group>"; };
+		B100000000000012 /* OverlayViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayViews.swift; sourceTree = "<group>"; };
+		B100000000000013 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = assets; sourceTree = "<group>"; };
+		B100000000000015 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,6 +50,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A100000000000014 /* TributeCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -54,8 +69,9 @@
 			isa = PBXGroup;
 			children = (
 				B100000000000001 /* TalesOfTributeApp.swift */,
-				D100000000000004 /* Models */,
-				D100000000000005 /* Engine */,
+				B100000000000015 /* Info.plist */,
+				D100000000000008 /* Session */,
+				D100000000000009 /* Theme */,
 				D100000000000006 /* Views */,
 				D100000000000007 /* Resources */,
 				B100000000000009 /* Assets.xcassets */,
@@ -71,27 +87,13 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		D100000000000004 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				B100000000000002 /* Models.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
-		D100000000000005 /* Engine */ = {
-			isa = PBXGroup;
-			children = (
-				B100000000000003 /* GameEngine.swift */,
-				B100000000000004 /* AIPlayer.swift */,
-			);
-			path = Engine;
-			sourceTree = "<group>";
-		};
 		D100000000000006 /* Views */ = {
 			isa = PBXGroup;
 			children = (
 				B100000000000005 /* RootView.swift */,
+				D10000000000000A /* Menu */,
+				D10000000000000B /* Daily */,
+				D10000000000000C /* Match */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -102,8 +104,52 @@
 				B100000000000006 /* cards.json */,
 				B100000000000007 /* patrons.json */,
 				B100000000000008 /* decks.json */,
+				B100000000000013 /* assets */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		D100000000000008 /* Session */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000B /* GameSession.swift */,
+			);
+			path = Session;
+			sourceTree = "<group>";
+		};
+		D100000000000009 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000C /* TableTheme.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		D10000000000000A /* Menu */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000D /* MenuViews.swift */,
+			);
+			path = Menu;
+			sourceTree = "<group>";
+		};
+		D10000000000000B /* Daily */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000E /* TamrielMapView.swift */,
+			);
+			path = Daily;
+			sourceTree = "<group>";
+		};
+		D10000000000000C /* Match */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000F /* MatchBoardView.swift */,
+				B100000000000010 /* PatronRailView.swift */,
+				B100000000000011 /* CardViews.swift */,
+				B100000000000012 /* OverlayViews.swift */,
+			);
+			path = Match;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -122,6 +168,9 @@
 			dependencies = (
 			);
 			name = TalesOfTribute;
+			packageProductDependencies = (
+				P200000000000001 /* TributeCore */,
+			);
 			productName = TalesOfTribute;
 			productReference = B10000000000000A /* TalesOfTribute.app */;
 			productType = "com.apple.product-type.application";
@@ -145,6 +194,9 @@
 				Base,
 			);
 			mainGroup = D100000000000001;
+			packageReferences = (
+				P100000000000001 /* XCLocalSwiftPackageReference "../TributeCore" */,
+			);
 			productRefGroup = D100000000000003 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -163,6 +215,7 @@
 				A100000000000007 /* patrons.json in Resources */,
 				A100000000000008 /* decks.json in Resources */,
 				A100000000000009 /* Assets.xcassets in Resources */,
+				A100000000000013 /* assets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -174,10 +227,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				A100000000000001 /* TalesOfTributeApp.swift in Sources */,
-				A100000000000002 /* Models.swift in Sources */,
-				A100000000000003 /* GameEngine.swift in Sources */,
-				A100000000000004 /* AIPlayer.swift in Sources */,
+				A10000000000000B /* GameSession.swift in Sources */,
+				A10000000000000C /* TableTheme.swift in Sources */,
 				A100000000000005 /* RootView.swift in Sources */,
+				A10000000000000D /* MenuViews.swift in Sources */,
+				A10000000000000E /* TamrielMapView.swift in Sources */,
+				A10000000000000F /* MatchBoardView.swift in Sources */,
+				A100000000000010 /* PatronRailView.swift in Sources */,
+				A100000000000011 /* CardViews.swift in Sources */,
+				A100000000000012 /* OverlayViews.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -219,14 +277,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGNING_ALLOWED = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TalesOfTribute/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Tales of Tribute";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.fan.talesoftribute;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -244,12 +305,15 @@
 				CODE_SIGNING_ALLOWED = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TalesOfTribute/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Tales of Tribute";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.fan.talesoftribute;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -280,6 +344,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		P100000000000001 /* XCLocalSwiftPackageReference "../TributeCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../TributeCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		P200000000000001 /* TributeCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TributeCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = F000000000000001 /* Project object */;
 }

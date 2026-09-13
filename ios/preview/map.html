@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Daily Tamriel road preview</title>
+<style>
+  html,body{margin:0;height:100%;background:#c6bba3;font-family:Georgia,serif;color:#3a2610}
+  .wrap{padding:16px 20px;height:100%;box-sizing:border-box;display:flex;flex-direction:column}
+  h1{margin:0 0 4px;font-size:26px}
+  p{margin:0 0 10px;font-size:13px;opacity:.8}
+  .map{flex:1;position:relative;background:#e8d9b4 center/contain no-repeat}
+  .pin{position:absolute;width:10px;height:10px;border-radius:50%;border:1px solid #3a2610;transform:translate(-50%,-50%)}
+  .next{width:14px;height:14px;background:#b02a22}
+  .done{background:#2f6a3e}
+  .idle{background:#6a5840aa}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Challenge the Provinces</h1>
+  <p>Parchment Tamriel · pins on real zones · date-seeded path (High Isle first) · fail locks the remaining New York day.</p>
+  <div class="map" id="map"></div>
+</div>
+<script>
+const stops = [
+  {id:'highisle',x:8,y:60,cls:'next'},
+  {id:'glenumbra',x:16,y:32,cls:'idle'},
+  {id:'stormhaven',x:22,y:26,cls:'idle'},
+  {id:'alikr',x:20,y:38,cls:'idle'},
+  {id:'cyrodiil',x:52,y:36,cls:'idle'},
+  {id:'vvardenfell',x:74,y:20,cls:'idle'},
+  {id:'grahtwood',x:42,y:74,cls:'idle'},
+  {id:'summerset',x:14,y:80,cls:'idle'},
+  {id:'solstice',x:74,y:90,cls:'idle'},
+  {id:'eastmarch',x:58,y:20,cls:'idle'},
+];
+const map = document.getElementById('map');
+map.style.backgroundImage = "url('../../web/assets/ui/tamriel-map.jpg')";
+stops.forEach(s => {
+  const el = document.createElement('div');
+  el.className = 'pin ' + s.cls;
+  el.style.left = s.x + '%';
+  el.style.top = s.y + '%';
+  el.title = s.id;
+  map.appendChild(el);
+});
+</script>
+</body>
+</html>
