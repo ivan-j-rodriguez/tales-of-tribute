@@ -82,11 +82,8 @@ async function loadData() {
 function show(id) {
   document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
   $(id).classList.add('active');
-  requestAnimationFrame(() => syncRotateGate());
+  requestAnimationFrame(() => syncBoardLayout());
 }
-
-const BOARD_W = 1180;
-const BOARD_H = 640;
 
 function isPortrait() {
   const vv = window.visualViewport;
@@ -95,30 +92,21 @@ function isPortrait() {
   return h > w;
 }
 
-function syncRotateGate() {
+function syncBoardLayout() {
   const match = $('#match');
   const matchOn = !!match?.classList.contains('active');
   const portrait = isPortrait();
-  const need = matchOn && portrait;
-  document.body.classList.toggle('need-landscape', need);
-  const gate = $('#rotate-gate');
-  if (gate) gate.hidden = !need;
-  if (matchOn && !portrait) fitMatchBoard();
-}
-
-function fitMatchBoard() {
-  const match = $('#match');
-  const vp = match?.querySelector('.board-viewport');
+  document.body.classList.toggle('is-portrait', matchOn && portrait);
+  document.body.classList.toggle('is-landscape', matchOn && !portrait);
+  document.body.classList.remove('need-landscape');
+  const tip = $('#landscape-tip');
+  if (tip) tip.hidden = !(matchOn && portrait);
   const board = match?.querySelector('.board');
-  if (!vp || !board || !match.classList.contains('active')) return;
-  if (isPortrait()) return;
-  const w = vp.clientWidth;
-  const h = vp.clientHeight;
-  if (!w || !h) return;
-  const scale = Math.min(w / BOARD_W, h / BOARD_H);
-  board.style.width = BOARD_W + 'px';
-  board.style.height = BOARD_H + 'px';
-  board.style.transform = `scale(${scale})`;
+  if (!board || !matchOn) return;
+  board.style.width = '100%';
+  board.style.height = '100%';
+  board.style.maxWidth = 'none';
+  board.style.transform = 'none';
 }
 
 let lastToast = '';
@@ -195,7 +183,7 @@ function onSplashEnter() {
   }
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 27';
+  if (stamp) stamp.textContent = 'build 28';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -1030,7 +1018,7 @@ function renderMatch() {
   else if (isRankedMatch || isGauntletMatch) setMusicCue('boss');
   else if (s.turn >= 3) setMusicCue('fight');
   else setMusicCue('tavern');
-  syncRotateGate();
+  syncBoardLayout();
 }
 
 function layoutFan(container, rival = false) {
@@ -2252,9 +2240,9 @@ function bind() {
     syncSfxToggles();
     if (isSfxOn()) playSfx('tap');
   });
-  window.addEventListener('resize', syncRotateGate);
-  window.addEventListener('orientationchange', () => setTimeout(syncRotateGate, 160));
-  window.visualViewport?.addEventListener('resize', syncRotateGate);
+  window.addEventListener('resize', syncBoardLayout);
+  window.addEventListener('orientationchange', () => setTimeout(syncBoardLayout, 160));
+  window.visualViewport?.addEventListener('resize', syncBoardLayout);
   $('#btn-hand-done').onclick = () => {
     $('#hand-device-overlay').classList.remove('show');
     renderMatch();
@@ -2398,7 +2386,13 @@ function installTestHook() {
       }));
     },
     liftOpen: () => liftActive,
-    rotateGate: () => !$('#rotate-gate')?.hidden,
+    rotateGate: () => false,
+    portraitTip: () => !$('#landscape-tip')?.hidden,
+    boardFill() {
+      const b = document.querySelector('#match .board')?.getBoundingClientRect();
+      const m = document.querySelector('#match')?.getBoundingClientRect();
+      return { bw: Math.round(b?.width || 0), bh: Math.round(b?.height || 0), mw: Math.round(m?.width || 0), mh: Math.round(m?.height || 0) };
+    },
   };
 }
 

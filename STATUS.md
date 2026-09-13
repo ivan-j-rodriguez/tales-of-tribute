@@ -1,13 +1,11 @@
 # Status
 
-**2026-09-13 (web phone fix, build 27):** iPhone Pages shots showed a crushed portrait stack, tap-to-inspect zoom, a table that jumped on the first play, brown pile stubs, and a red End Turn bar over the hand.
+**2026-09-13 (web phone fix, build 28):** Build 27 letterboxed landscape (1180×640 card with dark side bars) and blocked portrait behind a rotate-gate.
 
-- **Portrait:** rotate-to-landscape gate. The match table is hidden until the phone is sideways.
-- **Landscape:** 1180×640 canvas scale-to-fits `100dvw × 100dvh`. Zones are **absolutely locked** so playing a card cannot reflow tavern / agents / hand (verified 0px shift).
-- **Tap vs hold:** pointer-only. Short tap plays; hold ≥500ms inspects; hold never also plays.
-- **Piles:** stacked card-back art + count badges. Tavern deck is labeled Deck, not “Tavern” under the pile.
-- **Tavern** sits in a fixed center band. Agent row is a dedicated band between tokens and hand.
-- End Turn is the glowing hourglass. Playable glow, SFX+mute, tokens, and left-pointing pendants stay.
+- **Landscape:** board is `100%` of the Safari viewport (`100dvw × 100dvh`, safe-area insets). Fluid CSS grid — no fixed canvas, no scale-to-fit gutters.
+- **Vertical bands:** opponent hand/agents → tokens → tavern dead-center → tokens → player agents → hand. Agent dashed slots stay in their own rows.
+- **Portrait:** playable again (compact full table: tavern, hand, piles, patrons, hourglass). Gentle “Landscape plays better” tip only — never a hard block.
+- Piles stay as card-back stacks. Hourglass End Turn, SFX toggle, tokens, and left-pointing pendants stay.
 
 **Unofficial fan project.** Not affiliated with Bethesda / ZeniMax / ESO. Not for sale.
 
@@ -19,11 +17,11 @@
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=25`.
+`docs/` is a copy of `web/`. Cache-bust `?v=28`.
 
 | Fix | Notes |
 |---|---|
-| Landscape fit | Design canvas 1180×640, JS `fitMatchBoard()` scales into the viewport. Tested ~844×390 and common phone landscape sizes. |
+| Landscape fit | Full-bleed fluid grid (`width/height: 100%`). No 1180×640 letterbox. |
 | Felt | Dark teal + knotwork + candle bloom (not the flat green `#24705c`). |
 | Hourglass | Right of the patron column. Glows when you can end. Replaces the flat brown End Turn bar. |
 | Card glow | Cyan/gold rim on affordable tavern + legal hand cards. On-card combo 2/3/4 as suits stack. No fake combo bar. |

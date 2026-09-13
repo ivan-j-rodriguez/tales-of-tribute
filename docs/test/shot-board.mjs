@@ -54,6 +54,8 @@ const before = await land.evaluate(() => ({
   zones: window.__totTest.zones(),
   lift: window.__totTest.liftOpen(),
   gate: window.__totTest.rotateGate(),
+  fill: window.__totTest.boardFill(),
+  tip: window.__totTest.portraitTip(),
 }));
 await shot('phone-landscape-844x390', land);
 await land.evaluate(() => window.__totTest.tapCard('#hand-zone .card[data-id="gold"]'));
@@ -82,14 +84,32 @@ console.log('before', JSON.stringify(before, null, 2));
 console.log('afterTap', JSON.stringify(afterTap));
 console.log('after', JSON.stringify(after, null, 2));
 console.log('shift', JSON.stringify(shift));
+const fill = before.fill || {};
+if ((fill.bw || 0) < (fill.mw || 999) * 0.96 || (fill.bh || 0) < (fill.mh || 999) * 0.96) {
+  console.error('FAIL landscape not full-bleed', fill);
+  process.exitCode = 1;
+}
 await land.close();
 
 const portShot = await browser.newPage();
 await portShot.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 await ready(portShot);
-const gate = await portShot.evaluate(() => window.__totTest.rotateGate());
-await shot('phone-portrait-rotate-gate', portShot);
-console.log('portraitGate', gate);
+const portrait = await portShot.evaluate(() => ({
+  gate: window.__totTest.rotateGate(),
+  tip: window.__totTest.portraitTip(),
+  fill: window.__totTest.boardFill(),
+  zones: window.__totTest.zones(),
+}));
+await shot('phone-portrait-playable', portShot);
+console.log('portrait', JSON.stringify(portrait));
+if (portrait.gate || !portrait.tip || (portrait.fill?.bh || 0) < 400) {
+  console.error('FAIL portrait not playable', portrait);
+  process.exitCode = 1;
+}
+if (!portrait.zones?.['#tavern-zone']?.h || !portrait.zones?.['#hand-zone']?.h) {
+  console.error('FAIL portrait missing table zones', portrait.zones);
+  process.exitCode = 1;
+}
 await portShot.close();
 
 const small = await browser.newPage();

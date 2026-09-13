@@ -1,9 +1,7 @@
-/* Build 25 — phone landscape scale-to-fit + ESO table authenticity.
+/* Build 28 — full-bleed fluid table (landscape + portrait).
    Loaded after style.css so these rules win the cascade. */
 
 :root {
-  --board-w: 1180px;
-  --board-h: 640px;
   --eso-felt: #0d2a28;
   --eso-felt-deep: #061614;
   --eso-gold: #d4af37;
@@ -14,14 +12,17 @@
   display: flex !important;
   flex-direction: column !important;
   overflow: hidden !important;
+  position: relative;
   width: 100dvw;
   height: 100dvh;
+  max-width: 100dvw;
+  max-height: 100dvh;
   touch-action: manipulation;
   padding:
-    max(4px, env(safe-area-inset-top, 0px))
-    max(6px, env(safe-area-inset-right, 0px))
-    max(4px, env(safe-area-inset-bottom, 0px))
-    max(6px, env(safe-area-inset-left, 0px)) !important;
+    env(safe-area-inset-top, 0px)
+    env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px)
+    env(safe-area-inset-left, 0px) !important;
   --felt: var(--eso-felt) !important;
   --felt-deep: var(--eso-felt-deep) !important;
   background:
@@ -35,70 +36,49 @@
   --felt-deep: var(--eso-felt-deep) !important;
 }
 
-.rotate-gate {
-  display: none;
+.landscape-tip {
   position: absolute;
-  inset: 0;
-  z-index: 40;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  background:
-    radial-gradient(ellipse at 50% 30%, rgba(255, 220, 140, 0.12), transparent 50%),
-    #0c1c1a;
-}
-body.need-landscape .rotate-gate {
-  display: flex !important;
-}
-body.need-landscape #match .board-viewport {
-  visibility: hidden;
+  top: max(6px, env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
   pointer-events: none;
-}
-.rotate-card {
-  max-width: 22rem;
-  text-align: center;
-  color: #f3ead2;
-  border: 1px solid rgba(212, 175, 55, 0.45);
-  background: linear-gradient(180deg, #2a2214, #14100c);
-  padding: 1.4rem 1.2rem;
-  box-shadow: 0 12px 28px #000a;
-}
-.rotate-card h2 {
   font-family: 'Cinzel', serif;
-  font-size: 1.25rem;
-  color: #f0d060;
-  margin: 0.3rem 0 0.5rem;
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f0d78a;
+  background: rgba(10, 18, 16, 0.72);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  padding: 0.24rem 0.68rem;
+  border-radius: 999px;
+  box-shadow: 0 4px 14px #0008;
 }
-.rotate-card p { margin: 0; color: #d8cba0; line-height: 1.4; }
-.rotate-icon { font-size: 2.2rem; color: #e8c547; }
 
 #match .board-viewport {
   flex: 1 1 auto;
   width: 100%;
   height: 100%;
+  min-width: 0;
   min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
   position: relative;
   touch-action: manipulation;
 }
 
 #match .board {
-  width: var(--board-w);
-  height: var(--board-h);
-  flex: 0 0 auto;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  flex: 1 1 auto;
   display: grid !important;
-  grid-template-columns: 72px minmax(0, 1fr) 176px !important;
+  grid-template-columns: minmax(48px, 6.5%) minmax(0, 1fr) minmax(150px, 20%) !important;
   grid-template-rows: 1fr !important;
-  transform-origin: center center;
+  transform: none !important;
   overflow: hidden !important;
-  border: 2px solid rgba(212, 175, 55, 0.38);
-  box-shadow:
-    inset 0 0 0 10px #2a1c10,
-    inset 0 0 0 12px rgba(212, 175, 55, 0.28),
-    0 10px 28px #000a;
+  border: none;
+  box-shadow: none;
   background:
     radial-gradient(ellipse at 18% 12%, rgba(255, 220, 150, 0.07), transparent 28%),
     radial-gradient(ellipse at 82% 88%, rgba(255, 220, 150, 0.05), transparent 26%),
@@ -124,7 +104,8 @@ body.need-landscape #match .board-viewport {
 
 /* ——— Left played-effects strip ——— */
 #match .events-rail {
-  width: 72px !important;
+  width: auto !important;
+  min-width: 0 !important;
   padding: 8px 4px !important;
   background: linear-gradient(180deg, rgba(8, 12, 10, 0.55), rgba(8, 12, 10, 0.28)) !important;
   border-right: 1px solid rgba(212, 175, 55, 0.22);
@@ -141,25 +122,39 @@ body.need-landscape #match .board-viewport {
 }
 #match #events-combo { display: none !important; }
 
-/* Locked absolute zones — playing a card cannot reflow the table */
+/* Fluid felt: opponent top → tavern dead-center → you bottom */
 #match .felt-table {
-  display: block !important;
+  display: grid !important;
   position: relative !important;
   width: 100% !important;
   height: 100% !important;
+  min-width: 0 !important;
   min-height: 0 !important;
-  padding: 0 !important;
+  max-height: 100% !important;
+  padding: 4px 6px 6px !important;
   margin: 0 !important;
-  gap: 0 !important;
+  gap: 2px 6px !important;
   overflow: hidden !important;
   background: transparent !important;
-  grid-template-columns: none !important;
-  grid-template-rows: none !important;
-  grid-template-areas: none !important;
-}
-
-#match .felt-table > * {
-  grid-area: auto !important;
+  align-items: stretch !important;
+  justify-items: stretch !important;
+  grid-template-columns: minmax(52px, 9%) minmax(0, 1fr) minmax(52px, 9%) !important;
+  grid-template-rows:
+    minmax(44px, 0.7fr)
+    minmax(48px, 0.82fr)
+    minmax(24px, 0.36fr)
+    minmax(96px, 1.58fr)
+    minmax(24px, 0.36fr)
+    minmax(48px, 0.82fr)
+    minmax(72px, 1.12fr) !important;
+  grid-template-areas:
+    "opp-draw opp-hand   opp-cd"
+    ".        opp-agents ."
+    ".        opp-res    ."
+    "tavern-d tavern     tavern-x"
+    ".        you-res    ."
+    ".        you-agents ."
+    "you-draw you-hand   you-cd" !important;
 }
 
 #match .felt-hud-opp,
@@ -168,46 +163,79 @@ body.need-landscape #match .board-viewport {
 #match .sr-pile { display: none !important; }
 
 #match .felt-opp-hand {
-  position: absolute !important;
-  left: 86px; right: 86px; top: 8px; height: 60px;
+  grid-area: opp-hand !important;
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
   overflow: hidden !important;
 }
 #match .felt-opp-agents {
-  position: absolute !important;
-  left: 86px; right: 86px; top: 70px; height: 52px;
+  grid-area: opp-agents !important;
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
   overflow: hidden !important;
 }
 #match #opp-res {
-  position: absolute !important;
-  left: 86px; right: 86px; top: 124px; height: 36px;
+  grid-area: opp-res !important;
+  grid-row: opp-res !important;
+  grid-column: opp-res !important;
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: auto !important;
 }
 #match .felt-tavern {
-  position: absolute !important;
-  left: 86px; right: 86px; top: 164px; height: 148px;
+  grid-area: tavern !important;
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
   display: flex !important;
   flex-direction: column !important;
-  justify-content: flex-start !important;
+  justify-content: center !important;
   overflow: hidden !important;
 }
 #match #you-res {
-  position: absolute !important;
-  left: 86px; right: 86px; top: 316px; height: 36px;
+  grid-area: you-res !important;
+  grid-row: you-res !important;
+  grid-column: you-res !important;
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: auto !important;
 }
 #match .felt-you-agents {
-  position: absolute !important;
-  left: 86px; right: 86px; top: 356px; height: 70px;
+  grid-area: you-agents !important;
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
   overflow: hidden !important;
 }
 #match .felt-you-hand {
-  position: absolute !important;
-  left: 72px; right: 72px; top: 430px; height: 150px;
+  grid-area: you-hand !important;
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
   overflow: hidden !important;
 }
 #match .felt-hud-you {
-  position: absolute !important;
-  right: 6px; bottom: 6px;
+  grid-area: you-hand !important;
+  position: relative !important;
+  justify-self: end !important;
+  align-self: end !important;
   width: auto !important;
   z-index: 12;
+  pointer-events: auto;
 }
 
 #match #pile-opp-draw,
@@ -216,19 +244,21 @@ body.need-landscape #match .board-viewport {
 #match #pile-tavern-discard,
 #match #pile-you-draw,
 #match #pile-you-cd {
-  position: absolute !important;
+  position: relative !important;
   top: auto !important;
   left: auto !important;
   right: auto !important;
   bottom: auto !important;
   margin: 0 !important;
+  align-self: center !important;
+  justify-self: center !important;
 }
-#match #pile-opp-draw { left: 8px !important; top: 10px !important; }
-#match #pile-opp-cd { right: 8px !important; top: 10px !important; }
-#match #pile-tavern-draw { left: 8px !important; top: 188px !important; }
-#match #pile-tavern-discard { right: 8px !important; top: 188px !important; }
-#match #pile-you-draw { left: 8px !important; top: 448px !important; }
-#match #pile-you-cd { right: 8px !important; top: 448px !important; }
+#match #pile-opp-draw { grid-area: opp-draw !important; }
+#match #pile-opp-cd { grid-area: opp-cd !important; }
+#match #pile-tavern-draw { grid-area: tavern-d !important; }
+#match #pile-tavern-discard { grid-area: tavern-x !important; }
+#match #pile-you-draw { grid-area: you-draw !important; }
+#match #pile-you-cd { grid-area: you-cd !important; }
 
 /* Stacked card-back piles */
 #match .hex-pile,
@@ -359,7 +389,7 @@ body.need-landscape #match .board-viewport {
 }
 #match #opp-res .eso-tok { transform: scale(0.9); opacity: 0.94; }
 
-/* Tavern — five cards, never crop the table around them */
+/* Tavern — five cards, fluid to the center band */
 #match .felt-tavern { min-height: 0 !important; }
 #match .tavern-band {
   flex: 1;
@@ -367,28 +397,29 @@ body.need-landscape #match .board-viewport {
   align-items: center;
   justify-content: center;
   min-height: 0;
+  width: 100%;
 }
 #match .tavern-zone {
   width: 100% !important;
-  height: 128px !important;
-  min-height: 128px !important;
-  max-height: 128px !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
   display: flex !important;
   flex-wrap: nowrap !important;
   justify-content: center !important;
   align-items: center !important;
-  gap: 0.4rem !important;
+  gap: 0.35rem !important;
   overflow: hidden !important;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(212, 175, 55, 0.22);
   border-radius: 10px;
-  padding: 0.2rem 0.3rem !important;
+  padding: 0.15rem 0.25rem !important;
 }
 #match .tavern-zone .card {
-  width: 78px !important;
-  height: 118px !important;
-  flex: 0 0 78px !important;
-  max-width: 78px !important;
+  width: clamp(52px, 8.6vw, 88px) !important;
+  height: calc(clamp(52px, 8.6vw, 88px) * 1.52) !important;
+  flex: 0 0 auto !important;
+  max-width: none !important;
   transform: none !important;
 }
 #match .turn-chip {
@@ -408,7 +439,8 @@ body.need-landscape #match .board-viewport {
   display: flex !important;
   justify-content: center;
   align-items: flex-end;
-  height: 148px !important;
+  height: 100% !important;
+  min-height: 0 !important;
   width: 100%;
   position: relative;
 }
@@ -418,9 +450,9 @@ body.need-landscape #match .board-viewport {
   left: auto !important;
   top: auto !important;
   bottom: auto !important;
-  width: 84px !important;
-  height: 128px !important;
-  margin: 0 -14px;
+  width: clamp(56px, 9vw, 90px) !important;
+  height: calc(clamp(56px, 9vw, 90px) * 1.52) !important;
+  margin: 0 -12px;
   transform: none !important;
 }
 
@@ -432,8 +464,8 @@ body.need-landscape #match .board-viewport {
   gap: 8px;
 }
 #match .agent-slot.empty {
-  width: 48px !important;
-  height: 60px !important;
+  width: clamp(36px, 5.2vw, 52px) !important;
+  height: clamp(46px, 7.6vw, 68px) !important;
   border: 1px dashed rgba(212, 175, 55, 0.5);
   border-radius: 6px;
   display: flex;
@@ -448,23 +480,27 @@ body.need-landscape #match .board-viewport {
   color: #c8b888;
 }
 #match .agent-slot.filled .card {
-  width: 48px !important;
-  height: 64px !important;
+  width: clamp(36px, 5.2vw, 52px) !important;
+  height: clamp(50px, 7.8vw, 72px) !important;
 }
 
 /* Legal-card glow — cyan/gold rim (filter:none on buttons is overridden here) */
 #match .felt-opp-hand {
   position: relative;
-  min-height: 62px !important;
-  overflow: visible !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
 }
 #match .rival-fan {
-  height: 62px !important;
+  height: 100% !important;
+  min-height: 0 !important;
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 #match .rival-fan .card {
-  width: 44px !important;
-  height: 58px !important;
+  width: clamp(32px, 4.6vw, 48px) !important;
+  height: clamp(42px, 6.2vw, 62px) !important;
 }
 
 #match button.card.playable,
@@ -508,9 +544,10 @@ body.need-landscape #match .board-viewport {
 
 /* Right rail: wooden pendants tip LEFT + glowing hourglass End Turn */
 #match .patron-rail {
-  width: 176px !important;
+  width: auto !important;
+  min-width: 0 !important;
   display: grid !important;
-  grid-template-columns: 1fr 72px !important;
+  grid-template-columns: minmax(0, 1fr) minmax(56px, 72px) !important;
   grid-template-rows: 1fr !important;
   align-items: stretch !important;
   padding: 8px 6px 8px 2px !important;
@@ -719,4 +756,77 @@ body.need-landscape #match .board-viewport {
 #match #btn-end {
   background: transparent !important;
   border: none !important;
+}
+
+/* Portrait — compact but complete table, never a rotate-gate */
+body.is-portrait #match .board {
+  grid-template-columns: minmax(36px, 10%) minmax(0, 1fr) minmax(78px, 24%) !important;
+}
+body.is-portrait #match .felt-table {
+  padding: 28px 4px 4px !important;
+  gap: 2px 4px !important;
+  grid-template-columns: minmax(44px, 13%) minmax(0, 1fr) minmax(44px, 13%) !important;
+  grid-template-rows:
+    minmax(40px, 0.68fr)
+    minmax(44px, 0.78fr)
+    minmax(22px, 0.32fr)
+    minmax(88px, 1.42fr)
+    minmax(22px, 0.32fr)
+    minmax(44px, 0.78fr)
+    minmax(84px, 1.18fr) !important;
+}
+body.is-portrait #match .tavern-zone .card {
+  width: clamp(46px, 15vw, 70px) !important;
+  height: calc(clamp(46px, 15vw, 70px) * 1.52) !important;
+}
+body.is-portrait #match #hand-zone .card,
+body.is-portrait #match .you-fan .card {
+  width: clamp(50px, 16vw, 74px) !important;
+  height: calc(clamp(50px, 16vw, 74px) * 1.52) !important;
+  margin: 0 -10px;
+}
+body.is-portrait #match .rival-fan .card {
+  width: clamp(30px, 10vw, 42px) !important;
+  height: clamp(40px, 13vw, 56px) !important;
+}
+body.is-portrait #match .agent-slot.empty,
+body.is-portrait #match .agent-slot.filled .card {
+  width: clamp(32px, 9vw, 44px) !important;
+  height: clamp(42px, 12vw, 58px) !important;
+}
+body.is-portrait #match .patron-rail {
+  grid-template-columns: 1fr !important;
+  grid-template-rows: 1fr auto !important;
+  padding: 6px 3px 6px 2px !important;
+}
+body.is-portrait #match .rail-patrons {
+  grid-column: 1;
+  grid-row: 1;
+}
+body.is-portrait #match .rail-glass {
+  grid-column: 1;
+  grid-row: 2;
+}
+body.is-portrait #match .patron-coin,
+body.is-portrait #match .patron-coin .wood-pendant,
+body.is-portrait #match .patron-coin .token-dial {
+  width: 72px !important;
+  height: 36px !important;
+}
+body.is-portrait #match .eso-hourglass-end { width: 56px; padding: 4px 0 6px !important; }
+body.is-portrait #match .eso-hourglass-end .hg-svg {
+  width: 40px !important;
+  height: 66px !important;
+}
+body.is-portrait #match .pile-stack {
+  width: 38px;
+  height: 54px;
+}
+
+@media (orientation: landscape) {
+  #match .board {
+    width: 100% !important;
+    height: 100% !important;
+    transform: none !important;
+  }
 }
