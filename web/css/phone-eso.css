@@ -58,8 +58,8 @@
     inset 0 0 0 12px rgba(212, 175, 55, 0.28),
     0 10px 28px #000a;
   background:
-    repeating-linear-gradient(0deg, transparent, transparent 22px, rgba(212, 175, 55, 0.035) 22px, rgba(212, 175, 55, 0.035) 23px),
-    repeating-linear-gradient(90deg, transparent, transparent 22px, rgba(212, 175, 55, 0.028) 22px, rgba(212, 175, 55, 0.028) 23px),
+    radial-gradient(ellipse at 18% 12%, rgba(255, 220, 150, 0.07), transparent 28%),
+    radial-gradient(ellipse at 82% 88%, rgba(255, 220, 150, 0.05), transparent 26%),
     radial-gradient(ellipse at 50% 46%, #18403c 0%, var(--eso-felt) 58%, var(--eso-felt-deep) 100%);
 }
 
@@ -203,14 +203,14 @@
 }
 #match .hex-pile .pile-art,
 #match .pile-btn .pile-art {
-  width: 46px !important;
-  height: 68px !important;
+  width: 50px !important;
+  height: 74px !important;
   clip-path: polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0 50%);
-  border: 1px solid rgba(212, 175, 55, 0.55) !important;
+  border: 1px solid rgba(212, 175, 55, 0.7) !important;
   box-shadow: 0 3px 8px #0008, inset 0 0 0 1px #0006 !important;
   background:
-    linear-gradient(135deg, rgba(212, 175, 55, 0.28), transparent 46%),
-    repeating-linear-gradient(45deg, #3a2414, #3a2414 5px, #24160c 5px, #24160c 7px) !important;
+    radial-gradient(circle at 50% 42%, rgba(212, 175, 55, 0.35), transparent 46%),
+    linear-gradient(160deg, #6a4220, #2a160c) !important;
 }
 #match .hex-pile .pile-art.card-back-face {
   background:
@@ -336,11 +336,25 @@
 }
 
 /* Legal-card glow — cyan/gold rim (filter:none on buttons is overridden here) */
+#match .felt-opp-hand {
+  position: relative;
+  min-height: 62px !important;
+  overflow: visible !important;
+}
+#match .rival-fan {
+  height: 62px !important;
+  position: relative;
+}
+#match .rival-fan .card {
+  width: 44px !important;
+  height: 58px !important;
+}
+
 #match button.card.playable,
 #match button.card.affordable,
 #match .card.playable,
 #match .card.affordable {
-  filter: drop-shadow(0 0 6px rgba(127, 232, 255, 1)) drop-shadow(0 0 14px rgba(212, 175, 55, 0.75)) !important;
+  filter: drop-shadow(0 0 8px rgba(127, 232, 255, 1)) drop-shadow(0 0 18px rgba(212, 175, 55, 0.9)) !important;
 }
 #match button.card.playable::after,
 #match button.card.affordable::after,
@@ -396,39 +410,79 @@
   justify-content: space-evenly;
   align-items: stretch;
   gap: 4px;
+  height: 100%;
 }
-#match .rail-group { gap: 6px !important; align-items: stretch !important; }
+#match .rail-group { gap: 8px !important; align-items: stretch !important; }
 #match .patron-coin {
-  width: 96px !important;
-  height: 52px !important;
+  width: 108px !important;
+  height: 46px !important;
   position: relative;
   overflow: visible !important;
 }
+#match .patron-coin .wood-pendant,
 #match .patron-coin .token-dial {
-  width: 96px !important;
-  height: 52px !important;
+  display: flex !important;
+  align-items: center;
+  width: 108px !important;
+  height: 46px !important;
   position: relative;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
 }
-#match .patron-coin .token-frame {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 2px 3px #000a);
+#match .patron-coin .wood-tip {
+  width: 16px;
+  height: 30px;
+  flex: 0 0 16px;
+  background: linear-gradient(180deg, #d8b06a, #8a5828 55%, #4a2c10);
+  clip-path: polygon(100% 0, 0 50%, 100% 100%);
+  box-shadow: -1px 1px 2px #0008;
 }
-#match .patron-coin .token-point { display: none !important; }
+#match .patron-coin .wood-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 38px;
+  flex: 1;
+  padding: 0 5px 0 6px;
+  background:
+    linear-gradient(180deg, rgba(255, 230, 160, 0.28), transparent 40%),
+    linear-gradient(180deg, #c4924a, #7a4a1c 58%, #3e240c);
+  border: 1px solid #e6c878;
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+  box-shadow: 0 2px 4px #0007, inset 0 1px 0 #fff4;
+}
+#match .patron-coin .wood-name {
+  flex: 1;
+  min-width: 0;
+  font-family: 'Cinzel', serif;
+  font-size: 0.52rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #f3e6b8;
+  text-shadow: 0 1px 2px #000a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#match .patron-coin .token-frame,
+#match .patron-coin .token-point,
+#match .patron-coin .plabel { display: none !important; }
 #match .patron-coin .coin-ring {
-  position: absolute !important;
+  position: relative !important;
   left: auto !important;
-  right: 6px !important;
-  bottom: 50% !important;
-  transform: translateY(50%) !important;
-  width: 34px !important;
-  height: 34px !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  width: 30px !important;
+  height: 30px !important;
   padding: 2px !important;
   border-radius: 50%;
+  flex: 0 0 30px;
   background: #1a1612 !important;
-  box-shadow: 0 0 0 1px #c9c0b0, inset 0 0 0 1px #000 !important;
+  box-shadow: 0 0 0 1px #e8dcc0, inset 0 0 0 1px #000 !important;
   overflow: hidden;
 }
 #match .patron-coin .coin-ring img {
@@ -437,36 +491,23 @@
   object-fit: cover;
   border-radius: 50%;
 }
-#match .patron-coin .plabel {
-  display: none;
-}
-#match .patron-coin.callable .token-frame {
-  filter: drop-shadow(0 0 6px rgba(180, 255, 90, 0.7));
-}
-#match .patron-coin.fav-you .favor-pip {
-  background: #3a7ae0;
-}
-#match .patron-coin.fav-opp .favor-pip {
-  background: #c62828;
+#match .patron-coin.callable .wood-bar {
+  box-shadow: 0 0 10px rgba(180, 255, 90, 0.55), 0 2px 4px #0007;
 }
 #match .patron-coin .favor-pip {
   position: absolute;
-  left: 3px;
+  left: 2px;
   top: 50%;
   transform: translateY(-50%);
   width: 0;
   height: 0;
   border-style: solid;
-  border-width: 7px 10px 7px 0;
+  border-width: 6px 9px 6px 0;
   border-color: transparent #c9c0b0 transparent transparent;
   z-index: 3;
 }
-#match .patron-coin.fav-you .favor-pip {
-  border-right-color: #3a7ae0;
-}
-#match .patron-coin.fav-opp .favor-pip {
-  border-right-color: #c62828;
-}
+#match .patron-coin.fav-you .favor-pip { border-right-color: #3a7ae0; }
+#match .patron-coin.fav-opp .favor-pip { border-right-color: #c62828; }
 #match .patron-coin.treasury .favor-pip,
 #match .patron-coin.neutral .favor-pip { display: none; }
 
@@ -484,32 +525,32 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  width: 68px;
-  padding: 6px 4px 8px !important;
+  width: 70px;
+  padding: 8px 2px 10px !important;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   color: #efe6c8;
 }
 #match .eso-hourglass-end .hourglass {
-  width: 56px;
+  width: 62px;
   opacity: 1 !important;
   padding: 0;
 }
 #match .eso-hourglass-end .hg-svg {
-  width: 52px !important;
-  height: 84px !important;
+  width: 58px !important;
+  height: 96px !important;
   filter: drop-shadow(0 2px 4px #000a);
 }
 #match .eso-hourglass-end .eso-end-caption {
   font-family: 'Cinzel', serif;
-  font-size: 0.52rem;
+  font-size: 0.58rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #c8b888;
 }
 #match .eso-hourglass-end.can-end {
-  filter: drop-shadow(0 0 10px rgba(190, 255, 80, 0.85)) drop-shadow(0 0 18px rgba(212, 175, 55, 0.55));
+  filter: drop-shadow(0 0 14px rgba(200, 255, 80, 1)) drop-shadow(0 0 26px rgba(212, 175, 55, 0.75));
 }
 #match .eso-hourglass-end.can-end .hg-svg {
   animation: tot-hg-pulse 1.6s ease-in-out infinite;

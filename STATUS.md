@@ -1,6 +1,6 @@
 # Status
 
-**2026-09-13 (web phone-landscape fix, build 25):** GitHub Pages players were zoomed into the tavern on iPhone landscape. The web table now **scale-to-fits the full board** (opponent piles/hand, tavern, player agents/hand, draw+cooldown both sides, patrons, hourglass) with iPhone safe-area padding. End Turn is the ornate hourglass (lime/gold glow on your turn). Affordable tavern and playable hand cards glow. SFX + mute persist separately from music.
+**2026-09-13 (web phone-landscape fix, build 26):** GitHub Pages players were zoomed into the tavern on iPhone landscape. The web table now **scale-to-fits the full board** (opponent piles/hand, tavern, player agents/hand, draw+cooldown both sides, patrons, hourglass) with iPhone safe-area padding. End Turn is the ornate hourglass (lime/gold glow on your turn). Affordable tavern and playable hand cards glow. Wooden pendants tip left with names + medallions. SFX + mute persist separately from music.
 
 **Unofficial fan project.** Not affiliated with Bethesda / ZeniMax / ESO. Not for sale.
 

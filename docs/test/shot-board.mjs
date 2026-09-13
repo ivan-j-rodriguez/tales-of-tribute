@@ -39,21 +39,35 @@ async function shot(name, { w, h }) {
   await page.waitForFunction(() => window.__totTest, { timeout: 20000 });
   await page.evaluate(() => window.__totTest.startQuick());
   await page.waitForFunction(() => window.__totTest.snapshot().hand > 0, { timeout: 8000 });
-  await new Promise(r => setTimeout(r, 500));
+  if (name.includes('glow')) {
+    await page.evaluate(() => {
+      const gold = [...document.querySelectorAll('#hand-zone .card')].find(el => el.dataset.id === 'gold');
+      gold?.click();
+    });
+    await new Promise(r => setTimeout(r, 450));
+  }
+  await new Promise(r => setTimeout(r, 400));
+  const dest = `/opt/cursor/artifacts/${name}.png`;
+  await page.screenshot({ path: dest });
   await page.screenshot({ path: `/workspace/${name}.png` });
   const info = await page.evaluate(() => {
+    const snap = window.__totTest.snapshot();
     const coins = [...document.querySelectorAll('.patron-coin')].map(el => ({
       id: el.dataset.pid, favor: el.dataset.favor, cls: el.className,
-      rot: getComputedStyle(el.querySelector('.token-dial')).transform,
     }));
-    const hg = document.querySelector('#hourglass')?.getBoundingClientRect();
-    const rail = document.querySelector('#patron-rail')?.getBoundingClientRect();
-    return { coins, hg: hg && { x: Math.round(hg.x), y: Math.round(hg.y) }, railW: rail && Math.round(rail.width) };
+    const hg = document.querySelector('#btn-end')?.getBoundingClientRect();
+    const piles = [...document.querySelectorAll('#match .hex-pile:not(.sr-pile)')].map(el => {
+      const r = el.getBoundingClientRect();
+      return { id: el.id, w: Math.round(r.width), h: Math.round(r.height), x: Math.round(r.x), y: Math.round(r.y) };
+    });
+    return { snap, coins, hg: hg && { x: Math.round(hg.x), y: Math.round(hg.y), w: Math.round(hg.width), h: Math.round(hg.height) }, piles };
   });
-  console.log(name, JSON.stringify(info, null, 0).slice(0, 500));
+  console.log(name, JSON.stringify(info, null, 2));
   await page.close();
 }
-await shot('board-portrait', { w: 390, h: 844 });
-await shot('board-landscape', { w: 844, h: 390 });
+await shot('phone-landscape-844x390', { w: 844, h: 390 });
+await shot('phone-landscape-844x390-glow', { w: 844, h: 390 });
+await shot('phone-landscape-667x375', { w: 667, h: 375 });
+await shot('phone-landscape-932x430', { w: 932, h: 430 });
 await browser.close();
 server.close();

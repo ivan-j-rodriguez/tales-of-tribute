@@ -175,7 +175,7 @@ function onSplashEnter() {
   }
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 25';
+  if (stamp) stamp.textContent = 'build 26';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -852,29 +852,16 @@ function renderMatch() {
     el.dataset.side = pid === 'treasury' ? 'mid' : (youPats.includes(pid) ? 'you' : 'opp');
     if (yourTurn && engine.canCallPatron(pid)) el.classList.add('callable');
     if (prevFavor[pid] && prevFavor[pid] !== favorWord.toLowerCase()) el.classList.add('just-flipped');
+    const short = (pat.short || pat.name || pid).replace(/^The\s+/i, '');
     el.innerHTML = `
-      <div class="token-dial" title="${favorWord}">
-        <svg class="token-frame" viewBox="0 0 96 52" aria-hidden="true">
-          <defs>
-            <linearGradient id="wood-${pid}" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#7a5330"/>
-              <stop offset="45%" stop-color="#4a2e14"/>
-              <stop offset="100%" stop-color="#2a180a"/>
-            </linearGradient>
-            <linearGradient id="sil-${pid}" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#f4efe6"/>
-              <stop offset="40%" stop-color="#c9c0b0"/>
-              <stop offset="100%" stop-color="#5a544c"/>
-            </linearGradient>
-          </defs>
-          <path d="M4 26 L20 6 H86 Q94 6 94 14 V38 Q94 46 86 46 H20 Z"
-                fill="url(#wood-${pid})" stroke="#2c2010" stroke-width="1.4"/>
-          <path d="M86 10 H90 V42 H86" fill="url(#sil-${pid})" opacity="0.35"/>
-        </svg>
+      <div class="token-dial wood-pendant" title="${favorWord} — ${pat.name || short}">
+        <span class="wood-tip" aria-hidden="true"></span>
+        <span class="wood-bar">
+          <span class="wood-name">${short}</span>
+          <span class="coin-ring"><img src="${patronArt(pid)}" alt="${short}" draggable="false" /></span>
+        </span>
         <span class="favor-pip" aria-hidden="true"></span>
-        <div class="coin-ring"><img src="${patronArt(pid)}" alt="${pat.short}" draggable="false" /></div>
       </div>
-      <div class="plabel">${pat.short}</div>
     `;
     bindCardGesture(el, {
       onTap: () => openPatronConfirm(pid, 'call'),
