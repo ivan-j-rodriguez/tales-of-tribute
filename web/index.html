@@ -169,55 +169,48 @@
     <!-- MATCH — authentic board -->
     <section id="match" class="screen skin-high-isle">
       <div class="board">
-        <div class="board-main">
-          <!-- Opponent strip -->
-          <div class="strip opp-strip">
-            <div class="hud" id="opp-res"></div>
-            <div class="strip-piles">
-              <button type="button" class="pile-btn" id="pile-opp-hand" data-pile="opp-hand" title="Rival hand"><span class="pile-art card-back-face"></span><span class="pile-count" id="cnt-opp-hand">0</span><span class="pile-label">Hand</span></button>
-              <button type="button" class="pile-btn" id="pile-opp-draw" data-pile="opp-draw" title="Rival draw"><span class="pile-art card-back-face"></span><span class="pile-count" id="cnt-opp-draw">0</span><span class="pile-label">Draw</span></button>
-              <button type="button" class="pile-btn" id="pile-opp-cd" data-pile="opp-cooldown" title="Rival cooldown"><span class="pile-art"></span><span class="pile-count" id="cnt-opp-cd">0</span><span class="pile-label">Cooldown</span></button>
-            </div>
-            <div class="agents-row" id="opp-agents"></div>
-            <div class="hand-row rival-hand-row">
-              <div class="hand-cards fan-hand rival-fan" id="opp-hand-zone"></div>
-            </div>
+        <aside class="events-rail" id="events-rail" aria-label="Played effects">
+          <div class="events-title">Effects</div>
+          <div class="events-combo" id="events-combo"></div>
+          <div class="events-list" id="events-list"></div>
+        </aside>
+        <div class="board-main felt-table">
+          <div class="hud felt-hud-opp" id="opp-res"></div>
+          <button type="button" class="pile-btn hex-pile pile-opp-draw" id="pile-opp-draw" data-pile="opp-draw" title="Rival draw">
+            <span class="pile-art card-back-face"></span>
+            <span class="pile-count" id="cnt-opp-draw">0</span>
+            <span class="pile-label">Draw</span>
+          </button>
+          <button type="button" class="pile-btn hex-pile pile-opp-cd" id="pile-opp-cd" data-pile="opp-cooldown" title="Rival cooldown">
+            <span class="pile-art"></span>
+            <span class="pile-count" id="cnt-opp-cd">0</span>
+            <span class="pile-label">Cooldown</span>
+          </button>
+          <button type="button" class="pile-btn hex-pile pile-opp-hand sr-pile" id="pile-opp-hand" data-pile="opp-hand" title="Rival hand">
+            <span class="pile-art card-back-face"></span>
+            <span class="pile-count" id="cnt-opp-hand">0</span>
+            <span class="pile-label">Hand</span>
+          </button>
+          <div class="felt-opp-hand">
+            <div class="hand-cards fan-hand rival-fan" id="opp-hand-zone"></div>
           </div>
+          <div class="agents-row felt-opp-agents" id="opp-agents"></div>
 
-          <!-- Tavern -->
-          <div class="tavern-band">
-            <button type="button" class="pile-btn tavern-discard" id="pile-tavern-discard" data-pile="tavern-discard" title="Tavern discard"><span class="pile-art"></span><span class="pile-count" id="cnt-tavern-discard">0</span><span class="pile-label">Discard</span></button>
-            <div class="tavern-zone" id="tavern-zone"></div>
+          <button type="button" class="pile-btn hex-pile pile-tavern-draw" id="pile-tavern-draw" data-pile="tavern-draw" title="Tavern deck">
+            <span class="pile-art card-back-face"></span>
+            <span class="pile-count" id="cnt-tavern-draw">0</span>
+            <span class="pile-label">Tavern</span>
+          </button>
+          <button type="button" class="pile-btn hex-pile pile-tavern-discard" id="pile-tavern-discard" data-pile="tavern-discard" title="Tavern discard">
+            <span class="pile-art"></span>
+            <span class="pile-count" id="cnt-tavern-discard">0</span>
+            <span class="pile-label">Discard</span>
+          </button>
+          <div class="felt-tavern">
             <div class="turn-chip" id="turn-ind">Your turn</div>
+            <div class="tavern-zone" id="tavern-zone"></div>
           </div>
-
-          <!-- You -->
-          <div class="strip you-strip">
-            <div class="agents-row" id="you-agents"></div>
-            <div class="played-row" id="you-played"></div>
-            <div class="hand-row you-hand-row">
-              <div class="hand-cards fan-hand you-fan" id="hand-zone"></div>
-            </div>
-            <div class="you-footer">
-              <div class="strip-piles">
-                <button type="button" class="pile-btn" id="pile-you-draw" data-pile="you-draw" title="Your draw"><span class="pile-art card-back-face"></span><span class="pile-count" id="cnt-you-draw">0</span><span class="pile-label">Draw</span></button>
-                <button type="button" class="pile-btn" id="pile-you-played" data-pile="you-played" title="Played this turn"><span class="pile-art"></span><span class="pile-count" id="cnt-you-played">0</span><span class="pile-label">Played</span></button>
-                <button type="button" class="pile-btn" id="pile-you-cd" data-pile="you-cooldown" title="Your cooldown"><span class="pile-art"></span><span class="pile-count" id="cnt-you-cd">0</span><span class="pile-label">Cooldown</span></button>
-              </div>
-              <div class="hud" id="you-res"></div>
-              <div class="match-actions">
-                <button id="btn-end">End Turn</button>
-                <button id="btn-hg-toggle" title="Hourglass">⌛</button>
-                <button id="btn-match-settings" title="Settings">⚙</button>
-                <button id="btn-concede">Leave</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- RIGHT RAIL: patrons + treasury + hourglass -->
-        <aside class="patron-rail" id="patron-rail" aria-label="Patrons">
-          <div class="rail-patrons" id="rail-patrons"></div>
+          <div class="felt-tools">
           <div class="hourglass" id="hourglass" data-on="0">
             <svg viewBox="0 0 40 64" class="hg-svg" aria-hidden="true">
               <defs>
@@ -236,6 +229,41 @@
             </svg>
             <span class="hg-time" id="hg-time">—</span>
           </div>
+            <button id="btn-end">End Turn</button>
+          </div>
+
+          <div class="hud felt-mid-res" id="you-res"></div>
+          <div class="played-row felt-played" id="you-played"></div>
+          <div class="agents-row felt-you-agents" id="you-agents"></div>
+
+          <button type="button" class="pile-btn hex-pile pile-you-draw" id="pile-you-draw" data-pile="you-draw" title="Your draw">
+            <span class="pile-art card-back-face"></span>
+            <span class="pile-count" id="cnt-you-draw">0</span>
+            <span class="pile-label">Draw</span>
+          </button>
+          <button type="button" class="pile-btn hex-pile pile-you-cd" id="pile-you-cd" data-pile="you-cooldown" title="Your cooldown">
+            <span class="pile-art"></span>
+            <span class="pile-count" id="cnt-you-cd">0</span>
+            <span class="pile-label">Cooldown</span>
+          </button>
+          <button type="button" class="pile-btn hex-pile pile-you-played sr-pile" id="pile-you-played" data-pile="you-played" title="Played this turn">
+            <span class="pile-art"></span>
+            <span class="pile-count" id="cnt-you-played">0</span>
+            <span class="pile-label">Played</span>
+          </button>
+          <div class="felt-you-hand">
+            <div class="hand-cards fan-hand you-fan" id="hand-zone"></div>
+          </div>
+          <div class="felt-hud-you">
+            <div class="match-actions">
+              <button id="btn-hg-toggle" title="Hourglass">⌛</button>
+              <button id="btn-match-settings" title="Settings">⚙</button>
+              <button id="btn-concede">Leave</button>
+            </div>
+          </div>
+        </div>
+        <aside class="patron-rail" id="patron-rail" aria-label="Patrons">
+          <div class="rail-patrons" id="rail-patrons"></div>
         </aside>
       </div>
       <div class="log-dock" id="log-dock"></div>

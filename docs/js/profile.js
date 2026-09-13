@@ -12,21 +12,47 @@ export const RANK_TIERS = ['Unranked', 'Orichalcum', 'Ebony', 'Quicksilver', 'Vo
 export const RANK_THRESHOLDS = [0, 0, 100, 250, 450, 700]; // points to enter tier index
 
 export const TABLE_SKINS = [
-  { id: 'high-isle', name: 'High Isle Oak', price: 0, desc: 'Warm tavern oak — free with membership.' },
-  { id: 'clockwork', name: 'Clockwork', price: 120, desc: 'Brass gears and factotum inlay.' },
-  { id: 'daedra', name: 'Coldharbour', price: 150, desc: 'Red-black runes of Oblivion.' },
-  { id: 'apocrypha', name: 'Apocrypha', price: 180, desc: 'Green-black ink and tentacles.' },
-  { id: 'orsinium', name: 'Orsinium Anvil', price: 140, desc: 'Iron table, clan banners.' },
-  { id: 'vestige', name: 'Vestige Hall', price: 200, desc: 'Sky-shard blue and worn leather.' },
+  { id: 'high-isle', name: 'High Isle', tag: 'Zone', price: 0, desc: 'Systres limestone, teal surf, and Breton gold.' },
+  { id: 'auridon', name: 'Auridon', tag: 'Zone', price: 80, desc: 'Altmer marble and the azure Abecean.' },
+  { id: 'warden', name: 'Warden', tag: 'Class', price: 90, desc: 'Frostpine grove — ice bloom over deep moss.' },
+  { id: 'nightblade', name: 'Nightblade', tag: 'Class', price: 100, desc: 'Moonlight, void-purple, and a drop of blood.' },
+  { id: 'grahtwood', name: 'Grahtwood', tag: 'Zone', price: 110, desc: 'Valenwood canopy — gold light through leaves.' },
+  { id: 'dragonknight', name: 'Dragonknight', tag: 'Class', price: 120, desc: 'Molten stone and Red Mountain fire.' },
+  { id: 'clockwork', name: 'Clockwork City', tag: 'Zone', price: 120, desc: 'Brass, copper oil, and ticking factotums.' },
+  { id: 'orsinium', name: 'Orsinium', tag: 'Zone', price: 140, desc: 'Iron halls, frost, orichalcum green.' },
+  { id: 'arcanist', name: 'Arcanist', tag: 'Class', price: 150, desc: 'Verdant ink, gold runes, the eye of Mora.' },
+  { id: 'daedra', name: 'Coldharbour', tag: 'Zone', price: 150, desc: 'Soulfire cyan over Molag Bal’s grey waste.' },
+  { id: 'vvardenfell', name: 'Vvardenfell', tag: 'Zone', price: 160, desc: 'Ashfall, kwama amber, the mountain’s glow.' },
+  { id: 'apocrypha', name: 'Apocrypha', tag: 'Zone', price: 180, desc: 'Black ink seas and watching green eyes.' },
+  { id: 'summerset', name: 'Summerset', tag: 'Zone', price: 180, desc: 'Crystal Alinor — aurora over white-gold.' },
+  { id: 'vestige', name: 'Vestige', tag: 'Class', price: 200, desc: 'Aetherial blue — a sky-shard on the table.' },
 ];
 
 export const CARD_BACKS = [
-  { id: 'default', name: 'Roister Back', price: 0, desc: 'Classic Tales of Tribute back.' },
-  { id: 'clockwork', name: 'Brass Circuit', price: 80, desc: 'Clockwork City motif.' },
-  { id: 'daedra', name: 'Sigil Back', price: 90, desc: 'Daedric script.' },
+  { id: 'default', name: 'Roister Back', price: 0, desc: 'Club gold on dark oak.' },
+  { id: 'nightblade', name: 'Shadow Dance', price: 70, desc: 'Void and crimson.' },
+  { id: 'warden', name: 'Frostpine', price: 70, desc: 'Ice over living wood.' },
+  { id: 'dragonknight', name: 'Ember Scale', price: 80, desc: 'Lava-cracked hide.' },
+  { id: 'clockwork', name: 'Brass Circuit', price: 80, desc: 'Sotha Sil’s geometry.' },
+  { id: 'auridon', name: 'Altmer Sun', price: 90, desc: 'Pale gold of Firsthold.' },
+  { id: 'daedra', name: 'Soulfire', price: 90, desc: 'Coldharbour cyan.' },
+  { id: 'arcanist', name: 'Ink & Eye', price: 100, desc: 'Apocryphal gold runes.' },
   { id: 'apocrypha', name: 'Green Eye', price: 100, desc: 'Hermaeus Mora’s gaze.' },
   { id: 'vestige', name: 'Aetherial', price: 110, desc: 'Sky-shard glow.' },
 ];
+
+export const CARD_BACK_PALETTE = {
+  default: ['#1a1008', '#d4af37'],
+  nightblade: ['#120818', '#c44'],
+  warden: ['#0a1614', '#7ec8d8'],
+  dragonknight: ['#1a0a08', '#e06020'],
+  clockwork: ['#1a1810', '#c9a227'],
+  auridon: ['#141810', '#e8d080'],
+  daedra: ['#0c1018', '#4ec8e8'],
+  arcanist: ['#08140c', '#d4af37'],
+  apocrypha: ['#0a1810', '#3a9050'],
+  vestige: ['#101828', '#60a0ff'],
+};
 
 export const STORE_FRAGMENT_COST = 35;
 export const STORE_UPGRADE_COST = 55;

@@ -75,16 +75,37 @@ button.primary {
 /* ——— Splash ——— */
 #splash {
   align-items: center; justify-content: center;
+  --splash-a: rgba(255,180,70,0.18);
+  --splash-b: rgba(30,160,180,0.28);
+  --splash-c: rgba(40,20,60,0.22);
+  --splash-base: #081018;
+  --splash-mid: #123028;
   background:
-    radial-gradient(ellipse at 50% 15%, rgba(255,180,70,0.18), transparent 45%),
-    radial-gradient(ellipse at 15% 85%, rgba(120,50,10,0.45), transparent 40%),
-    radial-gradient(ellipse at 85% 70%, rgba(40,20,60,0.25), transparent 35%),
+    radial-gradient(ellipse at 50% 15%, var(--splash-a), transparent 45%),
+    radial-gradient(ellipse at 15% 85%, var(--splash-b), transparent 40%),
+    radial-gradient(ellipse at 85% 70%, var(--splash-c), transparent 35%),
     repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 3px),
-    linear-gradient(180deg, #0e0804 0%, #2a160c 45%, #140c08 100%);
+    linear-gradient(180deg, var(--splash-base) 0%, var(--splash-mid) 45%, var(--splash-base) 100%);
   text-align: center;
   padding: 1.5rem;
   overflow: auto;
 }
+
+body.skin-high-isle { --splash-a: rgba(255,220,150,0.28); --splash-b: rgba(20,170,190,0.32); --splash-c: rgba(232,200,120,0.16); --splash-base: #081820; --splash-mid: #123028; }
+body.skin-auridon { --splash-a: rgba(255,230,160,0.35); --splash-b: rgba(50,160,210,0.3); --splash-c: rgba(240,220,150,0.18); --splash-base: #0c1816; --splash-mid: #1a2c28; }
+body.skin-grahtwood { --splash-a: rgba(210,190,70,0.22); --splash-b: rgba(30,70,20,0.45); --splash-c: rgba(80,120,30,0.2); --splash-base: #081208; --splash-mid: #142410; }
+body.skin-vvardenfell { --splash-a: rgba(255,90,20,0.28); --splash-b: rgba(200,140,50,0.25); --splash-c: rgba(80,30,10,0.35); --splash-base: #100806; --splash-mid: #22140e; }
+body.skin-summerset { --splash-a: rgba(255,230,200,0.28); --splash-b: rgba(80,160,255,0.28); --splash-c: rgba(220,200,255,0.16); --splash-base: #0a0c18; --splash-mid: #161828; }
+body.skin-clockwork { --splash-a: rgba(200,160,40,0.22); --splash-b: rgba(80,180,170,0.2); --splash-c: rgba(180,140,40,0.16); --splash-base: #080806; --splash-mid: #14140c; }
+body.skin-apocrypha { --splash-a: rgba(40,200,80,0.22); --splash-b: rgba(20,80,40,0.4); --splash-c: rgba(80,230,120,0.14); --splash-base: #020806; --splash-mid: #06140c; }
+body.skin-daedra { --splash-a: rgba(60,200,220,0.2); --splash-b: rgba(40,160,180,0.22); --splash-c: rgba(180,200,220,0.1); --splash-base: #06080e; --splash-mid: #10141c; }
+body.skin-orsinium { --splash-a: rgba(200,220,230,0.14); --splash-b: rgba(80,120,50,0.22); --splash-c: rgba(160,170,180,0.12); --splash-base: #0a0c10; --splash-mid: #16181c; }
+body.skin-vestige { --splash-a: rgba(140,200,255,0.3); --splash-b: rgba(40,80,180,0.28); --splash-c: rgba(80,170,255,0.16); --splash-base: #060c18; --splash-mid: #101828; }
+body.skin-nightblade { --splash-a: rgba(190,210,255,0.22); --splash-b: rgba(160,20,60,0.38); --splash-c: rgba(180,80,220,0.16); --splash-base: #06030a; --splash-mid: #14081a; }
+body.skin-arcanist { --splash-a: rgba(212,175,55,0.22); --splash-b: rgba(40,180,80,0.28); --splash-c: rgba(80,230,120,0.12); --splash-base: #03100a; --splash-mid: #0a1810; }
+body.skin-warden { --splash-a: rgba(190,235,255,0.24); --splash-b: rgba(30,120,70,0.36); --splash-c: rgba(140,220,200,0.14); --splash-base: #061410; --splash-mid: #0c241c; }
+body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,150,40,0.22); --splash-c: rgba(80,20,10,0.35); --splash-base: #0a0404; --splash-mid: #1a0a08; }
+
 .splash-frame {
   max-width: 36rem;
   padding: 2rem 1.5rem;
@@ -255,67 +276,199 @@ button.primary {
   .patron-card .desc { display: none; }
 }
 
-/* ——— Match board: carved wood rim + felt play surface (ESO table) ——— */
+/* ——— Match board: ESO zone / class atmospheres ——— */
 #match {
-  --skin-base: #2a1810;
-  --felt: #1a2a1c;
-  --felt-deep: #0c1610;
-  --rim: #3d2418;
-  --inlay-line: rgba(212,175,55,0.55);
-  --skin-glow: rgba(255,180,70,0.14);
-  --skin-inlay: rgba(212,175,55,0.12);
+  position: relative;
+  --skin-base: #123028;
+  --felt: #123028;
+  --felt-deep: #081820;
+  --rim: #3a3020;
+  --inlay-line: rgba(232,200,120,0.65);
+  --skin-glow: rgba(40,180,190,0.18);
+  --skin-inlay: rgba(232,200,120,0.12);
+  --bloom-a: radial-gradient(ellipse at 18% 0%, rgba(255,220,140,0.28), transparent 36%);
+  --bloom-b: radial-gradient(ellipse at 82% 100%, rgba(30,160,180,0.26), transparent 42%);
+  --motif: none;
   background:
-    /* candle bloom */
-    radial-gradient(ellipse at 18% 8%, rgba(255,180,80,0.16), transparent 28%),
-    radial-gradient(ellipse at 82% 12%, rgba(255,160,60,0.1), transparent 26%),
-    /* carved wood rim frame */
+    var(--bloom-a),
+    var(--bloom-b),
     linear-gradient(90deg, var(--rim) 0%, var(--rim) 14px, transparent 14px, transparent calc(100% - 14px), var(--rim) calc(100% - 14px)),
     linear-gradient(180deg, var(--rim) 0%, var(--rim) 12px, transparent 12px, transparent calc(100% - 12px), var(--rim) calc(100% - 12px)),
-    /* gold inlay rail */
     linear-gradient(90deg, transparent 14px, var(--inlay-line) 15px, transparent 17px, transparent calc(100% - 17px), var(--inlay-line) calc(100% - 15px), transparent calc(100% - 14px)),
-    /* felt center */
     radial-gradient(ellipse at 50% 45%, color-mix(in srgb, var(--felt) 70%, #000) 0%, var(--felt-deep) 70%),
     linear-gradient(180deg, var(--felt) 0%, var(--felt-deep) 100%);
   overflow: hidden;
   box-shadow: inset 0 0 80px rgba(0,0,0,0.55);
 }
+#match::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: var(--motif);
+  opacity: 0.85;
+}
+#match > * { position: relative; z-index: 1; }
 #match .board-main {
   background:
-    radial-gradient(ellipse at 50% 40%, rgba(255,200,100,0.04), transparent 55%),
+    radial-gradient(ellipse at 50% 40%, var(--skin-glow), transparent 55%),
     repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px);
   border-radius: 6px;
   margin: 2px;
   box-shadow: inset 0 0 40px rgba(0,0,0,0.35);
 }
+
+/* High Isle — teal surf, limestone, Breton gold */
 #match.skin-high-isle {
-  --rim: #3d2418; --felt: #1a2e1e; --felt-deep: #0a1810;
-  --inlay-line: rgba(212,175,55,0.55);
-  --skin-glow: rgba(255,180,70,0.14);
+  --rim: #3a3224; --felt: #123028; --felt-deep: #081820;
+  --inlay-line: rgba(232,200,120,0.7);
+  --skin-glow: rgba(40,180,190,0.2);
+  --bloom-a: radial-gradient(ellipse at 16% 0%, rgba(255,220,150,0.32), transparent 38%);
+  --bloom-b: radial-gradient(ellipse at 86% 100%, rgba(20,170,190,0.3), transparent 44%);
+  --motif:
+    radial-gradient(ellipse at 70% 18%, rgba(180,230,240,0.1), transparent 22%),
+    repeating-linear-gradient(100deg, transparent 0 28px, rgba(255,240,200,0.04) 28px 29px);
 }
+/* Auridon — Altmer marble + Abecean blue */
+#match.skin-auridon {
+  --rim: #4a4030; --felt: #1a2c28; --felt-deep: #0c1816;
+  --inlay-line: rgba(240,220,150,0.75);
+  --skin-glow: rgba(255,220,140,0.22);
+  --bloom-a: radial-gradient(ellipse at 50% -8%, rgba(255,230,160,0.42), transparent 42%);
+  --bloom-b: radial-gradient(ellipse at 100% 80%, rgba(50,160,210,0.28), transparent 40%);
+  --motif: repeating-radial-gradient(circle at 50% 0%, rgba(255,230,160,0.1) 0 2px, transparent 3px 46px);
+}
+/* Grahtwood — Valenwood canopy */
+#match.skin-grahtwood {
+  --rim: #2a3a18; --felt: #142410; --felt-deep: #081208;
+  --inlay-line: rgba(180,160,50,0.5);
+  --skin-glow: rgba(160,190,50,0.16);
+  --bloom-a: radial-gradient(ellipse at 28% 18%, rgba(210,190,70,0.22), transparent 30%);
+  --bloom-b: radial-gradient(ellipse at 78% 72%, rgba(30,70,20,0.45), transparent 42%);
+  --motif:
+    radial-gradient(circle at 18% 28%, rgba(180,200,70,0.14) 0 42px, transparent 72px),
+    radial-gradient(circle at 76% 62%, rgba(60,120,30,0.18) 0 56px, transparent 90px),
+    radial-gradient(circle at 50% 8%, rgba(240,220,100,0.1) 0 30px, transparent 60px);
+}
+/* Vvardenfell — ash + Red Mountain */
+#match.skin-vvardenfell {
+  --rim: #3a2018; --felt: #22140e; --felt-deep: #100806;
+  --inlay-line: rgba(230,120,40,0.55);
+  --skin-glow: rgba(255,90,20,0.22);
+  --bloom-a: radial-gradient(ellipse at 50% 110%, rgba(255,70,10,0.45), transparent 48%);
+  --bloom-b: radial-gradient(ellipse at 18% 12%, rgba(200,140,50,0.2), transparent 28%);
+  --motif:
+    radial-gradient(circle at 82% 22%, rgba(255,160,40,0.12) 0 20px, transparent 50px),
+    repeating-linear-gradient(8deg, transparent 0 18px, rgba(80,30,10,0.18) 18px 19px);
+}
+/* Summerset — crystal Alinor */
+#match.skin-summerset {
+  --rim: #3a3840; --felt: #161828; --felt-deep: #0a0c18;
+  --inlay-line: rgba(220,200,255,0.55);
+  --skin-glow: rgba(160,200,255,0.2);
+  --bloom-a: radial-gradient(ellipse at 20% 0%, rgba(255,230,200,0.28), transparent 36%);
+  --bloom-b: radial-gradient(ellipse at 90% 90%, rgba(80,160,255,0.28), transparent 40%);
+  --motif:
+    linear-gradient(135deg, rgba(255,255,255,0.06) 0 12%, transparent 12% 38%, rgba(140,180,255,0.08) 38% 40%, transparent 40%),
+    repeating-linear-gradient(-20deg, transparent 0 36px, rgba(200,220,255,0.05) 36px 37px);
+}
+/* Clockwork City */
 #match.skin-clockwork {
-  --rim: #3a3020; --felt: #12140e; --felt-deep: #080a06;
-  --inlay-line: rgba(200,160,60,0.65);
-  --skin-glow: rgba(200,160,60,0.18);
+  --rim: #3a3020; --felt: #14140c; --felt-deep: #080806;
+  --inlay-line: rgba(210,170,50,0.7);
+  --skin-glow: rgba(200,160,40,0.22);
+  --bloom-a: radial-gradient(ellipse at 70% 20%, rgba(80,180,170,0.16), transparent 32%);
+  --bloom-b: radial-gradient(ellipse at 20% 80%, rgba(200,140,30,0.2), transparent 36%);
+  --motif:
+    repeating-radial-gradient(circle at 85% 15%, transparent 0 16px, rgba(200,160,40,0.1) 17px, transparent 20px),
+    repeating-linear-gradient(90deg, transparent 0 22px, rgba(180,140,40,0.08) 22px 23px);
 }
-#match.skin-daedra {
-  --rim: #3a1010; --felt: #1a080c; --felt-deep: #0a0406;
-  --inlay-line: rgba(200,60,60,0.55);
-  --skin-glow: rgba(180,40,40,0.2);
-}
+/* Apocrypha */
 #match.skin-apocrypha {
-  --rim: #142820; --felt: #0a1810; --felt-deep: #040c08;
-  --inlay-line: rgba(60,180,80,0.5);
-  --skin-glow: rgba(60,180,80,0.18);
+  --rim: #142820; --felt: #06140c; --felt-deep: #020806;
+  --inlay-line: rgba(50,200,90,0.55);
+  --skin-glow: rgba(40,200,80,0.22);
+  --bloom-a: radial-gradient(ellipse at 50% 42%, rgba(40,180,80,0.32), transparent 38%);
+  --bloom-b: radial-gradient(ellipse at 12% 10%, rgba(20,80,40,0.4), transparent 30%);
+  --motif:
+    radial-gradient(circle at 50% 44%, rgba(80,230,120,0.35) 0 6px, rgba(40,160,80,0.18) 14px, transparent 36px),
+    radial-gradient(circle at 22% 70%, rgba(60,200,90,0.12) 0 4px, transparent 18px),
+    radial-gradient(circle at 78% 28%, rgba(60,200,90,0.12) 0 3px, transparent 16px);
 }
+/* Coldharbour (id: daedra) */
+#match.skin-daedra {
+  --rim: #1a2430; --felt: #10141c; --felt-deep: #06080e;
+  --inlay-line: rgba(80,210,230,0.5);
+  --skin-glow: rgba(60,200,220,0.18);
+  --bloom-a: radial-gradient(ellipse at 50% 100%, rgba(40,160,180,0.22), transparent 42%);
+  --bloom-b: radial-gradient(ellipse at 8% 8%, rgba(180,200,220,0.1), transparent 28%);
+  --motif:
+    repeating-linear-gradient(90deg, transparent 0 40px, rgba(80,210,230,0.08) 40px 41px, transparent 41px 80px),
+    repeating-linear-gradient(0deg, transparent 0 28px, rgba(80,210,230,0.05) 28px 29px);
+}
+/* Orsinium */
 #match.skin-orsinium {
-  --rim: #2a2a30; --felt: #14161a; --felt-deep: #0a0c10;
-  --inlay-line: rgba(160,160,180,0.45);
-  --skin-glow: rgba(160,160,180,0.12);
+  --rim: #2a2c30; --felt: #16181c; --felt-deep: #0a0c10;
+  --inlay-line: rgba(120,180,90,0.45);
+  --skin-glow: rgba(160,170,180,0.14);
+  --bloom-a: radial-gradient(ellipse at 50% 0%, rgba(200,220,230,0.14), transparent 32%);
+  --bloom-b: radial-gradient(ellipse at 20% 90%, rgba(80,120,50,0.18), transparent 36%);
+  --motif: repeating-radial-gradient(circle at 12% 18%, rgba(180,180,190,0.12) 0 3px, transparent 4px 52px);
 }
+/* Vestige — sky-shard */
 #match.skin-vestige {
   --rim: #1a2840; --felt: #101828; --felt-deep: #060c18;
-  --inlay-line: rgba(80,160,255,0.5);
-  --skin-glow: rgba(80,160,255,0.18);
+  --inlay-line: rgba(80,170,255,0.6);
+  --skin-glow: rgba(80,170,255,0.22);
+  --bloom-a: radial-gradient(ellipse at 50% 0%, rgba(140,200,255,0.32), transparent 40%);
+  --bloom-b: radial-gradient(ellipse at 80% 90%, rgba(40,80,180,0.28), transparent 40%);
+  --motif:
+    linear-gradient(200deg, rgba(160,210,255,0.12), transparent 35%),
+    repeating-linear-gradient(25deg, transparent 0 30px, rgba(100,180,255,0.06) 30px 31px);
+}
+/* Nightblade */
+#match.skin-nightblade {
+  --rim: #2a1028; --felt: #14081a; --felt-deep: #06030a;
+  --inlay-line: rgba(200,40,80,0.55);
+  --skin-glow: rgba(180,80,220,0.16);
+  --bloom-a: radial-gradient(ellipse at 78% 6%, rgba(190,210,255,0.28), transparent 34%);
+  --bloom-b: radial-gradient(ellipse at 16% 92%, rgba(160,20,60,0.38), transparent 42%);
+  --motif:
+    radial-gradient(circle at 78% 8%, rgba(230,235,255,0.35) 0 10px, rgba(180,200,255,0.12) 22px, transparent 48px),
+    radial-gradient(circle at 20% 30%, rgba(200,80,255,0.1) 0 2px, transparent 3px),
+    radial-gradient(circle at 62% 58%, rgba(255,255,255,0.1) 0 1px, transparent 2px);
+}
+/* Arcanist */
+#match.skin-arcanist {
+  --rim: #1a3020; --felt: #0a1810; --felt-deep: #03100a;
+  --inlay-line: rgba(212,175,55,0.6);
+  --skin-glow: rgba(40,180,80,0.2);
+  --bloom-a: radial-gradient(ellipse at 50% 42%, rgba(40,180,80,0.3), transparent 40%);
+  --bloom-b: radial-gradient(ellipse at 82% 12%, rgba(212,175,55,0.22), transparent 30%);
+  --motif:
+    repeating-conic-gradient(from 0deg at 50% 45%, transparent 0 14deg, rgba(212,175,55,0.07) 14deg 15deg),
+    radial-gradient(circle at 50% 45%, rgba(80,230,120,0.32) 0 7px, transparent 26px);
+}
+/* Warden */
+#match.skin-warden {
+  --rim: #1a3a32; --felt: #0c241c; --felt-deep: #061410;
+  --inlay-line: rgba(140,220,220,0.55);
+  --skin-glow: rgba(140,220,200,0.18);
+  --bloom-a: radial-gradient(ellipse at 50% 0%, rgba(190,235,255,0.26), transparent 36%);
+  --bloom-b: radial-gradient(ellipse at 14% 86%, rgba(30,120,70,0.38), transparent 42%);
+  --motif:
+    repeating-linear-gradient(118deg, transparent 0 16px, rgba(190,235,255,0.06) 16px 17px),
+    radial-gradient(circle at 70% 24%, rgba(200,240,255,0.12) 0 18px, transparent 40px);
+}
+/* Dragonknight */
+#match.skin-dragonknight {
+  --rim: #3a1810; --felt: #1a0a08; --felt-deep: #0a0404;
+  --inlay-line: rgba(255,100,40,0.6);
+  --skin-glow: rgba(255,80,20,0.22);
+  --bloom-a: radial-gradient(ellipse at 50% 108%, rgba(255,70,10,0.5), transparent 48%);
+  --bloom-b: radial-gradient(ellipse at 84% 16%, rgba(255,150,40,0.2), transparent 30%);
+  --motif: repeating-linear-gradient(16deg, transparent 0 20px, rgba(255,80,20,0.1) 20px 21px, transparent 21px 38px);
 }
 
 .board {
@@ -820,12 +973,20 @@ button.primary {
   height: 48px; border-radius: 6px; margin-bottom: 0.5rem;
   border: 1px solid rgba(212,175,55,0.3);
 }
-.skin-swatch.high-isle { background: linear-gradient(135deg, #2a1810, #5c3a24); }
-.skin-swatch.clockwork { background: linear-gradient(135deg, #1a1810, #8a7020); }
-.skin-swatch.daedra { background: linear-gradient(135deg, #1a0808, #8b1a1a); }
-.skin-swatch.apocrypha { background: linear-gradient(135deg, #0a1810, #2a8050); }
-.skin-swatch.orsinium { background: linear-gradient(135deg, #1a1a1c, #6a5a40); }
-.skin-swatch.vestige { background: linear-gradient(135deg, #101828, #4080c0); }
+.skin-swatch.high-isle { background: linear-gradient(135deg, #123028, #e8c878 45%, #1aa0b0); }
+.skin-swatch.auridon { background: linear-gradient(135deg, #1a2c28, #f0dc96 40%, #32a0d2); }
+.skin-swatch.grahtwood { background: linear-gradient(135deg, #081208, #3a5a18 50%, #d4be46); }
+.skin-swatch.vvardenfell { background: linear-gradient(135deg, #22140e, #e06018 55%, #ff6a14); }
+.skin-swatch.summerset { background: linear-gradient(135deg, #161828, #f0e6d0 40%, #78a0ff); }
+.skin-swatch.clockwork { background: linear-gradient(135deg, #14140c, #c9a227 50%, #3a8a80); }
+.skin-swatch.apocrypha { background: linear-gradient(135deg, #06140c, #1a4a28 45%, #3ad060); }
+.skin-swatch.daedra { background: linear-gradient(135deg, #10141c, #4ec8e8 55%, #1a2430); }
+.skin-swatch.orsinium { background: linear-gradient(135deg, #16181c, #78b45a 50%, #8a8a96); }
+.skin-swatch.vestige { background: linear-gradient(135deg, #101828, #60a0ff 50%, #80c8ff); }
+.skin-swatch.nightblade { background: linear-gradient(135deg, #14081a, #c02850 45%, #c8d0ff); }
+.skin-swatch.arcanist { background: linear-gradient(135deg, #0a1810, #d4af37 40%, #2ad060); }
+.skin-swatch.warden { background: linear-gradient(135deg, #0c241c, #7ec8d8 45%, #2a8050); }
+.skin-swatch.dragonknight { background: linear-gradient(135deg, #1a0a08, #ff5014 50%, #ff9628); }
 
 .friend-modes {
   display: flex; flex-direction: column; gap: 0.75rem;
@@ -1124,8 +1285,13 @@ button.primary {
     repeating-linear-gradient(45deg, #1a1008, #1a1008 4px, #2a2010 4px, #2a2010 5px);
 }
 .back-swatch.back-default { background: linear-gradient(135deg, #3a2818, #1a1008); }
-.back-swatch.back-clockwork { background: linear-gradient(135deg, #3a3420, #1a1810 60%, #8a7020); }
-.back-swatch.back-daedra { background: linear-gradient(135deg, #3a1010, #1a0808 60%, #8b1a1a); }
+.back-swatch.back-nightblade { background: linear-gradient(135deg, #2a1028, #120818 55%, #c44); }
+.back-swatch.back-warden { background: linear-gradient(135deg, #1a3a32, #0a1614 55%, #7ec8d8); }
+.back-swatch.back-dragonknight { background: linear-gradient(135deg, #3a1810, #1a0a08 55%, #e06020); }
+.back-swatch.back-clockwork { background: linear-gradient(135deg, #3a3420, #1a1810 60%, #c9a227); }
+.back-swatch.back-auridon { background: linear-gradient(135deg, #3a3420, #141810 55%, #e8d080); }
+.back-swatch.back-daedra { background: linear-gradient(135deg, #1a2430, #0c1018 55%, #4ec8e8); }
+.back-swatch.back-arcanist { background: linear-gradient(135deg, #1a3020, #08140c 55%, #d4af37); }
 .back-swatch.back-apocrypha { background: linear-gradient(135deg, #142820, #0a1810 60%, #2a8050); }
 .back-swatch.back-vestige { background: linear-gradient(135deg, #1a2840, #101828 60%, #4080c0); }
 
@@ -1347,4 +1513,435 @@ button.primary {
 @media (orientation: landscape) and (max-height: 500px) {
   .tavern-zone { flex-wrap: nowrap; }
   .rival-fan { height: calc(var(--card-h) * 0.42 + 6px); }
+}
+
+/* ========== ESO TABLE v2 — felt, hex, effects rail, dossier ========== */
+:root {
+  --hex: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  --card-w: 78px;
+  --card-h: 90px;
+  --hand-card-w: 86px;
+  --hand-card-h: 100px;
+  --events-w: 58px;
+}
+#match { display: flex; flex-direction: column; }
+#match .board {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+/* Left: combo / played-effects rail */
+.events-rail {
+  width: var(--events-w);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0.45rem 0.2rem;
+  background: linear-gradient(90deg, rgba(0,0,0,0.35), transparent);
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  z-index: 2;
+}
+.events-title {
+  font-family: 'Cinzel', serif;
+  font-size: 0.52rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.85;
+  writing-mode: horizontal-tb;
+}
+.events-combo {
+  font-family: 'Cinzel', serif;
+  font-size: 0.62rem;
+  color: var(--gold-bright);
+  min-height: 0.8em;
+}
+.events-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.28rem;
+  width: 100%;
+}
+.event-hex {
+  width: 46px;
+  height: 54px;
+  position: relative;
+  cursor: pointer;
+  filter: drop-shadow(0 2px 4px #0008);
+}
+.event-hex img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: top;
+  clip-path: var(--hex);
+  display: block;
+}
+.event-hex .ev-pip {
+  position: absolute; left: 50%; bottom: -2px; transform: translateX(-50%);
+  font-size: 0.48rem; color: var(--gold-bright);
+  background: rgba(0,0,0,0.7);
+  padding: 0 3px; border-radius: 3px;
+  white-space: nowrap; max-width: 52px; overflow: hidden; text-overflow: ellipsis;
+  pointer-events: none;
+}
+.event-hex.combo { outline: none; filter: drop-shadow(0 0 6px rgba(212,175,55,0.55)); }
+
+/* Felt grid — real ToT topology */
+.felt-table {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(52px, 11%) 1fr minmax(52px, 11%) minmax(70px, 13%);
+  grid-template-rows: auto minmax(0, 0.9fr) minmax(0, 1.1fr) auto minmax(0, 0.85fr) minmax(0, 1.15fr) auto;
+  grid-template-areas:
+    "opp-draw   opp-hand    opp-cd     tools"
+    "opp-draw   opp-agents  opp-cd     tools"
+    "tavern-d   tavern      tavern-x   tools"
+    "you-draw   midres      you-cd     tools"
+    "you-draw   you-agents  you-cd     you-hud"
+    "you-draw   you-hand    you-cd     you-hud"
+    "actions    you-hand    cooldown   actions2";
+  gap: 0.2rem 0.35rem;
+  padding: 0.35rem 0.4rem 0.25rem;
+  align-items: center;
+  justify-items: center;
+}
+.felt-hud-opp { grid-area: opp-hand; align-self: start; justify-self: start; z-index: 2; }
+.felt-opp-hand { grid-area: opp-hand; width: 100%; align-self: center; }
+.felt-opp-agents { grid-area: opp-agents; width: 100%; }
+.felt-tavern { grid-area: tavern; width: 100%; position: relative; }
+.felt-played { grid-area: midres; width: 100%; }
+.felt-you-agents { grid-area: you-agents; width: 100%; }
+.felt-you-hand { grid-area: you-hand; width: 100%; align-self: end; }
+.felt-hud-you { grid-area: you-hud; align-self: end; width: 100%; }
+.felt-tools { grid-area: tools; align-self: start; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+#pile-opp-draw { grid-area: opp-draw; align-self: start; }
+#pile-opp-cd { grid-area: opp-cd; align-self: start; }
+#pile-tavern-draw { grid-area: tavern-d; }
+#pile-tavern-discard { grid-area: tavern-d; align-self: end; }
+#pile-you-draw { grid-area: you-draw; align-self: center; }
+#pile-you-cd { grid-area: cooldown; align-self: end; }
+#pile-you-played { grid-area: midres; justify-self: end; align-self: start; }
+
+.sr-pile { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+#pile-opp-hand.sr-pile, #pile-you-played.sr-pile {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0);
+}
+
+.felt-hud-opp.hud, .felt-hud-you .hud {
+  background: rgba(0,0,0,0.28);
+  border-color: rgba(212,175,55,0.2);
+  font-size: 0.78rem;
+}
+.felt-played + .felt-hud-you { }
+.felt-table > .hud#you-res { grid-area: midres; }
+
+/* Center resources sit ON the felt like the real table */
+.felt-table .hud {
+  justify-content: center;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  gap: 0.85rem;
+  font-size: 1.05rem;
+}
+.felt-table .hud .icon-disc { width: 28px; height: 28px; font-size: 0.85rem; }
+.felt-hud-opp.hud {
+  justify-content: flex-start;
+  font-size: 0.75rem;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(212,175,55,0.25);
+}
+.felt-hud-you .hud { font-size: 0.8rem; }
+
+.felt-tools .hourglass {
+  margin-top: 0;
+  opacity: 0.9;
+}
+.felt-tools .hg-svg { width: 42px; height: 68px; }
+#btn-end {
+  background: linear-gradient(180deg, #6a3020, #3a1810);
+  border-color: #c07040;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.72rem;
+}
+
+.patron-rail {
+  background: transparent;
+  border-left: none;
+  box-shadow: none;
+  width: var(--rail-w);
+}
+
+.hex-pile {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  min-width: 0;
+  padding: 0.1rem;
+}
+.hex-pile .pile-art {
+  width: 44px; height: 50px;
+  clip-path: var(--hex);
+  border: none;
+  border-radius: 0;
+  box-shadow: 0 3px 8px #0008;
+}
+.hex-pile .pile-label { font-size: 0.5rem; }
+
+/* Hex cards — art fills the tile; text lives in the dossier */
+#match .card {
+  width: var(--card-w);
+  height: var(--card-h);
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.55));
+}
+#match .card::after { display: none; }
+#match .card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(160deg, #f0e6b8, #8a6a20 40%, #3a2810);
+  clip-path: var(--hex);
+  z-index: 0;
+}
+#match .card img.art {
+  position: absolute;
+  inset: 2px;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  object-fit: cover;
+  object-position: top;
+  clip-path: var(--hex);
+  z-index: 1;
+}
+#match .card .meta { display: none; }
+#match .card .cost-badge {
+  left: 50%; top: 6%;
+  transform: translateX(-50%);
+  width: 20px; height: 20px; font-size: 0.7rem;
+}
+#match .card .hp-badge { top: 28%; right: 8%; }
+#match .card.affordable { filter: drop-shadow(0 0 10px rgba(212,175,55,0.75)); }
+#match .card.playable { filter: drop-shadow(0 0 8px rgba(240,200,100,0.45)); }
+#match .card.contract-card::after {
+  display: block;
+  inset: 2px;
+  border-radius: 0;
+  clip-path: var(--hex);
+  box-shadow: inset 0 0 0 2px rgba(150,80,255,0.65);
+}
+
+.tavern-zone {
+  background: transparent;
+  justify-content: center;
+  gap: 0.55rem;
+  overflow: visible;
+}
+.tavern-band, .felt-tavern {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+.felt-tavern .turn-chip {
+  position: absolute;
+  top: -0.85rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.agents-row, .played-row {
+  gap: 0.45rem;
+  min-height: calc(var(--card-h) * 0.55);
+}
+.agent-slot {
+  background: transparent;
+}
+.agent-slot.empty {
+  width: var(--card-w);
+  height: var(--card-h);
+  clip-path: var(--hex);
+  border: none;
+  background: rgba(212,175,55,0.08);
+  box-shadow: inset 0 0 0 1.5px rgba(212,175,55,0.35);
+  display: flex; align-items: center; justify-content: center;
+}
+.hand-row, .felt-you-hand, .felt-opp-hand {
+  background: transparent;
+}
+
+/* Landscape — use the felt */
+@media (orientation: landscape) {
+  :root {
+    --card-w: 88px; --card-h: 102px;
+    --hand-card-w: 96px; --hand-card-h: 110px;
+    --rail-w: 70px;
+    --events-w: 62px;
+  }
+  .felt-table {
+    grid-template-columns: 72px 1fr 72px 88px;
+    grid-template-rows: auto minmax(0, 1fr) minmax(0, 1.15fr) auto minmax(0, 0.9fr) minmax(0, 1.2fr);
+    padding: 0.45rem 0.65rem;
+    gap: 0.25rem 0.55rem;
+  }
+  .felt-tools .hg-svg { width: 48px; height: 76px; }
+}
+@media (min-width: 960px) and (orientation: landscape) {
+  :root {
+    --card-w: 108px; --card-h: 124px;
+    --hand-card-w: 116px; --hand-card-h: 134px;
+    --rail-w: 84px;
+    --events-w: 72px;
+  }
+  .event-hex { width: 56px; height: 64px; }
+  .hex-pile .pile-art { width: 56px; height: 64px; }
+}
+@media (orientation: portrait) {
+  :root {
+    --card-w: 64px; --card-h: 74px;
+    --hand-card-w: 72px; --hand-card-h: 84px;
+    --events-w: 50px;
+    --rail-w: 60px;
+  }
+  .felt-table {
+    grid-template-columns: 48px 1fr 48px 58px;
+    gap: 0.12rem 0.2rem;
+    padding: 0.2rem 0.25rem;
+  }
+}
+
+/* Official card dossier (hold-to-read) */
+.lift-clone.lift-dossier {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  border-radius: 0;
+  overflow: visible;
+  box-shadow: none;
+  background: transparent;
+  width: auto !important;
+  height: auto !important;
+  max-width: min(92vw, 720px);
+  pointer-events: none;
+}
+.dossier-hex {
+  position: relative;
+  flex: 0 0 auto;
+  width: min(38vw, 200px);
+  height: calc(min(38vw, 200px) * 1.16);
+  filter: drop-shadow(0 12px 28px #000c);
+}
+.dossier-hex img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: top;
+  clip-path: var(--hex);
+}
+.dossier-hex .cost-badge {
+  position: absolute; left: 50%; top: 6%; transform: translateX(-50%);
+  width: 28px; height: 28px; border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ffe680, #a07820);
+  color: #2a1808; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cinzel', serif; border: 1px solid #fff8;
+}
+.dossier-text {
+  flex: 1;
+  min-width: 0;
+  color: #e8e0d4;
+  text-align: left;
+  padding: 0.4rem 0.2rem;
+}
+.dossier-kinds {
+  display: flex; flex-direction: column; gap: 0.05rem;
+  font-size: 0.78rem; color: #b8b0a4; letter-spacing: 0.02em;
+}
+.dossier-text h2 {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.15rem, 3.2vw, 1.85rem);
+  font-weight: 600;
+  color: #f4efe6;
+  letter-spacing: 0.06em;
+  margin: 0.35rem 0 0.55rem;
+  text-transform: uppercase;
+}
+.dossier-cost {
+  display: flex; align-items: center; gap: 0.45rem;
+  font-size: 0.95rem; color: #ddd;
+  margin-bottom: 0.7rem;
+}
+.dossier-cost strong { color: #f0e6b8; font-family: 'Cinzel', serif; }
+.dossier-block { margin-bottom: 0.65rem; }
+.dossier-h {
+  font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #9a948c; margin-bottom: 0.2rem;
+}
+.dossier-block ul { list-style: none; padding: 0; }
+.dossier-block li {
+  position: relative; padding-left: 1.1rem;
+  font-size: 0.92rem; line-height: 1.35; color: #e8e0d4;
+  margin: 0.12rem 0;
+}
+.dossier-block li::before {
+  content: '';
+  position: absolute; left: 0; top: 0.45em;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #c9a227;
+}
+.dossier-block li.power::before { background: #c44; }
+.dossier-block li.coin::before { background: #f0d060; }
+.dossier-block li.prestige::before { background: #e8c547; }
+@media (orientation: portrait) {
+  .lift-clone.lift-dossier {
+    flex-direction: column;
+    max-width: 92vw;
+  }
+  .dossier-hex { width: min(56vw, 200px); height: calc(min(56vw, 200px) * 1.16); }
+}
+
+.felt-mid-res {
+  grid-area: midres;
+  justify-self: center;
+  align-self: center;
+  z-index: 2;
+}
+.felt-mid-res .res-label { display: none; }
+.felt-mid-res .res {
+  flex-direction: column;
+  gap: 0.15rem;
+  font-family: 'Cinzel', serif;
+  font-size: 1.15rem;
+  color: var(--gold-bright);
+  text-shadow: 0 2px 8px #000a;
+}
+.felt-mid-res .icon-disc {
+  width: 36px; height: 36px; font-size: 1rem;
+  box-shadow: 0 0 12px rgba(212,175,55,0.25), inset 0 0 6px #0008;
+}
+.felt-played { opacity: 0.95; pointer-events: auto; }
+.res-label { opacity: 0.7; margin-right: 0.25rem; font-size: 0.75rem; }
+#match .card.deal-anim { animation: hex-deal 0.42s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes hex-deal {
+  from { transform: translateY(-18px) scale(0.86); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+#card-modal .modal-body {
+  max-width: min(92vw, 720px);
+  background: rgba(6, 8, 10, 0.94);
+  border: 1px solid rgba(212,175,55,0.35);
+  padding: 1.2rem 1.1rem;
+}
+#card-modal .modal-dossier { display: flex; align-items: center; gap: 1rem; }
+#card-modal .lift-dossier { width: 100%; }
+@media (orientation: portrait) {
+  #card-modal .modal-dossier { flex-direction: column; }
 }

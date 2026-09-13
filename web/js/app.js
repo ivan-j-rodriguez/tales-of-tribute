@@ -6,7 +6,7 @@ import {
   recordMatchResult, openPurse, buySack, claimAchievement, claimDailyChallenge,
   isDeckUnlocked, fragmentProgress, ACHIEVEMENTS, STARTER_DECKS, LOCKED_DECKS,
   ALL_DECKS, FRAGMENTS_TO_UNLOCK, SACK_BUY_COST, purseCount,
-  TABLE_SKINS, CARD_BACKS, STORE_FRAGMENT_COST, STORE_UPGRADE_COST,
+  TABLE_SKINS, CARD_BACKS, CARD_BACK_PALETTE, STORE_FRAGMENT_COST, STORE_UPGRADE_COST,
   buyFragment, buyUpgrade, buySkin, buyBack, equipSkin, equipBack, RANK_TIERS,
   GAUNTLET_STOPS, ensureGauntletDay, recordGauntletResult, setAiDifficulty,
   msUntilNextNyMidnight, nyDateStr,
@@ -100,21 +100,18 @@ function patronArt(id) {
 }
 
 function applyTableSkin() {
+  if (!profile) return;
+  const id = profile.tableSkin || 'high-isle';
+  [...document.body.classList].filter(c => c.startsWith('skin-')).forEach(c => document.body.classList.remove(c));
+  document.body.classList.add('skin-' + id);
   const match = $('#match');
-  if (!match || !profile) return;
-  match.className = 'screen' + (match.classList.contains('active') ? ' active' : '');
-  match.classList.add('skin-' + (profile.tableSkin || 'high-isle'));
-  document.documentElement.style.setProperty('--back-hue',
-    profile.cardBack === 'apocrypha' ? '#0a1810'
-    : profile.cardBack === 'daedra' ? '#1a0808'
-    : profile.cardBack === 'clockwork' ? '#1a1810'
-    : profile.cardBack === 'vestige' ? '#101828'
-    : '#1a1008');
-  document.documentElement.style.setProperty('--back-accent',
-    profile.cardBack === 'apocrypha' ? '#3a9050'
-    : profile.cardBack === 'daedra' ? '#c44'
-    : profile.cardBack === 'vestige' ? '#60a0ff'
-    : '#d4af37');
+  if (match) {
+    match.className = 'screen' + (match.classList.contains('active') ? ' active' : '');
+    match.classList.add('skin-' + id);
+  }
+  const pal = CARD_BACK_PALETTE[profile.cardBack] || CARD_BACK_PALETTE.default;
+  document.documentElement.style.setProperty('--back-hue', pal[0]);
+  document.documentElement.style.setProperty('--back-accent', pal[1]);
 }
 
 function refreshSplashPurse() {
@@ -173,6 +170,53 @@ function typeLabel(d) {
   else if (d.type === 'action') bits.push('Action');
   else if (d.type) bits.push(d.type);
   return bits.join(' · ') || 'Card';
+}
+
+function dossierKind(d) {
+  if (d.contract && d.type === 'agent') return 'Contract Agent';
+  if (d.contract) return 'Contract';
+  if (d.type === 'agent') return 'Agent';
+  return 'Action';
+}
+
+function effectBullets(text) {
+  if (!text) return '<li>—</li>';
+  const parts = String(text).split(/[;\n]|(?<=\.)\s+/).map(s => s.trim()).filter(Boolean);
+  return parts.map((s) => {
+    const cls = /power/i.test(s) ? 'power' : /prestige/i.test(s) ? 'prestige' : /coin/i.test(s) ? 'coin' : '';
+    const line = s.endsWith('.') ? s : s + '.';
+    return `<li class="${cls}">${line}</li>`;
+  }).join('');
+}
+
+function dossierHTML(d) {
+  const pat = patronsById[d.patron];
+  const patronName = pat?.name || d.patron || '';
+  const combos = [
+    d.combo2Text && ['Combo 2', d.combo2Text],
+    d.combo3Text && ['Combo 3', d.combo3Text],
+    d.combo4Text && ['Combo 4', d.combo4Text],
+  ].filter(Boolean);
+  return `
+    <div class="dossier-hex">
+      <img src="${artFor(d)}" alt="" draggable="false" />
+      ${d.cost != null ? `<div class="cost-badge">${d.cost}</div>` : ''}
+    </div>
+    <div class="dossier-text">
+      <div class="dossier-kinds">
+        <span>Tribute Card</span>
+        <span>${dossierKind(d)}</span>
+        <span>${patronName}</span>
+      </div>
+      <h2>${(d.name || '').toUpperCase()}</h2>
+      ${d.cost != null ? `<div class="dossier-cost"><span class="icon-disc coin">₵</span> Coin Cost <strong>${d.cost}</strong></div>` : ''}
+      <div class="dossier-block">
+        <div class="dossier-h">Play Effect</div>
+        <ul>${effectBullets(d.playText)}</ul>
+      </div>
+      ${combos.map(([h, tx]) => `<div class="dossier-block"><div class="dossier-h">${h}</div><ul>${effectBullets(tx)}</ul></div>`).join('')}
+      ${d.hp != null ? `<div class="dossier-block"><div class="dossier-h">Health</div><ul><li>${d.hp}${d.taunt ? ' · Taunt' : ''}</li></ul></div>` : ''}
+    </div>`;
 }
 
 /**
@@ -245,40 +289,31 @@ function startLift(fromEl, def) {
   endLift(true);
   if (!fromEl || !def) return;
   const rect = fromEl.getBoundingClientRect();
-  if (!rect.width) return;
   liftActive = true;
-  liftFromRect = rect;
-  fromEl.classList.add('lift-source');
-  fromEl.style.opacity = '0.25';
+  liftFromRect = rect.width ? rect : null;
+  if (fromEl) {
+    fromEl.classList.add('lift-source');
+    fromEl.style.opacity = '0.2';
+  }
   const layer = $('#lift-layer') || document.body;
   const clone = document.createElement('div');
-  clone.className = 'lift-clone';
-  clone.style.left = rect.left + 'px';
-  clone.style.top = rect.top + 'px';
-  clone.style.width = rect.width + 'px';
-  clone.style.height = rect.height + 'px';
-  const bits = [];
-  if (def.cost != null) bits.push('cost ' + def.cost);
-  if (def.hp != null) bits.push('HP ' + def.hp);
-  if (def.taunt) bits.push('Taunt');
-  clone.innerHTML = `
-    <img src="${artFor(def)}" alt="" draggable="false" />
-    <div class="lift-meta"><strong>${def.name || ''}</strong>${typeLabel(def)}${bits.length ? ' · ' + bits.join(' · ') : ''}<br>${def.playText || ''}</div>
-  `;
+  clone.className = 'lift-clone lift-dossier';
+  clone.innerHTML = dossierHTML(def);
   layer.appendChild(clone);
   liftClone = clone;
-  // Scale toward player (bottom of screen)
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
   requestAnimationFrame(() => {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const targetW = Math.min(vw * 0.72, 220);
-    const targetH = targetW * (rect.height / rect.width);
-    const tx = (vw - targetW) / 2;
-    const ty = Math.max(40, vh * 0.28 - targetH / 2);
+    const w = clone.offsetWidth || Math.min(vw * 0.9, 640);
+    const h = clone.offsetHeight || 280;
+    const tx = Math.max(12, (vw - w) / 2);
+    const ty = Math.max(16, (vh - h) / 2);
+    clone.style.left = tx + 'px';
+    clone.style.top = ty + 'px';
     clone.animate([
-      { left: rect.left + 'px', top: rect.top + 'px', width: rect.width + 'px', height: rect.height + 'px', transform: 'scale(1)' },
-      { left: tx + 'px', top: ty + 'px', width: targetW + 'px', height: targetH + 'px', transform: 'scale(1.02)' },
-    ], { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
+      { opacity: 0, transform: 'scale(0.86) translateY(18px)' },
+      { opacity: 1, transform: 'scale(1) translateY(0)' },
+    ], { duration: 260, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
   });
 }
 
@@ -501,7 +536,7 @@ function resHTML(pl, label, key) {
   };
   lastRes[key] = { coin: pl.coin, power: pl.power, prestige: pl.prestige };
   return `
-    <span style="opacity:.7;margin-right:.25rem;font-size:.75rem">${label}</span>
+    <span class="res-label">${label}</span>
     <span class="res" title="Coin"><span class="icon-disc coin">₵</span> ${tick('coin', pl.coin)}</span>
     <span class="res" title="Prestige"><span class="icon-disc prestige">♛</span> ${tick('prestige', pl.prestige)}</span>
     <span class="res" title="Power"><span class="icon-disc power">✊</span> ${tick('power', pl.power)}</span>
@@ -577,6 +612,37 @@ function renderAgentRow(row, agents, { attackable = false, onAttack = null } = {
   }
 }
 
+function renderEventsRail(you, s) {
+  const list = $('#events-list');
+  const comboEl = $('#events-combo');
+  if (!list) return;
+  list.innerHTML = '';
+  const played = (you?.played || []).filter(c => {
+    const d = cardsById[c.id];
+    return d && d.type !== 'agent';
+  });
+  const suits = you?.suitsPlayed || {};
+  const topCombo = Math.max(0, ...Object.values(suits));
+  if (comboEl) comboEl.textContent = topCombo >= 2 ? `Combo ${topCombo}` : '';
+  const turnLog = (engine.log || []).filter(l => l.t === s.turn && l.a === s.active).slice(-8);
+  const items = played.length ? played.map((c, i) => {
+    const d = cardsById[c.id];
+    return { def: d, pip: d?.playText || '', combo: topCombo >= 2 && i === played.length - 1 };
+  }) : turnLog.map(l => ({ def: null, pip: l.msg, combo: /combo/i.test(l.msg) }));
+  for (const it of items) {
+    const el = document.createElement('div');
+    el.className = 'event-hex' + (it.combo ? ' combo' : '');
+    if (it.def) {
+      el.innerHTML = `<img src="${artFor(it.def)}" alt="" /><span class="ev-pip">${it.pip}</span>`;
+      el.addEventListener('pointerdown', (e) => { e.stopPropagation(); startLift(el, it.def); });
+      el.addEventListener('pointerup', (e) => { e.stopPropagation(); endLift(); });
+    } else {
+      el.innerHTML = `<span class="ev-pip">${it.pip}</span>`;
+    }
+    list.appendChild(el);
+  }
+}
+
 function renderMatch() {
   if (!engine?.state) return;
   const s = engine.state;
@@ -603,6 +669,9 @@ function renderMatch() {
   $('#cnt-you-played').textContent = you.played.length;
   $('#cnt-you-cd').textContent = you.cooldown.length;
   $('#cnt-tavern-discard').textContent = s.tavernDiscard.length;
+  const tdraw = $('#cnt-tavern-draw');
+  if (tdraw) tdraw.textContent = (s.tavernPile || []).length;
+  renderEventsRail(you, s);
 
   // Patron rail: opp patrons TOP, treasury MIDDLE, your patrons BOTTOM
   const rail = $('#rail-patrons');
@@ -839,16 +908,7 @@ function afterPlayerAction() {
 function showCardModal(d) {
   if (!d) return;
   const m = $('#card-modal');
-  $('#card-modal-body').innerHTML = `
-    <img src="${artFor(d)}" alt="${d.name}" />
-    <h3>${d.name}</h3>
-    <p>${d.patron} · ${d.type}${d.contract ? ' · contract' : ''} · cost ${d.cost}${d.hp != null ? ' · HP ' + d.hp : ''}${d.taunt ? ' · Taunt' : ''}</p>
-    <p><em>${d.playText || '—'}</em></p>
-    ${d.combo2Text ? `<p>Combo 2: ${d.combo2Text}</p>` : ''}
-    ${d.combo3Text ? `<p>Combo 3: ${d.combo3Text}</p>` : ''}
-    ${d.combo4Text ? `<p>Combo 4: ${d.combo4Text}</p>` : ''}
-    <button id="btn-modal-close">Close</button>
-  `;
+  $('#card-modal-body').innerHTML = `<div class="lift-dossier modal-dossier">${dossierHTML(d)}</div><button id="btn-modal-close">Close</button>`;
   m.classList.add('show');
   $('#btn-modal-close').onclick = () => m.classList.remove('show');
   m.onclick = (e) => { if (e.target === m) m.classList.remove('show'); };
@@ -869,6 +929,7 @@ function openPileModal(pileKey) {
   else if (pileKey === 'opp-cooldown') { cards = opp.cooldown; title = 'Rival cooldown'; }
   else if (pileKey === 'opp-hand') { cards = opp.hand; title = 'Rival hand'; }
   else if (pileKey === 'tavern-discard') { cards = s.tavernDiscard; title = 'Tavern discard'; }
+  else if (pileKey === 'tavern-draw') { cards = s.tavernPile || []; title = 'Tavern deck'; }
 
   const grid = $('#pile-modal-grid');
   grid.innerHTML = '';
@@ -1254,7 +1315,7 @@ function renderSettings() {
       el.innerHTML = `
         <div class="skin-swatch ${s.id}"></div>
         <h4>${s.name}</h4>
-        <p>${s.desc}</p>
+        <p>${s.tag ? s.tag + ' · ' : ''}${s.desc}</p>
         <div class="price">${owned ? (eq ? 'Equipped' : 'Owned') : `🔒 ${s.price}g`}</div>
         <button type="button">${owned ? (eq ? 'Equipped' : 'Equip') : 'Buy & equip'}</button>
       `;
