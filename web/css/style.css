@@ -70,7 +70,7 @@ button.primary {
 
 #app { height: 100%; width: 100%; position: relative; }
 .screen { display: none; height: 100%; width: 100%; position: absolute; inset: 0; }
-.screen.active { display: flex; flex-direction: column; }
+.screen.active { display: flex; flex-direction: column; z-index: 3; }
 
 /* ——— Splash ——— */
 #splash {
@@ -91,7 +91,7 @@ button.primary {
   overflow: auto;
 }
 
-body.skin-high-isle { --splash-a: rgba(255,220,150,0.28); --splash-b: rgba(20,170,190,0.32); --splash-c: rgba(232,200,120,0.16); --splash-base: #081820; --splash-mid: #123028; }
+body.skin-high-isle { --splash-a: rgba(255,210,130,0.32); --splash-b: rgba(80,50,20,0.4); --splash-c: rgba(232,200,120,0.2); --splash-base: #120c08; --splash-mid: #2a1c10; }
 body.skin-auridon { --splash-a: rgba(255,230,160,0.35); --splash-b: rgba(50,160,210,0.3); --splash-c: rgba(240,220,150,0.18); --splash-base: #0c1816; --splash-mid: #1a2c28; }
 body.skin-grahtwood { --splash-a: rgba(210,190,70,0.22); --splash-b: rgba(30,70,20,0.45); --splash-c: rgba(80,120,30,0.2); --splash-base: #081208; --splash-mid: #142410; }
 body.skin-vvardenfell { --splash-a: rgba(255,90,20,0.28); --splash-b: rgba(200,140,50,0.25); --splash-c: rgba(80,30,10,0.35); --splash-base: #100806; --splash-mid: #22140e; }
@@ -321,14 +321,17 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
 
 /* High Isle — teal surf, limestone, Breton gold */
 #match.skin-high-isle {
-  --rim: #3a3224; --felt: #123028; --felt-deep: #081820;
-  --inlay-line: rgba(232,200,120,0.7);
-  --skin-glow: rgba(40,180,190,0.2);
-  --bloom-a: radial-gradient(ellipse at 16% 0%, rgba(255,220,150,0.32), transparent 38%);
-  --bloom-b: radial-gradient(ellipse at 86% 100%, rgba(20,170,190,0.3), transparent 44%);
+  --rim: #4a3420;
+  --felt: #1c2a22;
+  --felt-deep: #0e1612;
+  --inlay-line: rgba(232,200,120,0.85);
+  --skin-glow: rgba(255,200,110,0.22);
+  --bloom-a: radial-gradient(ellipse at 12% 0%, rgba(255,210,130,0.42), transparent 40%);
+  --bloom-b: radial-gradient(ellipse at 88% 100%, rgba(40,90,80,0.35), transparent 42%);
   --motif:
-    radial-gradient(ellipse at 70% 18%, rgba(180,230,240,0.1), transparent 22%),
-    repeating-linear-gradient(100deg, transparent 0 28px, rgba(255,240,200,0.04) 28px 29px);
+    radial-gradient(ellipse at 50% 50%, transparent 42%, rgba(20,12,6,0.45) 78%),
+    repeating-linear-gradient(28deg, transparent 0 18px, rgba(212,175,55,0.05) 18px 19px),
+    repeating-linear-gradient(-28deg, transparent 0 22px, rgba(212,175,55,0.035) 22px 23px);
 }
 /* Auridon — Altmer marble + Abecean blue */
 #match.skin-auridon {
@@ -1524,7 +1527,8 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
   --hand-card-h: 100px;
   --events-w: 58px;
 }
-#match { display: flex; flex-direction: column; }
+#match.screen { display: none; }
+#match.screen.active { display: flex; flex-direction: column; }
 #match .board {
   display: flex;
   flex: 1;
@@ -1944,4 +1948,28 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
 #card-modal .lift-dossier { width: 100%; }
 @media (orientation: portrait) {
   #card-modal .modal-dossier { flex-direction: column; }
+}
+
+/* Carved ESO rim — not a flat casino cloth */
+#match.screen.active::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  box-shadow:
+    inset 0 0 0 10px rgba(42, 28, 14, 0.92),
+    inset 0 0 0 12px rgba(212, 175, 55, 0.45),
+    inset 0 0 0 22px rgba(28, 18, 10, 0.88),
+    inset 0 0 80px rgba(0,0,0,0.45);
+}
+#match.screen.active > * { position: relative; z-index: 1; }
+
+#splash.screen.active {
+  background:
+    radial-gradient(ellipse at 50% 12%, rgba(255,200,110,0.28), transparent 42%),
+    radial-gradient(ellipse at 12% 88%, rgba(90,40,12,0.5), transparent 40%),
+    radial-gradient(ellipse at 90% 70%, rgba(40,20,8,0.35), transparent 35%),
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 3px),
+    linear-gradient(180deg, #140c08 0%, #2a1a10 48%, #100a06 100%);
 }
