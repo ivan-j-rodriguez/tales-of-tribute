@@ -48,6 +48,7 @@ export class GameEngine {
         patronCallsLeft: 1,
         setback: { coin: 0, power: 0, draw: 0 },
         suitsPlayed: {},
+        playedThisTurn: [],
         createdThisTurn: [],
       };
     };
@@ -183,6 +184,7 @@ export class GameEngine {
     p.patronCallsLeft = 1;
     p.suitsPlayed = {};
     p.played = [];
+    p.playedThisTurn = [];
     // Hunding favored start coin
     for (const pid of this.state.matchPatrons) {
       if (pid === 'hunding' && this._favorFor(pid) === 1) {
@@ -226,6 +228,8 @@ export class GameEngine {
     const card = p.hand.splice(idx, 1)[0];
     const def = this.card(card.id);
     p.played.push(card);
+    p.playedThisTurn = p.playedThisTurn || [];
+    p.playedThisTurn.push({ uid: card.uid, id: card.id, patron: def.patron });
 
     const suit = def.patron;
     p.suitsPlayed[suit] = (p.suitsPlayed[suit] || 0) + 1;

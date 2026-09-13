@@ -29,6 +29,7 @@
   --skin-inlay: rgba(212, 175, 55, 0.08);
   --back-hue: #1a1008;
   --back-accent: #d4af37;
+  --card-back: url('../assets/ui/card-back.svg');
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -59,6 +60,11 @@ button {
 }
 button:hover { filter: brightness(1.12); box-shadow: 0 0 14px rgba(212,175,55,0.4); }
 button:active { transform: scale(0.97); }
+button.card:hover, button.card:active, button.card:focus {
+  filter: none;
+  transform: none;
+  box-shadow: none;
+}
 button:disabled { opacity: 0.4; cursor: not-allowed; filter: none; box-shadow: none; }
 button.primary {
   background:
@@ -2867,3 +2873,304 @@ button.card:active, #match button.card:active { transform: none !important; }
 #match .card { position: relative; }
 
 body:has(#match.screen.active) #toast { display: none !important; }
+
+/* ===== Build 26 — phone table lock ===== */
+
+#match .felt-table {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+  grid-template-areas: none !important;
+  align-items: stretch !important;
+  justify-items: stretch !important;
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden !important;
+  padding: 0.2rem 3.1rem 0.12rem 2.7rem !important;
+  gap: 0.12rem !important;
+}
+#match .felt-table > * { grid-area: auto !important; grid-row: auto !important; }
+#match .felt-table > .hex-pile,
+#match .felt-hud-opp,
+#match .felt-tools,
+#match .felt-played {
+  position: absolute !important;
+  grid-row: 1 !important;
+}
+#match .felt-hud-opp,
+#match .felt-tools {
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+#match .felt-top {
+  grid-row: 1 !important;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  overflow: hidden;
+}
+#match .felt-center {
+  grid-row: 2 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  z-index: 8;
+  pointer-events: none;
+}
+#match .felt-center > * { pointer-events: auto; }
+#match .felt-bottom {
+  grid-row: 3 !important;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: stretch;
+  overflow: visible;
+}
+#match .felt-tavern,
+#match #opp-res,
+#match #you-res {
+  grid-row: auto !important;
+  position: relative;
+  width: 100%;
+}
+#match .felt-tavern {
+  min-height: 0 !important;
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+#match .tavern-zone {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  min-height: 0 !important;
+  padding: 0.15rem 0.1rem;
+}
+#match .felt-played[hidden] { display: none !important; }
+
+/* Real card-back stacks — never a blank brown hex */
+.card-back-face,
+.pile-art.card-back-face,
+.card-back-only .card-back-face,
+.pile-modal-grid .card-back-face {
+  background:
+    linear-gradient(180deg, rgba(255,236,170,0.18), transparent 36%),
+    var(--card-back),
+    linear-gradient(160deg, #2a7a64, #12382f) !important;
+  background-size: cover, cover, cover !important;
+  background-position: center !important;
+  border: none !important;
+  animation: back-shimmer 5.6s ease-in-out infinite;
+}
+@keyframes back-shimmer {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.12); }
+}
+.hex-pile {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.hex-pile .pile-art {
+  width: 52px;
+  height: 80px;
+  clip-path: var(--hex);
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 4px 10px #0009;
+}
+.hex-pile .pile-stack {
+  position: absolute;
+  left: 50%;
+  top: 2px;
+  width: 52px;
+  height: 80px;
+  margin-left: -26px;
+  pointer-events: none;
+  z-index: 1;
+}
+.hex-pile .pile-sheet {
+  position: absolute;
+  inset: 0;
+  clip-path: var(--hex);
+  background:
+    linear-gradient(180deg, rgba(255,236,170,0.12), transparent 40%),
+    var(--card-back),
+    #1a4a40;
+  background-size: cover;
+  box-shadow: 0 2px 4px #0007;
+}
+.hex-pile .pile-sheet:nth-child(1) { transform: translate(5px, 4px) rotate(4deg); opacity: 0.78; }
+.hex-pile .pile-sheet:nth-child(2) { transform: translate(2px, 2px) rotate(1.5deg); opacity: 0.9; }
+.hex-pile.pile-empty .pile-sheet { display: none; }
+.hex-pile.pile-empty .pile-art {
+  background: rgba(8, 20, 18, 0.28) !important;
+  animation: none;
+  box-shadow: inset 0 0 0 1.5px rgba(212,175,55,0.4);
+}
+.hex-pile.pile-empty .pile-art.card-back-face {
+  background: rgba(8, 20, 18, 0.28) !important;
+}
+.hex-pile .pile-art.pile-face {
+  animation: none;
+  background: #1a120c !important;
+}
+.hex-pile .pile-art.pile-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  clip-path: var(--hex);
+  pointer-events: none;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+}
+.hex-pile.pile-thick .pile-sheet:nth-child(1) { transform: translate(7px, 6px) rotate(6deg); }
+
+#pile-opp-draw { top: 8px; left: 6px; }
+#pile-opp-cd { top: 8px; right: 6px; }
+#pile-tavern-draw { top: 38%; left: 6px; }
+#pile-tavern-discard { top: 52%; left: 6px; }
+#pile-you-draw { bottom: 22%; left: 6px; }
+#pile-you-cd { bottom: 12px; right: 8px; }
+
+/* Tap never zooms. Inspect is hold-only. */
+#match .card,
+#match button.card,
+#match .card:hover,
+#match .card:active,
+#match .card:focus,
+#match button.card:hover,
+#match button.card:active,
+#match button.card:focus,
+.tavern-zone .card,
+.tavern-zone .card:active {
+  transform: none !important;
+  scale: 1 !important;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.55));
+}
+#hand-zone .card,
+#hand-zone .card:hover,
+#hand-zone .card:active,
+#hand-zone .card:focus {
+  transform: var(--fan-tf, none) !important;
+  scale: 1 !important;
+}
+#match .card.playable,
+#match .card.affordable {
+  filter: drop-shadow(0 0 5px rgba(170,235,255,1)) drop-shadow(0 0 12px rgba(130,220,255,0.7)) !important;
+}
+#match .card img,
+#match .card img.art,
+#match .lift-hex-fly img,
+.hex-pile img {
+  pointer-events: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-drag: none !important;
+  user-select: none !important;
+}
+#match, #match .card, #match img {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+html.has-touch #match .card:hover { transform: none !important; }
+
+/* Fan the held hand; keep tap targets */
+#hand-zone.you-fan,
+#hand-zone.fan-hand {
+  position: relative !important;
+  height: calc(var(--hand-card-h) + 18px) !important;
+}
+#hand-zone .card {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 0 !important;
+  margin: 0 !important;
+  transform-origin: 50% 110%;
+  transform: var(--fan-tf, none) !important;
+}
+#opp-hand-zone .card {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform-origin: 50% -10%;
+}
+
+/* Agent seats stay the same size empty or filled */
+#match .agent-slot,
+#match .agent-slot.empty,
+#match .agent-slot.filled,
+#match .agent-slot.filled .card {
+  width: calc(var(--card-w) * 0.72) !important;
+  height: calc(var(--card-h) * 0.72) !important;
+}
+#match .agent-slot.filled { width: calc(var(--card-w) * 0.72) !important; height: calc(var(--card-h) * 0.72) !important; }
+
+/* Combo rail is illustrated hexes */
+.events-list { gap: 0.34rem; }
+.event-hex {
+  width: 44px;
+  height: 68px;
+}
+.event-hex .ev-pip { display: none; }
+.event-hex .ev-combo {
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  transform: translateX(-50%);
+  font-size: 0.48rem;
+  letter-spacing: 0.04em;
+  color: #f0e6b8;
+  background: rgba(0,0,0,0.72);
+  padding: 0 3px;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+/* Mora + Treasury never tip */
+.patron-coin.mora .token-dial,
+.patron-coin[data-pid="mora"] .token-dial,
+.patron-coin.treasury .token-dial,
+.patron-coin[data-pid="treasury"] .token-dial,
+.patron-coin.mora.fav-you .token-dial,
+.patron-coin.mora.fav-opp .token-dial,
+.patron-coin.mora.neutral .token-dial {
+  transform: rotate(-90deg) !important;
+}
+.patron-coin.mora img,
+.patron-coin[data-pid="mora"] img,
+.patron-coin.treasury img,
+.patron-coin[data-pid="treasury"] img {
+  transform: rotate(90deg) !important;
+}
+
+.fly-card {
+  border-radius: 0;
+  clip-path: var(--hex);
+  filter: drop-shadow(0 10px 16px #000b);
+}
+.fly-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  pointer-events: none;
+}
+
+@media (orientation: landscape) {
+  #match .felt-table { padding: 0.15rem 4.4rem 0.1rem 3.2rem !important; }
+  .hex-pile .pile-art, .hex-pile .pile-stack { width: 46px; height: 70px; }
+}
+@media (orientation: portrait) {
+  .hex-pile .pile-art, .hex-pile .pile-stack { width: 48px; height: 74px; }
+}
