@@ -192,7 +192,7 @@ await page.evaluate(() => document.querySelector('#pc-cancel')?.click());
 const treas = await page.evaluate(() => window.__totTest.startTreasuryTarget());
 assert('treasury opens targeting', !!(treas && treas.ok && treas.steps.includes('sacrifice')), treas);
 b = await snap(page);
-assert('treasury banner asks to sacrifice', b.targetBanner === true && /Sacrifice/i.test(b.targetPrompt || ''), b);
+assert('treasury banner asks to sacrifice', b.targetBanner === true && /SACRIFICE/i.test(b.targetPrompt || ''), b);
 assert('treasury glows legal cards', b.legalGlow >= 1, b);
 const coinBefore = b.coin;
 await page.evaluate(() => document.querySelector('#target-cancel')?.click());

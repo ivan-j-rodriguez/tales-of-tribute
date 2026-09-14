@@ -763,7 +763,7 @@ function paintPatronCalls(you, opp) {
   const paint = (id, n) => {
     const el = $(id);
     if (!el) return;
-    el.innerHTML = `<span class="bust" aria-hidden="true"></span><span class="num">${n}</span>`;
+    el.innerHTML = `<span class="oct" aria-hidden="true"></span><span class="num">${n}</span>`;
     el.dataset.n = String(n);
     el.classList.toggle('empty', n <= 0);
   };
@@ -1222,37 +1222,65 @@ function finishPatronCall(pid, picks) {
   afterPlayerAction();
 }
 
-const TARGET_PROMPTS = {
-  sacrifice: 'Sacrifice a card — pay on confirm.',
-  destroy: 'Destroy a card you own.',
-  knockout: 'Knock Out an enemy Agent (Taunt first).',
-  discard: 'Discard a card.',
-  donate: 'Donate a card from your hand.',
-  toss: 'Toss: send a revealed card to cooldown.',
-  replace: 'Replace a Tavern card.',
-  acquire: 'Acquire a Tavern card.',
-  refreshHand: 'Refresh a card from cooldown to your hand.',
-  refreshDraw: 'Refresh a card from cooldown to your draw pile.',
-  confine: 'Confine a card from their cooldown under your Agent.',
-  heal: 'Heal one of your Agents.',
-  choose: 'Choose one effect.',
-  powerAttack: 'Spend Power to Knock Out an Agent (Taunt first).',
-  lookConfine: 'Choose a revealed card to send to their cooldown.',
-  moraShare: 'Choose a Tavern action both players gain.',
-};
+const TARGET_UP_TO = new Set(['destroy', 'confine', 'toss', 'donate', 'discard', 'replace', 'refreshHand', 'refreshDraw']);
+
+function targetTitle(step) {
+  const n = step.n || 1;
+  const plural = n === 1 ? '' : 'S';
+  const up = TARGET_UP_TO.has(step.kind) ? 'UP TO ' : '';
+  switch (step.kind) {
+    case 'sacrifice': return `SACRIFICE ${up}${n} CARD${plural}`;
+    case 'destroy': return `DESTROY UP TO ${n} CARD${plural}`;
+    case 'knockout': return `KNOCK OUT ${n} AGENT${plural}`;
+    case 'powerAttack': return `KNOCK OUT ${n} AGENT${plural}`;
+    case 'discard': return `DISCARD UP TO ${n} CARD${plural}`;
+    case 'donate': return `DONATE UP TO ${n} CARD${plural}`;
+    case 'toss': return `TOSS — MOVE UP TO ${n} CARD${plural}`;
+    case 'replace': return `REPLACE UP TO ${n} TAVERN CARD${plural}`;
+    case 'acquire': return `ACQUIRE A TAVERN CARD`;
+    case 'refreshHand': return `REFRESH UP TO ${n} CARD${plural} TO HAND`;
+    case 'refreshDraw': return `REFRESH UP TO ${n} CARD${plural} TO DRAW`;
+    case 'confine': return `CONFINE UP TO ${n} CARD${plural}`;
+    case 'heal': return `HEAL ${n} AGENT${plural}`;
+    case 'choose': return 'CHOOSE ONE';
+    case 'lookConfine': return `REPRIEVE — CHOOSE ${n} CARD${plural}`;
+    case 'moraShare': return 'BARGAIN — CHOOSE A TAVERN ACTION';
+    default: return 'CHOOSE A TARGET';
+  }
+}
+
+function optionCardLabel(opt) {
+  const bits = (opt || []).map((e) => {
+    if (e.op === 'coin') return `Gain ${e.n} Coin`;
+    if (e.op === 'power') return `Gain ${e.n} Power`;
+    if (e.op === 'prestige') return `Gain ${e.n} Prestige`;
+    if (e.op === 'draw') return `Draw ${e.n}`;
+    if (e.op === 'acquire') return `Acquire up to ${e.n} cost`;
+    if (e.op === 'draw_refresh') return `Refresh ${e.n} to draw`;
+    if (e.op === 'hand_refresh') return `Refresh ${e.n} to hand`;
+    if (e.op === 'knockout') return `Knock Out ${e.n}`;
+    if (e.op === 'knockout_all') return 'Knock Out all Agents';
+    return String(e.op || '').replace(/_/g, ' ');
+  }).filter(Boolean);
+  return bits.join('\n') || 'Option';
+}
 
 function beginTargetSession({ steps, onDone }) {
   endLift(true);
-  targetSession = { steps, idx: 0, picks: {}, chosen: [], onDone };
+  targetSession = { steps, idx: 0, picks: {}, chosen: [], onDone, peeking: false, boardPick: false };
   document.body.classList.add('targeting');
   paintTargetStep();
 }
 
 function clearTargetUI() {
-  document.body.classList.remove('targeting');
-  $$('.legal-target').forEach(el => el.classList.remove('legal-target'));
+  document.body.classList.remove('targeting', 'targeting-peek', 'targeting-board');
+  $$('.legal-target').forEach(el => el.classList.remove('legal-target', 'target-picked'));
   const ban = $('#target-banner');
   if (ban) ban.hidden = true;
+  const sheet = $('#target-sheet');
+  if (sheet) sheet.hidden = false;
+  const ret = $('#target-return');
+  if (ret) ret.hidden = true;
   const tray = $('#target-tray');
   if (tray) tray.innerHTML = '';
   const ch = $('#target-choices');
@@ -1264,6 +1292,64 @@ function cancelTargetSession() {
   targetSession = null;
   toast('Canceled');
   renderMatch();
+}
+
+function setTargetPeek(on) {
+  if (!targetSession) return;
+  targetSession.peeking = !!on;
+  document.body.classList.toggle('targeting-peek', !!on);
+  const sheet = $('#target-sheet');
+  const ret = $('#target-return');
+  if (sheet) sheet.hidden = !!on;
+  if (ret) ret.hidden = !on;
+}
+
+function confirmTargetStep() {
+  if (!targetSession || !engine) return;
+  const step = targetSession.steps[targetSession.idx];
+  if (!step) return;
+  const need = step.n || 1;
+  const have = targetSession.picked?.length || 0;
+  if (step.kind === 'choose') {
+    if (targetSession.picks.choose == null) { toast('Choose one option'); return; }
+    const uid = targetSession.sourceUid;
+    if (uid) {
+      const more = engine.targetingStepsForPlay(uid, targetSession.picks.choose);
+      targetSession.steps = more;
+      targetSession.idx = 0;
+    } else {
+      targetSession.idx += 1;
+    }
+    paintTargetStep();
+    return;
+  }
+  if (!have && !TARGET_UP_TO.has(step.kind) && step.kind !== 'acquire') {
+    toast('Pick a card first');
+    return;
+  }
+  if (!TARGET_UP_TO.has(step.kind) && have < need && step.kind !== 'acquire') {
+    toast(`Pick ${need}`);
+    return;
+  }
+  const delay = step.kind === 'sacrifice' || step.kind === 'destroy' ? 420
+    : step.kind === 'knockout' || step.kind === 'powerAttack' ? 380
+    : step.kind === 'confine' || step.kind === 'lookConfine' ? 400
+    : 60;
+  const sess = targetSession;
+  if (have) {
+    for (const uid of targetSession.picked) {
+      const el = document.querySelector(`.legal-target[data-uid="${uid}"]`);
+      if (!el) continue;
+      if (step.kind === 'sacrifice' || step.kind === 'destroy') el.classList.add('fx-sacrifice');
+      if (step.kind === 'knockout' || step.kind === 'powerAttack') el.classList.add('fx-slash');
+      if (step.kind === 'confine' || step.kind === 'lookConfine') el.classList.add('fx-confine');
+    }
+  }
+  setTimeout(() => {
+    if (targetSession !== sess) return;
+    targetSession.idx += 1;
+    paintTargetStep();
+  }, delay);
 }
 
 function paintTargetStep() {
@@ -1281,30 +1367,45 @@ function paintTargetStep() {
   const prompt = $('#target-prompt');
   const choices = $('#target-choices');
   const tray = $('#target-tray');
-  if (ban) ban.hidden = false;
-  if (prompt) prompt.textContent = TARGET_PROMPTS[step.kind] || 'Choose a target.';
+  const confirm = $('#target-confirm');
+  setTargetPeek(false);
+  $$('.legal-target').forEach(el => el.classList.remove('legal-target', 'target-picked'));
   if (choices) choices.innerHTML = '';
   if (tray) tray.innerHTML = '';
-  $$('.legal-target').forEach(el => el.classList.remove('legal-target'));
+  targetSession.boardPick = false;
+  document.body.classList.remove('targeting-board');
+
+  if (step.kind === 'acquire') {
+    if (ban) ban.hidden = true;
+    document.body.classList.add('targeting-board');
+    const legal = engine.legalTargets(step);
+    targetSession.legal = legal;
+    targetSession.need = 1;
+    targetSession.picked = [];
+    for (const t of legal) {
+      document.querySelector(`#match .card[data-uid="${t.uid}"]`)?.classList.add('legal-target');
+    }
+    if (!legal.length) {
+      targetSession.idx += 1;
+      paintTargetStep();
+    }
+    return;
+  }
+
+  if (ban) ban.hidden = false;
+  if (prompt) prompt.textContent = targetTitle(step);
+  if (confirm) confirm.hidden = false;
 
   if (step.kind === 'choose') {
     (step.options || []).forEach((opt, i) => {
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'target-opt';
-      const label = (opt || []).map(e => e.op).join(' / ') || `Option ${i + 1}`;
-      btn.textContent = label.replace(/_/g, ' ');
+      btn.className = 'target-opt target-opt-card';
+      btn.dataset.choice = String(i);
+      btn.innerHTML = `<span>${optionCardLabel(opt).replace(/\n/g, '<br>')}</span>`;
       btn.onclick = () => {
         targetSession.picks.choose = i;
-        const uid = targetSession.sourceUid;
-        if (uid) {
-          const more = engine.targetingStepsForPlay(uid, i);
-          targetSession.steps = more;
-          targetSession.idx = 0;
-        } else {
-          targetSession.idx += 1;
-        }
-        paintTargetStep();
+        $$('#target-choices .target-opt').forEach(el => el.classList.toggle('target-picked', el === btn));
       };
       choices.appendChild(btn);
     });
@@ -1315,23 +1416,18 @@ function paintTargetStep() {
   targetSession.legal = legal;
   targetSession.need = step.n || 1;
   targetSession.picked = [];
-  const hiddenZones = new Set(['cooldown', 'draw', 'opp-cooldown']);
   for (const t of legal) {
-    const onBoard = document.querySelector(`#match .card[data-uid="${t.uid}"]`);
-    if (onBoard && !hiddenZones.has(t.zone)) {
-      onBoard.classList.add('legal-target');
-    } else if (tray) {
-      const el = document.createElement('button');
-      el.type = 'button';
-      el.className = 'card legal-target tray-card';
-      el.dataset.uid = t.uid;
-      const d = cardsById[t.id];
-      el.innerHTML = d
-        ? `<img class="art" src="${artFor(d)}" alt="${d.name}" /><div class="meta"><div class="cname">${d.name}</div></div>`
-        : t.name;
-      el.onclick = () => pickTarget(t.uid);
-      tray.appendChild(el);
-    }
+    if (!tray) break;
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'card legal-target tray-card';
+    el.dataset.uid = t.uid;
+    const d = cardsById[t.id];
+    el.innerHTML = d
+      ? `<img class="art" src="${artFor(d)}" alt="${d.name}" /><div class="meta"><div class="cname">${d.name}</div></div>`
+      : t.name;
+    el.onclick = () => pickTarget(t.uid);
+    tray.appendChild(el);
   }
   if (!legal.length) {
     targetSession.idx += 1;
@@ -1343,33 +1439,28 @@ function pickTarget(uid) {
   if (!targetSession) return;
   const step = targetSession.steps[targetSession.idx];
   if (!step || !targetSession.legal?.some(t => t.uid === uid)) return;
-  if (targetSession.picked.includes(uid)) return;
-  targetSession.picked.push(uid);
   const key = step.kind === 'refreshHand' ? 'refreshHand'
     : step.kind === 'refreshDraw' ? 'refreshDraw'
     : step.kind;
+  if (targetSession.boardPick || step.kind === 'acquire') {
+    targetSession.picks[key] = [uid];
+    targetSession.picked = [uid];
+    confirmTargetStep();
+    return;
+  }
+  if (targetSession.picked.includes(uid)) {
+    targetSession.picked = targetSession.picked.filter(x => x !== uid);
+    const bag = targetSession.picks[key];
+    if (Array.isArray(bag)) targetSession.picks[key] = bag.filter(x => x !== uid);
+    document.querySelector(`.legal-target[data-uid="${uid}"]`)?.classList.remove('target-picked');
+    return;
+  }
+  if (targetSession.picked.length >= (step.n || 1)) return;
+  targetSession.picked.push(uid);
   if (!targetSession.picks[key]) targetSession.picks[key] = [];
   if (Array.isArray(targetSession.picks[key])) targetSession.picks[key].push(uid);
   else targetSession.picks[key] = uid;
-  const el = document.querySelector(`.legal-target[data-uid="${uid}"]`);
-  if (el) {
-    el.classList.add('target-picked');
-    if (step.kind === 'sacrifice' || step.kind === 'destroy') el.classList.add('fx-sacrifice');
-    if (step.kind === 'knockout' || step.kind === 'powerAttack') el.classList.add('fx-slash');
-    if (step.kind === 'confine' || step.kind === 'lookConfine') el.classList.add('fx-confine');
-  }
-  if (targetSession.picked.length >= (step.n || 1)) {
-    const delay = step.kind === 'sacrifice' || step.kind === 'destroy' ? 520
-      : step.kind === 'knockout' || step.kind === 'powerAttack' ? 420
-      : step.kind === 'confine' || step.kind === 'lookConfine' ? 450
-      : 90;
-    const sess = targetSession;
-    setTimeout(() => {
-      if (targetSession !== sess) return;
-      targetSession.idx += 1;
-      paintTargetStep();
-    }, delay);
-  }
+  document.querySelector(`.legal-target[data-uid="${uid}"]`)?.classList.add('target-picked');
 }
 
 function tryPlayCard(inst, el) {
@@ -2569,6 +2660,9 @@ function bind() {
 
   $('#pc-continue')?.addEventListener('click', () => confirmPatronContinue());
   $('#target-cancel')?.addEventListener('click', () => cancelTargetSession());
+  $('#target-confirm')?.addEventListener('click', () => confirmTargetStep());
+  $('#target-show-board')?.addEventListener('click', () => setTargetPeek(true));
+  $('#target-return')?.addEventListener('click', () => setTargetPeek(false));
   $('#pc-cancel')?.addEventListener('click', () => closePatronConfirm());
   $('#patron-confirm-overlay')?.addEventListener('click', (e) => {
     if (e.target.id === 'patron-confirm-overlay') closePatronConfirm();

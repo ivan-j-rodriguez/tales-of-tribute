@@ -336,11 +336,19 @@
         <button id="btn-pile-close">Close</button>
       </div>
     </div>
-    <div class="target-banner" id="target-banner" hidden>
-      <p id="target-prompt">Choose a target</p>
-      <div id="target-choices" class="target-choices"></div>
-      <div id="target-tray" class="target-tray"></div>
-      <button type="button" id="target-cancel" class="pc-cancel">Cancel</button>
+    <div class="target-overlay" id="target-banner" hidden>
+      <div class="target-veil" id="target-veil"></div>
+      <div class="target-sheet" id="target-sheet">
+        <h2 id="target-prompt">Choose a target</h2>
+        <div id="target-choices" class="target-choices"></div>
+        <div id="target-tray" class="target-tray"></div>
+        <div class="target-actions">
+          <button type="button" id="target-show-board">Show Board</button>
+          <button type="button" id="target-confirm" class="primary">Confirm</button>
+          <button type="button" id="target-cancel" class="pc-cancel">Cancel</button>
+        </div>
+      </div>
+      <button type="button" id="target-return" class="target-return" hidden>Return to pick</button>
     </div>
     <div class="toast" id="toast"></div>
     <div id="tour-root" class="tour-root" hidden>
