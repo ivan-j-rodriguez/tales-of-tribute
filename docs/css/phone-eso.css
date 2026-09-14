@@ -711,10 +711,12 @@
   grid-column: 2;
   grid-row: 1;
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 0 !important;
-  margin-top: 20%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 18% 0 0 !important;
+  margin-top: 0;
 }
 
 #match .eso-hourglass-end {
@@ -801,9 +803,10 @@
   border: none !important;
 }
 
-/* Portrait — compact but complete table, never a rotate-gate */
+/* Portrait — compact but complete table, never a rotate-gate.
+   Events rail is an overlay, so the board is felt + patron rail only. */
 body.is-portrait #match .board {
-  grid-template-columns: minmax(28px, 8%) minmax(0, 1fr) minmax(68px, 20%) !important;
+  grid-template-columns: minmax(0, 1fr) minmax(110px, 28%) !important;
 }
 body.is-portrait #match .felt-table {
   padding: 28px 4px 4px !important;
@@ -839,25 +842,24 @@ body.is-portrait #match .agent-slot.filled .card {
   height: clamp(36px, 9vw, 52px) !important;
 }
 body.is-portrait #match .patron-rail {
-  display: flex !important;
-  flex-direction: column !important;
-  grid-template-columns: none !important;
-  grid-template-rows: none !important;
-  padding: 10% 3px 8px 2px !important;
-  gap: 10px;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 36px !important;
+  grid-template-rows: 1fr !important;
+  padding: 8px 2px 8px 0 !important;
+  gap: 0;
 }
 body.is-portrait #match .rail-patrons {
-  flex: 0 0 auto;
+  grid-column: 1;
+  grid-row: 1;
   height: auto;
-  padding: 0;
+  padding: 6% 0 4%;
   gap: 12px;
 }
 body.is-portrait #match .rail-glass {
-  flex: 0 0 auto;
-  margin-top: 4px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  grid-column: 2;
+  grid-row: 1;
+  padding-top: 22% !important;
+  margin-top: 0;
 }
 body.is-portrait #match .patron-coin,
 body.is-portrait #match .patron-coin .wood-pendant,
