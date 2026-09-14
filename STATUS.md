@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-14 (build 43):** Board/felt seating + pack rebased onto Club 42 (PR #17). Pewter bezels centered on the portrait coin (~10% gothic peak; Treasury + Mora tipless). Portrait packs toward the tavern. Gold patron-use octagons sit on the hourglass / End Turn rail. Landscape tavern cards stay large and centered with chrome in the gutters. Club hub spacing / store intro / `club-chrome.css` from main 42. `?v=43`.
+
 **2026-09-14 (build 42):** Club hub section heads no longer sit on card titles or weekly meta (PROVINCES ROAD / FAN TOURNAMENT / WEEKLY CHALLENGES). Club Store intro is one inviting line; Unofficial / No IAP lives on the store footer and Settings. No felt / board-pass / table-pack / phone-eso match edits. `?v=42`.
 
 **2026-09-14 (build 41):** Board/felt spacing pass rebased onto Club 40 (PR #16). Chrome uses the full felt width. Tavern cards clear DRAW/DECK. Portrait turn banner, resource HUD, End Turn, played-effects, and Leave no longer overlap. Hold-inspect is a dark dossier modal. Patron tokens unchanged (round pewter + ~10% gothic peak). Club High Isle chrome / store / collection / CC0 beds stay from main. `?v=41`.
@@ -65,7 +67,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=42`. Dual-orientation board from PR #15 plus seating/pack sits under Club chrome 42.
+`docs/` is a copy of `web/`. Cache-bust `?v=43`. Board seating/pack from PR #18 sits under Club chrome 42.
 
 | Fix | Notes |
 |---|---|
