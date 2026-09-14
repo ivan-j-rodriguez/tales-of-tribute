@@ -319,6 +319,7 @@ await closeUp(portPage, `${TAG}-portrait-four-corners`, [pBoxes.oppDraw, pBoxes.
 await closeUp(portPage, `${TAG}-portrait-end-turn-bl`, [pBoxes.endTurn, pBoxes.youDraw, pBoxes.leaveHud], 390, 844);
 await closeUp(portPage, `${TAG}-portrait-deck-beside-tavern`, [pBoxes.deck, pBoxes.tavern, pBoxes.oppDraw], 390, 844);
 await closeUp(portPage, `${TAG}-portrait-pile-backs`, [pBoxes.oppDrawStack || pBoxes.oppDraw, pBoxes.youDrawStack || pBoxes.youDraw, pBoxes.deck], 390, 844);
+await closeUp(portPage, `${TAG}-portrait-deck-back`, [pBoxes.deck], 390, 844);
 const handGlowBox = await portPage.evaluate(() => {
   const cards = [...document.querySelectorAll('#hand-zone .card.playable, #hand-zone .card.affordable')];
   if (!cards.length) return null;
