@@ -38,10 +38,12 @@
 }
 
 .club-header {
-  background: linear-gradient(180deg, rgba(6, 20, 28, 0.96), rgba(6, 20, 28, 0.88)) !important;
+  background: linear-gradient(180deg, #071821 0%, #06141c 100%) !important;
   border-bottom: 1px solid rgba(230, 197, 106, 0.28);
   margin: -1rem -1rem 0.85rem !important;
-  padding: 0.65rem 1rem !important;
+  padding: 0.65rem 1rem 0.75rem !important;
+  z-index: 8;
+  box-shadow: 0 -24px 0 #06141c, 0 10px 18px rgba(3, 11, 18, 0.55);
 }
 .club-header h2, #friend-lobby h2, #collection h2, #store h2, #settings h2 {
   color: var(--hi-gold) !important;
@@ -76,11 +78,62 @@
 }
 
 .club-stat .val, .ach-row .ach-info strong { color: var(--hi-gold-bright) !important; }
+
+/* Club hub / store are flex columns (.screen.active). Default flex-shrink: 1
+   compresses section heads onto the cards beneath them on a phone viewport. */
+#club.screen.active > *,
+#store.screen.active > *,
+#collection.screen.active > *,
+#settings.screen.active > *,
+#ranked.screen.active > *,
+#gauntlet.screen.active > *,
+#friend-lobby.screen.active > * {
+  flex-shrink: 0;
+}
+
+.club-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin: 0 0 1.25rem;
+  padding: 0.25rem 0 0.2rem;
+  overflow: visible;
+  scroll-margin-top: 5.6rem;
+}
+.club-block .club-section {
+  margin: 0 !important;
+  padding: 0;
+}
+
 .club-section {
   color: var(--hi-gold) !important;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   font-size: 0.72rem !important;
+  line-height: 1.45;
+  margin: 1.2rem 0 0.65rem !important;
+  padding: 0.12rem 0 0.2rem;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+#club .season-banner,
+#club .ach-row,
+#club .ach-list,
+#club .login-cal,
+#club .hint,
+#store .bundle-card,
+#store .store-hero {
+  overflow: visible;
+}
+#club .season-banner h4,
+#club .ach-info strong {
+  overflow: visible;
+  line-height: 1.3;
+}
+#club .hint {
+  margin: 0;
+  line-height: 1.45;
 }
 
 #splash, #club, #store, #collection, #settings, #ranked, #gauntlet, #friend-lobby, #deckpick {
@@ -229,7 +282,20 @@
 }
 
 /* ——— Store: Crown Store energy ——— */
-#store-hint { color: var(--hi-cream) !important; max-width: 40rem; }
+#store-hint {
+  color: var(--hi-cream) !important;
+  max-width: 28rem;
+  margin: 0 0 0.4rem !important;
+  line-height: 1.35;
+}
+.store-footnote {
+  margin: 1.5rem 0 0.35rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #7a8a90;
+  text-align: center;
+}
 .store-nav {
   display: flex; flex-wrap: wrap; gap: 0.4rem;
   margin: 0 0 0.9rem;
@@ -247,7 +313,18 @@
   background: rgba(3, 11, 18, 0.45);
 }
 .store-nav a:hover { border-color: var(--hi-gold); color: var(--hi-gold-bright); }
-.store-section { margin-bottom: 1.15rem; scroll-margin-top: 3.6rem; }
+.store-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-bottom: 1.25rem;
+  scroll-margin-top: 5.6rem;
+  overflow: visible;
+}
+.store-section .club-section {
+  margin: 0 !important;
+  padding: 0;
+}
 
 .store-item {
   position: relative;

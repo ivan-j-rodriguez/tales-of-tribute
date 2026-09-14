@@ -7,11 +7,11 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta name="theme-color" content="#06141c" />
   <title>Tales of Tribute — Fan Table</title>
-  <link rel="stylesheet" href="css/style.css?v=41" />
-  <link rel="stylesheet" href="css/phone-eso.css?v=41" />
-  <link rel="stylesheet" href="css/table-pack.css?v=41" />
-  <link rel="stylesheet" href="css/board-pass.css?v=41" />
-  <link rel="stylesheet" href="css/club-chrome.css?v=41" />
+  <link rel="stylesheet" href="css/style.css?v=42" />
+  <link rel="stylesheet" href="css/phone-eso.css?v=42" />
+  <link rel="stylesheet" href="css/table-pack.css?v=42" />
+  <link rel="stylesheet" href="css/board-pass.css?v=42" />
+  <link rel="stylesheet" href="css/club-chrome.css?v=42" />
 </head>
 <body>
   <div id="app">
@@ -46,7 +46,7 @@
           <label class="chk"><input type="checkbox" id="chk-hourglass-splash" /> Hourglass (90s)</label>
           <button type="button" id="btn-music" class="music-toggle" title="Music">♪ Music: Off</button>
         </div>
-        <p class="build-stamp" id="build-stamp">build 41</p>
+        <p class="build-stamp" id="build-stamp">build 42</p>
         <p class="disclaimer">Unofficial fan project. Not affiliated with Bethesda Softworks or ZeniMax Online Studios.</p>
       </div>
     </section>
@@ -142,24 +142,40 @@
         <button class="primary" id="btn-store">Store</button>
         <button id="btn-collection">Collection</button>
       </div>
-      <h3 class="club-section">Login calendar</h3>
-      <p class="hint">America/New_York midnight. Missed days mark a red X — the Club remembers.</p>
-      <div id="club-calendar" class="login-cal"></div>
-      <h3 class="club-section">Provinces road</h3>
-      <div id="club-road" class="season-banner"></div>
-      <h3 class="club-section">Ranked</h3>
-      <div id="club-ranked"></div>
-      <h3 class="club-section">Fan tournament</h3>
-      <div id="club-tournament" class="season-banner"></div>
-      <h3 class="club-section">Weekly Challenges</h3>
-      <p class="hint" id="club-weekly-hint"></p>
-      <div id="club-weekly" class="ach-list"></div>
-      <h3 class="club-section">Seasonal</h3>
-      <div id="club-seasonal"></div>
-      <h3 class="club-section">Daily</h3>
-      <div id="club-daily"></div>
-      <h3 class="club-section">Achievements</h3>
-      <div id="club-achievements" class="ach-list"></div>
+      <div class="club-block">
+        <h3 class="club-section">Login calendar</h3>
+        <p class="hint">America/New_York midnight. Missed days mark a red X — the Club remembers.</p>
+        <div id="club-calendar" class="login-cal"></div>
+      </div>
+      <div class="club-block">
+        <h3 class="club-section">Provinces road</h3>
+        <div id="club-road" class="season-banner"></div>
+      </div>
+      <div class="club-block">
+        <h3 class="club-section">Ranked</h3>
+        <div id="club-ranked"></div>
+      </div>
+      <div class="club-block">
+        <h3 class="club-section">Fan tournament</h3>
+        <div id="club-tournament" class="season-banner"></div>
+      </div>
+      <div class="club-block">
+        <h3 class="club-section">Weekly Challenges</h3>
+        <p class="hint" id="club-weekly-hint"></p>
+        <div id="club-weekly" class="ach-list"></div>
+      </div>
+      <div class="club-block">
+        <h3 class="club-section">Seasonal</h3>
+        <div id="club-seasonal"></div>
+      </div>
+      <div class="club-block">
+        <h3 class="club-section">Daily</h3>
+        <div id="club-daily"></div>
+      </div>
+      <div class="club-block">
+        <h3 class="club-section">Achievements</h3>
+        <div id="club-achievements" class="ach-list"></div>
+      </div>
     </section>
 
     <!-- STORE -->
@@ -169,7 +185,7 @@
         <span class="store-gold" id="store-gold"></span>
         <button id="btn-store-back">Back</button>
       </header>
-      <p class="hint" id="store-hint">Treasures of High Isle — featured parcels, the day’s slate, patron fragments, and Breton cosmetics. Purse gold only. Unofficial. No IAP.</p>
+      <p class="hint" id="store-hint">Treasures of High Isle — featured parcels and the day’s slate.</p>
       <p class="store-timer" id="store-timer"></p>
       <nav class="store-nav" aria-label="Store sections">
         <a href="#store-featured-block">Featured</a>
@@ -199,6 +215,7 @@
         <div class="store-grid" id="store-tomorrow"></div>
       </section>
       <div class="store-grid" id="store-later" hidden></div>
+      <p class="store-footnote">Unofficial fan table · No IAP</p>
     </section>
 
     <!-- COLLECTION -->
@@ -260,7 +277,7 @@
       </div>
       <div class="settings-block" id="settings-about">
         <h3 class="club-section">About</h3>
-        <p class="hint">Unofficial Ivan Rodriguez fan table. Not for sale. No in-app purchases. Card art courtesy of UESP. Club beds are CC0: RandomMind (The Old Tower Inn, King’s Feast, Market Day), The Cynic Project / cynicmusic.com (A New Town), yd (Tavern), plus an original Night Harbor loop — never Kevin MacLeod, never the ESO soundtrack. See assets/audio/CREDITS.txt.</p>
+        <p class="hint">Unofficial Ivan Rodriguez fan table. Not for sale. No IAP. Card art courtesy of UESP. Club beds are CC0: RandomMind (The Old Tower Inn, King’s Feast, Market Day), The Cynic Project / cynicmusic.com (A New Town), yd (Tavern), plus an original Night Harbor loop — never Kevin MacLeod, never the ESO soundtrack. See assets/audio/CREDITS.txt.</p>
       </div>
     </section>
 
@@ -490,6 +507,6 @@
       </div>
     </div>
   </div>
-  <script type="module" src="js/app.js?v=41"></script>
+  <script type="module" src="js/app.js?v=42"></script>
 </body>
 </html>

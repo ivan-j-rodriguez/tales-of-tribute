@@ -359,7 +359,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 41';
+  if (stamp) stamp.textContent = 'build 42';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -3953,6 +3953,11 @@ function installTestHook() {
       isRankedMatch = false;
       isGauntletMatch = false;
       startMatch({ playerFirst: true, difficulty: 1 });
+    },
+    openClub() {
+      $('#login-overlay')?.classList.remove('show');
+      renderClub();
+      show('#club');
     },
     openStore() {
       $('#login-overlay')?.classList.remove('show');

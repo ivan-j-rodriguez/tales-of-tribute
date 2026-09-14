@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-14 (build 42):** Club hub section heads no longer sit on card titles or weekly meta (PROVINCES ROAD / FAN TOURNAMENT / WEEKLY CHALLENGES). Club Store intro is one inviting line; Unofficial / No IAP lives on the store footer and Settings. No felt / board-pass / table-pack / phone-eso match edits. `?v=42`.
+
 **2026-09-14 (build 41):** Board/felt spacing pass rebased onto Club 40 (PR #16). Chrome uses the full felt width. Tavern cards clear DRAW/DECK. Portrait turn banner, resource HUD, End Turn, played-effects, and Leave no longer overlap. Hold-inspect is a dark dossier modal. Patron tokens unchanged (round pewter + ~10% gothic peak). Club High Isle chrome / store / collection / CC0 beds stay from main. `?v=41`.
 
 **2026-09-14 (build 40):** Club chrome overhaul — High Isle / Crown Store palette (gold, cream parchment, deep navy-teal, metal). Splash primary actions. Store sections Featured/Bundles, Daily, Fragments, Cosmetics with hero parcels (aspirational copy; economy still grindy). Collection taps open real detail sheets. Card-info modal shows full hex + name (no clip). Kevin MacLeod beds removed; CC0 looping playlists with crossfades. No felt / board-pass edits. `?v=40`.
@@ -63,7 +65,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=41`. Dual-orientation board from PR #15 sits on Club chrome 40.
+`docs/` is a copy of `web/`. Cache-bust `?v=42`. Dual-orientation board from PR #15 sits under Club chrome 42.
 
 | Fix | Notes |
 |---|---|
