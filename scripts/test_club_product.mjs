@@ -39,8 +39,8 @@ assert(/shop|today/i.test(buyErr.error || '') && !/slate/i.test(buyErr.error || 
 const html = readFileSync(new URL('../web/index.html', import.meta.url), 'utf8');
 assert(!/Daily slate/i.test(html), 'index has no Daily slate');
 assert(/Daily stock/.test(html), 'index has Daily stock');
-assert(/build 46/.test(html), 'splash stamp is build 46');
-assert(/\?v=46/.test(html), 'cache bust is 46');
+assert(/build 47/.test(html), 'splash stamp is build 47');
+assert(/\?v=47/.test(html), 'cache bust is 47');
 const splash = html.split('id="splash"')[1]?.split('id="ranked"')[0] || '';
 assert(!/Unofficial/i.test(splash), 'splash body has no unofficial line');
 assert(/id="account-disclaimer"/.test(html) && /id="about-disclaimer"/.test(html), 'disclaimers live on login and About');

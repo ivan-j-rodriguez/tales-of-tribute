@@ -62,6 +62,14 @@ console.log('store', storeCopy);
 if (/slate/i.test(JSON.stringify(storeCopy))) throw new Error('store still says slate');
 if (/unofficial/i.test(JSON.stringify(storeCopy))) throw new Error('store still says unofficial');
 await store.evaluate(() => { document.querySelector('#store').scrollTop = 0; });
+const storeOverflow = await store.evaluate(() => {
+  const el = document.querySelector('#store');
+  return { sw: el.scrollWidth, cw: el.clientWidth };
+});
+console.log('store overflow', storeOverflow);
+if (storeOverflow.sw > storeOverflow.cw + 1) {
+  throw new Error(`store horizontal overflow: scrollWidth ${storeOverflow.sw} > clientWidth ${storeOverflow.cw}`);
+}
 await shot(store, 'club_store_no_slate.png');
 await store.close();
 
