@@ -103,6 +103,31 @@ function isPortrait() {
   return h > w;
 }
 
+/** Expo Go / native WebView: `?native=1` (or `?expo=1`) hides browser-only tips. */
+function isNativeShell() {
+  try {
+    const q = new URLSearchParams(window.location.search);
+    const flag = q.get('native') || q.get('expo');
+    if (flag === '1' || flag === 'true' || flag === 'yes') return true;
+  } catch {
+    /* ignore */
+  }
+  return document.documentElement.classList.contains('is-native')
+    || document.body.classList.contains('is-native');
+}
+
+function applyNativeShell() {
+  if (!isNativeShell()) return false;
+  document.documentElement.classList.add('is-native');
+  document.body.classList.add('is-native');
+  const tip = $('#landscape-tip');
+  if (tip) {
+    tip.hidden = true;
+    tip.style.display = 'none';
+  }
+  return true;
+}
+
 function syncBoardLayout() {
   const match = $('#match');
   const matchOn = !!match?.classList.contains('active');
@@ -110,8 +135,9 @@ function syncBoardLayout() {
   document.body.classList.toggle('is-portrait', matchOn && portrait);
   document.body.classList.toggle('is-landscape', matchOn && !portrait);
   document.body.classList.remove('need-landscape');
+  applyNativeShell();
   const tip = $('#landscape-tip');
-  if (tip) tip.hidden = !(matchOn && portrait);
+  if (tip) tip.hidden = isNativeShell() || !(matchOn && portrait);
   const board = match?.querySelector('.board');
   if (!board || !matchOn) return;
   board.style.width = '100%';
@@ -194,7 +220,7 @@ function onSplashEnter() {
   }
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 28';
+  if (stamp) stamp.textContent = 'build 30';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -2585,6 +2611,7 @@ function installTestHook() {
     },
     liftOpen: () => liftActive,
     rotateGate: () => false,
+    isNative: () => isNativeShell(),
     portraitTip: () => !$('#landscape-tip')?.hidden,
     boardFill() {
       const b = document.querySelector('#match .board')?.getBoundingClientRect();
@@ -2593,6 +2620,8 @@ function installTestHook() {
     },
   };
 }
+
+applyNativeShell();
 
 loadData().then(() => {
   profile = loadProfile();

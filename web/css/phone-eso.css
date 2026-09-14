@@ -55,6 +55,20 @@
   box-shadow: 0 4px 14px #0008;
 }
 
+/* Expo Go / native WebView — no browser-chrome tips, honor injected insets. */
+html.is-native .landscape-tip,
+body.is-native .landscape-tip {
+  display: none !important;
+}
+
+html.is-native #match.screen.active {
+  padding:
+    max(env(safe-area-inset-top, 0px), var(--native-sat, 0px))
+    max(env(safe-area-inset-right, 0px), var(--native-sar, 0px))
+    max(env(safe-area-inset-bottom, 0px), var(--native-sab, 0px))
+    max(env(safe-area-inset-left, 0px), var(--native-sal, 0px)) !important;
+}
+
 #match .board-viewport {
   flex: 1 1 auto;
   width: 100%;

@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "Tales of Tribute (fan)",
+    "slug": "tales-of-tribute-fan",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0d2a28",
+    "scheme": "talesoftribute",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0d2a28"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "org.fan.talesoftribute",
+      "requireFullScreen": true,
+      "infoPlist": {
+        "UIStatusBarHidden": true,
+        "UIViewControllerBasedStatusBarAppearance": false,
+        "UIRequiresFullScreen": true
+      }
+    },
+    "android": {
+      "package": "org.fan.talesoftribute",
+      "softwareKeyboardLayoutMode": "pan",
+      "adaptiveIcon": {
+        "backgroundColor": "#0d2a28",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "orientation": "any",
+      "themeColor": "#0d2a28",
+      "backgroundColor": "#0d2a28"
+    },
+    "extra": {
+      "tableUrl": "https://ivan-j-rodriguez.github.io/tales-of-tribute/",
+      "unofficial": true,
+      "notForSale": true
+    }
+  }
+}

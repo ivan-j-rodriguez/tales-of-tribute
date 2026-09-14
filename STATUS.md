@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-14 (Expo Go wrapper, build 30):** `expo/` is a full-screen `react-native-webview` shell of the existing `web/` SPA for Expo Go (no Xcode). `?native=1` hides the “Landscape plays better” banner. GitHub Pages `docs/` stays the public table. SwiftUI `ios/TalesOfTribute` is unchanged.
+
 **2026-09-13 (web phone fix, build 28):** Build 27 letterboxed landscape (1180×640 card with dark side bars) and blocked portrait behind a rotate-gate.
 
 - **Landscape:** board is `100%` of the Safari viewport (`100dvw × 100dvh`, safe-area insets). Fluid CSS grid — no fixed canvas, no scale-to-fit gutters.
@@ -17,7 +19,7 @@
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=28`.
+`docs/` is a copy of `web/`. Cache-bust `?v=30`.
 
 | Fix | Notes |
 |---|---|
@@ -57,6 +59,8 @@ This Cloud VM has **no Xcode / Simulator / Swift**. The Xcode project is intende
 ## How to run
 
 **Web:** `cd web && python3 -m http.server 8080`
+
+**Expo Go:** install Expo Go, then open https://snack.expo.dev/pzo0vkEnrFNGI0TAERfXI (or `cd expo && npm install && npx expo start --tunnel`).
 
 **iOS:** Open `ios/TalesOfTribute/TalesOfTribute.xcodeproj` in Xcode 15+, run on iOS 17+.
 

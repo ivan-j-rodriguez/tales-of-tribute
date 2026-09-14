@@ -22,6 +22,50 @@ node scripts/test_ios_engine.mjs
 
 On a Mac: `cd ios/TributeCore && swift test`
 
+## Expo Go (iPhone, no Mac / no Xcode)
+
+The SwiftUI app above still needs Xcode 15+. **Expo Go** wraps the same `web/` table in a full-screen WebView — no Safari URL bar, no “LANDSCAPE PLAYS BETTER” banner.
+
+**Unofficial, not for sale, no IAP.**
+
+### On the iPhone right now
+
+1. Install **[Expo Go](https://apps.apple.com/app/expo-go/id982107779)**.
+2. Open this public Snack (no Expo account required):
+
+   **https://snack.expo.dev/pzo0vkEnrFNGI0TAERfXI**
+
+   Or scan `expo/assets/expo-go-qr.png`, or paste this into Expo Go:
+
+   `exp://u.expo.dev/933fd9c0-1666-11e7-afca-d980795c5824?runtime-version=exposdk%3A54.0.0&channel-name=production&snack=pzo0vkEnrFNGI0TAERfXI`
+
+3. Tap **Open with Expo Go**.
+4. Play. Portrait and landscape both work. The felt is edge-to-edge; the notch is padded. `?native=1` hides the landscape banner.
+
+The Snack is SDK **54** (Snack’s current ceiling). The `expo/` folder in this repo is SDK **57** to match a current Expo Go install. If Expo Go refuses the Snack as too old, use the computer steps below — those start the SDK 57 project.
+
+Saved Snack metadata: `expo/snack.json`. To mint a new anonymous Snack: `cd expo && npm install snack-sdk && npm run publish-snack`.
+
+### If you have any computer (not only a Mac)
+
+```bash
+git clone https://github.com/ivan-j-rodriguez/tales-of-tribute.git
+cd tales-of-tribute/expo
+npm install
+npx expo start --tunnel
+```
+
+Scan the QR with Expo Go. `--tunnel` works when the phone is not on the same Wi-Fi.
+
+To load a **local** `web/` folder instead of GitHub Pages (same LAN):
+
+```bash
+cd tales-of-tribute/expo
+./scripts/start-local-web.sh
+```
+
+Details: `expo/README.md`.
+
 ## Web preview
 
 ```bash
@@ -57,8 +101,10 @@ Card and patron portraits are from **UESP** (`ON-tribute-*` files) via the Media
 ```
 data/              JSON + rules
 web/               static SPA
+docs/              GitHub Pages copy of web/
+expo/              Expo Go WebView shell (this table, full-screen)
 ios/TributeCore    Swift rules package + XCTest
-ios/TalesOfTribute SwiftUI app
+ios/TalesOfTribute SwiftUI app (Xcode 15+)
 ios/preview        HTML board/map check (no Simulator)
 scripts/           data + art generators + Linux engine spec
 ```
