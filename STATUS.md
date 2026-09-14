@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-14 (build 49):** Board/felt only. Opening 5-card hand is centered on the true vertical midline — middle-card top centerX ≈ vw/2 (portrait + landscape). SFX / settings / Leave strip shifts up from the build 48 56% seat; End Turn stays under that strip (portrait). DRAW left / COOLDOWN right unchanged. Treasury pewter ring stays seated on the stretched right rail. Layout-fb overlap gates from board #15/#18/#19/#23 stay green. Club hub / store / collection / economy / music / auth / voice / club-chrome untouched. `?v=49`.
+
 **2026-09-14 (build 48):** Board/felt portrait pack rebased onto Club 47 (PR #22 store overflow). DRAW piles flush left; COOLDOWN piles flush right. SFX / settings / Leave become a mid-left vertical strip; End Turn / hourglass moves to bottom-left under that strip (portrait). Right rail rebalances patron-use octagons; patrons stay on the right. Landscape is a dual layout: piles to the edges, compact left chrome, End Turn stays on the right rail. Layout-fb overlap gates from board #15/#18/#19 stay green. Club hub / store / collection / economy from main 47. `?v=48`.
 
 **2026-09-14 (build 47):** Club Store horizontal overflow. Featured hero `::after` glow leaked past `.bundle-card` because `#store .bundle-card` was `overflow: visible`; `#store.scrollWidth` was ~54px wider than the viewport on a 390px phone. Cards clip the glow again; store grids wrap. Board CSS untouched. `?v=47`.
@@ -79,7 +81,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=48`. Board/felt portrait pack (DRAW left, COOLDOWN right, mid-left chrome strip, End Turn bottom-left) on Club 47.
+`docs/` is a copy of `web/`. Cache-bust `?v=49`. Board/felt hand-center + raised left chrome strip on Club 47 / board 48.
 
 | Fix | Notes |
 |---|---|
