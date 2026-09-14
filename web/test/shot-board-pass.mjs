@@ -99,6 +99,8 @@ async function measure(page, fileStem, { w, h }) {
     botBandPct: m.botBandPct,
     cardCount: m.cardCount,
     cardH: m.cardH,
+    midGapPct: m.midGapPct,
+    peakPct: m.peakPct,
     tavernDiscard: m.tavernDiscard,
     medallions: m.medallions,
     pointedTips: m.pointedTips,
@@ -118,8 +120,12 @@ async function measure(page, fileStem, { w, h }) {
   if (!pointed.length || pointed.some(p => !p.tip || p.tipless)) fail(`${fileStem} pointed patrons missing gothic tip`, notes);
   if (w < h) {
     if (m.topBandPct > 8 || m.botBandPct > 8) fail(`${fileStem} empty portrait bands T/B ${m.topBandPct}/${m.botBandPct}`, notes);
+    if ((m.midGapPct || 0) > 16) fail(`${fileStem} tavern-to-hand gap ${m.midGapPct}% (need ≤16%)`, notes);
   } else {
     if (m.leftGutterPct > 10) fail(`${fileStem} landscape left gutter ${m.leftGutterPct}%`, notes);
+  }
+  if (m.peakPct == null || m.peakPct < 7 || m.peakPct > 14) {
+    fail(`${fileStem} peak ${m.peakPct}% of diameter (need ≈10%, gate 7–14)`, notes);
   }
   console.log('ok ', JSON.stringify(notes));
   return notes;
@@ -170,9 +176,11 @@ if (pelinOpp?.favor !== 'unfavored') fail('pelin fav-opp not unfavored', pelinOp
 if (treas && treas.rot !== 'none') fail('treasury rotated', treas);
 
 const note = [
-  'Build 37 board-pass measurements',
+  'Build 39 board-pass measurements',
   `portrait 390x844: tavern ${results.portrait.tavernW}px = ${results.portrait.viewportTavernPct}% vw`,
   `  empty bands T/B ${results.portrait.topBandPct}% / ${results.portrait.botBandPct}% (need ≤8%)`,
+  `  tavern-to-hand gap ${results.portrait.midGapPct}% (need ≤16%)`,
+  `  peak ${results.portrait.peakPct}% of diameter (need ≈10%)`,
   `  tavern discard: ${results.portrait.tavernDiscard}  banner: ${results.portrait.landscapeBanner}`,
   `  medallions ${results.portrait.medallions}, gothic tips ${results.portrait.pointedTips}, Treasury tip ${results.portrait.treasuryHasTip}`,
   `landscape 844x390: tavern ${results.landscape.tavernW}px = ${results.landscape.viewportTavernPct}% vw (need ≥72%)`,

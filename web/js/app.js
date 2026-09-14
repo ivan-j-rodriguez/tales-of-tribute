@@ -275,31 +275,32 @@ function medallionMarkup(pid, pat, short, favorWord) {
       </div>
       <span class="plabel">${short}</span>`;
   }
-  /* One path: circular body + gothic ogive. The point is the bezel. */
+  /*
+   * ROUND pewter coin + short gothic peak (~10% of diameter).
+   * Circle centered at (50, 56), r=45, viewBox 0 0 100 110.
+   * Peak tip at y=2 → 9 units above the circle (9/90 = 10%).
+   */
   const sil = [
-    'M50 1.2',
-    'C58 11, 67 17, 75 28',
-    'C91 44, 98.2 58, 98.2 73',
-    'A48.2 48.2 0 1 1 1.8 73',
-    'C1.8 58, 9 44, 25 28',
-    'C33 17, 42 11, 50 1.2 Z',
+    'M50 2',
+    'C53.8 6.8, 61 11.2, 68.3 14.9',
+    'A45 45 0 1 1 31.7 14.9',
+    'C39 11.2, 46.2 6.8, 50 2 Z',
   ].join(' ');
-  const windowHole = 'M50 73 m-27.4 0 a27.4 27.4 0 1 1 54.8 0 a27.4 27.4 0 1 1 -54.8 0';
+  const windowHole = 'M50 56 m-27 0 a27 27 0 1 1 54 0 a27 27 0 1 1 -54 0';
   return `
     <div class="token-dial medallion" title="${title}">
       <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
-      <svg class="medallion-svg" viewBox="0 0 100 124" aria-hidden="true">
+      <svg class="medallion-svg" viewBox="0 0 100 110" aria-hidden="true">
         <defs>${defs}</defs>
-        <path class="token-point medallion-body" fill="url(#${uid}-pew)" fill-rule="evenodd" stroke="#1c1812" stroke-width="1.5"
+        <path class="token-point medallion-body" fill="url(#${uid}-pew)" fill-rule="evenodd" stroke="#1c1812" stroke-width="1.45"
           d="${sil} ${windowHole}"/>
-        <path fill="none" stroke="url(#${uid}-hi)" stroke-width="1.35" d="M50 5 C58 14, 67 20, 76 32"/>
-        <path fill="none" stroke="#1c1812" stroke-width="0.7" opacity=".55" d="M50 5 C42 14, 33 20, 24 32"/>
-        <path fill="none" stroke="url(#${uid}-hi)" stroke-width="1.05" d="M44 18 L50 6 L56 18"/>
-        <circle class="token-finial" cx="50" cy="4.6" r="2.55" fill="url(#${uid}-hi)" stroke="#1c1812" stroke-width="0.7"/>
-        <circle cx="50" cy="73" r="28.4" fill="none" stroke="#1c1812" stroke-width="1.45"/>
-        <circle cx="50" cy="73" r="27.2" fill="none" stroke="#efe6d4" stroke-width="1.1" opacity=".92"/>
-        <circle cx="50" cy="73" r="39.4" fill="none" stroke="#5c564c" stroke-width="2.25"/>
-        ${rimKnotwork(uid, 50, 73, 38.6, 10, true)}
+        <path fill="none" stroke="url(#${uid}-hi)" stroke-width="1.15" d="M50 4.2 C54 8.4, 61 11.6, 67.4 14.6"/>
+        <path fill="none" stroke="#1c1812" stroke-width="0.6" opacity=".5" d="M50 4.2 C46 8.4, 39 11.6, 32.6 14.6"/>
+        <circle class="token-finial" cx="50" cy="3.6" r="1.85" fill="url(#${uid}-hi)" stroke="#1c1812" stroke-width="0.6"/>
+        <circle cx="50" cy="56" r="28" fill="none" stroke="#1c1812" stroke-width="1.4"/>
+        <circle cx="50" cy="56" r="26.8" fill="none" stroke="#efe6d4" stroke-width="1.05" opacity=".92"/>
+        <circle cx="50" cy="56" r="38.4" fill="none" stroke="#5c564c" stroke-width="2.1"/>
+        ${rimKnotwork(uid, 50, 56, 37.8, 12, true)}
       </svg>
     </div>
     <span class="plabel">${short}</span>`;
@@ -3539,10 +3540,21 @@ function layoutMetrics() {
     overlap = Math.max(overlap, cards[i - 1].right - cards[i].x);
   }
   const oppHand = box('#match .felt-opp-hand');
-  const youHand = box('#match .felt-you-hand');
+  const youHand = box('#match .felt-you-hand') || box('#hand-zone');
   const feltW = felt?.w || board?.w || vw;
   const feltH = felt?.h || board?.h || vh;
   const tavernW = band?.w || tavern?.w || 0;
+  const tavernBottom = (tavern || band)?.bottom || 0;
+  const handTop = youHand?.y || 0;
+  const midGap = tavernBottom && handTop ? Math.max(0, handTop - tavernBottom) : 0;
+  const peakPath = document.querySelector('#rail-patrons path.token-point');
+  let peakPct = null;
+  if (peakPath) {
+    const bb = peakPath.getBBox();
+    const diameter = bb.width;
+    const peakH = Math.max(0, bb.height - diameter);
+    peakPct = diameter ? +(peakH / diameter * 100).toFixed(1) : null;
+  }
   const leftGutter = felt && tavern ? tavern.x - felt.x : 0;
   const rightGutter = felt && tavern ? felt.right - tavern.right : 0;
   const topBand = felt && oppHand ? Math.max(0, oppHand.y - felt.y) : 0;
@@ -3572,6 +3584,9 @@ function layoutMetrics() {
     botBand: +botBand.toFixed(1),
     topBandPct: feltH ? +(topBand / feltH * 100).toFixed(1) : 0,
     botBandPct: feltH ? +(botBand / feltH * 100).toFixed(1) : 0,
+    midGap: +midGap.toFixed(1),
+    midGapPct: feltH ? +(midGap / feltH * 100).toFixed(1) : 0,
+    peakPct,
     tavernDiscard: !!document.querySelector('#pile-tavern-discard'),
     medallions: document.querySelectorAll('#rail-patrons .medallion').length,
     pointedTips: document.querySelectorAll('#rail-patrons .token-point').length,

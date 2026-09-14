@@ -1,5 +1,5 @@
 /**
- * Build 36 board-pass gate + artifacts.
+ * Build 37 board-pass gate + artifacts.
  * Portrait 390×844 / landscape 844×390.
  * Gothic medallion silhouette IS the favor tip. No in-match landscape banner.
  */
@@ -62,9 +62,24 @@ function fail(msg, extra) {
 
 async function shotRail(page, name) {
   fs.mkdirSync(ART, { recursive: true });
-  const rail = await page.$('#patron-rail');
-  if (!rail) { fail(`${name} missing patron rail`); return; }
-  await rail.screenshot({ path: path.join(ART, `${name}.png`) });
+  const box = await page.evaluate(() => {
+    const coins = [...document.querySelectorAll('#rail-patrons .patron-coin')];
+    if (!coins.length) return null;
+    const rs = coins.map((el) => el.getBoundingClientRect());
+    const pad = 10;
+    const left = Math.min(...rs.map((r) => r.left)) - pad;
+    const top = Math.min(...rs.map((r) => r.top)) - pad;
+    const right = Math.max(...rs.map((r) => r.right)) + pad;
+    const bottom = Math.max(...rs.map((r) => r.bottom)) + pad;
+    return {
+      x: Math.max(0, left),
+      y: Math.max(0, top),
+      width: Math.min(window.innerWidth, right) - Math.max(0, left),
+      height: Math.min(window.innerHeight, bottom) - Math.max(0, top),
+    };
+  });
+  if (!box || box.width < 8 || box.height < 8) { fail(`${name} missing patron rail`); return; }
+  await page.screenshot({ path: path.join(ART, `${name}.png`), clip: box });
 }
 
 async function measure(page, fileStem, { w, h }) {
@@ -84,6 +99,8 @@ async function measure(page, fileStem, { w, h }) {
     botBandPct: m.botBandPct,
     cardCount: m.cardCount,
     cardH: m.cardH,
+    midGapPct: m.midGapPct,
+    peakPct: m.peakPct,
     tavernDiscard: m.tavernDiscard,
     medallions: m.medallions,
     pointedTips: m.pointedTips,
@@ -103,8 +120,12 @@ async function measure(page, fileStem, { w, h }) {
   if (!pointed.length || pointed.some(p => !p.tip || p.tipless)) fail(`${fileStem} pointed patrons missing gothic tip`, notes);
   if (w < h) {
     if (m.topBandPct > 8 || m.botBandPct > 8) fail(`${fileStem} empty portrait bands T/B ${m.topBandPct}/${m.botBandPct}`, notes);
+    if ((m.midGapPct || 0) > 16) fail(`${fileStem} tavern-to-hand gap ${m.midGapPct}% (need ≤16%)`, notes);
   } else {
     if (m.leftGutterPct > 10) fail(`${fileStem} landscape left gutter ${m.leftGutterPct}%`, notes);
+  }
+  if (m.peakPct == null || m.peakPct < 7 || m.peakPct > 14) {
+    fail(`${fileStem} peak ${m.peakPct}% of diameter (need ≈10%, gate 7–14)`, notes);
   }
   console.log('ok ', JSON.stringify(notes));
   return notes;
@@ -155,9 +176,11 @@ if (pelinOpp?.favor !== 'unfavored') fail('pelin fav-opp not unfavored', pelinOp
 if (treas && treas.rot !== 'none') fail('treasury rotated', treas);
 
 const note = [
-  'Build 36 board-pass measurements',
+  'Build 39 board-pass measurements',
   `portrait 390x844: tavern ${results.portrait.tavernW}px = ${results.portrait.viewportTavernPct}% vw`,
   `  empty bands T/B ${results.portrait.topBandPct}% / ${results.portrait.botBandPct}% (need ≤8%)`,
+  `  tavern-to-hand gap ${results.portrait.midGapPct}% (need ≤16%)`,
+  `  peak ${results.portrait.peakPct}% of diameter (need ≈10%)`,
   `  tavern discard: ${results.portrait.tavernDiscard}  banner: ${results.portrait.landscapeBanner}`,
   `  medallions ${results.portrait.medallions}, gothic tips ${results.portrait.pointedTips}, Treasury tip ${results.portrait.treasuryHasTip}`,
   `landscape 844x390: tavern ${results.landscape.tavernW}px = ${results.landscape.viewportTavernPct}% vw (need ≥72%)`,

@@ -1,6 +1,6 @@
-/* Build 37 — board-only pass.
+/* Build 39 — board-only pass.
    TWO compositions. Same engine/state. Different positions and sizes.
-   Gothic medallion: circular pewter body + integrated peak (the metal IS the tip).
+   Round pewter coin + short gothic peak (~10% of diameter). The metal IS the tip.
    Loaded last so these rules win. Do not letterbox one layout. */
 
 #pile-tavern-discard { display: none !important; }
@@ -56,11 +56,11 @@ body.is-portrait #match .felt-table,
     grid-template-rows:
       auto
       auto
-      26px
+      22px
+      minmax(150px, 1.2fr)
+      22px
       auto
-      26px
-      auto
-      minmax(150px, 1fr) !important;
+      minmax(148px, 1.05fr) !important;
     align-content: stretch !important;
   }
 }
@@ -71,14 +71,15 @@ body.is-portrait #match .felt-table {
   padding: 4px 2px 4px !important;
   row-gap: 2px !important;
   gap: 2px 0 !important;
+  /* Leftover height goes into tavern + hand cards, not an empty band. */
   grid-template-rows:
     auto
     auto
-    26px
+    22px
+    minmax(150px, 1.2fr)
+    22px
     auto
-    26px
-    auto
-    minmax(150px, 1fr) !important;
+    minmax(148px, 1.05fr) !important;
   align-content: stretch !important;
 }
 
@@ -98,12 +99,13 @@ body.is-portrait #match .felt-opp-hand {
 }
 body.is-portrait #match .felt-you-hand {
   min-height: 0 !important;
-  height: 100% !important;
+  height: auto !important;
   align-self: stretch !important;
 }
 body.is-portrait #match #hand-zone,
 body.is-portrait #match .you-fan {
   height: 100% !important;
+  min-height: 0 !important;
   align-items: flex-end !important;
 }
 
@@ -130,21 +132,21 @@ body.is-portrait #match .tavern-zone {
 }
 
 body.is-portrait #match .tavern-zone .card {
-  width: min(72px, calc((100% - 0.4rem) / 5.08)) !important;
+  width: min(78px, calc((100% - 0.4rem) / 5.08)) !important;
   height: auto !important;
   aspect-ratio: 1 / 1.52 !important;
-  min-height: 96px !important;
-  max-height: none !important;
+  min-height: 110px !important;
+  max-height: 96% !important;
 }
 
 body.is-portrait #match #hand-zone .card,
 body.is-portrait #match #hand-zone button.card,
 body.is-portrait #match .you-fan .card {
-  width: min(96px, 24vw) !important;
+  width: min(102px, 26vw) !important;
   height: auto !important;
   aspect-ratio: 1 / 1.52 !important;
-  min-height: 128px !important;
-  max-height: 158px !important;
+  min-height: 140px !important;
+  max-height: 92% !important;
   margin: 0 -14px !important;
 }
 
@@ -165,8 +167,8 @@ body.is-portrait #match .patron-rail {
 
 body.is-portrait #match .patron-coin { width: 52px !important; }
 body.is-portrait #match .patron-coin .token-dial.medallion {
-  width: 54px !important;
-  height: 68px !important;
+  width: 52px !important;
+  height: 58px !important;
 }
 body.is-portrait #match .patron-coin .token-dial.tipless {
   width: 44px !important;
@@ -270,8 +272,8 @@ body.is-landscape #match .patron-rail {
 
 body.is-landscape #match .patron-coin { width: 56px !important; }
 body.is-landscape #match .patron-coin .token-dial.medallion {
-  width: 56px !important;
-  height: 70px !important;
+  width: 54px !important;
+  height: 60px !important;
 }
 body.is-landscape #match .patron-coin .token-dial.tipless {
   width: 46px !important;
@@ -315,18 +317,18 @@ body.is-landscape #match .patron-coin .token-dial.tipless {
 #match .patron-coin .token-dial.medallion {
   display: block !important;
   position: relative;
-  width: 56px !important;
-  height: 70px !important;
+  width: 54px !important;
+  height: 60px !important;
   margin: 0 auto;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
   overflow: visible !important;
-  transform-origin: 50% 59%;
+  transform-origin: 50% 51%;
   transition: transform 0.7s cubic-bezier(.4, .12, .2, 1);
   filter: drop-shadow(0 3px 5px #0009);
-  /* Circle + gothic peak (concept art). SVG path is the silhouette. */
+  /* Round coin + short gothic peak. SVG path is the silhouette. */
   clip-path: none;
 }
 
@@ -369,13 +371,13 @@ body.is-landscape #match .patron-coin .token-dial.tipless {
 
 #match .patron-coin .coin-ring.medallion-face {
   position: absolute !important;
-  /* Window in viewBox 0 0 100 124, center (50, 73) r=27.4 */
-  left: 22.6% !important;
-  top: 36.8% !important;
+  /* Window in viewBox 0 0 100 110, circle (50, 56) r=27 */
+  left: 23% !important;
+  top: 26.4% !important;
   right: auto !important;
   bottom: auto !important;
-  width: 54.8% !important;
-  height: 44.2% !important;
+  width: 54% !important;
+  height: 49.1% !important;
   padding: 0 !important;
   border-radius: 50%;
   overflow: hidden;
