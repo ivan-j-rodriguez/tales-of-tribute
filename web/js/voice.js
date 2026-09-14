@@ -5,15 +5,6 @@
  */
 import { loadPeerJS } from './netplay.js';
 
-const PREF_KEY = 'tot_voice_pref_v1';
-
-export function voicePref() {
-  try { return localStorage.getItem(PREF_KEY) === '1'; } catch { return false; }
-}
-export function setVoicePref(on) {
-  try { localStorage.setItem(PREF_KEY, on ? '1' : '0'); } catch {}
-}
-
 export function createVoice() {
   return {
     wanted: false,
@@ -217,4 +208,13 @@ function permissionError(err) {
 
 export function canUseVoice(matchMode) {
   return matchMode === 'remote-host' || matchMode === 'remote-guest';
+}
+
+/** Match Mic is Friend/Ranked remote only — leftover Friend `wanted` must not leak onto Hotseat/AI. */
+export function voiceMicVisible(matchMode, state) {
+  return canUseVoice(matchMode) && !!(state?.wanted || state?.live);
+}
+
+export function disableVoiceIfDisallowed(state, net, matchMode) {
+  if (!canUseVoice(matchMode)) disableVoice(state, net);
 }
