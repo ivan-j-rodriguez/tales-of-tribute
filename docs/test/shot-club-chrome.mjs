@@ -62,7 +62,7 @@ function overlap(a, b) {
 const splash = await pageAt('?test=1');
 const stamp = await splash.$eval('#build-stamp', (el) => el.textContent);
 console.log('stamp', stamp);
-if (!/build 42/.test(stamp)) throw new Error(`expected build 42, got ${stamp}`);
+if (!/build 44/.test(stamp)) throw new Error(`expected build 44, got ${stamp}`);
 await shot(splash, 'club_splash.png');
 await splash.close();
 
@@ -136,8 +136,8 @@ console.log('bundle', bundle);
 if (!bundle.has) throw new Error('expected a hero bundle on shop=14');
 if (/stingy/i.test(bundle.copy)) throw new Error('bundle copy still lectures the economy');
 if (/No IAP/i.test(bundle.hint) || /unofficial/i.test(bundle.hint)) throw new Error('store intro still lectures No IAP / unofficial');
+if (/slate/i.test(bundle.hint + bundle.copy + bundle.footnote)) throw new Error('store UI still says slate');
 if ((bundle.hint.match(/[.]/g) || []).length > 1) throw new Error('store intro should be one tight line');
-if (!/No IAP/i.test(bundle.footnote)) throw new Error('store footer missing No IAP');
 await store.evaluate(() => { document.querySelector('#store').scrollTop = 0; });
 await new Promise((r) => setTimeout(r, 200));
 await shot(store, 'club_store_intro.png');
