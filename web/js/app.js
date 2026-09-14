@@ -15,7 +15,8 @@ import {
 import { UPGRADE_TO_BASE, upgradesForPatron } from './upgrades.js';
 import { hostRoom, joinRoom } from './netplay.js';
 import { setMusicEnabled, preferMusicFromStorage, warmMuted, playSfx, setMusicCue, setSfxStyle, getSfxStyle, setSfxEnabled, preferSfxFromStorage, isSfxOn } from './music.js';
-import { applyOfficialPatronText } from './texts.js';
+import { applyOfficialPatronText, applyOfficialCardText, cardPlayLines, cardComboLines } from './texts.js';
+import { overlayOfficialCardText, overlayOfficialPatronText } from './officialText.js';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -72,8 +73,18 @@ async function loadData() {
     fetch('data/decks.json').then(r => r.json()),
   ]);
   const norm = normalizeCatalog(c, p, d);
+  applyOfficialCardText(norm.cards);
+  applyOfficialPatronText(norm.patrons);
+  try {
+    const [cu, pu] = await Promise.all([
+      fetch('data/cards.uesp.json').then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch('data/patrons.uesp.json').then((r) => (r.ok ? r.json() : null)).catch(() => null),
+    ]);
+    if (cu) overlayOfficialCardText(norm.cards, cu);
+    if (pu) overlayOfficialPatronText(norm.patrons, pu);
+  } catch { /* optional local UESP dump */ }
   DATA.cards = norm.cards;
-  DATA.patrons = applyOfficialPatronText(norm.patrons);
+  DATA.patrons = norm.patrons;
   DATA.decks = norm.decks;
   cardsById = Object.fromEntries(DATA.cards.map(x => [x.id, x]));
   patronsById = Object.fromEntries(DATA.patrons.map(x => [x.id, x]));
@@ -211,9 +222,11 @@ function dossierKind(d) {
   return 'Action';
 }
 
-function effectBullets(text) {
-  if (!text) return '<li>—</li>';
-  const parts = String(text).split(/[;\n]|(?<=\.)\s+/).map(s => s.trim()).filter(Boolean);
+function effectBullets(src) {
+  const parts = Array.isArray(src)
+    ? src.map((s) => String(s || '').trim()).filter(Boolean)
+    : String(src || '').split(/[;\n]|(?<=\.)\s+/).map((s) => s.trim()).filter(Boolean);
+  if (!parts.length) return '<li>—</li>';
   return parts.map((s) => {
     let cls = '';
     if (/setback/i.test(s)) cls = 'setback';
@@ -229,11 +242,11 @@ function dossierHTML(d) {
   const pat = patronsById[d.patron];
   const patronName = pat?.name || d.patron || '';
   const icon = d.patron ? patronArt(d.patron) : '';
-  const combos = [
-    d.combo2Text && ['COMBO 2', d.combo2Text],
-    d.combo3Text && ['COMBO 3', d.combo3Text],
-    d.combo4Text && ['COMBO 4', d.combo4Text],
-  ].filter(Boolean);
+  const playLines = cardPlayLines(d);
+  const combos = [2, 3, 4].map((n) => {
+    const lines = cardComboLines(d, n);
+    return lines.length ? [`COMBO ${n}`, lines] : null;
+  }).filter(Boolean);
   return `
     <div class="eso-tip">
       <div class="eso-tip-head">
@@ -250,9 +263,9 @@ function dossierHTML(d) {
       ${d.cost != null ? `<div class="eso-tip-cost">COIN COST <b>${d.cost}</b></div>` : ''}
       <div class="eso-tip-block dossier-block">
         <div class="eso-tip-h dossier-h">PLAY EFFECT</div>
-        <ul>${effectBullets(d.playText)}</ul>
+        <ul>${effectBullets(playLines)}</ul>
       </div>
-      ${combos.map(([h, tx]) => `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">${h}</div><ul>${effectBullets(tx)}</ul></div>`).join('')}
+      ${combos.map(([h, lines]) => `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">${h}</div><ul>${effectBullets(lines)}</ul></div>`).join('')}
       ${d.hp != null ? `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">HEALTH</div><ul><li>${d.hp}${d.taunt ? ' · Taunt' : ''}</li></ul></div>` : ''}
     </div>`;
 }
@@ -320,45 +333,98 @@ function bindCardGesture(el, { onTap, onHoldRead }) {
   el.addEventListener('contextmenu', (e) => e.preventDefault());
 }
 
+function inspectMetrics(kind) {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const pad = 12;
+  const gap = 14;
+  const land = vw > vh;
+  const isCoin = kind === 'coin';
+  const aspect = isCoin ? 1 : 1.54;
+
+  if (land) {
+    const tipMin = isCoin ? 200 : 196;
+    const tipMax = 360;
+    let hexW = Math.min(vw * 0.32, isCoin ? 140 : 220, (vh - pad * 2) / aspect);
+    let hexH = hexW * aspect;
+    if (hexH > vh - pad * 2) {
+      hexH = vh - pad * 2;
+      hexW = hexH / aspect;
+    }
+    let tipW = Math.min(tipMax, vw - pad * 2 - hexW - gap);
+    if (tipW < tipMin && hexW > 96) {
+      hexW = Math.max(96, vw - pad * 2 - gap - tipMin);
+      hexH = hexW * aspect;
+      if (hexH > vh - pad * 2) {
+        hexH = vh - pad * 2;
+        hexW = hexH / aspect;
+      }
+      tipW = Math.min(tipMax, vw - pad * 2 - hexW - gap);
+    }
+    const clusterW = hexW + gap + tipW;
+    const tx = Math.max(pad, (vw - clusterW) / 2);
+    const ty = Math.max(pad, Math.min((vh - hexH) / 2, vh - pad - hexH));
+    return {
+      tx, ty, hexW, hexH,
+      textL: tx + hexW + gap,
+      textT: Math.max(pad, ty),
+      textW: Math.max(140, tipW),
+      textMaxH: vh - pad * 2,
+    };
+  }
+
+  const tipMinH = isCoin ? 168 : 132;
+  let hexW = Math.min(vw - pad * 2, isCoin ? 150 : 248);
+  let hexH = hexW * aspect;
+  const maxHexH = vh - pad * 2 - tipMinH - gap;
+  if (hexH > maxHexH) {
+    hexH = Math.max(110, maxHexH);
+    hexW = hexH / aspect;
+  }
+  const tx = Math.max(pad, (vw - hexW) / 2);
+  const ty = pad;
+  return {
+    tx, ty, hexW, hexH,
+    textL: pad,
+    textT: ty + hexH + gap,
+    textW: vw - pad * 2,
+    textMaxH: Math.max(88, vh - (ty + hexH + gap) - pad),
+  };
+}
+
+function applyInspectBox(hex, text, m) {
+  if (hex) {
+    hex.style.left = m.tx + 'px';
+    hex.style.top = m.ty + 'px';
+    hex.style.width = m.hexW + 'px';
+    hex.style.height = m.hexH + 'px';
+  }
+  if (text) {
+    text.style.left = m.textL + 'px';
+    text.style.top = m.textT + 'px';
+    text.style.width = m.textW + 'px';
+    text.style.maxWidth = m.textW + 'px';
+    text.style.maxHeight = m.textMaxH + 'px';
+  }
+}
+
 function placeInspectStage(wrap, rect, kind) {
   const hex = wrap.querySelector('.lift-hex-fly');
   const text = wrap.querySelector('.lift-text-fly');
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const land = vw > vh;
-  const isCoin = kind === 'coin';
-  const targetW = isCoin
-    ? Math.min(land ? vw * 0.22 : vw * 0.36, 168)
-    : Math.min(land ? vw * 0.30 : vw * 0.50, 260);
-  const targetH = isCoin ? targetW : targetW * 1.54;
-  let tx, ty, textL, textT, textW;
-  if (land) {
-    tx = Math.max(22, vw * 0.07);
-    ty = Math.max(18, (vh - targetH) / 2);
-    textL = tx + targetW + 28;
-    textT = Math.max(28, ty + 8);
-    textW = Math.min(440, vw - textL - 24);
-  } else {
-    tx = (vw - targetW) / 2;
-    ty = Math.max(10, vh * 0.05);
-    textL = 18;
-    textT = ty + targetH + 14;
-    textW = vw - 36;
-  }
-  wrap._to = { left: tx, top: ty, width: targetW, height: targetH };
+  const m = inspectMetrics(kind);
+  wrap._to = { left: m.tx, top: m.ty, width: m.hexW, height: m.hexH };
+  wrap._kind = kind;
+  if (!hex) return;
   hex.style.left = rect.left + 'px';
   hex.style.top = rect.top + 'px';
   hex.style.width = rect.width + 'px';
   hex.style.height = rect.height + 'px';
   hex.animate([
     { left: rect.left + 'px', top: rect.top + 'px', width: rect.width + 'px', height: rect.height + 'px' },
-    { left: tx + 'px', top: ty + 'px', width: targetW + 'px', height: targetH + 'px' },
+    { left: m.tx + 'px', top: m.ty + 'px', width: m.hexW + 'px', height: m.hexH + 'px' },
   ], { duration: 340, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
+  applyInspectBox(null, text, m);
   if (text) {
-    text.style.left = textL + 'px';
-    text.style.top = textT + 'px';
-    text.style.width = textW + 'px';
-    text.style.maxWidth = textW + 'px';
     requestAnimationFrame(() => {
       wrap.classList.add('show-veil');
       text.classList.add('show');
@@ -379,7 +445,7 @@ function startLift(fromEl, def) {
 
   const layer = $('#lift-layer') || document.body;
   const wrap = document.createElement('div');
-  wrap.className = 'lift-clone lift-fly';
+  wrap.className = 'lift-clone lift-fly inspect-card';
   wrap.innerHTML = `
     <div class="lift-veil"></div>
     <div class="lift-hex-fly">
@@ -464,17 +530,17 @@ function patronDossierHTML(pid) {
   const blocks = rows.map(([key, label]) => {
     const ab = pat.abilities?.[key];
     const on = key === current;
-    const cost = unlocked ? patronCostLine(ab) : '???';
-    let desc = unlocked ? (ab?.desc || (ab ? '—' : 'Cannot be used.')) : '???';
-    if (unlocked && desc) desc = desc.replace(/^Pay [^:]+:\s*/i, '');
+    let desc = unlocked ? (ab?.desc || (ab ? 'Cannot be used.' : 'Cannot be used.')) : '???';
     const turn = unlocked ? patronTurnLine(pid, key, pat) : '';
+    const hasPay = /^(Pay |If |Passive |Cannot |Sacrifice |Discard )/i.test(desc);
+    const cost = unlocked && !hasPay ? patronCostLine(ab) : '';
     return `
       <div class="eso-tip-block dossier-block${on ? ' current-favor' : ''}">
         <div class="eso-tip-h dossier-h">${label}${on ? ' · current' : ''}</div>
         <ul>
-          <li class="coin">${cost}</li>
+          ${cost ? `<li class="coin">${cost}</li>` : ''}
           <li>${desc}</li>
-          ${turn ? `<li class="turn-note">${turn}</li>` : ''}
+          ${turn && !/FAVORS you|now NEUTRAL|does not take a side/i.test(desc) ? `<li class="turn-note">${turn}</li>` : ''}
         </ul>
       </div>`;
   }).join('');
@@ -506,7 +572,7 @@ function startPatronLift(fromEl, pid) {
   fromEl.style.opacity = '0.12';
   const layer = $('#lift-layer') || document.body;
   const wrap = document.createElement('div');
-  wrap.className = 'lift-clone lift-fly';
+  wrap.className = 'lift-clone lift-fly inspect-coin';
   wrap.innerHTML = `
     <div class="lift-veil"></div>
     <div class="lift-hex-fly lift-coin-fly">
@@ -2250,9 +2316,19 @@ function bind() {
     syncSfxToggles();
     if (isSfxOn()) playSfx('tap');
   });
-  window.addEventListener('resize', syncBoardLayout);
-  window.addEventListener('orientationchange', () => setTimeout(syncBoardLayout, 160));
-  window.visualViewport?.addEventListener('resize', syncBoardLayout);
+  const refitInspect = () => {
+    if (!liftClone) return;
+    const kind = liftClone._kind || (liftClone.classList.contains('inspect-coin') ? 'coin' : 'card');
+    const hex = liftClone.querySelector('.lift-hex-fly');
+    const text = liftClone.querySelector('.lift-text-fly');
+    const m = inspectMetrics(kind);
+    liftClone._to = { left: m.tx, top: m.ty, width: m.hexW, height: m.hexH };
+    hex?.getAnimations?.().forEach((a) => a.cancel());
+    applyInspectBox(hex, text, m);
+  };
+  window.addEventListener('resize', () => { syncBoardLayout(); refitInspect(); });
+  window.addEventListener('orientationchange', () => setTimeout(() => { syncBoardLayout(); refitInspect(); }, 160));
+  window.visualViewport?.addEventListener('resize', () => { syncBoardLayout(); refitInspect(); });
   $('#btn-hand-done').onclick = () => {
     $('#hand-device-overlay').classList.remove('show');
     renderMatch();
@@ -2368,10 +2444,59 @@ function installTestHook() {
         })),
         endGlow: !!document.querySelector('#btn-end.can-end'),
         scale: document.querySelector('#match .board')?.style.transform || '',
+        goldTip: cardsById.gold?.playText || '',
+        liftLayer: !!document.querySelector('.lift-clone'),
+        comboHexes: document.querySelectorAll('#events-list .event-hex img').length,
+        pileBack: !!document.querySelector('#pile-you-draw .pile-stack, #pile-you-draw .pile-art'),
+        pileEmpty: !!document.querySelector('#pile-you-draw.pile-empty'),
+        tavernCenter: (() => {
+          const t = document.querySelector('#tavern-zone')?.getBoundingClientRect();
+          const m = document.querySelector('#match')?.getBoundingClientRect();
+          if (!t || !m || !m.height) return false;
+          const mid = (t.top + t.bottom) / 2;
+          const boardMid = (m.top + m.bottom) / 2;
+          return Math.abs(mid - boardMid) < m.height * 0.18;
+        })(),
+      };
+    },
+    inspectById(id) {
+      const d = cardsById[id];
+      const el = document.querySelector('#hand-zone .card, #tavern-zone .card');
+      if (!d || !el) return false;
+      startLift(el, d);
+      return true;
+    },
+    inspectFit() {
+      const hex = document.querySelector('.lift-hex-fly');
+      const text = document.querySelector('.lift-text-fly');
+      const tip = document.querySelector('.lift-text-fly .eso-tip-name');
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const slack = 2;
+      const on = (r) => !!(r && r.width > 12 && r.height > 12
+        && r.left >= -slack && r.top >= -slack
+        && r.right <= vw + slack && r.bottom <= vh + slack);
+      const box = (el) => {
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom };
+      };
+      return {
+        hex: box(hex),
+        text: box(text),
+        name: box(tip),
+        hexOn: on(hex?.getBoundingClientRect()),
+        textOn: on(text?.getBoundingClientRect()),
+        nameOn: on(tip?.getBoundingClientRect()),
+        tipText: text?.innerText || '',
       };
     },
     clickDraw() {
       document.querySelector('[data-pile="you-draw"]')?.click();
+      return lastToast;
+    },
+    clickTavernDeck() {
+      document.querySelector('[data-pile="tavern-draw"]')?.click();
       return lastToast;
     },
     playFirstGold() {

@@ -124,6 +124,7 @@ const browser = await puppeteer.launch({
 const page = await browser.newPage();
 page.setDefaultTimeout(20000);
 page.on('pageerror', (e) => console.error('PAGEERROR', e.message));
+await page.setViewport({ width: 844, height: 390, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 
 await page.goto(`http://127.0.0.1:${port}/?test=1`, { waitUntil: 'domcontentloaded' });
 await waitReady(page);
@@ -187,6 +188,36 @@ const held = await holdPatron(page, 'pelin');
 assert('patron hold lifts', !!(held.mid && held.mid.liftActive), held);
 assert('patron hold shows favor text', /Favored|Neutral|Unfavored/i.test(held.dossier || ''), held.dossier);
 assert('patron hold does not open call', held.mid && held.mid.patronConfirm === false, held);
+assert('patron hold uses official sentences', /Refresh — Return|Gain 1 Coin|Draw 1 card|Cannot be used|Knock Out/i.test(held.dossier || ''), held.dossier);
+
+// 7. inspect: full hex + official Toll of Flesh sentences (portrait + landscape)
+async function assertInspect(page, label) {
+  const opened = await page.evaluate(() => window.__totTest.inspectById('toll-of-flesh'));
+  assert(`${label} inspect opens`, opened);
+  await new Promise((r) => setTimeout(r, 420));
+  const fit = await page.evaluate(() => window.__totTest.inspectFit());
+  assert(`${label} hex on screen`, fit.hexOn, fit.hex);
+  assert(`${label} tooltip on screen`, fit.textOn, fit.text);
+  assert(`${label} name on screen`, fit.nameOn, fit.name);
+  assert(`${label} Gain 2 Coin`, /Gain 2 Coin/.test(fit.tipText || ''), fit.tipText);
+  assert(`${label} Draw 1 card`, /Draw 1 card/.test(fit.tipText || ''), fit.tipText);
+  assert(`${label} no token stub`, !/\b2 Coin\.\s/i.test(fit.tipText || '') && !/Draw 1\.(?! card)/i.test(fit.tipText || ''), fit.tipText);
+  await page.evaluate(() => {
+    document.querySelector('.lift-clone')?.remove();
+  });
+}
+
+await start(page);
+await assertInspect(page, 'landscape');
+
+const portraitPage = await browser.newPage();
+portraitPage.setDefaultTimeout(20000);
+await portraitPage.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+await portraitPage.goto(`http://127.0.0.1:${port}/?test=1`, { waitUntil: 'domcontentloaded' });
+await waitReady(portraitPage);
+await start(portraitPage);
+await assertInspect(portraitPage, 'portrait');
+await portraitPage.close();
 
 await browser.close();
 server.close();

@@ -85,7 +85,7 @@ async function holdPatron(page, pid = 'pelin') {
       || document.querySelector('#rail-patrons .patron-coin[data-side="you"]');
     if (!el) return { ok: false };
     el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', isPrimary: true }));
-    await new Promise(r => setTimeout(r, 920));
+    await new Promise(r => setTimeout(r, 1250));
     const mid = window.__totTest.snapshot();
     const dossier = document.querySelector('.lift-text-fly')?.innerText || '';
     el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch', isPrimary: true }));
@@ -99,7 +99,7 @@ async function holdHand(page) {
     const el = document.querySelector('#hand-zone .card');
     if (!el) return false;
     el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', isPrimary: true }));
-    await new Promise(r => setTimeout(r, 920));
+    await new Promise(r => setTimeout(r, 1250));
     el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch', isPrimary: true }));
     el.click();
     return true;
@@ -124,6 +124,7 @@ const browser = await puppeteer.launch({
 const page = await browser.newPage();
 page.setDefaultTimeout(20000);
 page.on('pageerror', (e) => console.error('PAGEERROR', e.message));
+await page.setViewport({ width: 844, height: 390, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 
 await page.goto(`http://127.0.0.1:${port}/?test=1`, { waitUntil: 'domcontentloaded' });
 await waitReady(page);
@@ -141,6 +142,11 @@ let b = await snap(page);
 assert('full tap plays one card', b.hand === hand0 - 1 && b.played >= 1, b);
 assert('full tap does not double-play', b.hand === hand0 - 1, b);
 assert('gold pays a coin', b.golds === golds0 - 1 && b.coin === coin0 + 1, b);
+assert('tap does not lift', b.liftActive === false && b.liftLayer === false, b);
+assert('combo rail shows card art', b.comboHexes >= 1, b);
+assert('draw pile paints a card back', a.pileBack === true && a.pileEmpty === false, a);
+assert('tavern sits near vertical center', a.tavernCenter === true, a);
+assert('gold tip is in-game sentence', /Gain 1 Coin/i.test(a.goldTip || ''), a.goldTip);
 
 // 2. iOS click-only still plays
 await start(page);
@@ -162,6 +168,8 @@ assert('hold does not play', b.hand === a.hand && b.coin === a.coin, { a, b });
 await start(page);
 const toast = await page.evaluate(() => window.__totTest.clickDraw());
 assert('draw pile sealed', /sealed/i.test(toast), toast);
+const tavernToast = await page.evaluate(() => window.__totTest.clickTavernDeck());
+assert('tavern deck sealed', /sealed/i.test(tavernToast), tavernToast);
 
 // 5. patron tap opens confirm, not lift
 await start(page);
@@ -180,6 +188,36 @@ const held = await holdPatron(page, 'pelin');
 assert('patron hold lifts', !!(held.mid && held.mid.liftActive), held);
 assert('patron hold shows favor text', /Favored|Neutral|Unfavored/i.test(held.dossier || ''), held.dossier);
 assert('patron hold does not open call', held.mid && held.mid.patronConfirm === false, held);
+assert('patron hold uses official sentences', /Refresh — Return|Gain 1 Coin|Draw 1 card|Cannot be used|Knock Out/i.test(held.dossier || ''), held.dossier);
+
+// 7. inspect: full hex + official Toll of Flesh sentences (portrait + landscape)
+async function assertInspect(page, label) {
+  const opened = await page.evaluate(() => window.__totTest.inspectById('toll-of-flesh'));
+  assert(`${label} inspect opens`, opened);
+  await new Promise((r) => setTimeout(r, 420));
+  const fit = await page.evaluate(() => window.__totTest.inspectFit());
+  assert(`${label} hex on screen`, fit.hexOn, fit.hex);
+  assert(`${label} tooltip on screen`, fit.textOn, fit.text);
+  assert(`${label} name on screen`, fit.nameOn, fit.name);
+  assert(`${label} Gain 2 Coin`, /Gain 2 Coin/.test(fit.tipText || ''), fit.tipText);
+  assert(`${label} Draw 1 card`, /Draw 1 card/.test(fit.tipText || ''), fit.tipText);
+  assert(`${label} no token stub`, !/\b2 Coin\.\s/i.test(fit.tipText || '') && !/Draw 1\.(?! card)/i.test(fit.tipText || ''), fit.tipText);
+  await page.evaluate(() => {
+    document.querySelector('.lift-clone')?.remove();
+  });
+}
+
+await start(page);
+await assertInspect(page, 'landscape');
+
+const portraitPage = await browser.newPage();
+portraitPage.setDefaultTimeout(20000);
+await portraitPage.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+await portraitPage.goto(`http://127.0.0.1:${port}/?test=1`, { waitUntil: 'domcontentloaded' });
+await waitReady(portraitPage);
+await start(portraitPage);
+await assertInspect(portraitPage, 'portrait');
+await portraitPage.close();
 
 await browser.close();
 server.close();
