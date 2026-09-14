@@ -254,7 +254,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 35';
+  if (stamp) stamp.textContent = 'build 36';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -2563,9 +2563,10 @@ function renderCollection() {
       const ups = upgradesForPatron(DATA.cards, id);
       const owned = ups.filter((u) => profile.ownedUpgrades.includes(u)).length;
       const ready = !unlocked && deckReadyToUnlock(profile, id, DATA.cards);
+      const title = id === 'mora' ? 'Hermaeus Mora' : (p.short || p.name || id);
       el.innerHTML = `
-        <img src="${patronArt(id)}" alt="${p.short}" />
-        <div class="name">${p.short}</div>
+        <img src="${patronArt(id)}" alt="${unlocked ? title : 'Locked patron'}" />
+        <div class="name">${unlocked ? title : '???'}</div>
         <div class="desc">${unlocked ? `Upgrades ${owned}/${ups.length}` : `Fragments ${frag}/${FRAGMENTS_TO_UNLOCK}${ready ? ' · ready' : ' · need cards'}`} · ${formatRarity(rarityOf('fragment', id))}</div>
       `;
       el.addEventListener('click', () => showCollectionDeck(id));
@@ -2588,20 +2589,14 @@ function renderClueEncyclopedia() {
     const wrap = document.createElement('div');
     wrap.className = `clue-deck deck-${deckId}`;
     wrap.style.setProperty('--ency-color', p.color || DECK_COLORS[deckId] || '#c9a227');
+    wrap.appendChild(encyPatronHead(deckId));
     const found = cards.filter((c) => clueCountOf(profile, c.id) >= 1).length;
-    const title = deckId === 'mora' ? 'Hermaeus Mora' : (p.name || deckId);
-    const unlocked = deckId === 'treasury' || isDeckUnlocked(profile, deckId);
-    wrap.innerHTML = `
-      <div class="clue-deck-head ency-divider">
-        <img src="${patronArt(deckId)}" alt="" />
-        <div>
-          <h3>${title}${unlocked ? '' : ' · ???'}</h3>
-          <p class="hint">${DECK_CAPTIONS[deckId] || ''} · ${found}/${cards.length} clues</p>
-        </div>
-      </div>
-      <div class="collection-cards"></div>
-    `;
-    const box = wrap.querySelector('.collection-cards');
+    const count = document.createElement('p');
+    count.className = 'hint clue-deck-count';
+    count.textContent = `${found}/${cards.length} clues`;
+    wrap.appendChild(count);
+    const box = document.createElement('div');
+    box.className = 'collection-cards';
     for (const c of cards) {
       const n = clueCountOf(profile, c.id);
       const known = n >= 1;
@@ -2613,6 +2608,7 @@ function renderClueEncyclopedia() {
       if (known) el.addEventListener('click', () => showCardModal(c));
       box.appendChild(el);
     }
+    wrap.appendChild(box);
     host.appendChild(wrap);
   }
 }
@@ -2791,6 +2787,25 @@ function showPurseReward(reward, rarity) {
   overlay.classList.add('show');
 }
 
+function encyPatronHead(deckId) {
+  const p = patronRecord(deckId);
+  const unlocked = deckId === 'treasury' || isDeckUnlocked(profile, deckId);
+  const title = deckId === 'mora' ? 'Hermaeus Mora' : (p.name || p.short || deckId);
+  const cap = DECK_CAPTIONS[deckId] || '';
+  const el = document.createElement('div');
+  el.className = `ency-patron-head deck-${deckId}` + (unlocked ? '' : ' locked');
+  el.dataset.deck = deckId;
+  el.style.setProperty('--ency-color', p.color || DECK_COLORS[deckId] || '#c9a227');
+  el.innerHTML = `
+    <img class="ency-patron-token" src="${patronArt(deckId)}" alt="${unlocked ? title : 'Locked patron'}" />
+    <div class="ency-patron-meta">
+      <strong class="ency-div-name">${unlocked ? title : '???'}</strong>
+      <span class="ency-div-cap">${unlocked ? cap : 'Locked'}</span>
+    </div>
+  `;
+  return el;
+}
+
 function renderEncy() {
   const sel = $('#ency-patron');
   if (sel) {
@@ -2814,33 +2829,19 @@ function renderEncy() {
   const grid = $('#ency-grid');
   if (!grid) return;
   grid.innerHTML = '';
-  const showDividers = !sel?.value;
+  const viewingAll = !rawPid;
   const groups = groupCardsByDeck(filtered);
   for (const g of groups) {
-    if (!g.cards.length && !(showDividers && g.id === 'mora')) continue;
-    if (showDividers) {
-      const p = patronRecord(g.id);
-      const unlocked = g.id === 'treasury' || isDeckUnlocked(profile, g.id);
-      const div = document.createElement('div');
-      div.className = `ency-divider deck-${g.id}` + (unlocked ? '' : ' locked');
-      div.style.setProperty('--ency-color', p.color || DECK_COLORS[g.id] || '#c9a227');
-      const title = g.id === 'mora' ? 'Hermaeus Mora' : (p.name || p.short || g.id);
-      const cap = DECK_CAPTIONS[g.id] || '';
-      div.innerHTML = `<span class="ency-div-name">${title}${unlocked ? '' : ' · ???'}</span>${cap ? `<span class="ency-div-cap">${cap}</span>` : ''}`;
-      grid.appendChild(div);
-    }
-    if (!g.cards.length && g.id === 'mora') {
-      const empty = document.createElement('div');
-      empty.className = 'ency-card deck-locked';
-      empty.innerHTML = `<div class="info"><strong>Hermaeus Mora</strong>Cards join as mora / hermaeus_mora — none in this filter.</div>`;
-      grid.appendChild(empty);
-    }
+    if (!g.cards.length && !(viewingAll && g.id !== 'other')) continue;
+    grid.appendChild(encyPatronHead(g.id));
     for (const c of g.cards) {
       const deckLocked = canonPatron(c.patron) !== 'treasury' && !isDeckUnlocked(profile, c.patron);
       const el = document.createElement('div');
       el.className = 'ency-card' + (deckLocked ? ' deck-locked' : '');
-      el.innerHTML = `<img src="${artFor(c)}" alt="${c.name}" /><div class="info"><strong>${c.name}</strong>${c.cost} · ${c.type}${c.upgraded ? ' · ▲' : ''}</div>`;
-      el.addEventListener('click', () => showCardModal(c));
+      el.innerHTML = deckLocked
+        ? `<div class="clue-unknown">?</div><div class="info"><strong>???</strong></div>`
+        : `<img src="${artFor(c)}" alt="${c.name}" /><div class="info"><strong>${c.name}</strong>${c.cost} · ${c.type}${c.upgraded ? ' · ▲' : ''}</div>`;
+      if (!deckLocked) el.addEventListener('click', () => showCardModal(c));
       grid.appendChild(el);
     }
   }
