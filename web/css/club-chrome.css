@@ -401,6 +401,8 @@
 }
 .club-sheet-close {
   align-self: flex-end;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.75rem;
 }
 .sheet-hero {
   display: flex; gap: 0.85rem; align-items: center;
@@ -561,6 +563,17 @@
   line-height: 1.18 !important;
   margin: 0.08rem 0 0.4rem !important;
   padding-bottom: 0.05em;
+}
+#card-modal .eso-tip-head {
+  align-items: center;
+}
+#card-modal .eso-tip-patron { flex-shrink: 0; }
+#card-modal .eso-tip-patron img {
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  margin: 0 !important;
 }
 #card-modal #btn-modal-close {
   flex: 0 0 auto;
