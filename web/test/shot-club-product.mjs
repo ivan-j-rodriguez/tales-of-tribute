@@ -116,6 +116,7 @@ const hotseatMic = await leak.evaluate(() => {
 });
 console.log('hotseat mic hidden', hotseatMic);
 if (!hotseatMic) throw new Error('Hotseat Mic must stay hidden after leftover Friend voice');
+await shot(leak, 'club_hotseat_mic_hidden.png');
 await leak.close();
 
 const aiLeak = await pageAt('?test=1');
@@ -125,6 +126,7 @@ const aiMic = await aiLeak.evaluate(() => {
 });
 console.log('ai mic hidden', aiMic);
 if (!aiMic) throw new Error('AI Mic must stay hidden after leftover Friend voice');
+await shot(aiLeak, 'club_ai_mic_hidden.png');
 await aiLeak.close();
 
 await browser.close();

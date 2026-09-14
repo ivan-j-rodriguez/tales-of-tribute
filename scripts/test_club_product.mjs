@@ -111,7 +111,7 @@ assert(/voiceMicVisible\(matchMode, voice\)/.test(app), 'paintVoiceChrome gates 
 assert(/function beginHotseatPick[\s\S]{0,80}syncVoiceToMatchMode/.test(app), 'Hotseat entry clears voice');
 assert(/function beginDeckPick[\s\S]{0,80}syncVoiceToMatchMode/.test(app), 'deck-pick entry syncs voice to mode');
 assert(/function startTutorialMatch[\s\S]{0,400}syncVoiceToMatchMode/.test(app), 'tutorial AI entry clears voice');
-assert(/function startGauntletStop[\s\S]{0,500}syncVoiceToMatchMode/.test(app), 'gauntlet AI entry clears voice');
+assert(/gauntletStopIndex[\s\S]{0,180}syncVoiceToMatchMode\(\);\s*pickYou = \[\.\.\.stop\.you\]/.test(app), 'gauntlet AI entry clears voice');
 assert(!/voicePref\(/.test(app), 'dead voicePref is not imported');
 
 await continueAsGuest();
