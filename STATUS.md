@@ -2,6 +2,8 @@
 
 **2026-09-14 (build 40):** Club chrome overhaul — High Isle / Crown Store palette (gold, cream parchment, deep navy-teal, metal). Splash primary actions. Store sections Featured/Bundles, Daily, Fragments, Cosmetics with hero parcels (aspirational copy; economy still grindy). Collection taps open real detail sheets. Card-info modal shows full hex + name (no clip). Kevin MacLeod beds removed; CC0 looping playlists with crossfades. No felt / board-pass edits. `?v=40`.
 
+**2026-09-14 (board #15, rebased):** Board/felt spacing pass on Club 40. Chrome uses the full felt width. Tavern cards clear DRAW/DECK. Portrait turn banner, resource HUD, End Turn, played-effects, and Leave no longer overlap. Hold-inspect is a dark dossier modal. Patron tokens unchanged (round pewter + ~10% gothic peak). `?v=40` until the build-41 bump.
+
 **2026-09-14 (build 39):** Board review on PR #12, rebased onto Club 38. Round pewter patron coin + short gothic peak (~10% of diameter). Portrait tavern-to-hand gap packed. No in-match landscape banner. Club/economy/encyclopedia stay on main. `?v=39`.
 
 **2026-09-14 (build 38):** Crown Crate loot follows the crate on the calendar (Iron / Orichalcum / Ebony / Voidsteel), not a hardcoded Iron/Fine roll. Still max 2 crates/month. No felt/table CSS. `?v=38`.
@@ -61,7 +63,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=40`. Dual-orientation board from build 39 sits under Club chrome 40.
+`docs/` is a copy of `web/`. Cache-bust `?v=40`. Dual-orientation board from PR #15 sits on Club chrome 40.
 
 | Fix | Notes |
 |---|---|

@@ -65,13 +65,13 @@ let gauntletStopIndex = null;
 let isGauntletMatch = false;
 
 const TURN_SECONDS = 90;
-const HOLD_MS = 500;
+const HOLD_MS = 1000;
 const AGENT_SLOTS = 4;
 const TOUR_KEY = 'tot_tour_v2';
 
 /** Guided first-match walkthrough — plain language, one spotlight at a time. */
 const TOUR_STEPS = [
-  { sel: '#hand-zone', text: 'This is your hand. Tap a card to play it. Press and hold to lift the card and read it — release to put it back.' },
+  { sel: '#hand-zone', text: 'This is your hand. Tap a card to play it. Hold about a second to open the dossier and read it — release to put it back.' },
   { sel: '#tavern-zone', text: 'Coin buys from the tavern — the five cards in the middle. Tap one you can afford; it flies to your cooldown pile.' },
   { sel: '#you-res', text: 'Power fights enemy agents. Leftover Power becomes Prestige at end of turn — unless a Taunt agent is still standing in their way.' },
   { sel: '#pile-you-draw', text: 'Your draw pile is cards you have not seen yet. Bought cards wait in cooldown until the deck reshuffles — then they join your draw again.' },
@@ -580,55 +580,24 @@ function inspectMetrics(kind) {
 }
 
 function applyInspectBox(hex, text, m) {
-  const vv = window.visualViewport;
-  const vw = Math.floor(Math.min(window.innerWidth, vv?.width || window.innerWidth));
-  const vh = Math.floor(Math.min(window.innerHeight, vv?.height || window.innerHeight));
-  const pad = 8;
-  const aspect = m.hexW ? (m.hexH / m.hexW) : 1.54;
-  let tx = m.tx, ty = m.ty, hexW = m.hexW, hexH = m.hexH;
-  if (hexH > vh - pad * 2) {
-    hexH = Math.max(80, vh - pad * 2);
-    hexW = hexH / aspect;
-  }
-  if (hexW > vw - pad * 2) {
-    hexW = Math.max(72, vw - pad * 2);
-    hexH = hexW * aspect;
-  }
-  if (ty + hexH > vh - pad) ty = Math.max(pad, vh - pad - hexH);
-  if (tx + hexW > vw - pad) tx = Math.max(pad, vw - pad - hexW);
-  if (ty < pad) ty = pad;
-  if (tx < pad) tx = pad;
   if (hex) {
-    hex.style.cssText = [
-      'position:fixed',
-      `left:${tx}px`,
-      `top:${ty}px`,
-      `width:${hexW}px`,
-      `height:${hexH}px`,
-      'max-width:none',
-      'max-height:none',
-      'transform:none',
-      'margin:0',
-      'inset:auto',
-    ].join(';');
+    hex.style.width = `${Math.round(m.hexW)}px`;
+    hex.style.height = `${Math.round(m.hexH)}px`;
+    hex.style.maxWidth = 'none';
+    hex.style.maxHeight = 'none';
+    hex.style.position = 'relative';
+    hex.style.left = 'auto';
+    hex.style.top = 'auto';
+    hex.style.margin = '0';
+    hex.style.inset = 'auto';
+    hex.style.transform = 'none';
   }
   if (text) {
-    const land = vw > vh;
-    let textL = land ? tx + hexW + 12 : pad;
-    let textT = land ? Math.max(pad, ty) : ty + hexH + 10;
-    let textW = land ? Math.max(140, vw - textL - pad) : vw - pad * 2;
-    let textMaxH = land ? vh - pad * 2 : Math.max(80, vh - textT - pad);
-    if (textL + 80 > vw) {
-      textL = pad;
-      textT = ty + hexH + 8;
-      textW = vw - pad * 2;
-      textMaxH = Math.max(80, vh - textT - pad);
-    }
-    text.style.left = textL + 'px';
-    text.style.top = textT + 'px';
-    text.style.width = textW + 'px';
-    text.style.maxWidth = textW + 'px';
-    text.style.maxHeight = textMaxH + 'px';
+    text.style.left = 'auto';
+    text.style.top = 'auto';
+    text.style.width = 'auto';
+    text.style.maxWidth = '100%';
+    text.style.position = 'relative';
   }
 }
 
@@ -640,23 +609,10 @@ function placeInspectStage(wrap, rect, kind) {
   wrap._kind = kind;
   applyInspectBox(hex, text, m);
   requestAnimationFrame(() => {
-    applyInspectBox(hex, text, m);
-    if (hex) {
-      const r = hex.getBoundingClientRect();
-      const roomB = window.innerHeight - 6;
-      const roomR = window.innerWidth - 6;
-      if (r.bottom > roomB) hex.style.top = Math.max(6, roomB - r.height) + 'px';
-      if (r.right > roomR) hex.style.left = Math.max(6, roomR - r.width) + 'px';
-      if (r.top < 6) hex.style.top = '6px';
-      if (r.left < 6) hex.style.left = '6px';
-    }
+    applyInspectBox(hex, text, inspectMetrics(kind));
+    wrap.classList.add('show-veil');
+    text?.classList.add('show');
   });
-  if (text) {
-    requestAnimationFrame(() => {
-      wrap.classList.add('show-veil');
-      text.classList.add('show');
-    });
-  }
 }
 
 function startLift(fromEl, def) {
@@ -674,13 +630,15 @@ function startLift(fromEl, def) {
 
   const layer = $('#lift-layer') || document.body;
   const wrap = document.createElement('div');
-  wrap.className = 'lift-clone lift-fly lift-inspect';
+  wrap.className = 'lift-clone lift-fly lift-inspect lift-dossier-modal';
   wrap.innerHTML = `
     <div class="lift-veil"></div>
-    <div class="lift-hex-fly">
-      <img src="${artFor(def)}" alt="" draggable="false" />
+    <div class="inspect-dossier-sheet">
+      <div class="lift-hex-fly">
+        <img src="${artFor(def)}" alt="" draggable="false" />
+      </div>
+      <div class="lift-text-fly">${dossierHTML(def)}</div>
     </div>
-    <div class="lift-text-fly">${dossierHTML(def)}</div>
   `;
   layer.appendChild(wrap);
   liftClone = wrap;
@@ -691,7 +649,6 @@ function endLift(instant = false) {
   const src = document.querySelector('.lift-source');
   const wrap = liftClone;
   const from = liftFromRect;
-  const to = wrap && wrap._to;
   liftActive = false;
   liftClone = null;
   liftFromRect = null;
@@ -700,18 +657,12 @@ function endLift(instant = false) {
     src.style.opacity = '';
   }
   if (!wrap) return;
-  if (instant || !from) { wrap.remove(); return; }
-  const hex = wrap.querySelector('.lift-hex-fly') || wrap;
   const text = wrap.querySelector('.lift-text-fly');
   if (text) text.classList.remove('show');
   wrap.classList.remove('show-veil');
-  const start = to || hex.getBoundingClientRect();
-  const anim = hex.animate([
-    { left: start.left + 'px', top: start.top + 'px', width: start.width + 'px', height: start.height + 'px' },
-    { left: from.left + 'px', top: from.top + 'px', width: from.width + 'px', height: from.height + 'px' },
-  ], { duration: 300, easing: 'cubic-bezier(.25,.75,.2,1)', fill: 'forwards' });
-  anim.onfinish = () => wrap.remove();
-  setTimeout(() => { if (wrap.parentNode) wrap.remove(); }, 360);
+  if (instant || !from) { wrap.remove(); return; }
+  wrap.classList.add('closing');
+  setTimeout(() => { if (wrap.parentNode) wrap.remove(); }, 220);
 }
 
 function favorKeyForSeat(pid) {
@@ -801,13 +752,15 @@ function startPatronLift(fromEl, pid) {
   fromEl.style.opacity = '0.12';
   const layer = $('#lift-layer') || document.body;
   const wrap = document.createElement('div');
-  wrap.className = 'lift-clone lift-fly lift-inspect inspect-coin';
+  wrap.className = 'lift-clone lift-fly lift-inspect lift-dossier-modal inspect-coin';
   wrap.innerHTML = `
     <div class="lift-veil"></div>
-    <div class="lift-hex-fly lift-coin-fly">
-      <img src="${patronArt(pid)}" alt="" draggable="false" />
+    <div class="inspect-dossier-sheet">
+      <div class="lift-hex-fly lift-coin-fly">
+        <img src="${patronArt(pid)}" alt="" draggable="false" />
+      </div>
+      <div class="lift-text-fly">${patronDossierHTML(pid)}</div>
     </div>
-    <div class="lift-text-fly">${patronDossierHTML(pid)}</div>
   `;
   layer.appendChild(wrap);
   liftClone = wrap;
@@ -3885,6 +3838,66 @@ function layoutMetrics() {
     const covered = rail ? Math.max(0, c.right - rail.x) : 0;
     return c.w > 0 && covered / c.w > 0.45;
   }).length;
+  const hit = (a, b) => !!(a && b && a.w > 2 && a.h > 2 && b.w > 2 && b.h > 2
+    && !(a.right <= b.x + 1 || b.right <= a.x + 1 || a.bottom <= b.y + 1 || b.bottom <= a.y + 1));
+  const anyHit = (listA, listB) => listA.some((a) => listB.some((b) => hit(a, b)));
+  const tavernCards = cards.map((c) => ({ x: c.x, y: c.y, w: c.w, h: c.h, right: c.right, bottom: c.y + c.h }));
+  const oppDraw = box('#pile-opp-draw');
+  const youDraw = box('#pile-you-draw');
+  const deck = box('#pile-tavern-draw');
+  const deckLabel = box('#pile-tavern-draw .pile-label');
+  const youCd = box('#pile-you-cd');
+  const oppCd = box('#pile-opp-cd');
+  const turn = box('#turn-ind');
+  const oppRes = box('#opp-res');
+  const youRes = box('#you-res');
+  const oppResTok = [...document.querySelectorAll('#opp-res .eso-tok')].map((el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom };
+  });
+  const youResTok = [...document.querySelectorAll('#you-res .eso-tok')].map((el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom };
+  });
+  const youAgentSlots = [...document.querySelectorAll('#you-agents .agent-slot')].map((el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom };
+  });
+  const oppAgentSlots = [...document.querySelectorAll('#opp-agents .agent-slot')].map((el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom };
+  });
+  const patronCoins = [...document.querySelectorAll('#rail-patrons .patron-coin')].map((el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom };
+  });
+  const effectHexes = [...document.querySelectorAll('#events-list .event-hex')].map((el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom };
+  });
+  const leaveHud = box('#match .felt-hud-you');
+  const sfxBtn = box('#btn-match-sfx');
+  const leaveBtn = box('#btn-concede');
+  const events = box('#match .events-rail');
+  const patronsCluster = box('#rail-patrons');
+  const youCalls = box('#you-patron-calls');
+  const youAgents = box('#you-agents');
+  const oppAgents = box('#opp-agents');
+  const tavernZone = box('#tavern-zone');
+  const hits = {
+    tavernVsOppDraw: anyHit(tavernCards, oppDraw ? [oppDraw] : []),
+    tavernVsDeck: anyHit(tavernCards, deck ? [deck] : []),
+    tavernVsYouDraw: anyHit(tavernCards, youDraw ? [youDraw] : []),
+    turnVsOppRes: anyHit(turn ? [turn] : [], oppResTok.length ? oppResTok : (oppRes ? [oppRes] : [])),
+    turnVsYouRes: anyHit(turn ? [turn] : [], youResTok.length ? youResTok : (youRes ? [youRes] : [])),
+    youResVsAgents: anyHit(youResTok, youAgentSlots),
+    oppResVsAgents: anyHit(oppResTok, oppAgentSlots),
+    endTurnVsPatrons: anyHit(hg ? [hg] : [], patronCoins),
+    effectsVsDeck: anyHit(effectHexes, deck ? [deck] : []),
+    effectsVsDeckLabel: anyHit(effectHexes, deckLabel ? [deckLabel] : []),
+    leaveVsCooldown: hit(leaveHud, youCd) || hit(leaveBtn, youCd),
+    sfxVsCooldown: hit(sfxBtn, youCd) || hit(leaveHud, youCd),
+  };
   return {
     vw, vh,
     matchW: match?.w || 0,
@@ -3916,6 +3929,13 @@ function layoutMetrics() {
     railW: rail?.w || 0,
     tokensStacked,
     youTok, oppTok, hg,
+    hits,
+    boxes: {
+      tavern: tavernZone,
+      oppDraw, youDraw, deck, deckLabel, youCd, oppCd,
+      turn, oppRes, youRes, leaveHud, events, patronsCluster, youCalls,
+      youAgents, oppAgents, endTurn: hg, patronRail: rail,
+    },
   };
 }
 
@@ -4064,6 +4084,7 @@ function installTestHook() {
       const hex = document.querySelector('.lift-hex-fly');
       const text = document.querySelector('.lift-text-fly');
       const tip = document.querySelector('.lift-text-fly .eso-tip-name');
+      const sheet = document.querySelector('.inspect-dossier-sheet');
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       const slack = 2;
@@ -4075,6 +4096,14 @@ function installTestHook() {
         const r = el.getBoundingClientRect();
         return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom };
       };
+      const nameBox = box(tip);
+      const sheetBox = box(sheet);
+      const titleClipped = !!(nameBox && (
+        (tip.scrollWidth > tip.clientWidth + 3)
+        || (sheetBox && nameBox.right > sheetBox.right + 2)
+        || nameBox.right > vw + slack
+        || nameBox.bottom > vh + slack
+      ));
       return {
         vw: window.innerWidth,
         vh: window.innerHeight,
@@ -4083,10 +4112,14 @@ function installTestHook() {
         metrics: liftClone?._kind ? inspectMetrics(liftClone._kind) : null,
         hex: box(hex),
         text: box(text),
-        name: box(tip),
+        name: nameBox,
+        sheet: sheetBox,
         hexOn: on(hex?.getBoundingClientRect()),
         textOn: on(text?.getBoundingClientRect()),
         nameOn: on(tip?.getBoundingClientRect()),
+        sheetOn: on(sheet?.getBoundingClientRect()),
+        titleClipped,
+        modal: !!sheet,
         tipText: text?.innerText || '',
       };
     },

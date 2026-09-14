@@ -1,11 +1,16 @@
-/* Build 39 — board-only pass.
+/* Build 40 — board/felt spacing pass.
    TWO compositions. Same engine/state. Different positions and sizes.
-   Round pewter coin + short gothic peak (~10% of diameter). The metal IS the tip.
-   Loaded last so these rules win. Do not letterbox one layout. */
+   Round pewter coin + short gothic peak (~10% of diameter) — unchanged.
+   Chrome uses the L/R edges. Nothing covers anything else. */
 
 #pile-tavern-discard { display: none !important; }
 
-/* ——— Shared: felt is the play surface. Chrome overlays it. ——— */
+/* Edge-to-edge felt. Safe-area padding was a skinny centered pillar on phones. */
+#match.screen.active {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
 #match .board {
   display: block !important;
   position: relative !important;
@@ -34,10 +39,42 @@
     "opp-hand"
     "opp-agents"
     "opp-res"
+    "turn"
     "tavern"
     "you-res"
     "you-agents"
     "you-hand" !important;
+}
+
+#match #turn-ind,
+#match .turn-chip {
+  grid-area: turn !important;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  justify-self: center !important;
+  align-self: center !important;
+  z-index: 8 !important;
+  margin: 0 !important;
+  pointer-events: none;
+}
+
+#match .token-row,
+#match #opp-res,
+#match #you-res {
+  min-height: 44px !important;
+  height: 44px !important;
+  overflow: visible !important;
+  z-index: 7 !important;
+}
+
+#match .felt-you-agents,
+#match .felt-opp-agents {
+  overflow: hidden !important;
+  z-index: 4 !important;
 }
 
 #match #pile-tavern-discard { display: none !important; }
@@ -56,9 +93,10 @@ body.is-portrait #match .felt-table,
     grid-template-rows:
       auto
       auto
+      44px
       22px
       minmax(150px, 1.2fr)
-      22px
+      44px
       auto
       minmax(148px, 1.05fr) !important;
     align-content: stretch !important;
@@ -71,13 +109,13 @@ body.is-portrait #match .felt-table {
   padding: 4px 2px 4px !important;
   row-gap: 2px !important;
   gap: 2px 0 !important;
-  /* Leftover height goes into tavern + hand cards, not an empty band. */
   grid-template-rows:
     auto
     auto
+    44px
     22px
     minmax(150px, 1.2fr)
-    22px
+    44px
     auto
     minmax(148px, 1.05fr) !important;
   align-content: stretch !important;
@@ -110,13 +148,13 @@ body.is-portrait #match .you-fan {
 }
 
 body.is-portrait #match .felt-tavern {
-  width: calc(100% - 64px) !important;
+  width: 100% !important;
   min-width: 72% !important;
   max-width: none !important;
   min-height: 0 !important;
   height: auto !important;
-  margin-left: 4px !important;
-  justify-self: start !important;
+  margin-left: 0 !important;
+  justify-self: stretch !important;
 }
 
 body.is-portrait #match .tavern-band,
@@ -127,15 +165,16 @@ body.is-portrait #match .tavern-zone {
 }
 
 body.is-portrait #match .tavern-zone {
-  gap: 0.22rem !important;
-  padding: 0.1rem 0.18rem !important;
+  gap: 0.18rem !important;
+  padding: 0.1rem 102px 0.1rem 52px !important;
+  box-sizing: border-box !important;
 }
 
 body.is-portrait #match .tavern-zone .card {
-  width: min(78px, calc((100% - 0.4rem) / 5.08)) !important;
+  width: min(72px, calc((100% - 0.4rem) / 5.08)) !important;
   height: auto !important;
   aspect-ratio: 1 / 1.52 !important;
-  min-height: 110px !important;
+  min-height: 72px !important;
   max-height: 96% !important;
 }
 
@@ -159,8 +198,11 @@ body.is-portrait #match #opp-hand-zone .card {
 }
 
 body.is-portrait #match .patron-rail {
-  width: auto !important;
-  max-width: 76px !important;
+  width: 102px !important;
+  max-width: 108px !important;
+  display: grid !important;
+  grid-template-columns: 56px 40px !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
   padding: 8px 2px 10px 4px !important;
   background: linear-gradient(90deg, rgba(8, 14, 12, 0) 0%, rgba(10, 16, 14, 0.18) 55%, rgba(16, 12, 8, 0.32) 100%) !important;
 }
@@ -202,9 +244,10 @@ body.is-landscape #match .felt-table {
   grid-template-rows:
     minmax(42px, 0.72fr)
     auto
-    28px
+    40px
+    22px
     minmax(96px, 1.7fr)
-    28px
+    40px
     auto
     minmax(72px, 1.25fr) !important;
 }
@@ -220,13 +263,13 @@ body.is-landscape #match .felt-you-agents {
 }
 
 body.is-landscape #match .felt-tavern {
-  width: calc(100% - 118px) !important;
+  width: 100% !important;
   min-width: 72% !important;
   max-width: none !important;
   min-height: 0 !important;
   height: auto !important;
-  margin-left: 8px !important;
-  justify-self: start !important;
+  margin-left: 0 !important;
+  justify-self: stretch !important;
 }
 
 body.is-landscape #match .tavern-band,
@@ -239,7 +282,8 @@ body.is-landscape #match .tavern-zone {
 body.is-landscape #match .tavern-zone {
   justify-content: space-evenly !important;
   gap: 0.4rem !important;
-  padding: 0.12rem 0.3rem !important;
+  padding: 0.12rem 124px 0.12rem 58px !important;
+  box-sizing: border-box !important;
 }
 
 body.is-landscape #match .tavern-zone .card {
@@ -266,7 +310,10 @@ body.is-landscape #match #opp-hand-zone .card {
 }
 
 body.is-landscape #match .patron-rail {
-  max-width: 118px !important;
+  width: 118px !important;
+  max-width: 124px !important;
+  display: grid !important;
+  grid-template-columns: 58px 48px !important;
   padding: 6px 4px 8px 10px !important;
 }
 
@@ -280,17 +327,24 @@ body.is-landscape #match .patron-coin .token-dial.tipless {
   height: 46px !important;
 }
 
-/* Piles stay corner overlays — never reserved columns */
-#match #pile-opp-draw { top: 6px !important; left: 4px !important; }
-#match #pile-opp-cd { top: 6px !important; right: 8px !important; }
-#match #pile-tavern-draw { top: 50% !important; left: 4px !important; transform: translateY(-50%) !important; }
-#match #pile-you-draw { bottom: 8px !important; left: 4px !important; }
-#match #pile-you-cd { bottom: 8px !important; right: 8px !important; }
+/* Piles sit in the L/R chrome strips — never on tavern cards. */
+#match #pile-opp-draw { top: 6px !important; left: 2px !important; }
+#match #pile-opp-cd { top: 6px !important; right: 122px !important; }
+#match #pile-tavern-draw { top: 52% !important; left: 2px !important; transform: translateY(-50%) !important; }
+#match #pile-you-draw { bottom: 8px !important; left: 2px !important; }
+#match #pile-you-cd { bottom: 8px !important; right: 122px !important; }
+
+body.is-portrait #match #pile-opp-cd { top: 6px !important; right: 108px !important; }
+body.is-portrait #match #pile-you-cd { bottom: 8px !important; right: 108px !important; }
 
 #match .felt-hud-you {
-  right: 72px !important;
-  bottom: 6px !important;
+  right: 176px !important;
+  bottom: 8px !important;
   left: auto !important;
+}
+body.is-portrait #match .felt-hud-you {
+  right: 160px !important;
+  bottom: 10px !important;
 }
 
 /* ===================================================================
@@ -454,3 +508,190 @@ body.is-landscape #match .patron-coin .token-dial.tipless {
   white-space: nowrap;
   text-align: center;
 }
+
+#match .felt-tavern {
+  width: 100% !important;
+  min-width: 72% !important;
+  margin-left: 0 !important;
+  justify-self: stretch !important;
+}
+
+/* Played-effects live above DECK, never on the deck label. */
+#match .events-rail {
+  position: absolute !important;
+  left: 2px !important;
+  top: 54px !important;
+  width: 48px !important;
+  height: calc(48% - 92px) !important;
+  max-height: calc(48% - 92px) !important;
+  padding: 4px 1px 6px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  z-index: 12 !important;
+}
+#match .events-rail .event-hex {
+  width: 36px !important;
+  height: 50px !important;
+  flex: 0 0 auto;
+}
+#match .events-title {
+  font-size: 0.42rem !important;
+  margin-bottom: 2px !important;
+}
+
+/* Hourglass + End Turn sit in column 2, beside medals — not under them. */
+#match .patron-rail {
+  display: grid !important;
+  grid-template-columns: auto auto !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  align-items: stretch !important;
+  justify-items: center !important;
+}
+#match .rail-patrons {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  z-index: 2 !important;
+}
+#match .rail-glass {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  justify-content: center !important;
+  align-self: center !important;
+  z-index: 3 !important;
+}
+body.is-portrait #match .rail-glass,
+body.is-landscape #match .rail-glass {
+  padding: 0 !important;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+  justify-content: center !important;
+  align-self: center !important;
+}
+#match .patron-use-token.opp {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  z-index: 4 !important;
+}
+#match .patron-use-token.you {
+  position: relative !important;
+  bottom: auto !important;
+  right: auto !important;
+  grid-column: 2 !important;
+  grid-row: 3 !important;
+  z-index: 4 !important;
+}
+#match .eso-hourglass-end {
+  width: 40px !important;
+  padding: 2px 0 4px !important;
+}
+
+/* Hold-inspect: dark dossier modal. Full card + title inside the sheet. */
+.lift-fly.lift-dossier-modal {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  overflow: hidden !important;
+}
+.lift-fly.lift-dossier-modal .lift-veil {
+  background: rgba(6, 10, 12, 0.86) !important;
+}
+.inspect-dossier-sheet {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 1.1rem;
+  max-width: min(96vw, 860px);
+  max-height: min(90dvh, 640px);
+  width: auto;
+  background:
+    linear-gradient(180deg, rgba(28, 24, 18, 0.98), rgba(10, 14, 14, 0.96));
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 14px;
+  box-shadow: 0 18px 48px #000c, inset 0 0 0 1px rgba(255, 244, 210, 0.08);
+  padding: 1rem 1.15rem 1.1rem;
+  box-sizing: border-box;
+  overflow: hidden;
+  pointer-events: none;
+}
+.lift-dossier-modal .lift-hex-fly {
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  inset: auto !important;
+  flex: 0 0 auto;
+  max-width: none !important;
+  max-height: min(78dvh, 520px) !important;
+  overflow: visible !important;
+}
+.lift-dossier-modal .lift-hex-fly img {
+  overflow: visible !important;
+}
+.lift-dossier-modal .lift-text-fly {
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  width: auto !important;
+  max-width: 100% !important;
+  max-height: min(78dvh, 560px) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding: 0 2px 0 0 !important;
+  opacity: 1 !important;
+}
+.lift-dossier-modal .eso-tip-name {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(22, 18, 14, 0.98) 70%, rgba(22, 18, 14, 0));
+  overflow: visible !important;
+  white-space: normal !important;
+  word-break: normal;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  padding-bottom: 0.2rem;
+}
+.lift-fly.lift-dossier-modal.closing {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+@media (orientation: portrait) {
+  .inspect-dossier-sheet {
+    flex-direction: column;
+    align-items: center;
+    max-width: min(94vw, 420px);
+    max-height: min(92dvh, 760px);
+    overflow: hidden;
+  }
+  .lift-dossier-modal .lift-hex-fly {
+    max-height: min(42dvh, 280px) !important;
+  }
+  .lift-dossier-modal .lift-text-fly {
+    width: 100% !important;
+    max-height: min(46dvh, 360px) !important;
+  }
+}
+body.is-portrait .inspect-dossier-sheet {
+  flex-direction: column;
+  align-items: center;
+  max-width: min(94vw, 420px);
+}
+body.is-landscape .inspect-dossier-sheet {
+  flex-direction: row;
+  align-items: stretch;
+}
+

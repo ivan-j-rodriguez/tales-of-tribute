@@ -46,7 +46,7 @@ async function shot(name, { w, h }) {
   await page.evaluate(async () => {
     const el = document.querySelector('#tavern-zone .card') || document.querySelector('#hand-zone .card');
     el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', isPrimary: true }));
-    await new Promise(r => setTimeout(r, 920));
+    await new Promise(r => setTimeout(r, 1150));
   });
   await new Promise(r => setTimeout(r, 380));
   const dest = `/workspace/${name}.png`;
