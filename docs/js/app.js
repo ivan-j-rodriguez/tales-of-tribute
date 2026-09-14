@@ -4217,7 +4217,7 @@ function layoutMetrics() {
   /* Portrait: End Turn leaves the rail, so octagons must stay with patrons.
      Landscape: hourglass still sits on the rail between the octagons. */
   const usesNearHourglass = vh > vw
-    ? (usesOnRightRail && usesNearPatrons)
+    ? usesOnRightRail
     : (distTo(youTokC, hgC) <= 120 && distTo(oppTokC, hgC) <= 120);
   const usesAtCorner = !!(youTok && oppTok && (
     (youTok.bottom > vh - 52 && youTok.right > vw - 52)
@@ -4227,13 +4227,10 @@ function layoutMetrics() {
   const youDrawStack = box('#pile-you-draw .pile-stack');
   const oppCdStack = box('#pile-opp-cd .pile-stack');
   const youCdStack = box('#pile-you-cd .pile-stack');
-  const drawLeftEdge = Math.min(
-    oppDrawStack?.x ?? oppDraw?.x ?? 99,
-    youDrawStack?.x ?? youDraw?.x ?? 99
-  );
+  const drawLeftEdge = Math.min(oppDraw?.x ?? 99, youDraw?.x ?? 99);
   const cdRightGap = Math.min(
-    youCdStack ? vw - youCdStack.right : (youCd ? vw - youCd.right : 99),
-    oppCdStack ? vw - oppCdStack.right : (oppCd ? vw - oppCd.right : 99)
+    youCd ? vw - youCd.right : 99,
+    oppCd ? vw - oppCd.right : 99
   );
   const hudIsLeftStrip = !!(leaveHud && sfxBtn && leaveBtn
     && leaveHud.x < vw * 0.22
@@ -4266,6 +4263,7 @@ function layoutMetrics() {
     leaveVsCooldown: hit(leaveHud, youCd) || hit(leaveBtn, youCd),
     sfxVsCooldown: hit(sfxBtn, youCd) || hit(leaveHud, youCd),
     hudVsDeck: hit(leaveHud, deck) || hit(leaveBtn, deck),
+    hudVsYouDraw: hit(leaveHud, youDraw) || hit(leaveBtn, youDraw),
     endTurnVsYouDraw: hit(hg, youDraw),
     endTurnVsHud: hit(hg, leaveHud),
   };

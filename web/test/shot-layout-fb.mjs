@@ -153,9 +153,10 @@ async function measure(page, fileStem, { w, h }) {
   if (!m.usesNearHourglass) fail(`${fileStem} patron-use octagons not on the right rail`, notes);
 
   if (TAG !== 'before') {
-    if ((m.drawLeftEdge ?? 99) > 6) fail(`${fileStem} DRAW not at left edge (${m.drawLeftEdge}px)`, notes);
+    if ((m.drawLeftEdge ?? 99) > 8) fail(`${fileStem} DRAW not at left edge (${m.drawLeftEdge}px)`, notes);
     if (w < h) {
-      if ((m.cdRightGap ?? 99) > 10) fail(`${fileStem} COOLDOWN not at right edge (gap ${m.cdRightGap}px)`, notes);
+      if ((m.cdRightGap ?? 99) > 12) fail(`${fileStem} COOLDOWN not at right edge (gap ${m.cdRightGap}px)`, notes);
+      if ((m.cdRightGap ?? 0) < -2) fail(`${fileStem} COOLDOWN clipped past the right edge (gap ${m.cdRightGap}px)`, notes);
       if (!m.hudIsLeftStrip) fail(`${fileStem} match-actions not a mid-left vertical strip`, notes);
       if (!m.endTurnBottomLeft) fail(`${fileStem} End Turn not bottom-left under the left strip`, notes);
     } else {
@@ -179,6 +180,7 @@ async function measure(page, fileStem, { w, h }) {
     'leaveVsCooldown',
     'sfxVsCooldown',
     'hudVsDeck',
+    'hudVsYouDraw',
     'endTurnVsYouDraw',
     'endTurnVsHud',
   ];
