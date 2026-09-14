@@ -12,7 +12,7 @@ import {
   gauntletCooldownMs, todaysFeatured, roadCrossing, WATER_ZONES,
   msUntilNextNyMidnight, nyDateStr,
   ensureClubMeta, currentShop, claimWeeklyGoal, claimSeasonalGoal, claimSeasonComplete,
-  discoverCards, noteClubEvent, deckReadyToUnlock, roadGrandPrizePreview,
+  discoverCards, noteClubEvent, deckReadyToUnlock, tryUnlockDeck, roadGrandPrizePreview,
 } from './profile.js';
 import { UPGRADE_TO_BASE, upgradesForPatron } from './upgrades.js';
 import {
@@ -21,6 +21,7 @@ import {
   currentSeason, nextSeason, msUntilShopRefresh, msUntilWeeklyReset,
   loginMonthGrid, clueCountOf, countClues, deckCardSet, weeklyKey,
   isOfferSoldOut, crateVariantForDay, CRATES_PER_MONTH, resolveCrateVariant,
+  baseCardsForDeck,
 } from './economy.js';
 import { hostRoom, joinRoom } from './netplay.js';
 import { setMusicEnabled, preferMusicFromStorage, warmMuted, playSfx, setMusicCue, setSfxStyle, getSfxStyle, setSfxEnabled, preferSfxFromStorage, isSfxOn } from './music.js';
@@ -358,7 +359,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 39';
+  if (stamp) stamp.textContent = 'build 40';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -1754,7 +1755,8 @@ function afterPlayerAction() {
 function showCardModal(d) {
   if (!d) return;
   const m = $('#card-modal');
-  $('#card-modal-body').innerHTML = `<div class="lift-dossier modal-dossier"><div class="dossier-hex"><img src="${artFor(d)}" alt="" /></div>${dossierHTML(d)}</div><button id="btn-modal-close">Close</button>`;
+  const name = d.name || 'Card';
+  $('#card-modal-body').innerHTML = `<div class="lift-dossier modal-dossier club-dossier"><div class="dossier-hex club-card-art"><img src="${artFor(d)}" alt="${name}" /></div>${dossierHTML(d)}</div><button id="btn-modal-close">Close</button>`;
   m.classList.add('show');
   $('#btn-modal-close').onclick = () => m.classList.remove('show');
   m.onclick = (e) => { if (e.target === m) m.classList.remove('show'); };
@@ -2512,6 +2514,36 @@ function renderClub() {
   }
 }
 
+function offerTitle(offer) {
+  if (!offer) return '';
+  if (offer.kind === 'fragment') {
+    const p = patronRecord(offer.target);
+    const name = offer.target === 'mora' ? 'Hermaeus Mora' : (p?.short || offer.target);
+    return `${name} fragment`;
+  }
+  if (offer.kind === 'skin') return TABLE_SKINS.find((x) => x.id === offer.target)?.name || offer.target;
+  if (offer.kind === 'back') return CARD_BACKS.find((x) => x.id === offer.target)?.name || offer.target;
+  if (offer.kind === 'clue' || offer.kind === 'upgrade') return cardsById[offer.target]?.name || offer.target;
+  return offer.id || '';
+}
+
+function rarityGlowClass(rarity) {
+  return rarity && rarity !== 'common' ? ` rarity-glow-${rarity}` : '';
+}
+
+function offerThumb(offer) {
+  if (offer.kind === 'fragment') {
+    return `<img src="${patronArt(offer.target)}" alt="" />`;
+  }
+  if (offer.kind === 'skin') return `<div class="skin-swatch ${offer.target}"></div>`;
+  if (offer.kind === 'back') return `<div class="back-swatch back-${offer.target}"></div>`;
+  if (offer.kind === 'clue' || offer.kind === 'upgrade') {
+    const c = cardsById[offer.target];
+    return c ? `<img src="${artFor(c)}" alt="" style="border-radius:8px;width:56px;height:84px;object-fit:contain;background:#071018" />` : '';
+  }
+  return '';
+}
+
 function offerVisual(offer) {
   if (offer.kind === 'fragment') {
     const p = patronsById[offer.target];
@@ -2545,7 +2577,7 @@ function offerVisual(offer) {
 function renderOfferCard(offer, { later = false, preview = false } = {}) {
   const sold = !later && !preview && isOfferSoldOut(profile, shopPeriodKeySafe(), offer.id);
   const el = document.createElement('div');
-  el.className = 'store-item' + (sold ? ' soldout' : '') + (later || preview ? ' later' : '');
+  el.className = 'store-item' + (sold ? ' soldout' : '') + (later || preview ? ' later' : '') + rarityGlowClass(offer.rarity);
   const price = preview || later ? 'Returns later' : (sold ? 'Sold out' : `${offer.price}g`);
   el.innerHTML = `
     <div class="rarity-pip rarity-${offer.rarity}">${formatRarity(offer.rarity)}</div>
@@ -2554,7 +2586,8 @@ function renderOfferCard(offer, { later = false, preview = false } = {}) {
     ${later || preview ? '' : `<button ${sold ? 'disabled' : ''}>${sold ? 'Sold out' : 'Buy'}</button>`}
   `;
   if (!later && !preview && !sold) {
-    el.querySelector('button').onclick = () => {
+    el.querySelector('button').onclick = (e) => {
+      e.stopPropagation();
       const res = buyShopOffer(profile, offer, DATA.cards);
       if (res.error) toast(res.error);
       else {
@@ -2563,41 +2596,96 @@ function renderOfferCard(offer, { later = false, preview = false } = {}) {
       }
     };
   }
+  el.addEventListener('click', (e) => {
+    if (e.target.closest('button')) return;
+    showOfferSheet(offer, { preview: later || preview, sold });
+  });
   return el;
 }
 
 function shopPeriodKeySafe() {
-  const slate = currentShop(profile, DATA.cards);
+  const slate = shopSlateNow();
   return slate.periodKey;
+}
+
+function shopSlateNow() {
+  const shopParam = Number(new URLSearchParams(location.search).get('shop') || '');
+  if (Number.isFinite(shopParam) && shopParam > 0) return currentShop(profile, DATA.cards, shopParam);
+  return currentShop(profile, DATA.cards);
+}
+
+function renderBundleHero(b, periodKey) {
+  const sold = isOfferSoldOut(profile, periodKey, b.id);
+  const names = (b.parts || []).map((p) => offerTitle(p)).join(' · ');
+  const parts = (b.parts || []).map((p) => `
+    <div class="bundle-part">
+      ${offerThumb(p)}
+      <strong>${offerTitle(p)}</strong>
+    </div>`).join('');
+  return `
+    <div class="bundle-card store-hero">
+      <p class="bundle-kicker">Featured · ${formatRarity(b.rarity)} parcel</p>
+      <h4>Roister’s Binding</h4>
+      <p>A High Isle pairing for the finer table — ${names}. Bound in Club gold before the Gonfalon slate turns.</p>
+      <div class="bundle-parts">${parts}</div>
+      <div class="bundle-cta">
+        <div class="price">${sold ? 'Sold out' : b.price + 'g'}</div>
+        <button class="primary" id="btn-buy-bundle" ${sold ? 'disabled' : ''}>${sold ? 'Sold out' : 'Claim the parcel'}</button>
+      </div>
+    </div>`;
+}
+
+function renderFeaturedPrize(offer) {
+  if (!offer) return '<p class="hint">The featured prize rides with tomorrow’s slate.</p>';
+  return `
+    <div class="store-hero">
+      <p class="bundle-kicker">Featured prize</p>
+      <div class="hero-art-row">${offerThumb(offer)}<div>
+        <h4>${offerTitle(offer)}</h4>
+        <p>A patron shard on today’s High Isle slate. Win the purse, then claim the road.</p>
+      </div></div>
+      <div class="bundle-cta">
+        <div class="price">${offer.price}g · ${formatRarity(offer.rarity)}</div>
+        <button class="primary" id="btn-buy-featured">Claim</button>
+      </div>
+    </div>`;
 }
 
 function renderStore() {
   profile = loadProfile();
   ensureClubMeta(profile, DATA.cards);
   $('#store-gold').textContent = `${profile.gold}g`;
-  const slate = currentShop(profile, DATA.cards);
+  const slate = shopSlateNow();
   const timer = $('#store-timer');
-  if (timer) timer.textContent = `Slate refreshes in ${fmtCountdown(msUntilShopRefresh())} (daily NY midnight).`;
+  if (timer) timer.textContent = `Slate refreshes in ${fmtCountdown(msUntilShopRefresh())} · America/New_York midnight.`;
+
+  const frags = (slate.featured || []).filter((o) => o.kind === 'fragment');
+  const cosmetics = (slate.featured || []).filter((o) => o.kind === 'skin' || o.kind === 'back');
+  const daily = (slate.featured || []).filter((o) => o.kind === 'clue' || o.kind === 'upgrade');
 
   const bundleBox = $('#store-bundle');
+  const heroBox = $('#store-featured-hero');
   if (bundleBox) {
     const b = slate.bundle;
-    if (!b) bundleBox.innerHTML = '<p class="hint">No bundle this slate.</p>';
-    else {
-      const sold = isOfferSoldOut(profile, slate.periodKey, b.id);
-      const names = (b.parts || []).map((p) => p.target).join(' + ');
-      bundleBox.innerHTML = `
-        <div class="bundle-card">
-          <div class="rarity-pip rarity-${b.rarity}">${formatRarity(b.rarity)} bundle</div>
-          <h4>Roister’s parcel</h4>
-          <p>${names} — still stingy; 10% off the pair. Fragments remain the long sink.</p>
-          <div class="price">${sold ? 'Sold out' : b.price + 'g'}</div>
-          <button id="btn-buy-bundle" ${sold ? 'disabled' : ''}>${sold ? 'Sold out' : 'Buy bundle'}</button>
-        </div>`;
+    if (b) {
+      bundleBox.innerHTML = renderBundleHero(b, slate.periodKey);
       $('#btn-buy-bundle')?.addEventListener('click', () => {
         const res = buyShopOffer(profile, b, DATA.cards);
         if (res.error) toast(res.error);
-        else { toast(`Bundle taken · ${b.price}g`); renderStore(); refreshSplashPurse(); }
+        else { toast(`Parcel claimed · ${b.price}g`); renderStore(); refreshSplashPurse(); }
+      });
+    } else bundleBox.innerHTML = '';
+  }
+  if (heroBox) {
+    if (slate.bundle) heroBox.innerHTML = '';
+    else {
+      const prize = frags[0] || slate.featured?.[0];
+      heroBox.innerHTML = renderFeaturedPrize(prize);
+      $('#btn-buy-featured')?.addEventListener('click', () => {
+        if (!prize) return;
+        const res = buyShopOffer(profile, prize, DATA.cards);
+        if (res.error) toast(res.error);
+        else { toast(`Claimed · ${prize.price}g`); renderStore(); refreshSplashPurse(); }
       });
     }
   }
@@ -2605,7 +2693,25 @@ function renderStore() {
   const feat = $('#store-featured');
   if (feat) {
     feat.innerHTML = '';
-    for (const o of slate.featured) feat.appendChild(renderOfferCard(o));
+    const rest = daily.length ? daily : (slate.featured || []).filter((o) => o.kind !== 'fragment' && o.kind !== 'skin' && o.kind !== 'back');
+    if (!rest.length && !frags.length && !cosmetics.length) {
+      for (const o of slate.featured || []) feat.appendChild(renderOfferCard(o));
+    } else {
+      for (const o of rest) feat.appendChild(renderOfferCard(o));
+      if (!rest.length) feat.innerHTML = '<p class="hint">Today’s clues ride with the fragment and cosmetics below.</p>';
+    }
+  }
+  const fragBox = $('#store-fragments');
+  if (fragBox) {
+    fragBox.innerHTML = '';
+    if (!frags.length) fragBox.innerHTML = '<p class="hint">No patron fragment on this slate — watch tomorrow’s preview.</p>';
+    else for (const o of frags) fragBox.appendChild(renderOfferCard(o));
+  }
+  const cosBox = $('#store-cosmetics');
+  if (cosBox) {
+    cosBox.innerHTML = '';
+    if (!cosmetics.length) cosBox.innerHTML = '<p class="hint">No table or back on this slate.</p>';
+    else for (const o of cosmetics) cosBox.appendChild(renderOfferCard(o));
   }
   const tom = $('#store-tomorrow');
   if (tom) {
@@ -2617,8 +2723,175 @@ function renderStore() {
   const later = $('#store-later');
   if (later) {
     later.innerHTML = '';
-    for (const o of slate.later) later.appendChild(renderOfferCard(o, { later: true }));
+    for (const o of slate.later || []) later.appendChild(renderOfferCard(o, { later: true }));
   }
+}
+
+function openClubSheet(html) {
+  const m = $('#club-sheet');
+  const body = $('#club-sheet-body');
+  if (!m || !body) return;
+  body.innerHTML = html;
+  m.classList.add('show');
+  m.onclick = (e) => { if (e.target === m) closeClubSheet(); };
+}
+
+function closeClubSheet() {
+  $('#club-sheet')?.classList.remove('show');
+}
+
+function sheetMeter(label, have, need) {
+  const pct = need ? Math.min(100, Math.round((have / need) * 100)) : 0;
+  return `<div class="sheet-meter"><div class="label"><span>${label}</span><span>${have}/${need}</span></div><div class="sheet-bar"><i style="width:${pct}%"></i></div></div>`;
+}
+
+function deckUnlockState(deckId) {
+  const unlocked = isDeckUnlocked(profile, deckId);
+  const frag = fragmentProgress(profile, deckId);
+  const ready = !unlocked && deckReadyToUnlock(profile, deckId, DATA.cards);
+  const bases = baseCardsForDeck(DATA.cards, deckId);
+  const found = bases.filter((c) => clueCountOf(profile, c.id) >= 1).length;
+  const missingFrag = Math.max(0, FRAGMENTS_TO_UNLOCK - frag);
+  const missingClues = Math.max(0, bases.length - found);
+  let status = 'Unlocked';
+  let how = 'This patron already sits at your table. Win matches to finish remaining card clues. Cosmetics equip from the Upgrades tab.';
+  if (!unlocked) {
+    status = ready ? 'Ready to unlock' : 'Locked';
+    const bits = [];
+    if (missingFrag) bits.push(`${missingFrag} more fragment${missingFrag === 1 ? '' : 's'} from the Club Store, Crown Crates, or match rewards`);
+    if (missingClues) bits.push(`a clue for ${missingClues} more base card${missingClues === 1 ? '' : 's'} — win on this road or buy a clue when it appears on the slate`);
+    how = ready
+      ? 'Fragments and every base clue are in. Claim unlock below — the Club opens the patron the moment the last shard is set.'
+      : `Still locked. Need ${bits.join(' · ') || 'progress on this road'}.`;
+  }
+  return { unlocked, frag, ready, bases, found, status, how, missingFrag, missingClues };
+}
+
+function showDeckSheet(deckId) {
+  const p = patronRecord(deckId);
+  const title = deckId === 'mora' ? 'Hermaeus Mora' : (p.name || p.short || deckId);
+  const st = deckUnlockState(deckId);
+  const display = st.unlocked ? title : '???';
+  const cards = deckCardSet(DATA.cards, deckId);
+  const starter = STARTER_DECKS.includes(deckId) || deckId === 'treasury';
+  const cardHtml = cards.map((c) => {
+    const n = clueCountOf(profile, c.id);
+    const known = n >= 1 || st.unlocked || starter;
+    const isUp = (c.baseQty || 0) === 0 && (c.upgradedQty || 0) > 0;
+    const ownedUp = !isUp || profile.ownedUpgrades.includes(c.id);
+    return `<div class="sheet-card${known ? '' : ' locked'}" data-card="${c.id}" data-known="${known ? '1' : '0'}">
+      ${known ? `<img src="${artFor(c)}" alt="${c.name}" />` : `<div class="clue-unknown">?</div>`}
+      <div class="tag">${known ? c.name : 'Unknown'}${isUp ? (ownedUp ? ' · ▲' : ' · ▲ locked') : ''} · ${n}/${CLUES_TO_UPGRADE}</div>
+    </div>`;
+  }).join('');
+  openClubSheet(`
+    <div class="sheet-hero">
+      <img src="${patronArt(deckId)}" alt="${display}" style="${st.unlocked ? '' : 'filter:grayscale(.85) brightness(.65)'}" />
+      <div>
+        <p class="sheet-kicker">${formatRarity(rarityOf('fragment', deckId))} · ${starter ? 'Starter' : 'Club road'}</p>
+        <h3 id="club-sheet-title">${display}</h3>
+        <p class="sheet-status">${st.status}</p>
+      </div>
+    </div>
+    <p class="sheet-blurb">${st.unlocked ? (DECK_CAPTIONS[deckId] || '') : 'A locked High Isle road. Fragments and card clues open the true name.'}</p>
+    <div class="sheet-progress">
+      ${starter ? '' : sheetMeter('Patron fragments', st.frag, FRAGMENTS_TO_UNLOCK)}
+      ${sheetMeter('Base card clues', st.found, Math.max(1, st.bases.length))}
+    </div>
+    <div class="sheet-how"><strong>How to unlock.</strong> ${st.how}</div>
+    ${st.ready ? '<button type="button" class="primary" id="btn-sheet-unlock">Unlock patron</button>' : ''}
+    <div class="sheet-cards">${cardHtml || '<p class="hint">No cards listed for this patron.</p>'}</div>
+  `);
+  $('#btn-sheet-unlock')?.addEventListener('click', () => {
+    const res = tryUnlockDeck(profile, deckId, DATA.cards);
+    if (res.unlocked) { toast(`${title} unlocked`); renderCollection(); showDeckSheet(deckId); }
+    else toast('Need every fragment and every base clue first.');
+  });
+  $('#club-sheet-body')?.querySelectorAll('.sheet-card').forEach((el) => {
+    el.addEventListener('click', () => {
+      const c = cardsById[el.dataset.card];
+      if (!c) return;
+      if (el.dataset.known === '1') showCardModal(c);
+      else showClueSheet(c);
+    });
+  });
+}
+
+function showClueSheet(c) {
+  const n = clueCountOf(profile, c.id);
+  const known = n >= 1;
+  const deck = canonPatron(c.patron);
+  const p = patronRecord(deck);
+  if (known) { showCardModal(c); return; }
+  openClubSheet(`
+    <div class="sheet-hero">
+      <div class="clue-unknown" style="width:88px;height:88px;border-radius:12px">?</div>
+      <div>
+        <p class="sheet-kicker">${p.short || deck} · unknown card</p>
+        <h3 id="club-sheet-title">Hidden tribute</h3>
+        <p class="sheet-status">Locked · ${n}/${CLUES_TO_UPGRADE} clues</p>
+      </div>
+    </div>
+    <div class="sheet-progress">${sheetMeter('Clues toward upgrade', n, CLUES_TO_UPGRADE)}</div>
+    <div class="sheet-how"><strong>How to unlock.</strong> Win matches to discover this card, or buy a clue when it appears on the daily Club Store slate. ${CLUES_TO_UPGRADE} clues on a known card unlock its upgrade.</div>
+    <button type="button" id="btn-sheet-deck">View ${p.short || 'patron'} road</button>
+  `);
+  $('#btn-sheet-deck')?.addEventListener('click', () => showDeckSheet(deck));
+}
+
+function showCosmeticSheet(kind, id) {
+  const cat = kind === 'skin' ? TABLE_SKINS : CARD_BACKS;
+  const item = cat.find((x) => x.id === id);
+  if (!item) return;
+  const owned = kind === 'skin' ? profile.unlockedSkins.includes(id) : profile.unlockedBacks.includes(id);
+  const eq = kind === 'skin' ? profile.tableSkin === id : profile.cardBack === id;
+  const swatch = kind === 'skin' ? `<div class="skin-swatch ${id}"></div>` : `<div class="back-swatch back-${id}"></div>`;
+  const how = owned
+    ? 'Owned. Equip it here — cosmetics never sit behind a real-money wall.'
+    : 'Appears on the rotating Club Store slate. Win matches to fill the purse, then claim it in gold. Seasonal pieces wait for their festival.';
+  openClubSheet(`
+    <div class="sheet-hero">
+      ${swatch}
+      <div>
+        <p class="sheet-kicker">${item.tag || kind} · ${formatRarity(item.rarity || 'fine')}</p>
+        <h3 id="club-sheet-title">${item.name}</h3>
+        <p class="sheet-status">${owned ? (eq ? 'Equipped' : 'Owned') : 'Not owned'}</p>
+      </div>
+    </div>
+    <p class="sheet-blurb">${item.desc || ''}</p>
+    <div class="sheet-how"><strong>How to unlock.</strong> ${how}</div>
+    ${owned ? `<button type="button" class="primary" id="btn-sheet-equip">${eq ? 'Equipped' : 'Equip'}</button>` : '<button type="button" id="btn-sheet-store">Open Store</button>'}
+  `);
+  $('#btn-sheet-equip')?.addEventListener('click', () => {
+    if (kind === 'skin') equipSkin(profile, id);
+    else equipBack(profile, id);
+    applyTableSkin();
+    renderCollection();
+    showCosmeticSheet(kind, id);
+  });
+  $('#btn-sheet-store')?.addEventListener('click', () => {
+    closeClubSheet();
+    storeReturnScreen = '#collection';
+    renderStore();
+    show('#store');
+  });
+}
+
+function showOfferSheet(offer, { preview = false, sold = false } = {}) {
+  if (offer.kind === 'fragment') { showDeckSheet(offer.target); return; }
+  if (offer.kind === 'skin') { showCosmeticSheet('skin', offer.target); return; }
+  if (offer.kind === 'back') { showCosmeticSheet('back', offer.target); return; }
+  if (offer.kind === 'clue' || offer.kind === 'upgrade') {
+    const c = cardsById[offer.target];
+    if (c && clueCountOf(profile, c.id) >= 1) showCardModal(c);
+    else if (c) showClueSheet(c);
+    return;
+  }
+  openClubSheet(`
+    <h3 id="club-sheet-title">${offerTitle(offer)}</h3>
+    <p class="sheet-blurb">${preview ? 'Returns on a later slate.' : sold ? 'Already claimed this slate.' : 'A Club Store offer. Purse gold only.'}</p>
+    <div class="sheet-how"><strong>How to unlock.</strong> Win matches to fill the purse, then buy when the rotating slate shows this piece. No IAP.</div>
+  `);
 }
 
 let collectionTab = 'patrons';
@@ -2642,10 +2915,10 @@ function renderCollection() {
   const clues = countClues(profile, DATA.cards);
   if (hint) {
     hint.textContent = collectionTab === 'patrons'
-      ? 'Locked decks need patron fragments AND one clue for every base card in that deck.'
+      ? 'Tap a patron for progress, lock reasons, and how to unlock. Fragments plus every base clue open a locked road.'
       : collectionTab === 'clues'
-        ? `${clues.have}/${clues.total} cards found. ${CLUES_TO_UPGRADE} clues on a card unlocks its upgrade. Grouped by deck — starters first.`
-        : 'Table designs, card backs, and owned card upgrades. Buy them on the rotating slate.';
+        ? `${clues.have}/${clues.total} cards found. ${CLUES_TO_UPGRADE} clues on a card unlocks its upgrade. Tap any row for progress and how to unlock.`
+        : 'Tap a fragment, table, or back for progress and how to unlock. Equip owned cosmetics here.';
   }
 
   const grid = $('#collection-grid');
@@ -2656,20 +2929,20 @@ function renderCollection() {
       const p = patronRecord(id);
       if (!p) continue;
       const unlocked = isDeckUnlocked(profile, id);
+      const ready = !unlocked && deckReadyToUnlock(profile, id, DATA.cards);
       const el = document.createElement('div');
-      el.className = 'patron-card' + (unlocked ? '' : ' locked');
+      el.className = 'patron-card tappable' + (unlocked ? '' : ' locked') + (ready ? ' deck-ready' : '');
       el.dataset.deck = id;
       const frag = fragmentProgress(profile, id);
       const ups = upgradesForPatron(DATA.cards, id);
       const owned = ups.filter((u) => profile.ownedUpgrades.includes(u)).length;
-      const ready = !unlocked && deckReadyToUnlock(profile, id, DATA.cards);
       const title = id === 'mora' ? 'Hermaeus Mora' : (p.short || p.name || id);
       el.innerHTML = `
         <img src="${patronArt(id)}" alt="${unlocked ? title : 'Locked patron'}" />
         <div class="name">${unlocked ? title : '???'}</div>
         <div class="desc">${unlocked ? `Upgrades ${owned}/${ups.length}` : `Fragments ${frag}/${FRAGMENTS_TO_UNLOCK}${ready ? ' · ready' : ' · need cards'}`} · ${formatRarity(rarityOf('fragment', id))}</div>
       `;
-      el.addEventListener('click', () => showCollectionDeck(id));
+      el.addEventListener('click', () => showDeckSheet(id));
       grid.appendChild(el);
     }
   }
@@ -2689,7 +2962,7 @@ function renderClueEncyclopedia() {
     const wrap = document.createElement('div');
     wrap.className = `clue-deck deck-${deckId}`;
     wrap.style.setProperty('--ency-color', p.color || DECK_COLORS[deckId] || '#c9a227');
-    wrap.appendChild(encyPatronHead(deckId));
+      wrap.appendChild(encyPatronHead(deckId, { tappable: true }));
     const found = cards.filter((c) => clueCountOf(profile, c.id) >= 1).length;
     const count = document.createElement('p');
     count.className = 'hint clue-deck-count';
@@ -2705,7 +2978,7 @@ function renderClueEncyclopedia() {
       el.innerHTML = known
         ? `<img src="${artFor(c)}" alt="${c.name}" /><div class="tag">${c.name} · ${n}/${CLUES_TO_UPGRADE}${c.starter ? ' · starter' : ''}${c.upgraded ? ' · ▲' : ''}</div>`
         : `<div class="clue-unknown">?</div><div class="tag">Unknown · ${n}/${CLUES_TO_UPGRADE}</div>`;
-      if (known) el.addEventListener('click', () => showCardModal(c));
+      el.addEventListener('click', () => known ? showCardModal(c) : showClueSheet(c));
       box.appendChild(el);
     }
     wrap.appendChild(box);
@@ -2731,6 +3004,7 @@ function renderCollectionUpgrades() {
         <h4>${id === 'mora' ? 'Hermaeus Mora' : p.short}</h4>
         <p>Fragments ${n}/${FRAGMENTS_TO_UNLOCK}${isDeckUnlocked(profile, id) ? ' · unlocked' : ''}</p>
       `;
+      el.addEventListener('click', () => showDeckSheet(id));
       frags.appendChild(el);
     }
   }
@@ -2748,8 +3022,13 @@ function renderCollectionUpgrades() {
         <p>${s.tag || ''} · ${owned ? (eq ? 'Equipped' : 'Owned') : 'Not owned'}</p>
         ${owned ? `<button>${eq ? 'Equipped' : 'Equip'}</button>` : ''}
       `;
-      el.querySelector('button')?.addEventListener('click', () => {
+      el.querySelector('button')?.addEventListener('click', (e) => {
+        e.stopPropagation();
         equipSkin(profile, s.id); applyTableSkin(); renderCollection();
+      });
+      el.addEventListener('click', (e) => {
+        if (e.target.closest('button')) return;
+        showCosmeticSheet('skin', s.id);
       });
       skins.appendChild(el);
     }
@@ -2767,8 +3046,13 @@ function renderCollectionUpgrades() {
         <p>${owned ? (eq ? 'Equipped' : 'Owned') : 'Not owned'}</p>
         ${owned ? `<button>${eq ? 'Equipped' : 'Equip'}</button>` : ''}
       `;
-      el.querySelector('button')?.addEventListener('click', () => {
+      el.querySelector('button')?.addEventListener('click', (e) => {
+        e.stopPropagation();
         equipBack(profile, b.id); applyTableSkin(); renderCollection();
+      });
+      el.addEventListener('click', (e) => {
+        if (e.target.closest('button')) return;
+        showCosmeticSheet('back', b.id);
       });
       backs.appendChild(el);
     }
@@ -2777,15 +3061,24 @@ function renderCollectionUpgrades() {
     ups.innerHTML = '';
     const owned = (profile.ownedUpgrades || []).map((id) => cardsById[id]).filter(Boolean);
     if (!owned.length) ups.innerHTML = '<p class="hint">No card upgrades yet — find clues at the table or buy them when the slate turns.</p>';
-    for (const c of owned) {
-      ups.innerHTML += `<div class="coll-card upgrade-owned"><img src="${artFor(c)}" alt="${c.name}" /><div class="tag">${c.name}</div></div>`;
+    else {
+      ups.innerHTML = '';
+      for (const c of owned) {
+        const el = document.createElement('div');
+        el.className = 'coll-card upgrade-owned';
+        el.innerHTML = `<img src="${artFor(c)}" alt="${c.name}" /><div class="tag">${c.name}</div>`;
+        el.addEventListener('click', () => showCardModal(c));
+        ups.appendChild(el);
+      }
     }
   }
 }
 
 function showCollectionDeck(deckId) {
+  showDeckSheet(deckId);
   const p = patronRecord(deckId);
   const detail = $('#collection-detail');
+  if (!detail) return;
   detail.classList.remove('hidden');
   const unlocked = isDeckUnlocked(profile, deckId);
   const cards = deckCardSet(DATA.cards, deckId);
@@ -2796,13 +3089,21 @@ function showCollectionDeck(deckId) {
     const owned = !isUp || profile.ownedUpgrades.includes(c.id);
     const n = clueCountOf(profile, c.id);
     const cls = isUp ? (owned ? 'upgrade-owned' : 'upgrade-locked') : '';
-    html += `<div class="coll-card ${cls}">
+    html += `<div class="coll-card ${cls}" data-card="${c.id}">
       <img src="${artFor(c)}" alt="${c.name}" />
       <div class="tag">${c.name}${isUp ? (owned ? ' ▲ owned' : ' ▲ locked') : ''} · clues ${n}/${CLUES_TO_UPGRADE}</div>
     </div>`;
   }
   html += '</div>';
   detail.innerHTML = html;
+  detail.querySelectorAll('.coll-card').forEach((el) => {
+    el.addEventListener('click', () => {
+      const c = cardsById[el.dataset.card];
+      if (!c) return;
+      if (clueCountOf(profile, c.id) >= 1 || isDeckUnlocked(profile, deckId) || STARTER_DECKS.includes(deckId)) showCardModal(c);
+      else showClueSheet(c);
+    });
+  });
 }
 
 function openLoginGreet() {
@@ -2829,6 +3130,9 @@ function openLoginGreet() {
       : 'Stamp today for a modest Club purse of gold.';
   }
   overlay.classList.add('show');
+  cal?.querySelectorAll('.cal-day.claimable').forEach((el) => {
+    el.addEventListener('click', () => claimLoginStamp());
+  });
 }
 
 function claimLoginStamp() {
@@ -2891,22 +3195,23 @@ function showPurseReward(reward, rarity) {
   overlay.classList.add('show');
 }
 
-function encyPatronHead(deckId) {
+function encyPatronHead(deckId, { tappable = false } = {}) {
   const p = patronRecord(deckId);
   const unlocked = deckId === 'treasury' || isDeckUnlocked(profile, deckId);
   const title = deckId === 'mora' ? 'Hermaeus Mora' : (p.name || p.short || deckId);
   const cap = DECK_CAPTIONS[deckId] || '';
   const el = document.createElement('div');
-  el.className = `ency-patron-head deck-${deckId}` + (unlocked ? '' : ' locked');
+  el.className = `ency-patron-head deck-${deckId}` + (unlocked ? '' : ' locked') + (tappable ? ' tappable' : '');
   el.dataset.deck = deckId;
   el.style.setProperty('--ency-color', p.color || DECK_COLORS[deckId] || '#c9a227');
   el.innerHTML = `
     <img class="ency-patron-token" src="${patronArt(deckId)}" alt="${unlocked ? title : 'Locked patron'}" />
     <div class="ency-patron-meta">
       <strong class="ency-div-name">${unlocked ? title : '???'}</strong>
-      <span class="ency-div-cap">${unlocked ? cap : 'Locked'}</span>
+      <span class="ency-div-cap">${unlocked ? cap : 'Locked — tap for how to unlock'}</span>
     </div>
   `;
+  if (tappable) el.addEventListener('click', () => showDeckSheet(deckId));
   return el;
 }
 
@@ -2948,7 +3253,7 @@ function renderEncy() {
     const section = document.createElement('section');
     section.className = `ency-deck deck-${g.id}`;
     section.dataset.deck = g.id;
-    section.appendChild(encyPatronHead(g.id));
+    section.appendChild(encyPatronHead(g.id, { tappable: true }));
     const box = document.createElement('div');
     box.className = 'ency-deck-cards';
     for (const c of g.cards) {
@@ -2958,7 +3263,10 @@ function renderEncy() {
       el.innerHTML = deckLocked
         ? `<div class="clue-unknown">?</div><div class="info"><strong>???</strong></div>`
         : `<img src="${artFor(c)}" alt="${c.name}" /><div class="info"><strong>${c.name}</strong>${c.cost} · ${c.type}${c.upgraded ? ' · ▲' : ''}</div>`;
-      if (!deckLocked) el.addEventListener('click', () => showCardModal(c));
+      el.addEventListener('click', () => {
+        if (deckLocked) showDeckSheet(canonPatron(c.patron));
+        else showCardModal(c);
+      });
       box.appendChild(el);
     }
     section.appendChild(box);
@@ -3354,7 +3662,16 @@ function bind() {
   $('#btn-splash-store')?.addEventListener('click', () => openStore('#splash'));
   $('#btn-store-back')?.addEventListener('click', () => {
     if (storeReturnScreen === '#club') { renderClub(); show('#club'); }
+    else if (storeReturnScreen === '#collection') { renderCollection(); show('#collection'); }
     else onSplashEnter();
+  });
+  $('#btn-club-sheet-close')?.addEventListener('click', () => closeClubSheet());
+  $$('.store-nav a').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const id = a.getAttribute('href')?.slice(1);
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   });
   $('#ency-patron').onchange = renderEncy;
   $('#ency-search').oninput = renderEncy;
@@ -3616,6 +3933,30 @@ function installTestHook() {
       isRankedMatch = false;
       isGauntletMatch = false;
       startMatch({ playerFirst: true, difficulty: 1 });
+    },
+    openStore() {
+      $('#login-overlay')?.classList.remove('show');
+      storeReturnScreen = '#splash';
+      renderStore();
+      show('#store');
+    },
+    openCollection() {
+      $('#login-overlay')?.classList.remove('show');
+      storeReturnScreen = '#splash';
+      renderCollection();
+      show('#collection');
+    },
+    openDeckSheet(id = 'pelin') {
+      this.openCollection();
+      showDeckSheet(id);
+    },
+    openCardModal(id = 'the-portcullis') {
+      const c = cardsById[id] || DATA.cards.find((x) => (x.name || '').toLowerCase().includes('portcullis'));
+      if (c) showCardModal(c);
+      return !!(c && document.querySelector('#card-modal.show') && document.querySelector('#card-modal .eso-tip-name'));
+    },
+    shopHasBundle() {
+      return !!shopSlateNow().bundle;
     },
     snapshot() {
       const p = engine?.state?.players[0];

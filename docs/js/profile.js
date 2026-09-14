@@ -277,9 +277,10 @@ export function ensureClubMeta(profile, cards = []) {
   return profile;
 }
 
-export function currentShop(profile, cards = []) {
+export function currentShop(profile, cards = [], when) {
   const ctx = shopContextFromProfile(profile, cards, TABLE_SKINS, CARD_BACKS, LOCKED_DECKS);
-  const today = buildShopSlate({ ...ctx, periodKey: shopPeriodKey() });
+  const periodKey = typeof when === 'number' ? when : shopPeriodKey(when);
+  const today = buildShopSlate({ ...ctx, periodKey });
   const tomorrow = tomorrowShopSlate(ctx);
   return { ...today, tomorrow };
 }

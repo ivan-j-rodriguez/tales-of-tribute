@@ -1,10 +1,18 @@
-Music (Creative Commons By Attribution 3.0 — Kevin MacLeod, incompetech.com):
-  Call to Adventure — menus
-  Heroic Age — fight
-  Five Armies — boss / ranked
-  Black Vortex — danger
-Credit: "[Title] Kevin MacLeod (incompetech.com) Licensed under Creative Commons: By Attribution 3.0 http://creativecommons.org/licenses/by/3.0/"
+Club beds — CC0 / public-domain dedication. Never Kevin MacLeod. Never the ESO soundtrack.
 
-Tamriel provinces map: UESP File:ON-map-Tamriel (provinces).jpg — used as card art is, unofficial fan table, not for sale.
+  The Old Tower Inn (loop) — RandomMind, OpenGameArt.org, CC0
+    https://opengameart.org/content/medieval-the-old-tower-inn
+  A New Town — The Cynic Project / pixelsphere.org / cynicmusic.com, CC0
+    https://opengameart.org/content/a-new-town-rpg-theme
+  Tavern — yd, OpenGameArt.org, CC0
+    https://opengameart.org/content/tavern-0
+  King's Feast — RandomMind, OpenGameArt.org, CC0
+    https://opengameart.org/content/medieval-kings-feast
+  Market Day — RandomMind, OpenGameArt.org, CC0
+    https://opengameart.org/content/medieval-market-day
+  Night Harbor — original loop written for this unofficial fan table (CC0)
 
-Never uses Elder Scrolls Online soundtrack. Folk/renaissance beds are not used.
+Credits are appreciated for the OpenGameArt tracks; CC0 does not require them.
+The Club rotates short beds with soft crossfades so one loop never nags.
+
+Tamriel provinces map: UESP File:ON-map-Tamriel (provinces).jpg — unofficial fan table, not for sale.
