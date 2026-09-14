@@ -489,18 +489,9 @@
   transform-origin: 50% 64%;
   transition: transform 0.65s cubic-bezier(.4, .12, .2, 1);
 }
-#match .patron-coin .token-point {
-  display: block !important;
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 12px;
-  height: 14px;
-  transform: translateX(-50%);
-  background: linear-gradient(180deg, #f7f2e8, #c9c0b0 42%, #8a8276 78%, #4a453c);
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-  filter: drop-shadow(0 1px 1px #0008);
-  z-index: 2;
+#match .patron-coin span.token-point,
+#match .patron-coin .token-point:not(path) {
+  display: none !important;
 }
 #match .patron-coin .coin-ring {
   position: absolute !important;

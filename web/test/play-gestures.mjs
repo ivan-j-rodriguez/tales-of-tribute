@@ -149,6 +149,7 @@ assert('gold tip is in-game sentence', /Gain 1 Coin/i.test(a.goldTip || ''), a.g
 assert('harvest is Draw 1 card', /Draw 1 card/i.test(a.harvestTip || ''), a.harvestTip);
 assert('treasury has no favor tip', a.treasuryHasTip === false, a.patrons);
 assert('no tavern discard pile', a.tavernDiscard === false, a);
+assert('no landscape-plays-better banner', a.landscapeBanner === false, a);
 assert('pointed patrons have a gothic tip', a.patrons.filter(p => p.id !== 'treasury' && p.id !== 'mora').every(p => p.tip && p.medallion), a.patrons);
 assert('patron tokens are coins not nameplates', a.woodPendants === 0 && a.coinRings >= 5, a);
 assert('empty agent seats stay thin', a.agentEmptyH > 0 && a.agentEmptyH <= 36 && a.agentsRowH <= 48, a);
@@ -253,12 +254,13 @@ await nativePage.goto(`http://127.0.0.1:${port}/?test=1&native=1`, { waitUntil: 
 await waitReady(nativePage);
 await start(nativePage);
 const nativeSnap = await snap(nativePage);
-assert('native shell hides landscape banner', nativeSnap.nativeShell === true && nativePage.evaluate(() => document.querySelector('#landscape-tip')?.hidden) , nativeSnap);
+assert('native shell is on', nativeSnap.nativeShell === true, nativeSnap);
+assert('no landscape banner on match', nativeSnap.landscapeBanner === false, nativeSnap);
 const nativeTipHidden = await nativePage.evaluate(() => {
   const tip = document.querySelector('#landscape-tip');
   if (!tip) return true;
   const cs = getComputedStyle(tip);
-  return tip.hidden || cs.display === 'none';
+  return tip.hidden || cs.display === 'none' || !tip.textContent.trim();
 });
 assert('native tip not visible', nativeTipHidden);
 await nativePage.close();

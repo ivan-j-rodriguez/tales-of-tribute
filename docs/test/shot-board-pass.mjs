@@ -1,8 +1,7 @@
 /**
- * Build 35 board-pass gate + artifacts.
- * Portrait 390×844: no large empty bands, no tavern discard, tavern readable.
- * Landscape 844×390: no large side gutters, tavern ≥ 72% viewport.
- * Patron medallions: gothic tip rotates with favor; Treasury + Mora tipless.
+ * Build 36 board-pass gate + artifacts.
+ * Portrait 390×844 / landscape 844×390.
+ * Gothic medallion silhouette IS the favor tip. No in-match landscape banner.
  */
 import http from 'http';
 import fs from 'fs';
@@ -61,10 +60,16 @@ function fail(msg, extra) {
   process.exitCode = 1;
 }
 
+async function shotRail(page, name) {
+  fs.mkdirSync(ART, { recursive: true });
+  const rail = await page.$('#patron-rail');
+  if (!rail) { fail(`${name} missing patron rail`); return; }
+  await rail.screenshot({ path: path.join(ART, `${name}.png`) });
+}
+
 async function measure(page, fileStem, { w, h }) {
   fs.mkdirSync(ART, { recursive: true });
-  const destArt = path.join(ART, `${fileStem}.png`);
-  await page.screenshot({ path: destArt, fullPage: false });
+  await page.screenshot({ path: path.join(ART, `${fileStem}.png`), fullPage: false });
   const m = await page.evaluate(() => window.__totTest.layout());
   const snap = await page.evaluate(() => window.__totTest.snapshot());
   const notes = {
@@ -84,7 +89,8 @@ async function measure(page, fileStem, { w, h }) {
     pointedTips: m.pointedTips,
     treasuryHasTip: snap.treasuryHasTip,
     moraHasTip: snap.moraHasTip,
-    patrons: snap.patrons?.map(p => ({ id: p.id, favor: p.favor, tip: p.tip, tipless: p.tipless })),
+    landscapeBanner: snap.landscapeBanner,
+    patrons: snap.patrons?.map(p => ({ id: p.id, favor: p.favor, tip: p.tip, tipless: p.tipless, rot: p.rot })),
   };
 
   if (m.tavernDiscard) fail(`${fileStem} tavern discard still present`, notes);
@@ -92,6 +98,7 @@ async function measure(page, fileStem, { w, h }) {
   if ((m.cardH || 0) < 52) fail(`${fileStem} tavern cards too short (${m.cardH}px)`, notes);
   if ((m.medallions || 0) < 5) fail(`${fileStem} expected 5 medallions`, notes);
   if (snap.treasuryHasTip) fail(`${fileStem} Treasury has a tip`, notes);
+  if (snap.landscapeBanner) fail(`${fileStem} landscape banner still on the match felt`, notes);
   const pointed = (snap.patrons || []).filter(p => p.id !== 'treasury' && p.id !== 'mora');
   if (!pointed.length || pointed.some(p => !p.tip || p.tipless)) fail(`${fileStem} pointed patrons missing gothic tip`, notes);
   if (w < h) {
@@ -103,48 +110,63 @@ async function measure(page, fileStem, { w, h }) {
   return notes;
 }
 
+async function favorSet(page, map) {
+  return page.evaluate((pairs) => {
+    for (const [pid, v] of pairs) window.__totTest.setFavor(pid, v);
+    return window.__totTest.snapshot().patrons.map(p => ({ id: p.id, favor: p.favor, rot: p.rot, tipless: p.tipless }));
+  }, Object.entries(map));
+}
+
 const results = {};
 
 const portPage = await browser.newPage();
 await portPage.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 await ready(portPage);
 results.portrait = await measure(portPage, 'portrait-390x844', { w: 390, h: 844 });
-const portFavor = await portPage.evaluate(() => {
-  const a = window.__totTest.setFavor('pelin', 1);
-  const b = window.__totTest.setFavor('crows', -1);
-  const snap = window.__totTest.snapshot();
-  return { a, b, patrons: snap.patrons };
-});
-console.log('portrait favor', JSON.stringify(portFavor));
-await new Promise(r => setTimeout(r, 800));
-await portPage.screenshot({ path: path.join(ART, 'portrait-patron-favor-rotate.png') });
+await shotRail(portPage, 'portrait-rail-neutral');
+await favorSet(portPage, { pelin: 1, hlaalu: 0, crows: 0, celarus: 0 });
+await new Promise(r => setTimeout(r, 700));
+await shotRail(portPage, 'portrait-rail-fav-you');
+await favorSet(portPage, { pelin: -1, hlaalu: 0, crows: 0, celarus: 0 });
+await new Promise(r => setTimeout(r, 700));
+await shotRail(portPage, 'portrait-rail-fav-opp');
 await portPage.close();
 
 const landPage = await browser.newPage();
 await landPage.setViewport({ width: 844, height: 390, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 await ready(landPage);
 results.landscape = await measure(landPage, 'landscape-844x390', { w: 844, h: 390 });
-const landFavor = await landPage.evaluate(() => {
-  const a = window.__totTest.setFavor('pelin', 1);
-  const b = window.__totTest.setFavor('crows', -1);
-  const snap = window.__totTest.snapshot();
-  return { a, b, patrons: snap.patrons };
-});
-console.log('landscape favor', JSON.stringify(landFavor));
-await new Promise(r => setTimeout(r, 800));
-await landPage.screenshot({ path: path.join(ART, 'landscape-patron-favor-rotate.png') });
+await shotRail(landPage, 'landscape-rail-neutral');
+const youState = await favorSet(landPage, { pelin: 1, hlaalu: 0, crows: 0, celarus: 0 });
+console.log('landscape fav-you', JSON.stringify(youState));
+await new Promise(r => setTimeout(r, 700));
+await shotRail(landPage, 'landscape-rail-fav-you');
+const oppState = await favorSet(landPage, { pelin: -1, hlaalu: 0, crows: 0, celarus: 0 });
+console.log('landscape fav-opp', JSON.stringify(oppState));
+await new Promise(r => setTimeout(r, 700));
+await shotRail(landPage, 'landscape-rail-fav-opp');
 await landPage.close();
 
+const pelinYou = youState.find(p => p.id === 'pelin');
+const pelinOpp = oppState.find(p => p.id === 'pelin');
+const treas = youState.find(p => p.id === 'treasury');
+if (pelinYou?.favor !== 'favored') fail('pelin fav-you not favored', pelinYou);
+if (pelinOpp?.favor !== 'unfavored') fail('pelin fav-opp not unfavored', pelinOpp);
+if (treas && treas.rot !== 'none') fail('treasury rotated', treas);
+
 const note = [
-  'Build 35 board-pass measurements',
+  'Build 36 board-pass measurements',
   `portrait 390x844: tavern ${results.portrait.tavernW}px = ${results.portrait.viewportTavernPct}% vw`,
   `  empty bands T/B ${results.portrait.topBandPct}% / ${results.portrait.botBandPct}% (need ≤8%)`,
-  `  tavern discard: ${results.portrait.tavernDiscard}`,
+  `  tavern discard: ${results.portrait.tavernDiscard}  banner: ${results.portrait.landscapeBanner}`,
   `  medallions ${results.portrait.medallions}, gothic tips ${results.portrait.pointedTips}, Treasury tip ${results.portrait.treasuryHasTip}`,
   `landscape 844x390: tavern ${results.landscape.tavernW}px = ${results.landscape.viewportTavernPct}% vw (need ≥72%)`,
   `  gutters L/R ${results.landscape.leftGutterPct}% / ${results.landscape.rightGutterPct}%`,
-  `  tavern discard: ${results.landscape.tavernDiscard}`,
+  `  tavern discard: ${results.landscape.tavernDiscard}  banner: ${results.landscape.landscapeBanner}`,
   `  medallions ${results.landscape.medallions}, gothic tips ${results.landscape.pointedTips}, Treasury tip ${results.landscape.treasuryHasTip}`,
+  `pelin fav-you ${pelinYou?.favor} rot=${pelinYou?.rot}`,
+  `pelin fav-opp ${pelinOpp?.favor} rot=${pelinOpp?.rot}`,
+  `treasury rot=${treas?.rot}`,
 ].join('\n');
 fs.writeFileSync(path.join(ART, 'board-pass-measurements.txt'), note + '\n');
 console.log(note);

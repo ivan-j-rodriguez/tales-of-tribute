@@ -164,7 +164,10 @@ function syncBoardLayout() {
   document.body.classList.toggle('is-landscape', matchOn && !portrait);
   document.body.classList.remove('need-landscape');
   const tip = $('#landscape-tip');
-  if (tip) tip.hidden = native || !(matchOn && portrait);
+  if (tip) {
+    tip.hidden = true;
+    tip.setAttribute('hidden', '');
+  }
   const board = match?.querySelector('.board');
   if (!board || !matchOn) return;
   board.style.width = '100%';
@@ -207,46 +210,51 @@ function patronNeverTips(pat, pid) {
   return !!(pat?.alwaysNeutral || pat?.abilities?.alwaysNeutral || pid === 'treasury' || pid === 'mora');
 }
 
-/** Ornate pewter gothic medallion. Tip = favor. Treasury + Mora stay circular. */
+/** Ornate pewter gothic medallion. The metal silhouette IS the favor tip. */
 function medallionMarkup(pid, pat, short, favorWord) {
   const uid = `med-${pid}`;
   const art = patronArt(pid);
+  const field = pat?.color || '#6b1218';
   const title = `${favorWord} — ${pat?.name || short}`;
   const neverTurn = patronNeverTips(pat, pid);
   const pew = `
-    <linearGradient id="${uid}-pew" x1="18%" y1="0" x2="88%" y2="100%">
-      <stop offset="0%" stop-color="#e8e2d4"/>
-      <stop offset="22%" stop-color="#9a9488"/>
-      <stop offset="48%" stop-color="#d8d0c2"/>
-      <stop offset="70%" stop-color="#6a6458"/>
-      <stop offset="100%" stop-color="#2e2a24"/>
-    </linearGradient>`;
+    <linearGradient id="${uid}-pew" x1="16%" y1="0" x2="90%" y2="100%">
+      <stop offset="0%" stop-color="#f3eee4"/>
+      <stop offset="18%" stop-color="#c8c0b4"/>
+      <stop offset="42%" stop-color="#8a8478"/>
+      <stop offset="58%" stop-color="#e6dfd2"/>
+      <stop offset="78%" stop-color="#6a6458"/>
+      <stop offset="100%" stop-color="#2a261e"/>
+    </linearGradient>
+    <radialGradient id="${uid}-fld" cx="38%" cy="30%">
+      <stop offset="0%" stop-color="#9a2434"/>
+      <stop offset="100%" stop-color="${field}"/>
+    </radialGradient>`;
+  /* One continuous gothic oval. Point is the bezel, not a glued triangle. */
+  const sil = 'M50 2 C55 14, 68 26, 78 44 A 40 40 0 1 1 22 44 C32 26, 45 14, 50 2 Z';
   if (neverTurn) {
     return `
       <div class="token-dial medallion tipless" title="${title}">
-        <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
         <svg class="medallion-svg" viewBox="0 0 100 100" aria-hidden="true">
-          <defs>${pew}</defs>
-          <path fill="url(#${uid}-pew)" fill-rule="evenodd" stroke="#1c1812" stroke-width="1.4"
-            d="M50 2 A48 48 0 1 1 49.9 2 Z M50 50 m-35 0 a35 35 0 1 1 70 0 a35 35 0 1 1 -70 0"/>
-          <circle cx="50" cy="50" r="36.2" fill="none" stroke="#efe6d4" stroke-width="1.1" opacity=".75"/>
-          <circle cx="50" cy="50" r="37.4" fill="none" stroke="#5c564c" stroke-width="2.2" stroke-dasharray="3.3 2.1"/>
+          <defs>${pew}<clipPath id="${uid}-face"><circle cx="50" cy="50" r="29"/></clipPath></defs>
+          <circle cx="50" cy="50" r="48" fill="url(#${uid}-pew)" stroke="#1c1812" stroke-width="1.5"/>
+          <circle cx="50" cy="50" r="31" fill="url(#${uid}-fld)"/>
         </svg>
+        <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
       </div>
       <span class="plabel">${short}</span>`;
   }
   return `
     <div class="token-dial medallion" title="${title}">
-      <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
       <svg class="medallion-svg" viewBox="0 0 100 128" aria-hidden="true">
         <defs>${pew}</defs>
-        <path class="token-point medallion-body" fill="url(#${uid}-pew)" fill-rule="evenodd" stroke="#1c1812" stroke-width="1.4"
-          d="M50 2 C60 16, 80 32, 90 54 A 46 46 0 1 1 10 54 C20 32, 40 16, 50 2 Z
-             M50 78 m-34 0 a34 34 0 1 1 68 0 a34 34 0 1 1 -68 0"/>
-        <circle cx="50" cy="78" r="35.2" fill="none" stroke="#efe6d4" stroke-width="1.15" opacity=".8"/>
-        <circle cx="50" cy="78" r="36.4" fill="none" stroke="#5c564c" stroke-width="2.3" stroke-dasharray="3.4 2.2"/>
-        <path fill="url(#${uid}-pew)" stroke="#1c1812" stroke-width="1" d="M50 2 L57 24 Q50 20 43 24 Z"/>
+        <path class="token-point medallion-body" fill="url(#${uid}-pew)" stroke="#1c1812" stroke-width="1.5" d="${sil}"/>
+        <circle cx="50" cy="76" r="31" fill="url(#${uid}-fld)"/>
+        <circle cx="50" cy="76" r="33.2" fill="none" stroke="#1c1812" stroke-width="1.8"/>
+        <circle cx="50" cy="76" r="32.2" fill="none" stroke="#efe6d4" stroke-width="1.05" opacity=".8"/>
+        <circle cx="50" cy="76" r="32.8" fill="none" stroke="#5c564c" stroke-width="2.2" stroke-dasharray="3.2 2.1"/>
       </svg>
+      <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
     </div>
     <span class="plabel">${short}</span>`;
 }
@@ -3605,6 +3613,12 @@ function installTestHook() {
         treasuryHasTip: coins.some(c => c.id === 'treasury' && c.tip),
         moraHasTip: coins.some(c => c.id === 'mora' && c.tip),
         tavernDiscard: !!document.querySelector('#pile-tavern-discard'),
+        landscapeBanner: (() => {
+          const tip = document.querySelector('#landscape-tip');
+          if (!tip) return false;
+          const cs = getComputedStyle(tip);
+          return !tip.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' && Number(cs.opacity) > 0 && !!(tip.textContent || '').trim();
+        })(),
         resPatronTok: !!document.querySelector('#you-res .tok-patron'),
         railPatronTok: !!document.querySelector('#you-patron-calls'),
         targeting: !!targetSession,

@@ -177,7 +177,14 @@ body.is-portrait #match .eso-hourglass-end .hg-svg {
   height: 46px !important;
 }
 body.is-portrait #match .pile-stack { width: 32px; height: 46px; }
-body.is-portrait #match .landscape-tip { font-size: 0.52rem; padding: 0.14rem 0.45rem; }
+#landscape-tip,
+#match .landscape-tip,
+.landscape-tip {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
 
 /* ===================================================================
    LANDSCAPE — edge-to-edge felt. Wide tavern. Slim right rail.
@@ -306,16 +313,32 @@ body.is-landscape #match .patron-coin .token-dial.tipless {
 #match .patron-coin .token-dial.medallion {
   display: block !important;
   position: relative;
-  width: 50px !important;
-  height: 66px !important;
+  width: 52px !important;
+  height: 68px !important;
   margin: 0 auto;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
-  transform-origin: 50% 61%;
+  overflow: hidden !important;
+  transform-origin: 50% 60%;
   transition: transform 0.7s cubic-bezier(.4, .12, .2, 1);
   filter: drop-shadow(0 3px 5px #0009);
+  /* Silhouette IS the tip: clip the whole badge to a gothic pointed oval. */
+  clip-path: polygon(
+    50% 0%,
+    68% 14%,
+    88% 32%,
+    98% 52%,
+    88% 78%,
+    68% 96%,
+    50% 100%,
+    32% 96%,
+    12% 78%,
+    2% 52%,
+    12% 32%,
+    32% 14%
+  );
 }
 
 #match .patron-coin .token-dial.tipless {
@@ -323,6 +346,8 @@ body.is-landscape #match .patron-coin .token-dial.tipless {
   height: 46px !important;
   transform: none !important;
   transform-origin: 50% 50%;
+  clip-path: circle(48% at 50% 50%);
+  overflow: hidden !important;
 }
 
 #match .patron-coin .medallion-svg {
@@ -339,20 +364,34 @@ body.is-landscape #match .patron-coin .token-dial.tipless {
   pointer-events: none;
 }
 
+#match .patron-coin path.token-point,
+#match .patron-coin path.medallion-body {
+  display: block !important;
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  width: auto !important;
+  height: auto !important;
+  background: none !important;
+  clip-path: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
 #match .patron-coin .coin-ring.medallion-face {
   position: absolute !important;
-  left: 14% !important;
-  top: 36% !important;
+  left: 22% !important;
+  top: 38% !important;
   right: auto !important;
   bottom: auto !important;
-  width: 72% !important;
-  height: 56% !important;
+  width: 56% !important;
+  height: 44% !important;
   padding: 0 !important;
   border-radius: 50%;
   overflow: hidden;
   background: #4a1018 !important;
   box-shadow: none !important;
-  z-index: 1;
+  z-index: 2;
   transform-origin: 50% 50%;
   transition: transform 0.7s cubic-bezier(.4, .12, .2, 1);
 }

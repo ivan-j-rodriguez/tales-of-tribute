@@ -36,7 +36,9 @@
   --felt-deep: var(--eso-felt-deep) !important;
 }
 
-.landscape-tip {
+.landscape-tip,
+#landscape-tip { display: none !important; }
+.landscape-tip-off {
   position: absolute;
   top: max(6px, env(safe-area-inset-top, 0px));
   left: 50%;
