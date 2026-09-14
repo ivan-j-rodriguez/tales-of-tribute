@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
-  <meta name="theme-color" content="#1e4a48" />
+  <meta name="theme-color" content="#06141c" />
   <title>Tales of Tribute — Fan Table</title>
-  <link rel="stylesheet" href="css/style.css?v=39" />
-  <link rel="stylesheet" href="css/phone-eso.css?v=39" />
-  <link rel="stylesheet" href="css/table-pack.css?v=39" />
-  <link rel="stylesheet" href="css/board-pass.css?v=39" />
+  <link rel="stylesheet" href="css/style.css?v=40" />
+  <link rel="stylesheet" href="css/phone-eso.css?v=40" />
+  <link rel="stylesheet" href="css/table-pack.css?v=40" />
+  <link rel="stylesheet" href="css/board-pass.css?v=40" />
+  <link rel="stylesheet" href="css/club-chrome.css?v=40" />
 </head>
 <body>
   <div id="app">
@@ -23,21 +24,29 @@
         <p class="subtitle">Two patrons, a tavern of five, and the long road to forty prestige.</p>
         <div class="splash-purse" id="splash-purse"></div>
         <div class="actions splash-actions">
-          <button class="primary" id="btn-play">Play vs AI</button>
-          <button id="btn-gauntlet">Challenge the Provinces</button>
-          <button class="ranked-btn" id="btn-ranked">Ranked</button>
-          <button id="btn-friend">Play a Friend</button>
-          <button class="primary store-btn" id="btn-splash-store">Store</button>
-          <button id="btn-club">Club</button>
-          <button id="btn-splash-collection">Collection</button>
-          <button id="btn-ency">Encyclopedia</button>
-          <button id="btn-settings">Settings</button>
+          <div class="splash-primary">
+            <button class="primary splash-play" id="btn-play">Play vs AI</button>
+          </div>
+          <div class="splash-compete">
+            <button class="ranked-btn" id="btn-ranked">Ranked</button>
+            <button id="btn-friend">Play a Friend</button>
+          </div>
+          <div class="splash-club-row">
+            <button class="primary store-btn" id="btn-splash-store">Store</button>
+            <button id="btn-splash-collection">Collection</button>
+            <button id="btn-club">Club</button>
+          </div>
+          <div class="splash-more">
+            <button class="ghost" id="btn-gauntlet">Provinces</button>
+            <button class="ghost" id="btn-ency">Encyclopedia</button>
+            <button class="ghost" id="btn-settings">Settings</button>
+          </div>
         </div>
         <div class="splash-toggles">
           <label class="chk"><input type="checkbox" id="chk-hourglass-splash" /> Hourglass (90s)</label>
           <button type="button" id="btn-music" class="music-toggle" title="Music">♪ Music: Off</button>
         </div>
-        <p class="build-stamp" id="build-stamp">build 38</p>
+        <p class="build-stamp" id="build-stamp">build 40</p>
         <p class="disclaimer">Unofficial fan project. Not affiliated with Bethesda Softworks or ZeniMax Online Studios.</p>
       </div>
     </section>
@@ -160,16 +169,36 @@
         <span class="store-gold" id="store-gold"></span>
         <button id="btn-store-back">Back</button>
       </header>
-      <p class="hint" id="store-hint">Daily slate — four table designs, four card backs, one deck fragment. The fragment is the prize, not pocket gold. Clues are rare and expensive. Purse gold only. No real-money wall.</p>
+      <p class="hint" id="store-hint">Treasures of High Isle — featured parcels, the day’s slate, patron fragments, and Breton cosmetics. Purse gold only. Unofficial. No IAP.</p>
       <p class="store-timer" id="store-timer"></p>
-      <h3 class="club-section">Slate bundle</h3>
-      <div id="store-bundle"></div>
-      <h3 class="club-section">This slate</h3>
-      <div class="store-grid" id="store-featured"></div>
-      <h3 class="club-section">Tomorrow’s preview</h3>
-      <div class="store-grid" id="store-tomorrow"></div>
-      <h3 class="club-section">Returns later</h3>
-      <div class="store-grid" id="store-later"></div>
+      <nav class="store-nav" aria-label="Store sections">
+        <a href="#store-featured-block">Featured</a>
+        <a href="#store-daily-block">Daily slate</a>
+        <a href="#store-fragments-block">Fragments</a>
+        <a href="#store-cosmetics-block">Cosmetics</a>
+      </nav>
+      <section class="store-section" id="store-featured-block">
+        <h3 class="club-section">Featured · Bundles</h3>
+        <div id="store-bundle"></div>
+        <div id="store-featured-hero"></div>
+      </section>
+      <section class="store-section" id="store-daily-block">
+        <h3 class="club-section">Daily slate</h3>
+        <div class="store-grid" id="store-featured"></div>
+      </section>
+      <section class="store-section" id="store-fragments-block">
+        <h3 class="club-section">Fragments</h3>
+        <div class="store-grid" id="store-fragments"></div>
+      </section>
+      <section class="store-section" id="store-cosmetics-block">
+        <h3 class="club-section">Cosmetics</h3>
+        <div class="store-grid" id="store-cosmetics"></div>
+      </section>
+      <section class="store-section" id="store-tomorrow-block">
+        <h3 class="club-section">Tomorrow’s preview</h3>
+        <div class="store-grid" id="store-tomorrow"></div>
+      </section>
+      <div class="store-grid" id="store-later" hidden></div>
     </section>
 
     <!-- COLLECTION -->
@@ -231,7 +260,7 @@
       </div>
       <div class="settings-block" id="settings-about">
         <h3 class="club-section">About</h3>
-        <p class="hint">Unofficial Ivan Rodriguez fan table. Not affiliated with Bethesda Softworks or ZeniMax Online Studios. Not for sale. No in-app purchases. Card art courtesy of UESP. Menu beds are CC-BY Kevin MacLeod (Call to Adventure, Heroic Age, Five Armies, Black Vortex) — never the ESO soundtrack.</p>
+        <p class="hint">Unofficial Ivan Rodriguez fan table. Not for sale. No in-app purchases. Card art courtesy of UESP. Club beds are CC0: RandomMind (The Old Tower Inn, King’s Feast, Market Day), The Cynic Project / cynicmusic.com (A New Town), yd (Tavern), plus an original Night Harbor loop — never Kevin MacLeod, never the ESO soundtrack. See assets/audio/CREDITS.txt.</p>
       </div>
     </section>
 
@@ -451,10 +480,16 @@
         </div>
       </div>
     </div>
-    <div class="modal" id="card-modal">
+    <div class="modal club-card-modal" id="card-modal">
       <div class="modal-body" id="card-modal-body"></div>
     </div>
+    <div class="modal club-sheet-modal" id="club-sheet">
+      <div class="club-sheet" role="dialog" aria-modal="true" aria-labelledby="club-sheet-title">
+        <button type="button" class="club-sheet-close" id="btn-club-sheet-close">Close</button>
+        <div id="club-sheet-body"></div>
+      </div>
+    </div>
   </div>
-  <script type="module" src="js/app.js?v=39"></script>
+  <script type="module" src="js/app.js?v=40"></script>
 </body>
 </html>

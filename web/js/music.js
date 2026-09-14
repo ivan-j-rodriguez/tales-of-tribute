@@ -1,23 +1,40 @@
 /**
- * Tribute audio — CC-BY Kevin MacLeod beds (never ESO OST, never folk drones).
- * tavern/menu: Call to Adventure · fight: Heroic Age · boss: Five Armies · danger: Black Vortex
+ * Tribute audio — CC0 / original beds (never Kevin MacLeod, never ESO OST).
+ * Short looping playlists with a soft crossfade so one cue never nags.
+ *
+ * tavern: harbor inn + harp + hearth
+ * fight:  Breton feast + market road
+ * boss:   market then feast
+ * danger: night harbor pad + inn
  */
 
-const STEMS = {
-  tavern: 'assets/audio/tot-bed-menu.mp3?v=17',
-  fight: 'assets/audio/tot-bed-fight.mp3?v=17',
-  boss: 'assets/audio/tot-bed-boss.mp3?v=17',
-  danger: 'assets/audio/tot-bed-danger.mp3?v=17',
+const V = '40';
+const BED = (file) => `assets/audio/${file}?v=${V}`;
+
+const PLAYLISTS = {
+  tavern: [BED('tot-bed-harbor.mp3'), BED('tot-bed-harp.mp3'), BED('tot-bed-hearth.mp3')],
+  fight: [BED('tot-bed-feast.mp3'), BED('tot-bed-market.mp3')],
+  boss: [BED('tot-bed-market.mp3'), BED('tot-bed-feast.mp3')],
+  danger: [BED('tot-bed-night.mp3'), BED('tot-bed-harbor.mp3')],
 };
+
+const TARGET_VOL = 0.32;
+const FADE_MS = 2400;
+const NEXT_LEAD = 2.7;
 
 let ctx = null;
 let master = null;
 let sfxGain = null;
-let musicEl = null;
+let players = [];
+let active = 0;
 let playing = false;
 let musicOn = false;
 let sfxStyle = 'table';
 let sfxOn = true;
+let cueName = 'tavern';
+let trackIndex = 0;
+let fadeRaf = 0;
+let armTimer = 0;
 
 function ensureCtx() {
   if (ctx) return ctx;
@@ -33,29 +50,117 @@ function ensureCtx() {
   return ctx;
 }
 
-function ensureMusicEl() {
-  if (musicEl) return musicEl;
-  musicEl = new Audio(STEMS.tavern);
-  musicEl.loop = true;
-  musicEl.preload = 'auto';
-  musicEl.volume = 0.34;
-  musicEl.dataset.cue = 'tavern';
-  return musicEl;
+function makePlayer() {
+  const el = new Audio();
+  el.preload = 'auto';
+  el.loop = false;
+  el.volume = 0;
+  el.addEventListener('ended', () => {
+    if (!musicOn || !playing) return;
+    advanceTrack(true);
+  });
+  el.addEventListener('timeupdate', onTimeUpdate);
+  return el;
+}
+
+function ensurePlayers() {
+  if (players.length === 2) return players;
+  players = [makePlayer(), makePlayer()];
+  return players;
+}
+
+function listFor(cue) {
+  return PLAYLISTS[cue] || PLAYLISTS.tavern;
+}
+
+function clearFade() {
+  if (fadeRaf) cancelAnimationFrame(fadeRaf);
+  fadeRaf = 0;
+}
+
+function fadeVolumes(fromEl, toEl, ms = FADE_MS) {
+  clearFade();
+  const t0 = performance.now();
+  const from0 = fromEl ? fromEl.volume : 0;
+  const step = (now) => {
+    const p = Math.min(1, (now - t0) / ms);
+    if (toEl) toEl.volume = TARGET_VOL * p;
+    if (fromEl) fromEl.volume = from0 * (1 - p);
+    if (p < 1) fadeRaf = requestAnimationFrame(step);
+    else {
+      fadeRaf = 0;
+      if (fromEl && fromEl !== toEl) {
+        fromEl.pause();
+        fromEl.volume = 0;
+      }
+    }
+  };
+  fadeRaf = requestAnimationFrame(step);
+}
+
+function srcAt(i) {
+  const list = listFor(cueName);
+  return list[((i % list.length) + list.length) % list.length];
+}
+
+function onTimeUpdate(e) {
+  if (!musicOn || !playing) return;
+  const el = e.target;
+  if (el !== players[active]) return;
+  if (!el.duration || !Number.isFinite(el.duration)) return;
+  if (el.duration - el.currentTime > NEXT_LEAD) return;
+  if (armTimer) return;
+  armTimer = 1;
+  advanceTrack(false);
+}
+
+function advanceTrack(immediate) {
+  const list = listFor(cueName);
+  if (!list.length) return;
+  trackIndex = (trackIndex + 1) % list.length;
+  startTrack(srcAt(trackIndex), { fade: !immediate });
+}
+
+function startTrack(src, { fade = true } = {}) {
+  ensurePlayers();
+  const from = players[active];
+  const to = players[1 - active];
+  if (to.src && to.src.includes(src.replace(/^\.\//, '')) && !to.paused && fade) {
+    armTimer = 0;
+    return;
+  }
+  to.src = src;
+  to.volume = fade ? 0 : TARGET_VOL;
+  const go = () => {
+    to.play().catch(() => {});
+    if (fade && from && from !== to && !from.paused) fadeVolumes(from, to, FADE_MS);
+    else {
+      to.volume = TARGET_VOL;
+      if (from && from !== to) { from.pause(); from.volume = 0; }
+    }
+    active = 1 - active;
+    armTimer = 0;
+  };
+  if (to.readyState >= 2) go();
+  else to.addEventListener('canplay', go, { once: true });
 }
 
 export function isMusicOn() { return musicOn && playing; }
 
 export async function setMusicEnabled(on) {
   ensureCtx();
-  ensureMusicEl();
+  ensurePlayers();
   musicOn = !!on;
   try { localStorage.setItem('tot_music', on ? '1' : '0'); } catch {}
   if (on) {
     if (ctx?.state === 'suspended') await ctx.resume();
     playing = true;
-    try { await musicEl.play(); } catch {}
-  } else if (musicEl) {
-    musicEl.pause();
+    startTrack(srcAt(trackIndex), { fade: false });
+    players[active].volume = TARGET_VOL;
+    try { await players[active].play(); } catch {}
+  } else {
+    clearFade();
+    players.forEach((p) => { p.pause(); p.volume = 0; });
     playing = false;
   }
   return on;
@@ -95,23 +200,25 @@ export function preferSfxFromStorage() {
 }
 
 export function setMusicCue(cue) {
-  const next = STEMS[cue] ? cue : 'tavern';
-  ensureMusicEl();
-  if (musicEl.dataset.cue === next) return;
-  const was = !musicEl.paused && musicOn;
-  musicEl.dataset.cue = next;
-  musicEl.src = STEMS[next];
-  musicEl.loop = true;
-  if (was) musicEl.play().catch(() => {});
+  const next = PLAYLISTS[cue] ? cue : 'tavern';
+  ensurePlayers();
+  if (cueName === next && players[active]?.src) return;
+  cueName = next;
+  trackIndex = 0;
+  if (musicOn && playing) startTrack(srcAt(0), { fade: true });
+  else {
+    players[active].src = srcAt(0);
+    players[active].volume = 0;
+  }
 }
 
 export function warmMuted() {
   ensureCtx();
-  ensureMusicEl();
+  ensurePlayers();
   sfxStyle = getSfxStyle();
   sfxOn = preferSfxFromStorage();
   if (sfxGain) sfxGain.gain.value = sfxOn ? 0.28 : 0;
-  musicEl.volume = 0.34;
+  players.forEach((p) => { p.volume = 0; });
 }
 
 function beep({ freq = 440, dur = 0.08, type = 'triangle', vol = 0.35, slide = 0, filterFreq = 0, filterQ = 1 }) {

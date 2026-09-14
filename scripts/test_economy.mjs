@@ -22,7 +22,7 @@ import {
   defaultProfile, addFragment, addCardClue, tryUnlockDeck, deckReadyToUnlock,
   recordMatchResult, FRAGMENTS_TO_UNLOCK, LOCKED_DECKS, buyFragment,
   recordGauntletResult, ensureGauntletDay, GAUNTLET_STOPS,
-  openCrownCrate,
+  openCrownCrate, currentShop,
 } from '../web/js/profile.js';
 
 const cards = JSON.parse(readFileSync(new URL('../data/cards.json', import.meta.url), 'utf8')).cards;
@@ -207,6 +207,14 @@ const expired = openCrownCrate(rollP, cards, null);
 assert(!!expired.error, `last month’s unopened crate expires (${expired.error})`);
 const freshMonth = openCrownCrate(rollP, cards, { id: 'iron' });
 assert(freshMonth.crate?.id === 'iron' && rollP.cratesOpened === 1, 'new month allows a fresh crate');
+
+const shopP = defaultProfile();
+const forced = currentShop(shopP, cards, 14);
+assert(!!forced.bundle, 'period 14 has a featured bundle');
+assert(forced.bundle.price >= 900, `bundle stays a gold sink (${forced.bundle.price})`);
+assert((forced.bundle.parts || []).length === 2, 'bundle pairs two slate pieces');
+const live = currentShop(shopP, cards);
+assert(Array.isArray(live.featured), 'current shop still builds without a period override');
 
 if (failed) {
   console.error(`\n${failed} failed`);

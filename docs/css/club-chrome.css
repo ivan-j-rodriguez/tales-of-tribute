@@ -1,0 +1,595 @@
+/* High Isle / Crown Store Club chrome.
+   Scoped to splash, Club, store, collection, settings, encyclopedia, ranked,
+   gauntlet, friend lobby, deck pick, Club overlays, and the card-info modal.
+   Does not own #match felt, board-pass, table-pack, or in-match lift inspect. */
+
+#splash, #club, #store, #collection, #settings, #encyclopedia, #ranked,
+#gauntlet, #friend-lobby, #deckpick,
+#login-overlay, #crate-overlay, #sack-overlay, #card-modal, #club-sheet {
+  --hi-navy: #06141c;
+  --hi-deep: #030b12;
+  --hi-teal: #0c3d48;
+  --hi-teal-bright: #1a6a72;
+  --hi-gold: #e6c56a;
+  --hi-gold-bright: #f6e7b2;
+  --hi-cream: #f3ead2;
+  --hi-parchment: #e8d9b0;
+  --hi-ink: #f7f1e4;
+  --hi-ink-dim: #c9bda0;
+  --hi-metal: #c5d0d4;
+  --hi-panel: rgba(8, 22, 32, 0.92);
+  --hi-border: 1px solid rgba(230, 197, 106, 0.48);
+}
+
+#splash, #club, #store, #collection, #settings, #encyclopedia, #ranked,
+#gauntlet, #friend-lobby {
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(230, 197, 106, 0.22), transparent 42%),
+    radial-gradient(ellipse at 100% 0%, rgba(26, 106, 114, 0.28), transparent 36%),
+    radial-gradient(ellipse at 0% 100%, rgba(12, 61, 72, 0.45), transparent 40%),
+    linear-gradient(180deg, #071821 0%, #0a2c34 42%, #06141c 100%) !important;
+  color: var(--hi-ink);
+}
+
+#deckpick {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(230, 197, 106, 0.16), transparent 44%),
+    linear-gradient(180deg, #071821, #0c2a32 55%, #06141c) !important;
+}
+
+.club-header {
+  background: linear-gradient(180deg, rgba(6, 20, 28, 0.96), rgba(6, 20, 28, 0.88)) !important;
+  border-bottom: 1px solid rgba(230, 197, 106, 0.28);
+  margin: -1rem -1rem 0.85rem !important;
+  padding: 0.65rem 1rem !important;
+}
+.club-header h2, #friend-lobby h2, #collection h2, #store h2, #settings h2 {
+  color: var(--hi-gold) !important;
+  letter-spacing: 0.06em;
+}
+#encyclopedia header {
+  background: linear-gradient(180deg, #071821, #0a2430) !important;
+  box-shadow: 0 10px 16px rgba(7, 24, 33, 0.9) !important;
+}
+#encyclopedia .ency-patron-head {
+  background: #0a2430 !important;
+  box-shadow: 0 8px 10px #0a2430 !important;
+}
+
+#club, #store, #collection, #settings, #ranked, #gauntlet, #friend-lobby {
+  --panel: var(--hi-panel);
+  --border: var(--hi-border);
+  --gold: var(--hi-gold);
+  --gold-bright: var(--hi-gold-bright);
+  --gold-dim: #b8963c;
+  --ink: var(--hi-ink);
+  --ink-dim: var(--hi-ink-dim);
+}
+
+.club-stat, .ach-row, .season-banner, .settings-block, .store-item, .bundle-card,
+.collection-detail, .ranked-status {
+  background:
+    linear-gradient(180deg, rgba(243, 234, 210, 0.06), transparent 34%),
+    linear-gradient(180deg, rgba(16, 40, 50, 0.96), rgba(8, 20, 28, 0.96)) !important;
+  border: 1px solid rgba(197, 208, 212, 0.28) !important;
+  box-shadow: inset 0 1px 0 rgba(246, 231, 178, 0.12), 0 8px 18px rgba(0, 0, 0, 0.28);
+}
+
+.club-stat .val, .ach-row .ach-info strong { color: var(--hi-gold-bright) !important; }
+.club-section {
+  color: var(--hi-gold) !important;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.72rem !important;
+}
+
+#splash, #club, #store, #collection, #settings, #ranked, #gauntlet, #friend-lobby, #deckpick {
+  scrollbar-color: #e6c56a #0a2430;
+}
+
+/* ——— Splash: primary actions, not button vomit ——— */
+#splash.screen.active {
+  background:
+    radial-gradient(ellipse at 50% 8%, rgba(246, 231, 178, 0.28), transparent 38%),
+    radial-gradient(ellipse at 12% 88%, rgba(26, 106, 114, 0.42), transparent 40%),
+    radial-gradient(ellipse at 92% 70%, rgba(230, 197, 106, 0.14), transparent 34%),
+    linear-gradient(180deg, #041018 0%, #0a3038 46%, #07141c 100%) !important;
+}
+.hi-veil {
+  background:
+    radial-gradient(circle at 50% 120%, rgba(26, 160, 168, 0.16), transparent 48%),
+    linear-gradient(180deg, transparent 60%, rgba(3, 11, 18, 0.35)) !important;
+}
+.hi-kicker {
+  color: var(--hi-gold-bright) !important;
+  letter-spacing: 0.28em !important;
+}
+.splash-frame {
+  max-width: 26.5rem;
+  padding: 1.7rem 1.25rem 1.2rem !important;
+  border: 1px solid rgba(230, 197, 106, 0.7) !important;
+  background:
+    linear-gradient(180deg, rgba(246, 231, 178, 0.1), transparent 26%),
+    linear-gradient(180deg, rgba(10, 36, 46, 0.96), rgba(5, 16, 24, 0.98)) !important;
+  box-shadow:
+    0 0 0 5px rgba(7, 20, 28, 0.7),
+    inset 0 0 0 1px rgba(197, 208, 212, 0.22),
+    0 22px 56px rgba(0, 0, 0, 0.5) !important;
+  gap: 0.85rem !important;
+}
+.splash-frame::before {
+  content: '';
+  position: absolute; left: 12%; right: 12%; top: 10px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--hi-gold), transparent);
+  pointer-events: none;
+}
+#splash h1 {
+  color: var(--hi-gold) !important;
+  text-shadow: 0 2px 24px rgba(230, 197, 106, 0.45), 0 0 40px rgba(26, 160, 168, 0.2) !important;
+}
+#splash .subtitle { color: var(--hi-cream) !important; max-width: 22rem; }
+#splash .disclaimer {
+  max-width: 22rem !important;
+  color: #8a9aa0 !important;
+  margin-top: 0.15rem;
+}
+.splash-purse {
+  border-color: rgba(230, 197, 106, 0.4) !important;
+  background: rgba(3, 11, 18, 0.55) !important;
+  color: var(--hi-gold-bright) !important;
+}
+
+.splash-actions {
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.7rem !important;
+  width: 100%;
+  max-width: 22rem !important;
+}
+.splash-primary, .splash-compete, .splash-club-row, .splash-more {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.splash-primary { flex-direction: column; }
+.splash-primary #btn-play,
+#splash button.splash-play {
+  width: 100%;
+  padding: 0.85rem 1.2rem;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  background:
+    linear-gradient(180deg, rgba(255, 236, 180, 0.4), transparent 42%),
+    linear-gradient(180deg, #c9a44a, #8a6a1c) !important;
+  border-color: #f6e7b2 !important;
+  color: #1a1408 !important;
+  box-shadow: 0 0 22px rgba(230, 197, 106, 0.35);
+}
+.splash-compete button, .splash-club-row button {
+  flex: 1 1 7.2rem;
+}
+#splash button.store-btn {
+  background:
+    linear-gradient(180deg, rgba(255, 230, 150, 0.3), transparent 45%),
+    linear-gradient(180deg, #1e7a78, #0d454c) !important;
+  border-color: var(--hi-gold) !important;
+  box-shadow: 0 0 16px rgba(26, 160, 168, 0.28);
+}
+#splash button.ranked-btn {
+  background:
+    linear-gradient(180deg, rgba(230, 197, 106, 0.18), transparent 45%),
+    linear-gradient(180deg, #3a2218, #1a100c) !important;
+  border-color: #d4a060 !important;
+}
+#splash .splash-more button.ghost,
+#splash button.ghost {
+  background: transparent !important;
+  border-color: rgba(197, 208, 212, 0.28) !important;
+  color: var(--hi-cream) !important;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  box-shadow: none;
+  flex: 1 1 auto;
+}
+#splash .splash-more button.ghost:hover {
+  border-color: var(--hi-gold) !important;
+  color: var(--hi-gold-bright) !important;
+}
+.build-stamp {
+  font-family: 'Cinzel', serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  color: #7a8a90;
+  text-transform: uppercase;
+}
+
+#splash button, #club button, #store button, #collection button,
+#settings button, #ranked button, #gauntlet button, #friend-lobby button,
+#deckpick button, #card-modal button, #club-sheet button,
+.login-modal button, .crate-modal button, #sack-overlay button {
+  background:
+    linear-gradient(180deg, rgba(246, 231, 178, 0.14), transparent 40%),
+    linear-gradient(180deg, #1a3a44, #0c1c24);
+  border: 1px solid rgba(230, 197, 106, 0.45);
+  color: var(--hi-gold-bright);
+}
+#splash button.primary, #club button.primary, #store button.primary,
+#collection button.primary, #settings button.primary, #ranked button.primary,
+#gauntlet button.primary, #friend-lobby button.primary, #deckpick button.primary,
+.login-modal button.primary, .crate-modal button.primary, #sack-overlay button.primary,
+#card-modal button.primary, #club-sheet button.primary {
+  background:
+    linear-gradient(180deg, rgba(255, 236, 180, 0.28), transparent 45%),
+    linear-gradient(180deg, #b8943a, #6e5214);
+  border-color: var(--hi-gold);
+  color: #fff8e8;
+}
+
+/* ——— Store: Crown Store energy ——— */
+#store-hint { color: var(--hi-cream) !important; max-width: 40rem; }
+.store-nav {
+  display: flex; flex-wrap: wrap; gap: 0.4rem;
+  margin: 0 0 0.9rem;
+}
+.store-nav a {
+  font-family: 'Cinzel', serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--hi-cream);
+  border: 1px solid rgba(230, 197, 106, 0.35);
+  border-radius: 999px;
+  padding: 0.32rem 0.7rem;
+  background: rgba(3, 11, 18, 0.45);
+}
+.store-nav a:hover { border-color: var(--hi-gold); color: var(--hi-gold-bright); }
+.store-section { margin-bottom: 1.15rem; scroll-margin-top: 3.6rem; }
+
+.store-item {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+.store-item:hover { transform: translateY(-2px); border-color: var(--hi-gold) !important; }
+.store-item .rarity-pip {
+  font-family: 'Cinzel', serif;
+}
+.store-item.rarity-glow-fine { box-shadow: 0 0 16px rgba(80, 180, 110, 0.28); }
+.store-item.rarity-glow-superior { box-shadow: 0 0 16px rgba(70, 150, 230, 0.32); }
+.store-item.rarity-glow-epic { box-shadow: 0 0 18px rgba(176, 90, 230, 0.38); }
+.store-item.rarity-glow-legendary {
+  box-shadow: 0 0 22px rgba(230, 197, 106, 0.5);
+  border-color: var(--hi-gold) !important;
+}
+
+.bundle-card, .store-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 1.1rem 1rem 1.05rem !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(246, 231, 178, 0.65) !important;
+  background:
+    linear-gradient(120deg, rgba(246, 231, 178, 0.16), transparent 42%),
+    linear-gradient(180deg, #163844 0%, #0a1c26 55%, #07141c 100%) !important;
+  box-shadow:
+    0 0 0 1px rgba(197, 208, 212, 0.2),
+    0 0 28px rgba(230, 197, 106, 0.22),
+    inset 0 1px 0 rgba(255, 240, 200, 0.2) !important;
+  margin-bottom: 1rem;
+}
+.bundle-card::after, .store-hero::after {
+  content: '';
+  position: absolute; inset: auto -20% -40% 40%;
+  height: 120%;
+  background: radial-gradient(circle, rgba(230, 197, 106, 0.18), transparent 60%);
+  pointer-events: none;
+}
+.bundle-kicker {
+  font-family: 'Cinzel', serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--hi-gold-bright);
+  margin: 0 0 0.25rem;
+}
+.bundle-card h4, .store-hero h4 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.35rem;
+  color: var(--hi-cream);
+  margin: 0.15rem 0 0.4rem;
+  letter-spacing: 0.04em;
+}
+.bundle-card p, .store-hero p {
+  color: var(--hi-ink-dim);
+  font-size: 0.92rem;
+  line-height: 1.4;
+  margin: 0 0 0.75rem;
+  max-width: 36rem;
+}
+.bundle-parts {
+  display: flex; gap: 0.55rem; flex-wrap: wrap;
+  margin: 0 0 0.8rem;
+}
+.bundle-part {
+  flex: 1 1 7.5rem;
+  min-width: 0;
+  background: rgba(3, 11, 18, 0.45);
+  border: 1px solid rgba(230, 197, 106, 0.28);
+  border-radius: 10px;
+  padding: 0.55rem;
+  text-align: center;
+}
+.bundle-part img {
+  width: 56px; height: 56px; object-fit: cover; border-radius: 50%;
+  border: 2px solid var(--hi-gold);
+}
+.bundle-part .skin-swatch, .bundle-part .back-swatch { height: 44px; margin: 0 auto 0.35rem; }
+.bundle-part strong {
+  display: block;
+  font-family: 'Cinzel', serif;
+  font-size: 0.78rem;
+  color: var(--hi-gold-bright);
+}
+.bundle-cta {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.75rem; flex-wrap: wrap;
+}
+.bundle-cta .price {
+  font-family: 'Cinzel', serif;
+  font-size: 1.25rem;
+  color: var(--hi-gold);
+}
+.hero-art-row {
+  display: flex; gap: 0.75rem; align-items: center; margin-bottom: 0.7rem;
+}
+.hero-art-row img {
+  width: 72px; height: 72px; border-radius: 50%;
+  border: 3px solid var(--hi-gold);
+  object-fit: cover;
+}
+
+.coll-tab {
+  background: rgba(8, 28, 36, 0.9) !important;
+  color: var(--hi-cream) !important;
+}
+.coll-tab.active {
+  color: var(--hi-gold-bright) !important;
+  border-color: var(--hi-gold) !important;
+  box-shadow: 0 0 12px rgba(230, 197, 106, 0.3);
+}
+.patron-card {
+  cursor: pointer;
+}
+.patron-card.deck-ready {
+  border-color: var(--hi-gold) !important;
+  box-shadow: 0 0 16px rgba(230, 197, 106, 0.4);
+}
+.ency-patron-head.tappable { cursor: pointer; }
+.ency-patron-head.tappable:hover { filter: brightness(1.08); }
+.clue-card, .coll-card, .ency-card { cursor: pointer; }
+.clue-card.unknown { cursor: pointer; }
+
+/* ——— Collection / Club detail sheet ——— */
+.club-sheet-modal {
+  z-index: 86;
+  align-items: flex-end;
+  padding: 0;
+  background: rgba(3, 8, 12, 0.72);
+}
+.club-sheet-modal.show { display: flex; }
+.club-sheet {
+  width: min(560px, 100%);
+  max-height: min(92dvh, 92vh);
+  margin: 0 auto;
+  background:
+    linear-gradient(180deg, rgba(246, 231, 178, 0.08), transparent 22%),
+    linear-gradient(180deg, #102832, #07141c);
+  border: 1px solid rgba(230, 197, 106, 0.55);
+  border-bottom: none;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -16px 40px rgba(0, 0, 0, 0.45);
+  padding: 0.85rem 1rem max(1.1rem, env(safe-area-inset-bottom));
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.club-sheet-close {
+  align-self: flex-end;
+}
+.sheet-hero {
+  display: flex; gap: 0.85rem; align-items: center;
+}
+.sheet-hero img {
+  width: 88px; height: 88px; border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--hi-gold);
+  background: #000;
+}
+.sheet-hero .skin-swatch, .sheet-hero .back-swatch {
+  width: 88px; height: 88px; margin: 0;
+}
+.sheet-hero h3 {
+  font-family: 'Cinzel', serif;
+  color: var(--hi-gold);
+  font-size: 1.25rem;
+  margin: 0 0 0.2rem;
+}
+.sheet-kicker {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hi-ink-dim);
+}
+.sheet-blurb { color: var(--hi-cream); line-height: 1.4; font-size: 0.95rem; }
+.sheet-progress {
+  display: grid; gap: 0.45rem;
+}
+.sheet-meter {
+  background: rgba(3, 11, 18, 0.55);
+  border: 1px solid rgba(230, 197, 106, 0.25);
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+}
+.sheet-meter .label {
+  display: flex; justify-content: space-between;
+  font-size: 0.78rem; color: var(--hi-ink-dim);
+  margin-bottom: 0.25rem;
+}
+.sheet-bar {
+  height: 7px; border-radius: 99px; background: #132028; overflow: hidden;
+}
+.sheet-bar > i {
+  display: block; height: 100%;
+  background: linear-gradient(90deg, #1a6a72, #e6c56a);
+}
+.sheet-how {
+  background: rgba(243, 234, 210, 0.06);
+  border-left: 3px solid var(--hi-gold);
+  padding: 0.55rem 0.7rem;
+  color: var(--hi-cream);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+.sheet-how strong { color: var(--hi-gold-bright); }
+.sheet-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 0.45rem;
+}
+.sheet-card {
+  background: #0a1418;
+  border: 1px solid rgba(230, 197, 106, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+  text-align: center;
+  cursor: pointer;
+}
+.sheet-card img {
+  width: 100%; aspect-ratio: 220 / 340;
+  object-fit: contain;
+  object-position: center;
+  background: #071018;
+  display: block;
+}
+.sheet-card .tag {
+  font-size: 0.65rem; color: var(--hi-ink-dim); padding: 0.25rem 0.2rem 0.4rem;
+}
+.sheet-card.locked { opacity: 0.72; }
+.sheet-status {
+  font-family: 'Cinzel', serif;
+  color: var(--hi-gold-bright);
+  font-size: 0.85rem;
+}
+
+/* ——— Card info modal: full hex + name, no clip ——— */
+#card-modal {
+  z-index: 90;
+  padding: max(0.4rem, env(safe-area-inset-top)) 0.55rem max(0.4rem, env(safe-area-inset-bottom));
+  align-items: center;
+  background: rgba(3, 8, 12, 0.82);
+}
+#card-modal .modal-body {
+  max-width: min(96vw, 520px);
+  width: min(96vw, 520px);
+  max-height: min(96dvh, 96vh);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.7rem 0.75rem 0.8rem;
+  background:
+    linear-gradient(180deg, rgba(246, 231, 178, 0.08), transparent 24%),
+    linear-gradient(180deg, #102028, #071018) !important;
+  border: 1px solid rgba(230, 197, 106, 0.5) !important;
+  border-radius: 14px;
+}
+#card-modal .modal-body img {
+  width: auto !important;
+  max-width: 100%;
+  height: auto !important;
+  border-radius: 0 !important;
+  margin-bottom: 0 !important;
+}
+#card-modal .modal-dossier,
+#card-modal .club-dossier {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center;
+  gap: 0.45rem !important;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  width: 100%;
+}
+#card-modal .dossier-hex,
+#card-modal .club-card-art {
+  flex: 0 1 auto;
+  width: min(64vw, 240px);
+  height: auto !important;
+  aspect-ratio: 220 / 340;
+  max-height: min(46vh, 300px);
+  filter: drop-shadow(0 10px 20px #000c);
+}
+#card-modal .dossier-hex img,
+#card-modal .club-card-art img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  clip-path: none !important;
+  display: block;
+  background: transparent;
+}
+#card-modal .eso-tip {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  width: 100%;
+  padding: 0 0.15rem 0.25rem;
+  -webkit-overflow-scrolling: touch;
+}
+#card-modal .eso-tip-name {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  font-size: clamp(1.05rem, 4.4vw, 1.55rem) !important;
+  line-height: 1.18 !important;
+  margin: 0.08rem 0 0.4rem !important;
+  padding-bottom: 0.05em;
+}
+#card-modal #btn-modal-close {
+  flex: 0 0 auto;
+  align-self: center;
+  min-width: 7rem;
+}
+
+.login-modal, .crate-modal, #sack-overlay .sack-modal {
+  background:
+    linear-gradient(180deg, rgba(246, 231, 178, 0.1), transparent 30%),
+    linear-gradient(180deg, #14343c, #07141c) !important;
+  border: 1px solid rgba(230, 197, 106, 0.7) !important;
+}
+
+@media (orientation: landscape) {
+  .club-sheet-modal { align-items: center; padding: 0.75rem; }
+  .club-sheet {
+    border-radius: 14px;
+    max-height: min(88vh, 88dvh);
+  }
+  #card-modal .dossier-hex,
+  #card-modal .club-card-art {
+    width: min(32vw, 200px);
+    max-height: min(72vh, 280px);
+  }
+}
+
+@media (max-height: 640px) {
+  #card-modal .dossier-hex,
+  #card-modal .club-card-art { max-height: min(38vh, 220px); }
+  #card-modal .eso-tip-name { font-size: clamp(0.95rem, 4vw, 1.25rem) !important; }
+}
