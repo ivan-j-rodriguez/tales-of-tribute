@@ -926,7 +926,7 @@ body.is-portrait #match .eso-hourglass-end {
   left: max(2px, env(safe-area-inset-left, 0px)) !important;
   right: auto !important;
   top: auto !important;
-  bottom: 88px !important;
+  bottom: 70px !important;
   width: 44px !important;
   padding: 2px 0 4px !important;
   margin: 0 !important;
@@ -1054,8 +1054,14 @@ body.is-portrait #match #pile-you-cd {
 body.is-portrait #match .hex-pile .pile-stack,
 body.is-landscape #match .hex-pile .pile-stack {
   position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  inset: auto !important;
   margin-left: auto !important;
   margin-right: auto !important;
+  margin-top: 0 !important;
   flex: 0 0 auto !important;
 }
 body.is-portrait #match .hex-pile .pile-count,
