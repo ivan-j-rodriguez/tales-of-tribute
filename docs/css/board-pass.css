@@ -1,8 +1,10 @@
-/* Build 42 — board/felt seating + pack pass.
+/* Build 48 — board/felt portrait pack (on Club 47 in-flight / main 46).
    TWO compositions. Same engine/state. Different positions and sizes.
    Pewter bezel seated on the portrait coin (CSS face = SVG window).
    Round pewter coin + short gothic peak (~10% of diameter).
-   Chrome uses the L/R edges. Nothing covers anything else. */
+   Portrait: DRAW flush left, COOLDOWN flush right, match-actions mid-left
+   strip, End Turn bottom-left, patron-use octagons stretch on the right rail.
+   Landscape: piles to the edges, compact left chrome; End Turn stays on the rail. */
 
 #pile-tavern-discard { display: none !important; }
 
@@ -795,5 +797,197 @@ body.is-portrait .inspect-dossier-sheet {
 body.is-landscape .inspect-dossier-sheet {
   flex-direction: row;
   align-items: stretch;
+}
+
+/* ===================================================================
+   Build 48 — Ivan portrait pack. Dual layout; do not copy portrait
+   packing onto landscape.
+   Yellow: DRAW → left edge. Purple: COOLDOWN → right edge.
+   Orange: SFX / settings / Leave → mid-left vertical strip.
+   Red: End Turn hourglass → bottom-left under that strip (portrait).
+   Blue: right rail rebalance — patrons stay right; octagons stretch.
+   =================================================================== */
+
+/* --- Piles to the true L/R edges. Keep labels on-canvas (board overflow:hidden). --- */
+body.is-portrait #match #pile-opp-draw,
+body.is-portrait #match #pile-you-draw,
+body.is-portrait #match #pile-tavern-draw,
+body.is-landscape #match #pile-opp-draw,
+body.is-landscape #match #pile-you-draw,
+body.is-landscape #match #pile-tavern-draw {
+  left: 0 !important;
+  min-width: 0 !important;
+  width: 42px !important;
+  padding: 1px 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+}
+body.is-portrait #match #pile-opp-draw { top: 2px !important; }
+body.is-portrait #match #pile-you-draw { bottom: 2px !important; }
+body.is-portrait #match #pile-opp-cd,
+body.is-portrait #match #pile-you-cd {
+  right: 4px !important;
+  min-width: 0 !important;
+  width: 64px !important;
+  padding: 1px 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+}
+body.is-portrait #match #pile-opp-cd .pile-label,
+body.is-portrait #match #pile-you-cd .pile-label {
+  font-size: 0.42rem !important;
+  max-width: 64px;
+}
+body.is-portrait #match #pile-opp-cd { top: 2px !important; }
+body.is-portrait #match #pile-you-cd { bottom: 2px !important; }
+body.is-portrait #match #pile-opp-draw .pile-stack,
+body.is-portrait #match #pile-you-draw .pile-stack,
+body.is-portrait #match #pile-tavern-draw .pile-stack,
+body.is-landscape #match #pile-opp-draw .pile-stack,
+body.is-landscape #match #pile-you-draw .pile-stack,
+body.is-landscape #match #pile-tavern-draw .pile-stack {
+  width: 32px !important;
+  margin: 0 !important;
+}
+body.is-portrait #match #pile-opp-cd .pile-stack,
+body.is-portrait #match #pile-you-cd .pile-stack {
+  width: 32px !important;
+  margin: 0 !important;
+}
+
+body.is-landscape #match #pile-opp-draw { top: 2px !important; }
+body.is-landscape #match #pile-you-draw { bottom: 2px !important; }
+body.is-landscape #match #pile-opp-cd { top: 2px !important; right: 118px !important; }
+body.is-landscape #match #pile-you-cd { bottom: 2px !important; right: 118px !important; }
+
+/* --- Match-actions: vertical strip mid-left (not bottom-center) --- */
+body.is-portrait #match .felt-hud-you,
+body.is-landscape #match .felt-hud-you {
+  position: absolute !important;
+  left: 1px !important;
+  right: auto !important;
+  width: 44px !important;
+  z-index: 21 !important;
+}
+body.is-portrait #match .felt-hud-you {
+  top: 56% !important;
+  bottom: auto !important;
+}
+/* Landscape: compact strip in the opp-draw → DECK gap (the only left-column hole). */
+body.is-landscape #match .felt-hud-you {
+  top: 20% !important;
+  bottom: auto !important;
+}
+body.is-portrait #match .you-actions,
+body.is-landscape #match .you-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  gap: 3px !important;
+  padding: 3px 2px !important;
+  margin: 0 !important;
+  background: rgba(6, 12, 10, 0.42) !important;
+  border-radius: 8px;
+}
+body.is-portrait #match .you-actions button,
+body.is-landscape #match .you-actions button {
+  min-width: 0 !important;
+  width: 100% !important;
+  padding: 0.2rem 0.1rem !important;
+  font-size: 0.48rem !important;
+  line-height: 1.1 !important;
+  letter-spacing: 0.02em;
+}
+body.is-landscape #match .you-actions {
+  gap: 2px !important;
+  padding: 2px 1px !important;
+}
+body.is-landscape #match .you-actions button {
+  padding: 0.12rem 0.08rem !important;
+  font-size: 0.42rem !important;
+}
+
+/* --- Portrait End Turn: immediately under the mid-left chrome strip. --- */
+body.is-portrait #match .eso-hourglass-end {
+  position: fixed !important;
+  left: max(2px, env(safe-area-inset-left, 0px)) !important;
+  right: auto !important;
+  top: calc(56% + 102px) !important;
+  bottom: auto !important;
+  width: 44px !important;
+  padding: 2px 0 4px !important;
+  margin: 0 !important;
+  z-index: 22 !important;
+  transform: none !important;
+  pointer-events: auto !important;
+}
+body.is-portrait #match .eso-hourglass-end .hg-svg {
+  width: 26px !important;
+  height: 42px !important;
+}
+body.is-portrait #match .eso-hourglass-end .eso-end-caption {
+  font-size: 0.42rem !important;
+}
+
+/* Landscape End Turn stays on the right rail (dual layout). */
+body.is-landscape #match .eso-hourglass-end {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+}
+
+/* --- Right rail: patrons stay; octagons stretch now that hourglass left (portrait) --- */
+body.is-portrait #match .patron-rail {
+  box-sizing: border-box !important;
+  width: 80px !important;
+  max-width: 86px !important;
+  grid-template-columns: 52px 24px !important;
+  padding: 8px 2px 10px 2px !important;
+}
+body.is-portrait #match .rail-glass {
+  justify-content: space-between !important;
+  align-self: center !important;
+  height: 44% !important;
+  max-height: 48% !important;
+  gap: 8px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+/* Landscape: hourglass still on the rail — keep octagons beside it, not in the corners. */
+body.is-landscape #match .rail-glass {
+  justify-content: center !important;
+  align-self: center !important;
+  height: auto !important;
+  max-height: 72% !important;
+  gap: 6px !important;
+}
+
+/* Hand / tavern gutters: left strip + right rail, not the old bottom-right HUD cluster. */
+body.is-portrait #match .felt-you-hand {
+  width: calc(100% - 52px - 88px) !important;
+  margin: 0 0 0 52px !important;
+}
+body.is-portrait #match .tavern-zone {
+  padding: 0.06rem 86px 0.06rem 50px !important;
+}
+body.is-landscape #match .tavern-zone {
+  padding: 0.08rem 118px 0.08rem 52px !important;
+}
+body.is-landscape #match .felt-you-hand {
+  width: calc(100% - 248px) !important;
+  margin: 0 0 0 56px !important;
+}
+
+/* Played-effects stay in the upper-left, above the new chrome strip. */
+body.is-portrait #match .events-rail {
+  top: 52px !important;
+  height: 22% !important;
+  max-height: 22% !important;
+  width: 42px !important;
 }
 

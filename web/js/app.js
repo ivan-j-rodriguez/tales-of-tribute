@@ -374,7 +374,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 47';
+  if (stamp) stamp.textContent = 'build 48';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -4207,11 +4207,39 @@ function layoutMetrics() {
   const hgC = tokCenter(hg);
   const youTokC = tokCenter(youTok);
   const oppTokC = tokCenter(oppTok);
-  const usesNearHourglass = distTo(youTokC, hgC) <= 110 && distTo(oppTokC, hgC) <= 110;
+  const patronsC = tokCenter(patronsCluster);
+  const usesOnRightRail = !!(youTok && oppTok && rail
+    && youTok.x >= rail.x - 12
+    && oppTok.x >= rail.x - 12
+    && youTok.right > vw - (rail.w + 16)
+    && oppTok.right > vw - (rail.w + 16));
+  const usesNearPatrons = distTo(youTokC, patronsC) <= 150 && distTo(oppTokC, patronsC) <= 150;
+  /* Portrait: End Turn leaves the rail, so octagons must stay with patrons.
+     Landscape: hourglass still sits on the rail between the octagons. */
+  const usesNearHourglass = vh > vw
+    ? usesOnRightRail
+    : (distTo(youTokC, hgC) <= 120 && distTo(oppTokC, hgC) <= 120);
   const usesAtCorner = !!(youTok && oppTok && (
     (youTok.bottom > vh - 52 && youTok.right > vw - 52)
     || (oppTok.y < 32 && oppTok.right > vw - 52)
   ));
+  const oppDrawStack = box('#pile-opp-draw .pile-stack');
+  const youDrawStack = box('#pile-you-draw .pile-stack');
+  const oppCdStack = box('#pile-opp-cd .pile-stack');
+  const youCdStack = box('#pile-you-cd .pile-stack');
+  const drawLeftEdge = Math.min(oppDraw?.x ?? 99, youDraw?.x ?? 99);
+  const cdRightGap = Math.min(
+    youCd ? vw - youCd.right : 99,
+    oppCd ? vw - oppCd.right : 99
+  );
+  const hudIsLeftStrip = !!(leaveHud && sfxBtn && leaveBtn
+    && leaveHud.x < vw * 0.22
+    && leaveHud.h + 1 >= leaveHud.w * 0.85
+    && sfxBtn.y + 4 < leaveBtn.y);
+  const endTurnBottomLeft = !!(hg
+    && hg.x < vw * 0.24
+    && hg.bottom > vh * 0.55
+    && (!leaveHud || hg.y >= leaveHud.bottom - 6));
   const tavernCardsTop = tavernCards.length ? Math.min(...tavernCards.map((c) => c.y)) : 0;
   const tavernCardsBot = tavernCards.length ? Math.max(...tavernCards.map((c) => c.bottom)) : 0;
   const oppResToCards = oppRes ? Math.max(0, tavernCardsTop - oppRes.bottom) : 0;
@@ -4234,6 +4262,10 @@ function layoutMetrics() {
     effectsVsDeckLabel: anyHit(effectHexes, deckLabel ? [deckLabel] : []),
     leaveVsCooldown: hit(leaveHud, youCd) || hit(leaveBtn, youCd),
     sfxVsCooldown: hit(sfxBtn, youCd) || hit(leaveHud, youCd),
+    hudVsDeck: hit(leaveHud, deck) || hit(leaveBtn, deck),
+    hudVsYouDraw: hit(leaveHud, youDraw) || hit(leaveBtn, youDraw),
+    endTurnVsYouDraw: hit(hg, youDraw),
+    endTurnVsHud: hit(hg, leaveHud),
   };
   return {
     vw, vh,
@@ -4269,6 +4301,11 @@ function layoutMetrics() {
     ringMaxOffset: +ringMaxOffset.toFixed(2),
     usesNearHourglass,
     usesAtCorner,
+    usesOnRightRail,
+    drawLeftEdge: +drawLeftEdge.toFixed(1),
+    cdRightGap: +cdRightGap.toFixed(1),
+    hudIsLeftStrip,
+    endTurnBottomLeft,
     oppResToCards: +oppResToCards.toFixed(1),
     youResToCards: +youResToCards.toFixed(1),
     tavernSideSlack: +tavernSideSlack.toFixed(1),
@@ -4279,6 +4316,7 @@ function layoutMetrics() {
       oppDraw, youDraw, deck, deckLabel, youCd, oppCd,
       turn, oppRes, youRes, leaveHud, events, patronsCluster, youCalls,
       youAgents, oppAgents, endTurn: hg, patronRail: rail,
+      sfxBtn, leaveBtn, oppDrawStack, youDrawStack, oppCdStack, youCdStack,
     },
   };
 }
