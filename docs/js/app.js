@@ -359,7 +359,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 40';
+  if (stamp) stamp.textContent = 'build 41';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
