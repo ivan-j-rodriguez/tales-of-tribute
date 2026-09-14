@@ -829,11 +829,16 @@ body.is-portrait #match #pile-opp-cd,
 body.is-portrait #match #pile-you-cd {
   right: 4px !important;
   min-width: 0 !important;
-  width: 56px !important;
+  width: 64px !important;
   padding: 1px 0 !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: flex-end !important;
+}
+body.is-portrait #match #pile-opp-cd .pile-label,
+body.is-portrait #match #pile-you-cd .pile-label {
+  font-size: 0.42rem !important;
+  max-width: 64px;
 }
 body.is-portrait #match #pile-opp-cd { top: 2px !important; }
 body.is-portrait #match #pile-you-cd { bottom: 2px !important; }
