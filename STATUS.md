@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-14 (build 39):** Board review on PR #12, rebased onto Club 38. Round pewter patron coin + short gothic peak (~10% of diameter). Portrait tavern-to-hand gap packed. No in-match landscape banner. Club/economy/encyclopedia stay on main. `?v=39`.
+
 **2026-09-14 (build 38):** Crown Crate loot follows the crate on the calendar (Iron / Orichalcum / Ebony / Voidsteel), not a hardcoded Iron/Fine roll. Still max 2 crates/month. No felt/table CSS. `?v=38`.
 
 **2026-09-14 (build 37):** Encyclopedia All-cards scroll opens each deck with the **patron portrait/token + name**, then that patron’s cards. Locked patrons stay grey/`???`. Mora and Treasury always appear. Collection Patrons + Card Clues match. No felt/table CSS. `?v=37`.
@@ -57,7 +59,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=38`. Dual-orientation board from this PR sits on Club build 38.
+`docs/` is a copy of `web/`. Cache-bust `?v=39`. Dual-orientation board from this PR sits on Club build 38.
 
 | Fix | Notes |
 |---|---|
