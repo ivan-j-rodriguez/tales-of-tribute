@@ -2784,7 +2784,7 @@ button.card:active, #match button.card:active { transform: none !important; }
   height: 100%;
   filter: drop-shadow(0 2px 3px #0008);
 }
-.patron-coin .token-point { display: none; }
+.patron-coin .token-point { display: block; }
 .patron-coin .coin-ring {
   left: 50%;
   bottom: 7px;

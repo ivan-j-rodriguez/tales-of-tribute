@@ -148,6 +148,9 @@ assert('tavern sits near vertical center', a.tavernCenter === true, a);
 assert('gold tip is in-game sentence', /Gain 1 Coin/i.test(a.goldTip || ''), a.goldTip);
 assert('harvest is Draw 1 card', /Draw 1 card/i.test(a.harvestTip || ''), a.harvestTip);
 assert('treasury has no favor tip', a.treasuryHasTip === false, a.patrons);
+assert('patron tokens are coins not nameplates', a.woodPendants === 0 && a.coinRings >= 5, a);
+assert('empty agent seats stay thin', a.agentEmptyH > 0 && a.agentEmptyH <= 36 && a.agentsRowH <= 48, a);
+assert('sfx leave miss piles', a.actionsOverlapPile === false, a);
 assert('no mid-match hourglass toggle', a.midMatchHgToggle === false, a);
 assert('patron uses not in resource triad', a.resPatronTok === false && a.triadCount === 3, a);
 assert('patron uses sit on the rail', a.railPatronTok === true && a.youCallsOnRail === true, a);
@@ -240,6 +243,23 @@ await waitReady(portraitPage);
 await start(portraitPage);
 await assertInspect(portraitPage, 'portrait');
 await portraitPage.close();
+
+const nativePage = await browser.newPage();
+nativePage.setDefaultTimeout(20000);
+await nativePage.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+await nativePage.goto(`http://127.0.0.1:${port}/?test=1&native=1`, { waitUntil: 'domcontentloaded' });
+await waitReady(nativePage);
+await start(nativePage);
+const nativeSnap = await snap(nativePage);
+assert('native shell hides landscape banner', nativeSnap.nativeShell === true && nativePage.evaluate(() => document.querySelector('#landscape-tip')?.hidden) , nativeSnap);
+const nativeTipHidden = await nativePage.evaluate(() => {
+  const tip = document.querySelector('#landscape-tip');
+  if (!tip) return true;
+  const cs = getComputedStyle(tip);
+  return tip.hidden || cs.display === 'none';
+});
+assert('native tip not visible', nativeTipHidden);
+await nativePage.close();
 
 await browser.close();
 server.close();

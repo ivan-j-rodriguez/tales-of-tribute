@@ -1,13 +1,15 @@
 # Status
 
+**2026-09-14 (build 31):** Patron tokens are circular silver/gold tribute coins again (no brown arrow nameplates). Felt packed so tavern + hand grow; empty agent seats stay thin hex outlines. `?native=1` hides the landscape banner for Expo Go.
+
 **2026-09-14 (Phase A, build 30):** Board authenticity, official copy, patron-uses placement, and targeted abilities. Rebased on main (table pack + inspect).
 
 ## Phase A — shipped (this build)
 
 - [x] Widen the playing field; events/combo strip **floats** (no permanent left column).
 - [x] Hourglass slides **up** beside the patron rail (not jammed bottom-right).
-- [x] Patrons have more vertical spacing; wooden chevrons still point left when Neutral.
-- [x] Pendants **physically rotate** (you / opponent / neutral). Favor-pip light hack removed.
+- [x] Patron **tokens** are circular silver/gold medallions (portrait + ornate bezel). Small name labels sit under the coin.
+- [x] Favor **point** on the bezel rotates (Neutral left, you down, rival up). Mora + Treasury never turn and have no point.
 - [x] Treasury has **no favor tip/pointer** and never rotates.
 - [x] Draw + cooldown piles larger and in their own columns.
 - [x] Portrait + landscape both playable (no rotate-gate).
@@ -39,13 +41,13 @@
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=30`.
+`docs/` is a copy of `web/`. Cache-bust `?v=31`.
 
 | Fix | Notes |
 |---|---|
 | Field | Events rail overlays the felt. Board is `1fr + slim patron rail`. |
 | Hourglass | Mid-high on the right, with silver/bronze patron-call busts. |
-| Pendants | Rotate −90° toward you / +90° toward rival. Face stays upright. |
+| Tokens | Circular coins. Point left / down / up for favor. Mora + Treasury stay still. |
 | Copy | `texts.js` official sentences + UESP patron lines. Harvest Season = “Draw 1 card.” |
 | Targeting | `GameEngine.targetingStepsForPlay/Patron` + in-match banner. |
 

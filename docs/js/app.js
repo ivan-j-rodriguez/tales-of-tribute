@@ -119,15 +119,32 @@ function isPortrait() {
   return h > w;
 }
 
+function isNativeShell() {
+  try {
+    const q = new URLSearchParams(location.search);
+    return q.get('native') === '1' || q.has('native');
+  } catch {
+    return false;
+  }
+}
+
+function applyNativeShell() {
+  const on = isNativeShell();
+  document.documentElement.classList.toggle('is-native', on);
+  document.body.classList.toggle('is-native', on);
+  return on;
+}
+
 function syncBoardLayout() {
   const match = $('#match');
   const matchOn = !!match?.classList.contains('active');
   const portrait = isPortrait();
+  const native = applyNativeShell();
   document.body.classList.toggle('is-portrait', matchOn && portrait);
   document.body.classList.toggle('is-landscape', matchOn && !portrait);
   document.body.classList.remove('need-landscape');
   const tip = $('#landscape-tip');
-  if (tip) tip.hidden = !(matchOn && portrait);
+  if (tip) tip.hidden = native || !(matchOn && portrait);
   const board = match?.querySelector('.board');
   if (!board || !matchOn) return;
   board.style.width = '100%';
@@ -208,7 +225,7 @@ function onSplashEnter() {
   }
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 30';
+  if (stamp) stamp.textContent = 'build 31';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -938,7 +955,7 @@ function renderAgentRow(row, agents, { attackable = false, onAttack = null } = {
         onHoldRead: (_inst, el) => startLift(el, cardsById[a.id]),
       }));
     } else {
-      slot.innerHTML = '<span class="slot-label">Agent</span>';
+      slot.innerHTML = '<span class="slot-label" aria-hidden="true"></span>';
     }
     row.appendChild(slot);
   }
@@ -1035,15 +1052,13 @@ function renderMatch() {
     if (yourTurn && engine.canCallPatron(pid)) el.classList.add('callable');
     if (prevFavor[pid] && prevFavor[pid] !== favorWord.toLowerCase()) el.classList.add('just-flipped');
     const short = (pat.short || pat.name || pid).replace(/^The\s+/i, '');
-    const alwaysN = !!(pat.alwaysNeutral || pat.abilities?.alwaysNeutral || pid === 'treasury');
+    const neverTurn = !!(pat.alwaysNeutral || pat.abilities?.alwaysNeutral || pid === 'treasury' || pid === 'mora');
     el.innerHTML = `
-      <div class="token-dial wood-pendant" title="${favorWord} — ${pat.name || short}">
-        ${alwaysN ? '' : '<span class="wood-tip" aria-hidden="true"></span>'}
-        <span class="wood-bar">
-          <span class="wood-name">${short}</span>
-          <span class="coin-ring"><img src="${patronArt(pid)}" alt="${short}" draggable="false" /></span>
-        </span>
+      <div class="token-dial" title="${favorWord} — ${pat.name || short}">
+        ${neverTurn ? '' : '<span class="token-point" aria-hidden="true"></span>'}
+        <span class="coin-ring"><img src="${patronArt(pid)}" alt="${short}" draggable="false" /></span>
       </div>
+      <span class="plabel">${short}</span>
     `;
     bindCardGesture(el, {
       onTap: () => openPatronConfirm(pid, 'call'),
@@ -1151,6 +1166,7 @@ function renderMatch() {
       onHoldRead: (_i, el) => startLift(el, def),
     }));
   });
+  layoutFan(hz, false);
   // Rival fanned backs (top)
   const ohz = $('#opp-hand-zone');
   if (ohz) {
@@ -1194,29 +1210,28 @@ function renderMatch() {
 
 function layoutFan(container, rival = false) {
   if (!container) return;
-  if (document.body.classList.contains('is-landscape') || document.body.classList.contains('is-portrait')) {
-    [...container.children].forEach((card, i) => {
-      card.style.transform = '';
-      card.style.left = '';
-      card.style.top = '';
-      card.style.bottom = '';
-      card.style.zIndex = String(i + 1);
-    });
-    return;
-  }
   const cards = [...container.children];
   const n = cards.length;
+  cards.forEach((card, i) => {
+    card.style.left = '';
+    card.style.top = '';
+    card.style.bottom = '';
+    card.style.zIndex = String(i + 1);
+  });
   if (!n) return;
-  const spread = rival ? Math.min(36, 8 + n * 4) : Math.min(28, 6 + n * 3);
+  const phone = document.body.classList.contains('is-landscape') || document.body.classList.contains('is-portrait');
+  const spread = rival
+    ? Math.min(phone ? 16 : 36, 6 + n * (phone ? 2.2 : 4))
+    : Math.min(phone ? 18 : 28, 5 + n * (phone ? 2.4 : 3));
   const start = -spread / 2;
   const step = n === 1 ? 0 : spread / (n - 1);
-  const overlap = rival ? 22 : Math.max(36, Math.min(52, 220 / n));
   cards.forEach((card, i) => {
     const rot = start + step * i;
-    const x = (i - (n - 1) / 2) * overlap;
-    const y = Math.abs(rot) * (rival ? 0.35 : 0.45);
+    const y = Math.abs(rot) * (rival ? 0.28 : 0.4);
+    const fan = `rotate(${rot.toFixed(2)}deg) translateY(${rival ? y : -y}px)`;
+    card.style.setProperty('--fan-tf', fan);
+    card.style.transform = fan;
     card.style.zIndex = String(i + 1);
-    card.style.transform = `translate(calc(-50% + ${x}px), ${rival ? y : -y}px) rotate(${rot}deg)`;
   });
 }
 
@@ -2885,8 +2900,10 @@ function installTestHook() {
         id: el.dataset.pid,
         side: el.dataset.side,
         favor: el.dataset.favor,
-        tip: !!el.querySelector('.wood-tip'),
+        tip: !!el.querySelector('.token-point'),
         pip: !!el.querySelector('.favor-pip'),
+        wood: !!el.querySelector('.wood-pendant, .wood-bar, .wood-name'),
+        ring: !!el.querySelector('.coin-ring'),
       }));
       const cluster = $('#rail-patrons')?.getBoundingClientRect();
       const rail = $('#patron-rail')?.getBoundingClientRect();
@@ -2940,6 +2957,17 @@ function installTestHook() {
         legalGlow: document.querySelectorAll('#match .card.legal-target, .tray-card.legal-target').length,
         youCallsOnRail: !!document.querySelector('#patron-rail #you-patron-calls'),
         triadCount: document.querySelectorAll('#you-res .eso-tok').length,
+        woodPendants: document.querySelectorAll('.wood-pendant, .wood-bar').length,
+        coinRings: document.querySelectorAll('#rail-patrons .patron-coin .coin-ring').length,
+        agentEmptyH: Math.max(0, ...[...document.querySelectorAll('#match .agent-slot.empty')].map(el => Math.round(el.getBoundingClientRect().height))),
+        agentsRowH: Math.round(document.querySelector('#you-agents')?.getBoundingClientRect().height || 0),
+        actionsOverlapPile: (() => {
+          const acts = document.querySelector('#match .felt-hud-you')?.getBoundingClientRect();
+          const piles = ['#pile-you-draw', '#pile-you-cd'].map(s => document.querySelector(s)?.getBoundingClientRect());
+          if (!acts || acts.width < 4) return false;
+          return piles.some((p) => p && !(acts.right < p.left || acts.left > p.right || acts.bottom < p.top || acts.top > p.bottom));
+        })(),
+        nativeShell: document.body.classList.contains('is-native'),
       };
     },
     inspectById(id) {
@@ -3051,6 +3079,7 @@ function installTestHook() {
 }
 
 loadData().then(() => {
+  applyNativeShell();
   profile = loadProfile();
   hourglassOn = !!profile.hourglassDefault;
   bind();
