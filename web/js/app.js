@@ -210,51 +210,94 @@ function patronNeverTips(pat, pid) {
   return !!(pat?.alwaysNeutral || pat?.abilities?.alwaysNeutral || pid === 'treasury' || pid === 'mora');
 }
 
-/** Ornate pewter gothic medallion. The metal silhouette IS the favor tip. */
+function pewterDefs(uid, field) {
+  return `
+    <linearGradient id="${uid}-pew" x1="16%" y1="0" x2="88%" y2="100%">
+      <stop offset="0%" stop-color="#f8f3e8"/>
+      <stop offset="14%" stop-color="#d8d0c2"/>
+      <stop offset="36%" stop-color="#8a8478"/>
+      <stop offset="52%" stop-color="#efe6d4"/>
+      <stop offset="74%" stop-color="#6a6458"/>
+      <stop offset="100%" stop-color="#2a261e"/>
+    </linearGradient>
+    <linearGradient id="${uid}-hi" x1="22%" y1="0" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#fffaf0"/>
+      <stop offset="42%" stop-color="#c8c0b0"/>
+      <stop offset="100%" stop-color="#4a453c"/>
+    </linearGradient>
+    <radialGradient id="${uid}-fld" cx="36%" cy="28%">
+      <stop offset="0%" stop-color="#c43440"/>
+      <stop offset="100%" stop-color="${field}"/>
+    </radialGradient>`;
+}
+
+/** Bezel bosses / knotwork pips around a circular window. */
+function rimBosses(uid, cx, cy, r, count, skipTop) {
+  const bits = [];
+  for (let i = 0; i < count; i++) {
+    if (skipTop && i === 0) continue;
+    const a = -Math.PI / 2 + (Math.PI * 2 * i) / count;
+    const x = (cx + r * Math.cos(a)).toFixed(2);
+    const y = (cy + r * Math.sin(a)).toFixed(2);
+    bits.push(`<circle cx="${x}" cy="${y}" r="2.05" fill="url(#${uid}-hi)" stroke="#1c1812" stroke-width="0.45"/>`);
+  }
+  return bits.join('');
+}
+
+/**
+ * Ornate pewter gothic medallion. The metal silhouette IS the favor tip:
+ * circular body + integrated gothic peak (not a triangle glued to a coin).
+ */
 function medallionMarkup(pid, pat, short, favorWord) {
   const uid = `med-${pid}`;
   const art = patronArt(pid);
   const field = pat?.color || '#6b1218';
   const title = `${favorWord} — ${pat?.name || short}`;
   const neverTurn = patronNeverTips(pat, pid);
-  const pew = `
-    <linearGradient id="${uid}-pew" x1="16%" y1="0" x2="90%" y2="100%">
-      <stop offset="0%" stop-color="#f3eee4"/>
-      <stop offset="18%" stop-color="#c8c0b4"/>
-      <stop offset="42%" stop-color="#8a8478"/>
-      <stop offset="58%" stop-color="#e6dfd2"/>
-      <stop offset="78%" stop-color="#6a6458"/>
-      <stop offset="100%" stop-color="#2a261e"/>
-    </linearGradient>
-    <radialGradient id="${uid}-fld" cx="38%" cy="30%">
-      <stop offset="0%" stop-color="#9a2434"/>
-      <stop offset="100%" stop-color="${field}"/>
-    </radialGradient>`;
-  /* One continuous gothic oval. Point is the bezel, not a glued triangle. */
-  const sil = 'M50 2 C55 14, 68 26, 78 44 A 40 40 0 1 1 22 44 C32 26, 45 14, 50 2 Z';
+  const defs = pewterDefs(uid, field);
   if (neverTurn) {
     return `
       <div class="token-dial medallion tipless" title="${title}">
-        <svg class="medallion-svg" viewBox="0 0 100 100" aria-hidden="true">
-          <defs>${pew}<clipPath id="${uid}-face"><circle cx="50" cy="50" r="29"/></clipPath></defs>
-          <circle cx="50" cy="50" r="48" fill="url(#${uid}-pew)" stroke="#1c1812" stroke-width="1.5"/>
-          <circle cx="50" cy="50" r="31" fill="url(#${uid}-fld)"/>
-        </svg>
         <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
+        <svg class="medallion-svg" viewBox="0 0 100 100" aria-hidden="true">
+          <defs>${defs}</defs>
+          <path fill="url(#${uid}-pew)" fill-rule="evenodd" stroke="#1c1812" stroke-width="1.45"
+            d="M50 2 A48 48 0 1 1 49.9 2 Z M50 50 m-31 0 a31 31 0 1 1 62 0 a31 31 0 1 1 -62 0"/>
+          <circle cx="50" cy="50" r="31.8" fill="none" stroke="#1c1812" stroke-width="1.35"/>
+          <circle cx="50" cy="50" r="30.7" fill="none" stroke="#efe6d4" stroke-width="1.05" opacity=".88"/>
+          <circle cx="50" cy="50" r="39.4" fill="none" stroke="#d8d0c2" stroke-width=".55" opacity=".65" stroke-dasharray="2.1 3.4"/>
+          <circle cx="50" cy="50" r="33.2" fill="none" stroke="#5c564c" stroke-width="2.05" stroke-dasharray="3.2 2.1"/>
+          ${rimBosses(uid, 50, 50, 39.6, 12, false)}
+        </svg>
       </div>
       <span class="plabel">${short}</span>`;
   }
+  /* Circle + gothic peak as ONE path. Peak is the bezel, not a pip. */
+  const sil = [
+    'M50 1.6',
+    'C55.8 9.4, 62.2 14.2, 68.4 20.6',
+    'C88.2 33.4, 98.1 49.6, 98.1 67.4',
+    'A48.1 48.1 0 1 1 1.9 67.4',
+    'C1.9 49.6, 11.8 33.4, 31.6 20.6',
+    'C37.8 14.2, 44.2 9.4, 50 1.6 Z',
+  ].join(' ');
+  const windowHole = 'M50 67.4 m-31.6 0 a31.6 31.6 0 1 1 63.2 0 a31.6 31.6 0 1 1 -63.2 0';
   return `
     <div class="token-dial medallion" title="${title}">
-      <svg class="medallion-svg" viewBox="0 0 100 128" aria-hidden="true">
-        <defs>${pew}</defs>
-        <path class="token-point medallion-body" fill="url(#${uid}-pew)" stroke="#1c1812" stroke-width="1.5" d="${sil}"/>
-        <circle cx="50" cy="76" r="31" fill="url(#${uid}-fld)"/>
-        <circle cx="50" cy="76" r="33.2" fill="none" stroke="#1c1812" stroke-width="1.8"/>
-        <circle cx="50" cy="76" r="32.2" fill="none" stroke="#efe6d4" stroke-width="1.05" opacity=".8"/>
-        <circle cx="50" cy="76" r="32.8" fill="none" stroke="#5c564c" stroke-width="2.2" stroke-dasharray="3.2 2.1"/>
-      </svg>
       <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
+      <svg class="medallion-svg" viewBox="0 0 100 118" aria-hidden="true">
+        <defs>${defs}</defs>
+        <path class="token-point medallion-body" fill="url(#${uid}-pew)" fill-rule="evenodd" stroke="#1c1812" stroke-width="1.45"
+          d="${sil} ${windowHole}"/>
+        <path fill="none" stroke="url(#${uid}-hi)" stroke-width="1.2" d="M50 4.2 C55.5 11.8, 62 16.4, 69.2 22.6"/>
+        <path fill="none" stroke="#2a261e" stroke-width="0.7" opacity=".55" d="M50 4.2 C44.5 11.8, 38 16.4, 30.8 22.6"/>
+        <circle class="token-finial" cx="50" cy="5.1" r="2.35" fill="url(#${uid}-hi)" stroke="#1c1812" stroke-width="0.7"/>
+        <circle cx="50" cy="67.4" r="32.8" fill="none" stroke="#1c1812" stroke-width="1.45"/>
+        <circle cx="50" cy="67.4" r="31.5" fill="none" stroke="#efe6d4" stroke-width="1.05" opacity=".9"/>
+        <circle cx="50" cy="67.4" r="40.2" fill="none" stroke="#d8d0c2" stroke-width=".55" opacity=".7" stroke-dasharray="2.2 3.6"/>
+        <circle cx="50" cy="67.4" r="34.2" fill="none" stroke="#5c564c" stroke-width="2.1" stroke-dasharray="3.3 2.15"/>
+        ${rimBosses(uid, 50, 67.4, 40.4, 12, true)}
+      </svg>
     </div>
     <span class="plabel">${short}</span>`;
 }

@@ -669,7 +669,8 @@
   white-space: nowrap;
 }
 #match .patron-coin .token-frame,
-#match .patron-coin .token-point,
+#match .patron-coin span.token-point,
+#match .patron-coin .token-point:not(path),
 #match .patron-coin .plabel { display: none !important; }
 #match .patron-coin .coin-ring {
   position: relative !important;

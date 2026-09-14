@@ -1,5 +1,5 @@
 /**
- * Build 36 board-pass gate + artifacts.
+ * Build 37 board-pass gate + artifacts.
  * Portrait 390×844 / landscape 844×390.
  * Gothic medallion silhouette IS the favor tip. No in-match landscape banner.
  */
@@ -62,7 +62,7 @@ function fail(msg, extra) {
 
 async function shotRail(page, name) {
   fs.mkdirSync(ART, { recursive: true });
-  const rail = await page.$('#patron-rail');
+  const rail = await page.$('#rail-patrons') || await page.$('#patron-rail');
   if (!rail) { fail(`${name} missing patron rail`); return; }
   await rail.screenshot({ path: path.join(ART, `${name}.png`) });
 }
@@ -155,7 +155,7 @@ if (pelinOpp?.favor !== 'unfavored') fail('pelin fav-opp not unfavored', pelinOp
 if (treas && treas.rot !== 'none') fail('treasury rotated', treas);
 
 const note = [
-  'Build 36 board-pass measurements',
+  'Build 37 board-pass measurements',
   `portrait 390x844: tavern ${results.portrait.tavernW}px = ${results.portrait.viewportTavernPct}% vw`,
   `  empty bands T/B ${results.portrait.topBandPct}% / ${results.portrait.botBandPct}% (need ≤8%)`,
   `  tavern discard: ${results.portrait.tavernDiscard}  banner: ${results.portrait.landscapeBanner}`,
