@@ -808,39 +808,55 @@ body.is-landscape .inspect-dossier-sheet {
    Blue: right rail rebalance — patrons stay right; octagons stretch.
    =================================================================== */
 
-/* --- Piles to the true L/R edges --- */
+/* --- Piles to the true L/R edges. Keep labels on-canvas (board overflow:hidden). --- */
 body.is-portrait #match #pile-opp-draw,
 body.is-portrait #match #pile-you-draw,
-body.is-portrait #match #pile-tavern-draw {
-  left: 0 !important;
-  min-width: 36px !important;
-  padding: 1px 0 !important;
-}
-body.is-portrait #match #pile-opp-draw { top: 4px !important; }
-body.is-portrait #match #pile-you-draw { bottom: 4px !important; }
-body.is-portrait #match #pile-opp-cd,
-body.is-portrait #match #pile-you-cd {
-  right: 0 !important;
-  min-width: 36px !important;
-  padding: 1px 0 !important;
-}
-body.is-portrait #match #pile-opp-cd { top: 4px !important; }
-body.is-portrait #match #pile-you-cd { bottom: 4px !important; }
-body.is-portrait #match #pile-opp-draw .pile-stack,
-body.is-portrait #match #pile-you-draw .pile-stack,
-body.is-portrait #match #pile-tavern-draw .pile-stack {
-  margin: 0 auto 0 1px;
-}
-body.is-portrait #match #pile-opp-cd .pile-stack,
-body.is-portrait #match #pile-you-cd .pile-stack {
-  margin: 0 1px 0 auto;
-}
-
+body.is-portrait #match #pile-tavern-draw,
 body.is-landscape #match #pile-opp-draw,
 body.is-landscape #match #pile-you-draw,
 body.is-landscape #match #pile-tavern-draw {
   left: 0 !important;
+  min-width: 0 !important;
+  width: 42px !important;
+  padding: 1px 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
 }
+body.is-portrait #match #pile-opp-draw { top: 2px !important; }
+body.is-portrait #match #pile-you-draw { bottom: 2px !important; }
+body.is-portrait #match #pile-opp-cd,
+body.is-portrait #match #pile-you-cd {
+  right: 4px !important;
+  min-width: 0 !important;
+  width: 64px !important;
+  padding: 1px 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+}
+body.is-portrait #match #pile-opp-cd .pile-label,
+body.is-portrait #match #pile-you-cd .pile-label {
+  font-size: 0.42rem !important;
+  max-width: 64px;
+}
+body.is-portrait #match #pile-opp-cd { top: 2px !important; }
+body.is-portrait #match #pile-you-cd { bottom: 2px !important; }
+body.is-portrait #match #pile-opp-draw .pile-stack,
+body.is-portrait #match #pile-you-draw .pile-stack,
+body.is-portrait #match #pile-tavern-draw .pile-stack,
+body.is-landscape #match #pile-opp-draw .pile-stack,
+body.is-landscape #match #pile-you-draw .pile-stack,
+body.is-landscape #match #pile-tavern-draw .pile-stack {
+  width: 32px !important;
+  margin: 0 !important;
+}
+body.is-portrait #match #pile-opp-cd .pile-stack,
+body.is-portrait #match #pile-you-cd .pile-stack {
+  width: 32px !important;
+  margin: 0 !important;
+}
+
 body.is-landscape #match #pile-opp-draw { top: 2px !important; }
 body.is-landscape #match #pile-you-draw { bottom: 2px !important; }
 body.is-landscape #match #pile-opp-cd { top: 2px !important; right: 118px !important; }
@@ -859,9 +875,10 @@ body.is-portrait #match .felt-hud-you {
   top: 56% !important;
   bottom: auto !important;
 }
+/* Landscape: compact strip in the opp-draw → DECK gap (the only left-column hole). */
 body.is-landscape #match .felt-hud-you {
-  top: auto !important;
-  bottom: 56px !important;
+  top: 20% !important;
+  bottom: auto !important;
 }
 body.is-portrait #match .you-actions,
 body.is-landscape #match .you-actions {
@@ -884,10 +901,13 @@ body.is-landscape #match .you-actions button {
   line-height: 1.1 !important;
   letter-spacing: 0.02em;
 }
-body.is-portrait #match #btn-match-settings,
-body.is-landscape #match #btn-match-settings {
-  padding: 0.18rem 0.1rem !important;
-  font-size: 0.78rem !important;
+body.is-landscape #match .you-actions {
+  gap: 2px !important;
+  padding: 2px 1px !important;
+}
+body.is-landscape #match .you-actions button {
+  padding: 0.12rem 0.08rem !important;
+  font-size: 0.42rem !important;
 }
 
 /* --- Portrait End Turn: bottom-left, under the left chrome strip.
@@ -933,18 +953,19 @@ body.is-portrait #match .patron-rail {
 body.is-portrait #match .rail-glass {
   justify-content: space-between !important;
   align-self: center !important;
-  height: 50% !important;
-  max-height: 54% !important;
+  height: 36% !important;
+  max-height: 40% !important;
   gap: 8px !important;
   padding: 0 !important;
   margin: 0 !important;
 }
+/* Landscape: hourglass still on the rail — keep octagons beside it, not in the corners. */
 body.is-landscape #match .rail-glass {
-  justify-content: space-between !important;
+  justify-content: center !important;
   align-self: center !important;
-  height: 78% !important;
-  max-height: 82% !important;
-  gap: 8px !important;
+  height: auto !important;
+  max-height: 72% !important;
+  gap: 6px !important;
 }
 
 /* Hand / tavern gutters: left strip + right rail, not the old bottom-right HUD cluster. */
