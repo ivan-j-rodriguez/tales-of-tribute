@@ -109,12 +109,30 @@ const portPage = await browser.newPage();
 await portPage.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 await ready(portPage);
 results.portrait = await measure(portPage, 'portrait-390x844', { w: 390, h: 844 });
+const portFavor = await portPage.evaluate(() => {
+  const a = window.__totTest.setFavor('pelin', 1);
+  const b = window.__totTest.setFavor('crows', -1);
+  const snap = window.__totTest.snapshot();
+  return { a, b, patrons: snap.patrons };
+});
+console.log('portrait favor', JSON.stringify(portFavor));
+await new Promise(r => setTimeout(r, 800));
+await portPage.screenshot({ path: path.join(ART, 'portrait-patron-favor-rotate.png') });
 await portPage.close();
 
 const landPage = await browser.newPage();
 await landPage.setViewport({ width: 844, height: 390, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 await ready(landPage);
 results.landscape = await measure(landPage, 'landscape-844x390', { w: 844, h: 390 });
+const landFavor = await landPage.evaluate(() => {
+  const a = window.__totTest.setFavor('pelin', 1);
+  const b = window.__totTest.setFavor('crows', -1);
+  const snap = window.__totTest.snapshot();
+  return { a, b, patrons: snap.patrons };
+});
+console.log('landscape favor', JSON.stringify(landFavor));
+await new Promise(r => setTimeout(r, 800));
+await landPage.screenshot({ path: path.join(ART, 'landscape-patron-favor-rotate.png') });
 await landPage.close();
 
 const note = [

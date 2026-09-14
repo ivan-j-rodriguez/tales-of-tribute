@@ -210,56 +210,43 @@ function patronNeverTips(pat, pid) {
 /** Ornate pewter gothic medallion. Tip = favor. Treasury + Mora stay circular. */
 function medallionMarkup(pid, pat, short, favorWord) {
   const uid = `med-${pid}`;
-  const field = pat?.color || '#6b1218';
   const art = patronArt(pid);
   const title = `${favorWord} — ${pat?.name || short}`;
   const neverTurn = patronNeverTips(pat, pid);
   const pew = `
-    <linearGradient id="${uid}-pew" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#f7f2e8"/>
-      <stop offset="18%" stop-color="#d8d2c6"/>
-      <stop offset="40%" stop-color="#9a9488"/>
-      <stop offset="62%" stop-color="#ece6da"/>
-      <stop offset="82%" stop-color="#6e685c"/>
-      <stop offset="100%" stop-color="#3a362e"/>
-    </linearGradient>
-    <radialGradient id="${uid}-hi" cx="32%" cy="28%">
-      <stop offset="0%" stop-color="#fffaf0" stop-opacity=".7"/>
-      <stop offset="100%" stop-color="#fffaf0" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="${uid}-fld" cx="38%" cy="30%">
-      <stop offset="0%" stop-color="#9a2434"/>
-      <stop offset="100%" stop-color="${field}"/>
-    </radialGradient>`;
+    <linearGradient id="${uid}-pew" x1="18%" y1="0" x2="88%" y2="100%">
+      <stop offset="0%" stop-color="#e8e2d4"/>
+      <stop offset="22%" stop-color="#9a9488"/>
+      <stop offset="48%" stop-color="#d8d0c2"/>
+      <stop offset="70%" stop-color="#6a6458"/>
+      <stop offset="100%" stop-color="#2e2a24"/>
+    </linearGradient>`;
   if (neverTurn) {
     return `
       <div class="token-dial medallion tipless" title="${title}">
+        <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
         <svg class="medallion-svg" viewBox="0 0 100 100" aria-hidden="true">
           <defs>${pew}</defs>
-          <circle cx="50" cy="50" r="47.5" fill="url(#${uid}-pew)" stroke="#2a261e" stroke-width="1.5"/>
-          <circle cx="50" cy="50" r="41" fill="none" stroke="#1c1812" stroke-width="2.1"/>
-          <circle cx="50" cy="50" r="39.2" fill="none" stroke="#efe8da" stroke-width="1.15" opacity=".8"/>
-          <circle cx="50" cy="50" r="40" fill="none" stroke="#6a6458" stroke-width="2.6" stroke-dasharray="3.5 2.2"/>
-          <circle cx="50" cy="50" r="34.5" fill="url(#${uid}-fld)"/>
-          <circle cx="50" cy="50" r="47.5" fill="url(#${uid}-hi)" pointer-events="none"/>
+          <path fill="url(#${uid}-pew)" fill-rule="evenodd" stroke="#1c1812" stroke-width="1.4"
+            d="M50 2 A48 48 0 1 1 49.9 2 Z M50 50 m-35 0 a35 35 0 1 1 70 0 a35 35 0 1 1 -70 0"/>
+          <circle cx="50" cy="50" r="36.2" fill="none" stroke="#efe6d4" stroke-width="1.1" opacity=".75"/>
+          <circle cx="50" cy="50" r="37.4" fill="none" stroke="#5c564c" stroke-width="2.2" stroke-dasharray="3.3 2.1"/>
         </svg>
-        <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
       </div>
       <span class="plabel">${short}</span>`;
   }
   return `
     <div class="token-dial medallion" title="${title}">
+      <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
       <svg class="medallion-svg" viewBox="0 0 100 128" aria-hidden="true">
         <defs>${pew}</defs>
-        <path class="token-point medallion-body" fill="url(#${uid}-pew)" stroke="#2a261e" stroke-width="1.5"
-          d="M50 2 C59 18, 78 34, 88 54 A 45 45 0 1 1 12 54 C22 34, 41 18, 50 2 Z"/>
-        <circle cx="50" cy="78" r="41.5" fill="none" stroke="#1c1812" stroke-width="2.2"/>
-        <circle cx="50" cy="78" r="39.6" fill="none" stroke="#efe8da" stroke-width="1.2" opacity=".82"/>
-        <circle cx="50" cy="78" r="40.4" fill="none" stroke="#6a6458" stroke-width="2.7" stroke-dasharray="3.6 2.3"/>
-        <circle cx="50" cy="78" r="34.5" fill="url(#${uid}-fld)"/>
-        <circle cx="50" cy="78" r="41.5" fill="url(#${uid}-hi)" pointer-events="none"/>
+        <path class="token-point medallion-body" fill="url(#${uid}-pew)" fill-rule="evenodd" stroke="#1c1812" stroke-width="1.4"
+          d="M50 2 C60 16, 80 32, 90 54 A 46 46 0 1 1 10 54 C20 32, 40 16, 50 2 Z
+             M50 78 m-34 0 a34 34 0 1 1 68 0 a34 34 0 1 1 -68 0"/>
+        <circle cx="50" cy="78" r="35.2" fill="none" stroke="#efe6d4" stroke-width="1.15" opacity=".8"/>
+        <circle cx="50" cy="78" r="36.4" fill="none" stroke="#5c564c" stroke-width="2.3" stroke-dasharray="3.4 2.2"/>
+        <path fill="url(#${uid}-pew)" stroke="#1c1812" stroke-width="1" d="M50 2 L57 24 Q50 20 43 24 Z"/>
       </svg>
-      <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
     </div>
     <span class="plabel">${short}</span>`;
 }
@@ -3641,6 +3628,12 @@ function installTestHook() {
       };
     },
     layout: layoutMetrics,
+    setFavor(pid, value) {
+      if (!engine?.state) return false;
+      engine.state.favor[pid] = value;
+      renderMatch();
+      return true;
+    },
     inspectById(id) {
       const d = cardsById[id];
       const el = document.querySelector('#hand-zone .card, #tavern-zone .card');

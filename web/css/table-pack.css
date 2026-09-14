@@ -630,19 +630,20 @@ body.is-portrait #match .board {
   grid-template-columns: none !important;
 }
 body.is-portrait #match .felt-table {
-  padding: 4px 0 6px !important;
-  row-gap: 3px !important;
-  gap: 3px 0 !important;
+  padding: 4px 0 4px !important;
+  row-gap: 2px !important;
+  gap: 2px 0 !important;
   align-content: stretch !important;
   grid-template-columns: 1fr !important;
   grid-template-rows:
-    minmax(58px, 0.92fr)
     auto
-    30px
-    minmax(128px, 1.85fr)
-    30px
     auto
-    minmax(118px, 1.7fr) !important;
+    26px
+    auto
+    26px
+    auto
+    minmax(150px, 1fr) !important;
+  align-content: stretch !important;
 }
 body.is-portrait #match .felt-tavern {
   width: 74% !important;
