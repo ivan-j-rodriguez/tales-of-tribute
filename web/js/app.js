@@ -6,13 +6,21 @@ import {
   recordMatchResult, openPurse, buySack, claimAchievement, claimDailyChallenge,
   isDeckUnlocked, fragmentProgress, ACHIEVEMENTS, STARTER_DECKS, LOCKED_DECKS,
   ALL_DECKS, FRAGMENTS_TO_UNLOCK, SACK_BUY_COST, purseCount,
-  TABLE_SKINS, CARD_BACKS, CARD_BACK_PALETTE, STORE_FRAGMENT_COST, STORE_UPGRADE_COST,
-  buyFragment, buyUpgrade, buySkin, buyBack, equipSkin, equipBack, RANK_TIERS,
+  TABLE_SKINS, CARD_BACKS, CARD_BACK_PALETTE,
+  buyShopOffer, equipSkin, equipBack, RANK_TIERS,
   GAUNTLET_STOPS, ensureGauntletDay, recordGauntletResult, setAiDifficulty,
   gauntletCooldownMs, todaysFeatured, roadCrossing, WATER_ZONES,
   msUntilNextNyMidnight, nyDateStr,
+  ensureClubMeta, currentShop, claimWeeklyGoal, claimSeasonalGoal, claimSeasonComplete,
+  discoverCards, noteClubEvent, deckReadyToUnlock, roadGrandPrizePreview,
 } from './profile.js';
 import { UPGRADE_TO_BASE, upgradesForPatron } from './upgrades.js';
+import {
+  formatRarity, rarityOf, priceOf, CLUES_TO_UPGRADE, DECK_IMPORTANCE, DECK_CAPTIONS,
+  currentSeason, nextSeason, msUntilShopRefresh, msUntilWeeklyReset,
+  loginMonthGrid, clueCountOf, countClues, deckCardSet, weeklyKey,
+  isOfferSoldOut,
+} from './economy.js';
 import { hostRoom, joinRoom } from './netplay.js';
 import { setMusicEnabled, preferMusicFromStorage, warmMuted, playSfx, setMusicCue, setSfxStyle, getSfxStyle, setSfxEnabled, preferSfxFromStorage, isSfxOn } from './music.js';
 import { applyOfficialPatronText, applyOfficialCardText, cardPlayLines, cardComboLines } from './texts.js';
@@ -217,6 +225,7 @@ function setHourglass(on) {
 
 function onSplashEnter() {
   profile = loadProfile();
+  ensureClubMeta(profile, DATA.cards || []);
   ensureDailyChallengeReset(profile);
   const daily = doDailyCheckIn(profile);
   if (daily) {
@@ -225,7 +234,7 @@ function onSplashEnter() {
   }
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-    if (stamp) stamp.textContent = 'build 33';
+  if (stamp) stamp.textContent = 'build 34';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -1756,9 +1765,20 @@ function startMatch(opts = {}) {
       else playSfx('play');
       if (def?.id === 'gold' || def?.id === 'writ-of-coin') playSfx('coinA');
     }
-    if (ev === 'buy') playSfx('buy');
+    if (ev === 'buy') {
+      playSfx('buy');
+      const id = data?.def?.id || data?.card?.id;
+      if (id) discoverCards(profile, [id], DATA.cards);
+      if (engine?.state?.active === localSeat()) noteClubEvent(profile, { kind: 'buy' });
+    }
     if (ev === 'writ') playSfx('coinB');
-    if (ev === 'patron') playSfx('patron');
+    if (ev === 'patron') {
+      playSfx('patron');
+      if (engine?.state?.active === localSeat()) noteClubEvent(profile, { kind: 'call' });
+    }
+    if (ev === 'play' && data?.def?.id) {
+      discoverCards(profile, [data.def.id], DATA.cards);
+    }
     if (ev === 'knockout') {
       playSfx('knockout');
       flashFx(data?.agent, 'fx-slash');
@@ -1825,13 +1845,19 @@ function showWin(data) {
 
   if (matchMode !== 'remote-guest' || true) {
     if (matchMode === 'hotseat') {
-      const r = recordMatchResult(profile, { won: engine.state.winner === 0, isRandom: isRandomMatch, ranked: false });
+      const r = recordMatchResult(profile, {
+        won: engine.state.winner === 0, isRandom: isRandomMatch, ranked: false,
+        patrons: [...pickYou], rivalPatrons: [...pickOpp],
+      });
       rewardLine = `+${r.gold}g`;
       if (r.purse) purseNote = ` · ${r.purse.rarity} cutpurse`;
     } else if (matchMode === 'remote-host' || matchMode === 'remote-guest') {
       const won = (matchMode === 'remote-host' && engine.state.winner === 0) ||
                   (matchMode === 'remote-guest' && engine.state.winner === 1);
-      const r = recordMatchResult(profile, { won, isRandom: false, ranked: false });
+      const r = recordMatchResult(profile, {
+        won, isRandom: false, ranked: false,
+        patrons: [...pickYou], rivalPatrons: [...pickOpp],
+      });
       rewardLine = `+${r.gold}g`;
       if (r.purse) purseNote = ` · ${r.purse.rarity} cutpurse`;
     } else if (isGauntletMatch && gauntletStopIndex != null) {
@@ -1839,17 +1865,22 @@ function showWin(data) {
       const g = recordGauntletResult(profile, { stopIndex: gauntletStopIndex, won: awardWin });
       if (awardWin) {
         rewardLine = `Province secured · +${g.gold || 0}g`;
-        purseNote = g.complete ? ' · Road complete!' : ' · next stop unlocked';
+        purseNote = g.complete ? ' · Road complete — grand prize!' : ' · next stop open';
       } else {
-        rewardLine = "Today's road ends here";
+        rewardLine = "The road locks until NY midnight";
         const ms = g.retryInMs || msUntilNextNyMidnight();
         purseNote = ` · retry in ${fmtCountdown(ms)}`;
       }
-      // still record a casual match for stats
-      recordMatchResult(profile, { won: awardWin, isRandom: false, ranked: false });
+      recordMatchResult(profile, {
+        won: awardWin, isRandom: false, ranked: false, skipGold: true, gauntlet: true,
+        patrons: [...pickYou], rivalPatrons: [...pickOpp], aiDifficulty: profile.aiDifficulty,
+      });
     } else {
       const awardWin = engine.state.winner === 0;
-      const r = recordMatchResult(profile, { won: awardWin, isRandom: isRandomMatch, ranked: isRankedMatch });
+      const r = recordMatchResult(profile, {
+        won: awardWin, isRandom: isRandomMatch, ranked: isRankedMatch,
+        patrons: [...pickYou], rivalPatrons: [...pickOpp], aiDifficulty: profile.aiDifficulty,
+      });
       rewardLine = `+${r.gold}g`;
       if (r.purse) purseNote = ` · ${r.purse.rarity} cutpurse`;
       if (isRankedMatch && r.ranked) {
@@ -1868,6 +1899,7 @@ function showWin(data) {
     <span style="font-size:.45em;color:#c4b39a">${reasonText(data.reason)}</span><br>
     <span style="font-size:.4em;color:#d4af37">${rewardLine}${purseNote}</span><br>
     <button class="primary" id="btn-again">Continue</button>
+    ${canRematch() ? '<button id="btn-rematch">Rematch</button>' : ''}
     ${purseCount(profile) > 0 ? '<button id="btn-win-purse">Open Cutpurse</button>' : ''}`;
   $('#win-overlay').classList.add('show');
   setTimeout(() => {
@@ -1882,11 +1914,24 @@ function showWin(data) {
       if (wasGauntlet) openGauntlet();
       else onSplashEnter();
     });
+    $('#btn-rematch')?.addEventListener('click', () => {
+      $('#win-overlay').classList.remove('show');
+      beginRematch();
+    });
     $('#btn-win-purse')?.addEventListener('click', () => {
       $('#win-overlay').classList.remove('show');
       doOpenPurse(false);
     });
   }, 50);
+}
+
+function canRematch() {
+  return (matchMode === 'ai' || matchMode === 'hotseat') && !isGauntletMatch && !net;
+}
+
+function beginRematch() {
+  if (!pickYou.length || !pickOpp.length) { onSplashEnter(); return; }
+  startMatch({});
 }
 
 function reasonText(r) {
@@ -2115,13 +2160,14 @@ function renderSettings() {
         <div class="skin-swatch ${s.id}"></div>
         <h4>${s.name}</h4>
         <p>${s.tag ? s.tag + ' · ' : ''}${s.desc}</p>
-        <div class="price">${owned ? (eq ? 'Equipped' : 'Owned') : `🔒 ${s.price}g`}</div>
-        <button type="button">${owned ? (eq ? 'Equipped' : 'Equip') : 'Buy & equip'}</button>
+        <div class="price">${owned ? (eq ? 'Equipped' : 'Owned') : `🔒 ${formatRarity(s.rarity || 'fine')} · Club Store`}</div>
+        <button type="button">${owned ? (eq ? 'Equipped' : 'Equip') : 'Find in Store'}</button>
       `;
       el.querySelector('button').onclick = () => {
-        const res = owned ? equipSkin(profile, s.id) : buySkin(profile, s.id);
+        if (!owned) { toast('Rotating Club Store — not always in stock.'); return; }
+        const res = equipSkin(profile, s.id);
         if (res.error) toast(res.error);
-        else { toast(owned ? `Equipped ${s.name}` : `Bought ${s.name}`); applyTableSkin(); renderSettings(); refreshSplashPurse(); }
+        else { toast(`Equipped ${s.name}`); applyTableSkin(); renderSettings(); refreshSplashPurse(); }
       };
       skins.appendChild(el);
     }
@@ -2139,13 +2185,14 @@ function renderSettings() {
         <div class="back-swatch back-${b.id}"></div>
         <h4>${b.name}</h4>
         <p>${b.desc}</p>
-        <div class="price">${owned ? (eq ? 'Equipped' : 'Owned') : `🔒 ${b.price}g`}</div>
-        <button type="button">${owned ? (eq ? 'Equipped' : 'Equip') : 'Buy & equip'}</button>
+        <div class="price">${owned ? (eq ? 'Equipped' : 'Owned') : `🔒 ${formatRarity(b.rarity || 'fine')} · Club Store`}</div>
+        <button type="button">${owned ? (eq ? 'Equipped' : 'Equip') : 'Find in Store'}</button>
       `;
       el.querySelector('button').onclick = () => {
-        const res = owned ? equipBack(profile, b.id) : buyBack(profile, b.id);
+        if (!owned) { toast('Rotating Club Store — not always in stock.'); return; }
+        const res = equipBack(profile, b.id);
         if (res.error) toast(res.error);
-        else { toast(owned ? `Equipped ${b.name}` : `Bought ${b.name}`); applyTableSkin(); renderSettings(); refreshSplashPurse(); }
+        else { toast(`Equipped ${b.name}`); applyTableSkin(); renderSettings(); refreshSplashPurse(); }
       };
       backs.appendChild(el);
     }
@@ -2167,10 +2214,38 @@ function leaveSettings() {
 }
 
 /* ——— Club / Store / Collection ——— */
+function rewardBits(reward = {}) {
+  const bits = [];
+  if (reward.gold) bits.push(`${reward.gold}g`);
+  if (reward.purses || reward.sacks) bits.push(`${reward.purses || reward.sacks} purse`);
+  if (reward.purse) bits.push(`${reward.purse} purse`);
+  if (reward.fragment) bits.push('fragment');
+  if (reward.clues) bits.push(`${reward.clues} clues`);
+  if (reward.skin) bits.push('table design');
+  if (reward.back) bits.push('card back');
+  return bits.join(', ');
+}
+
+function renderGoalRow(g, onClaim) {
+  const ready = (g.progress || 0) >= g.target && !g.claimed;
+  const row = document.createElement('div');
+  row.className = 'ach-row' + (ready ? ' claimable' : '');
+  row.innerHTML = `
+    <div class="ach-info">
+      <strong>${g.title}</strong>
+      <span>${g.desc} · ${g.progress || 0}/${g.target}${g.claimed ? ' · claimed' : ''} · ${rewardBits(g.reward)}</span>
+    </div>
+    <button ${ready ? '' : 'disabled'}>${g.claimed ? 'Claimed' : 'Claim'}</button>
+  `;
+  row.querySelector('button')?.addEventListener('click', onClaim);
+  return row;
+}
+
 function renderClub() {
   profile = loadProfile();
-  ensureDailyChallengeReset(profile);
+  ensureClubMeta(profile, DATA.cards);
   const r = profile.ranked || {};
+  const clues = countClues(profile, DATA.cards);
   $('#club-stats').innerHTML = `
     <div class="club-stat"><div class="label">Purse gold</div><div class="val">${profile.gold}</div></div>
     <div class="club-stat"><div class="label">Cutpurses</div><div class="val">${purseCount(profile)}</div></div>
@@ -2178,7 +2253,38 @@ function renderClub() {
     <div class="club-stat"><div class="label">Win streak</div><div class="val">${profile.winStreak || 0}</div></div>
     <div class="club-stat"><div class="label">Record</div><div class="val">${profile.stats.wins}–${profile.stats.losses}</div></div>
     <div class="club-stat"><div class="label">Decks</div><div class="val">${profile.unlockedDecks.length}/12</div></div>
+    <div class="club-stat"><div class="label">Clues</div><div class="val">${clues.have}/${clues.total}</div></div>
   `;
+
+  const cal = $('#club-calendar');
+  if (cal) {
+    const grid = loginMonthGrid(profile.loginDays);
+    const dow = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+    cal.innerHTML = dow.map((d) => `<div class="cal-dow">${d}</div>`).join('') +
+      grid.cells.map((c) => {
+        if (c.state === 'pad') return `<div class="cal-day pad"></div>`;
+        const mark = c.state === 'miss' ? '✕' : (c.state === 'ok' ? '✓' : c.day);
+        return `<div class="cal-day ${c.state}" title="${c.date}">${mark}</div>`;
+      }).join('');
+  }
+
+  const g = ensureGauntletDay(profile);
+  const featured = todaysFeatured(profile);
+  const prize = roadGrandPrizePreview(profile);
+  const roadEl = $('#club-road');
+  if (roadEl) {
+    const done = (g.cursor || 0) >= (g.order?.length || 0);
+    const lock = g.lockedDate === nyDateStr();
+    roadEl.innerHTML = `
+      <h4>Challenge the Provinces</h4>
+      <p>${done ? 'Road cleared — grand prize claimed.' : `Next: ${featured.name} (${(g.cursor || 0) + 1}/${g.order?.length || 0}).`}
+      ${lock ? ' Lost today — locked until NY midnight.' : ' Win advances. A loss locks the road for the day.'}
+      Grand prize: ${prize.label}. Unofficial fan road.</p>
+      <button type="button" id="btn-club-road">Open the map</button>
+    `;
+    $('#btn-club-road')?.addEventListener('click', () => openGauntlet());
+  }
+
   $('#club-ranked').innerHTML = `
     <div class="ach-row">
       <div class="ach-info">
@@ -2190,19 +2296,78 @@ function renderClub() {
   `;
   $('#btn-club-ranked')?.addEventListener('click', beginRanked);
 
+  const tourney = $('#club-tournament');
+  if (tourney) {
+    tourney.innerHTML = `
+      <h4>Fan tables</h4>
+      <p>Unofficial Club brackets when a host posts one — pass-and-play or a friend’s room. No netcode invented here, no IAP, not a Bethesda event.</p>
+      <button type="button" id="btn-club-friend">Play a Friend</button>
+    `;
+    $('#btn-club-friend')?.addEventListener('click', () => {
+      $('#friend-status').textContent = '';
+      show('#friend-lobby');
+    });
+  }
+
+  const weekHint = $('#club-weekly-hint');
+  if (weekHint) {
+    weekHint.textContent = `Resets Monday 00:00 America/New_York · week of ${weeklyKey()} · ${fmtCountdown(msUntilWeeklyReset())} left`;
+  }
+  const weeklyBox = $('#club-weekly');
+  if (weeklyBox) {
+    weeklyBox.innerHTML = '';
+    for (const goal of profile.challenges.weekly.goals || []) {
+      weeklyBox.appendChild(renderGoalRow(goal, () => {
+        const res = claimWeeklyGoal(profile, goal.id, DATA.cards);
+        if (res) { toast(`Weekly claimed — ${rewardBits(res)}`); renderClub(); refreshSplashPurse(); }
+      }));
+    }
+  }
+
+  const seasonBox = $('#club-seasonal');
+  if (seasonBox) {
+    const season = currentSeason();
+    const next = nextSeason();
+    const st = profile.challenges.seasonal;
+    if (!season) {
+      seasonBox.innerHTML = `<div class="season-banner"><h4>Between festivals</h4><p>Next fan theme: ${next?.name || '—'}. Unofficial — not affiliated with Bethesda / ESO.</p></div>`;
+    } else {
+      seasonBox.innerHTML = `
+        <div class="season-banner">
+          <h4>${season.name}</h4>
+          <p>${season.blurb} Season reward: ${rewardBits(season.reward)}.</p>
+        </div>
+        <div id="season-goals" class="ach-list"></div>
+        <button type="button" class="season-complete" id="btn-season-complete" ${st.seasonClaimed ? 'disabled' : ''}>${st.seasonClaimed ? 'Season claimed' : 'Claim season reward'}</button>
+      `;
+      const sg = $('#season-goals');
+      for (const goal of st.goals || []) {
+        sg.appendChild(renderGoalRow(goal, () => {
+          const res = claimSeasonalGoal(profile, goal.id, DATA.cards);
+          if (res) { toast(`Season goal — ${rewardBits(res)}`); renderClub(); refreshSplashPurse(); }
+        }));
+      }
+      $('#btn-season-complete')?.addEventListener('click', () => {
+        const res = claimSeasonComplete(profile, DATA.cards);
+        if (res) { toast(`Season complete — ${rewardBits(res)}`); applyTableSkin(); renderClub(); refreshSplashPurse(); }
+        else toast('Finish every seasonal goal first.');
+      });
+    }
+  }
+
   const dw = profile.challenges.dailyWin;
   $('#club-daily').innerHTML = `
     <div class="ach-row ${dw.progress >= dw.target && !dw.claimed ? 'claimable' : ''}">
       <div class="ach-info">
         <strong>Win ${dw.target} matches today</strong>
-        <span>${dw.progress}/${dw.target}${dw.claimed ? ' · claimed' : ''}</span>
+        <span>${dw.progress}/${dw.target}${dw.claimed ? ' · claimed' : ''} · 12g</span>
       </div>
-      <button id="btn-claim-daily" ${dw.progress >= dw.target && !dw.claimed ? '' : 'disabled'}>Claim purse</button>
+      <button id="btn-claim-daily" ${dw.progress >= dw.target && !dw.claimed ? '' : 'disabled'}>Claim 12g</button>
     </div>
   `;
   $('#btn-claim-daily')?.addEventListener('click', () => {
     const res = claimDailyChallenge(profile);
-    if (res) { toast('Daily claimed — +1 Fine cutpurse'); renderClub(); }
+    if (res) { toast('Daily claimed — +12g'); renderClub(); refreshSplashPurse(); }
   });
 
   const list = $('#club-achievements');
@@ -2212,147 +2377,267 @@ function renderClub() {
     const claimed = !!profile.achievements[`claimed_${a.id}`];
     const row = document.createElement('div');
     row.className = 'ach-row' + (unlocked ? '' : ' locked') + (unlocked && !claimed ? ' claimable' : '');
-    const rewardBits = [];
-    if (a.reward.gold) rewardBits.push(`${a.reward.gold}g`);
-    if (a.reward.purses || a.reward.sacks) rewardBits.push(`${a.reward.purses || a.reward.sacks} purse`);
     row.innerHTML = `
       <div class="ach-info">
         <strong>${a.name}</strong>
-        <span>${a.desc} · ${rewardBits.join(', ')}${claimed ? ' · claimed' : unlocked ? '' : ' · locked'}</span>
+        <span>${a.desc} · ${rewardBits(a.reward)}${claimed ? ' · claimed' : unlocked ? '' : ' · locked'}</span>
       </div>
       <button data-ach="${a.id}" ${unlocked && !claimed ? '' : 'disabled'}>${claimed ? 'Claimed' : 'Claim'}</button>
     `;
     row.querySelector('button')?.addEventListener('click', () => {
-      const res = claimAchievement(profile, a.id);
-      if (res) { toast(`Claimed ${a.name}`); renderClub(); }
+      const res = claimAchievement(profile, a.id, DATA.cards);
+      if (res) { toast(`Claimed ${a.name}`); renderClub(); refreshSplashPurse(); }
     });
     list.appendChild(row);
   }
 }
 
+function offerVisual(offer) {
+  if (offer.kind === 'fragment') {
+    const p = patronsById[offer.target];
+    return `<img src="${patronArt(offer.target)}" alt="" style="width:56px;height:56px;border-radius:50%;border:2px solid var(--gold-dim)" />
+      <h4>${p?.short || offer.target} fragment</h4>
+      <p>${fragmentProgress(profile, offer.target)}/${FRAGMENTS_TO_UNLOCK} · ${formatRarity(offer.rarity)}</p>`;
+  }
+  if (offer.kind === 'upgrade') {
+    const c = cardsById[offer.target];
+    return `<img src="${c ? artFor(c) : ''}" alt="" style="width:64px;height:90px;object-fit:cover;border-radius:4px;border:1px solid var(--gold-dim)" />
+      <h4>${c?.name || offer.target}</h4>
+      <p>Upgrade · ${formatRarity(offer.rarity)}</p>`;
+  }
+  if (offer.kind === 'skin') {
+    const s = TABLE_SKINS.find((x) => x.id === offer.target);
+    return `<div class="skin-swatch ${offer.target}"></div><h4>${s?.name || offer.target}</h4><p>Table · ${formatRarity(offer.rarity)}</p>`;
+  }
+  if (offer.kind === 'back') {
+    const b = CARD_BACKS.find((x) => x.id === offer.target);
+    return `<div class="back-swatch back-${offer.target}"></div><h4>${b?.name || offer.target}</h4><p>Back · ${formatRarity(offer.rarity)}</p>`;
+  }
+  return `<h4>${offer.id}</h4>`;
+}
+
+function renderOfferCard(offer, { later = false, preview = false } = {}) {
+  const sold = !later && !preview && isOfferSoldOut(profile, shopPeriodKeySafe(), offer.id);
+  const el = document.createElement('div');
+  el.className = 'store-item' + (sold ? ' soldout' : '') + (later || preview ? ' later' : '');
+  const price = preview || later ? 'Returns later' : (sold ? 'Sold out' : `${offer.price}g`);
+  el.innerHTML = `
+    <div class="rarity-pip rarity-${offer.rarity}">${formatRarity(offer.rarity)}</div>
+    ${offerVisual(offer)}
+    <div class="price">${price}</div>
+    ${later || preview ? '' : `<button ${sold ? 'disabled' : ''}>${sold ? 'Sold out' : 'Buy'}</button>`}
+  `;
+  if (!later && !preview && !sold) {
+    el.querySelector('button').onclick = () => {
+      const res = buyShopOffer(profile, offer, DATA.cards);
+      if (res.error) toast(res.error);
+      else {
+        toast(res.unlocked ? 'Patron unlocked — if every card clue is in.' : `Bought · ${offer.price}g`);
+        applyTableSkin(); renderStore(); refreshSplashPurse();
+      }
+    };
+  }
+  return el;
+}
+
+function shopPeriodKeySafe() {
+  const slate = currentShop(profile, DATA.cards);
+  return slate.periodKey;
+}
+
 function renderStore() {
   profile = loadProfile();
+  ensureClubMeta(profile, DATA.cards);
   $('#store-gold').textContent = `${profile.gold}g`;
-  const skins = $('#store-skins');
-  skins.innerHTML = '';
-  for (const s of TABLE_SKINS) {
-    const owned = profile.unlockedSkins.includes(s.id);
-    const eq = profile.tableSkin === s.id;
-    const el = document.createElement('div');
-    el.className = 'store-item' + (owned ? ' owned' : '') + (eq ? ' equipped' : '');
-    el.innerHTML = `
-      <div class="skin-swatch ${s.id}"></div>
-      <h4>${s.name}</h4>
-      <p>${s.desc}</p>
-      <div class="price">${owned ? (eq ? 'Equipped' : 'Owned') : s.price + 'g'}</div>
-      <button data-skin="${s.id}">${owned ? (eq ? 'Equipped' : 'Equip') : 'Buy'}</button>
-    `;
-    el.querySelector('button').onclick = () => {
-      const res = owned ? equipSkin(profile, s.id) : buySkin(profile, s.id);
-      if (res.error) toast(res.error);
-      else { toast(owned ? `Equipped ${s.name}` : `Bought ${s.name}`); applyTableSkin(); renderStore(); refreshSplashPurse(); }
-    };
-    skins.appendChild(el);
-  }
+  const slate = currentShop(profile, DATA.cards);
+  const timer = $('#store-timer');
+  if (timer) timer.textContent = `Slate refreshes in ${fmtCountdown(msUntilShopRefresh())} (2-day window, NY midnight).`;
 
-  const backs = $('#store-backs');
-  backs.innerHTML = '';
-  for (const b of CARD_BACKS) {
-    const owned = profile.unlockedBacks.includes(b.id);
-    const eq = profile.cardBack === b.id;
-    const el = document.createElement('div');
-    el.className = 'store-item' + (owned ? ' owned' : '') + (eq ? ' equipped' : '');
-    el.innerHTML = `
-      <h4>${b.name}</h4>
-      <p>${b.desc}</p>
-      <div class="price">${owned ? (eq ? 'Equipped' : 'Owned') : b.price + 'g'}</div>
-      <button data-back="${b.id}">${owned ? (eq ? 'Equipped' : 'Equip') : 'Buy'}</button>
-    `;
-    el.querySelector('button').onclick = () => {
-      const res = owned ? equipBack(profile, b.id) : buyBack(profile, b.id);
-      if (res.error) toast(res.error);
-      else { toast(owned ? `Equipped ${b.name}` : `Bought ${b.name}`); applyTableSkin(); renderStore(); }
-    };
-    backs.appendChild(el);
-  }
-
-  const frags = $('#store-frags');
-  frags.innerHTML = '';
-  for (const id of LOCKED_DECKS) {
-    const unlocked = isDeckUnlocked(profile, id);
-    const frag = fragmentProgress(profile, id);
-    const p = patronsById[id];
-    const el = document.createElement('div');
-    el.className = 'store-item' + (unlocked ? ' owned' : '');
-    el.innerHTML = `
-      <img src="${patronArt(id)}" alt="" style="width:56px;height:56px;border-radius:50%;border:2px solid var(--gold-dim)" />
-      <h4>${p?.short || id}</h4>
-      <p>${unlocked ? 'Unlocked' : `${frag}/${FRAGMENTS_TO_UNLOCK} fragments`}</p>
-      <div class="price">${unlocked ? '—' : STORE_FRAGMENT_COST + 'g'}</div>
-      <button ${unlocked ? 'disabled' : ''}>Buy fragment</button>
-    `;
-    el.querySelector('button').onclick = () => {
-      const res = buyFragment(profile, id);
-      if (res.error) toast(res.error);
-      else toast(res.unlocked ? `Unlocked ${p.short}!` : `Fragment ${frag + 1}/${FRAGMENTS_TO_UNLOCK}`);
-      renderStore(); refreshSplashPurse();
-    };
-    frags.appendChild(el);
-  }
-
-  const ups = $('#store-upgrades');
-  ups.innerHTML = '';
-  const candidates = [];
-  for (const deck of profile.unlockedDecks) {
-    for (const uid of upgradesForPatron(DATA.cards, deck)) {
-      if (!profile.ownedUpgrades.includes(uid)) candidates.push(uid);
-    }
-  }
-  if (!candidates.length) {
-    ups.innerHTML = '<p class="hint">All available upgrades owned — unlock more decks.</p>';
-  } else {
-    for (const uid of candidates.slice(0, 24)) {
-      const c = cardsById[uid];
-      if (!c) continue;
-      const el = document.createElement('div');
-      el.className = 'store-item';
-      el.innerHTML = `
-        <img src="${artFor(c)}" alt="" style="width:64px;height:90px;object-fit:cover;border-radius:4px;border:1px solid var(--gold-dim)" />
-        <h4>${c.name}</h4>
-        <p>${c.patron}</p>
-        <div class="price">${STORE_UPGRADE_COST}g</div>
-        <button>Buy</button>
-      `;
-      el.querySelector('button').onclick = () => {
-        const res = buyUpgrade(profile, uid, DATA.cards);
+  const bundleBox = $('#store-bundle');
+  if (bundleBox) {
+    const b = slate.bundle;
+    if (!b) bundleBox.innerHTML = '<p class="hint">No bundle this slate.</p>';
+    else {
+      const sold = isOfferSoldOut(profile, slate.periodKey, b.id);
+      const names = (b.parts || []).map((p) => p.target).join(' + ');
+      bundleBox.innerHTML = `
+        <div class="bundle-card">
+          <div class="rarity-pip rarity-${b.rarity}">${formatRarity(b.rarity)} bundle</div>
+          <h4>Roister’s parcel</h4>
+          <p>${names} — still stingy; 10% off the pair. Fragments remain the long sink.</p>
+          <div class="price">${sold ? 'Sold out' : b.price + 'g'}</div>
+          <button id="btn-buy-bundle" ${sold ? 'disabled' : ''}>${sold ? 'Sold out' : 'Buy bundle'}</button>
+        </div>`;
+      $('#btn-buy-bundle')?.addEventListener('click', () => {
+        const res = buyShopOffer(profile, b, DATA.cards);
         if (res.error) toast(res.error);
-        else { toast(`Upgrade owned: ${c.name}`); renderStore(); refreshSplashPurse(); }
-      };
-      ups.appendChild(el);
+        else { toast(`Bundle taken · ${b.price}g`); renderStore(); refreshSplashPurse(); }
+      });
     }
+  }
+
+  const feat = $('#store-featured');
+  if (feat) {
+    feat.innerHTML = '';
+    for (const o of slate.featured) feat.appendChild(renderOfferCard(o));
+  }
+  const tom = $('#store-tomorrow');
+  if (tom) {
+    tom.innerHTML = '';
+    for (const o of (slate.tomorrow?.featured || []).slice(0, 5)) {
+      tom.appendChild(renderOfferCard(o, { preview: true }));
+    }
+  }
+  const later = $('#store-later');
+  if (later) {
+    later.innerHTML = '';
+    for (const o of slate.later) later.appendChild(renderOfferCard(o, { later: true }));
   }
 }
 
+let collectionTab = 'patrons';
+
+function setCollectionTab(tab) {
+  collectionTab = tab;
+  $$('.coll-tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
+  const patrons = $('#collection-patrons');
+  const clues = $('#collection-clues');
+  const ups = $('#collection-cosmetics');
+  if (patrons) patrons.hidden = tab !== 'patrons';
+  if (clues) clues.hidden = tab !== 'clues';
+  if (ups) ups.hidden = tab !== 'upgrades';
+}
+
 function renderCollection() {
+  profile = loadProfile();
+  ensureClubMeta(profile, DATA.cards);
+  setCollectionTab(collectionTab);
+  const hint = $('#collection-hint');
+  const clues = countClues(profile, DATA.cards);
+  if (hint) {
+    hint.textContent = collectionTab === 'patrons'
+      ? 'Locked decks need patron fragments AND one clue for every base card in that deck.'
+      : collectionTab === 'clues'
+        ? `${clues.have}/${clues.total} cards found. ${CLUES_TO_UPGRADE} clues on a card unlocks its upgrade. Grouped by deck — starters first.`
+        : 'Table designs, card backs, and owned card upgrades. Buy them on the rotating slate.';
+  }
+
   const grid = $('#collection-grid');
-  grid.innerHTML = '';
-  $('#collection-detail').classList.add('hidden');
-  for (const id of ALL_DECKS) {
-    const p = patronsById[id];
-    if (!p) continue;
-    const unlocked = isDeckUnlocked(profile, id);
-    const el = document.createElement('div');
-    el.className = 'patron-card' + (unlocked ? '' : ' locked');
-    const frag = fragmentProgress(profile, id);
-    const ups = upgradesForPatron(DATA.cards, id);
-    const owned = ups.filter(u => profile.ownedUpgrades.includes(u)).length;
-    el.innerHTML = `
-      <img src="${patronArt(id)}" alt="${p.short}" />
-      <div class="name">${p.short}</div>
-      <div class="desc">${unlocked ? `Upgrades ${owned}/${ups.length}` : `Fragments ${frag}/${FRAGMENTS_TO_UNLOCK}`}</div>
+  if (grid) {
+    grid.innerHTML = '';
+    $('#collection-detail')?.classList.add('hidden');
+    for (const id of ALL_DECKS) {
+      const p = patronsById[id];
+      if (!p) continue;
+      const unlocked = isDeckUnlocked(profile, id);
+      const el = document.createElement('div');
+      el.className = 'patron-card' + (unlocked ? '' : ' locked');
+      const frag = fragmentProgress(profile, id);
+      const ups = upgradesForPatron(DATA.cards, id);
+      const owned = ups.filter((u) => profile.ownedUpgrades.includes(u)).length;
+      const ready = !unlocked && deckReadyToUnlock(profile, id, DATA.cards);
+      el.innerHTML = `
+        <img src="${patronArt(id)}" alt="${p.short}" />
+        <div class="name">${p.short}</div>
+        <div class="desc">${unlocked ? `Upgrades ${owned}/${ups.length}` : `Fragments ${frag}/${FRAGMENTS_TO_UNLOCK}${ready ? ' · ready' : ' · need cards'}`} · ${formatRarity(rarityOf('fragment', id))}</div>
+      `;
+      el.addEventListener('click', () => showCollectionDeck(id));
+      grid.appendChild(el);
+    }
+  }
+
+  renderClueEncyclopedia();
+  renderCollectionUpgrades();
+}
+
+function renderClueEncyclopedia() {
+  const host = $('#collection-clues');
+  if (!host) return;
+  host.innerHTML = '';
+  for (const deckId of DECK_IMPORTANCE) {
+    const p = patronsById[deckId];
+    if (!p && deckId !== 'treasury') continue;
+    const cards = deckCardSet(DATA.cards, deckId);
+    if (!cards.length) continue;
+    const wrap = document.createElement('div');
+    wrap.className = 'clue-deck';
+    const found = cards.filter((c) => clueCountOf(profile, c.id) >= 1).length;
+    wrap.innerHTML = `
+      <div class="clue-deck-head">
+        <img src="${patronArt(deckId)}" alt="" />
+        <div>
+          <h3>${p?.name || deckId}</h3>
+          <p class="hint">${DECK_CAPTIONS[deckId] || ''} · ${found}/${cards.length} clues</p>
+        </div>
+      </div>
+      <div class="collection-cards"></div>
     `;
-    el.addEventListener('click', () => showCollectionDeck(id));
-    grid.appendChild(el);
+    const box = wrap.querySelector('.collection-cards');
+    for (const c of cards) {
+      const n = clueCountOf(profile, c.id);
+      const known = n >= 1;
+      const el = document.createElement('div');
+      el.className = 'clue-card' + (known ? '' : ' unknown');
+      el.innerHTML = known
+        ? `<img src="${artFor(c)}" alt="${c.name}" /><div class="tag">${c.name} · ${n}/${CLUES_TO_UPGRADE}${c.starter ? ' · starter' : ''}${c.upgraded ? ' · ▲' : ''}</div>`
+        : `<div class="clue-unknown">?</div><div class="tag">Unknown · ${n}/${CLUES_TO_UPGRADE}</div>`;
+      if (known) el.addEventListener('click', () => showCardModal(c));
+      box.appendChild(el);
+    }
+    host.appendChild(wrap);
+  }
+}
+
+function renderCollectionUpgrades() {
+  const skins = $('#coll-skins');
+  const backs = $('#coll-backs');
+  const ups = $('#coll-upgrades');
+  if (skins) {
+    skins.innerHTML = '';
+    for (const s of TABLE_SKINS) {
+      const owned = profile.unlockedSkins.includes(s.id);
+      const eq = profile.tableSkin === s.id;
+      const el = document.createElement('div');
+      el.className = 'store-item' + (owned ? ' owned' : ' later') + (eq ? ' equipped' : '');
+      el.innerHTML = `
+        <div class="rarity-pip rarity-${s.rarity || 'fine'}">${formatRarity(s.rarity || 'fine')}</div>
+        <div class="skin-swatch ${s.id}"></div>
+        <h4>${s.name}</h4>
+        <p>${s.tag || ''} · ${owned ? (eq ? 'Equipped' : 'Owned') : 'Not owned'}</p>
+        ${owned ? `<button>${eq ? 'Equipped' : 'Equip'}</button>` : ''}
+      `;
+      el.querySelector('button')?.addEventListener('click', () => {
+        equipSkin(profile, s.id); applyTableSkin(); renderCollection();
+      });
+      skins.appendChild(el);
+    }
+  }
+  if (backs) {
+    backs.innerHTML = '';
+    for (const b of CARD_BACKS) {
+      const owned = profile.unlockedBacks.includes(b.id);
+      const eq = profile.cardBack === b.id;
+      const el = document.createElement('div');
+      el.className = 'store-item' + (owned ? ' owned' : ' later') + (eq ? ' equipped' : '');
+      el.innerHTML = `
+        <div class="rarity-pip rarity-${b.rarity || 'fine'}">${formatRarity(b.rarity || 'fine')}</div>
+        <h4>${b.name}</h4>
+        <p>${owned ? (eq ? 'Equipped' : 'Owned') : 'Not owned'}</p>
+        ${owned ? `<button>${eq ? 'Equipped' : 'Equip'}</button>` : ''}
+      `;
+      el.querySelector('button')?.addEventListener('click', () => {
+        equipBack(profile, b.id); applyTableSkin(); renderCollection();
+      });
+      backs.appendChild(el);
+    }
+  }
+  if (ups) {
+    ups.innerHTML = '';
+    const owned = (profile.ownedUpgrades || []).map((id) => cardsById[id]).filter(Boolean);
+    if (!owned.length) ups.innerHTML = '<p class="hint">No card upgrades yet — find clues at the table or buy them when the slate turns.</p>';
+    for (const c of owned) {
+      ups.innerHTML += `<div class="coll-card upgrade-owned"><img src="${artFor(c)}" alt="${c.name}" /><div class="tag">${c.name}</div></div>`;
+    }
   }
 }
 
@@ -2361,15 +2646,17 @@ function showCollectionDeck(deckId) {
   const detail = $('#collection-detail');
   detail.classList.remove('hidden');
   const unlocked = isDeckUnlocked(profile, deckId);
-  const cards = DATA.cards.filter(c => c.patron === deckId && !c.token && !c.curse);
-  let html = `<h3>${p.name}</h3><p>${unlocked ? 'Unlocked' : `Locked — ${fragmentProgress(profile, deckId)}/${FRAGMENTS_TO_UNLOCK} fragments`}</p><div class="collection-cards">`;
+  const cards = deckCardSet(DATA.cards, deckId);
+  const ready = deckReadyToUnlock(profile, deckId, DATA.cards);
+  let html = `<h3>${p.name}</h3><p>${unlocked ? 'Unlocked' : `Locked — ${fragmentProgress(profile, deckId)}/${FRAGMENTS_TO_UNLOCK} fragments${ready ? ' and every base card found' : ' plus one clue per base card'}`}</p><div class="collection-cards">`;
   for (const c of cards) {
     const isUp = (c.baseQty || 0) === 0 && (c.upgradedQty || 0) > 0;
     const owned = !isUp || profile.ownedUpgrades.includes(c.id);
+    const n = clueCountOf(profile, c.id);
     const cls = isUp ? (owned ? 'upgrade-owned' : 'upgrade-locked') : '';
     html += `<div class="coll-card ${cls}">
       <img src="${artFor(c)}" alt="${c.name}" />
-      <div class="tag">${c.name}${isUp ? (owned ? ' ▲ owned' : ' ▲ locked') : ''}</div>
+      <div class="tag">${c.name}${isUp ? (owned ? ' ▲ owned' : ' ▲ locked') : ''} · clues ${n}/${CLUES_TO_UPGRADE}</div>
     </div>`;
   }
   html += '</div>';
@@ -2617,6 +2904,7 @@ function renderGauntlet() {
   const g = ensureGauntletDay(profile);
   const featured = todaysFeatured(profile);
   const cd = gauntletCooldownMs(g);
+  const roadDone = (g.cursor || 0) >= (g.order?.length || 0);
   const markers = $('#gauntlet-markers');
   if (!markers) return;
   markers.innerHTML = '';
@@ -2632,9 +2920,10 @@ function renderGauntlet() {
     el.innerHTML = `<span class="g-pin"></span>${showName ? `<span class="g-name">${stop.name}</span>` : ''}`;
     el.title = stop.name;
     if (stop.id === 'highisle') el.classList.add('start');
-    if (g.lastId === stop.id) el.classList.add('cleared');
-    if (featured.id === stop.id) el.classList.add('current');
+    if ((g.clearedIds || []).includes(stop.id) || g.lastId === stop.id) el.classList.add('cleared');
+    if (featured.id === stop.id && !roadDone) el.classList.add('current');
     el.addEventListener('click', () => {
+      if (roadDone) { toast('Road cleared — a new path after NY midnight.'); return; }
       if (featured.id !== stop.id) { toast(`The road is at ${featured.name}`); return; }
       startGauntletStop(stop);
     });
@@ -2657,13 +2946,15 @@ function renderGauntlet() {
   const st = $('#gauntlet-status');
   const btn = $('#btn-gauntlet-play');
   const via = boat ? 'by boat' : 'on horseback';
-  if (cd > 0) {
-    if (st) st.textContent = `Next ride in ${fmtCountdown(cd)}. The road waits at ${featured.name}.`;
-    if (btn) { btn.disabled = true; btn.textContent = 'On the road'; }
+  const prize = roadGrandPrizePreview(profile);
+  if (roadDone) {
+    if (st) st.textContent = `Road cleared. Grand prize: ${prize.label}. A new road after NY midnight.`;
+    if (btn) { btn.disabled = true; btn.textContent = 'Road complete'; }
+  } else if (cd > 0) {
+    if (st) st.textContent = `Lost — locked until NY midnight (${fmtCountdown(cd)}). The road waits at ${featured.name}.`;
+    if (btn) { btn.disabled = true; btn.textContent = 'Locked today'; }
   } else {
-    if (st) st.textContent = featured.id === 'highisle'
-      ? `First stop: Gonfalon Bay — vs ${featured.rival}. Then the road wanders.`
-      : `Next: ${featured.name} ${via} — vs ${featured.rival}.`;
+    if (st) st.textContent = `Stop ${(g.cursor || 0) + 1}/${g.order?.length || 0}: ${featured.name} ${via} — vs ${featured.rival}. Win advances. Lose locks the day. Prize: ${prize.label}.`;
     if (btn) { btn.disabled = false; btn.textContent = `Ride to ${featured.name}`; }
   }
 }
@@ -2674,12 +2965,10 @@ function startGauntletStop(stop) {
   profile = loadProfile();
   const g = ensureGauntletDay(profile);
   const featured = todaysFeatured(profile);
-  if (stop.id !== featured.id) { toast(`Today's challenge is ${featured.name}`); return; }
+  if ((g.cursor || 0) >= (g.order?.length || 0)) { toast('Road already cleared.'); return; }
+  if (stop.id !== featured.id) { toast(`The road is at ${featured.name}`); return; }
   const cd = gauntletCooldownMs(g);
-  if (cd > 0) { toast(`Wait ${fmtCountdown(cd)}`); return; }
-  g.lastPlayAt = Date.now();
-  g.lastId = stop.id;
-  saveProfile(profile);
+  if (cd > 0) { toast(`Locked until NY midnight (${fmtCountdown(cd)})`); return; }
   isGauntletMatch = true;
   isRankedMatch = false;
   isRandomMatch = false;
@@ -2717,6 +3006,12 @@ function bind() {
   $('#btn-friend-back').onclick = () => onSplashEnter();
   $('#btn-collection').onclick = () => { renderCollection(); show('#collection'); };
   $('#btn-collection-back').onclick = () => { renderClub(); show('#club'); };
+  $$('.coll-tab').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      setCollectionTab(btn.dataset.tab);
+      renderCollection();
+    });
+  });
   $('#btn-store').onclick = () => { renderStore(); show('#store'); };
   $('#btn-store-back').onclick = () => { renderClub(); show('#club'); };
   $('#ency-patron').onchange = renderEncy;

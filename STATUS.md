@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-14 (build 34):** Club economy on top of the build 33 full-bleed overlay board. Shop / collection / challenges only — no felt or table-pack edits. `?v=34`.
+
 **2026-09-14 (build 33):** Spec lock on the full-bleed table — pointed silver medallions (Neutral tip left / you down / opp up; Treasury + Mora never tip), cream prestige hex, overlay chrome. Do not drop [`FEATURE_INVENTORY.md`](FEATURE_INVENTORY.md).
 
 **2026-09-14 (build 32):** Full-bleed felt rescue. Patron rail, piles, and played-effects are overlays — they no longer steal tavern width. Portrait + landscape tavern band ≥ 72% of the viewport. Layout is CSS/DOM only — do not drop anything in [`FEATURE_INVENTORY.md`](FEATURE_INVENTORY.md).
@@ -24,16 +26,21 @@
 - [x] Targeted abilities: full-screen pick modal (title, center row, gold select, Confirm, Show Board, Cancel). Treasury sacrifice (hand or played) → Writ of Coin. Acquire stays on the tavern (no modal). Same picks for Destroy, Knock Out, Replace, Toss, Donate/Discard, Refresh, Confine, Heal, Choose A/B. AI still auto-picks. After confirm: dissolve / KO slash + fly to cooldown / buy arc. End turn streams Power → Prestige.
 - [x] Patron-uses is a smaller gold octagon on the hourglass rail that greys when spent — not a 4th equal resource pip.
 
-## Phase B — next PR (not in this ship)
+## Phase B — Club / meta (build 32)
 
-- [ ] Cutpurse only on win; harder gold; rarity-weighted fragments / clues / rare cards
-- [ ] Endgame deck gates (fragments + one of each card)
-- [ ] Rotating daily store, bundles, tomorrow preview, ≥5× cosmetics
-- [ ] Provinces: win advances, lose locks until NY midnight, path-clear grand prize
-- [ ] Daily login calendar with red X on misses
-- [ ] More Club achievements
-- [ ] Rematch + fan-safe tournament bracket
-- [ ] Encyclopedia grouped by deck (caption → pendant → cards)
+- [x] Cutpurse-style rewards on **win only**; modest match gold (5/1 casual, 8/2 ranked)
+- [x] Endgame deck gates: fragments **and** one clue for every base card
+- [x] Rotating 2-day shop (NY midnight): weighted rarity, bundle, tomorrow preview, sold-out / returns later
+- [x] Stingy prices; fragments are the long coin sink (Common 90g → Legendary 560g)
+- [x] Collection tabs: Patrons/Decks · Card Clues · Upgrades (backs, tables, cosmetics)
+- [x] Card clues: 3 clues on a card unlocks its upgrade; encyclopedia-by-deck under Card Clues
+- [x] Weekly challenges (Monday NY reset) + seasonal fan themes (Undaunted mid-Sep 2026, High Seas Sep 30)
+- [x] Daily login calendar with red X on missed days
+- [x] Provinces: win → next, lose → lock that NY day, clear road → rotating grand prize
+- [x] Rematch on the win banner (AI/hotseat); fan-tournament hook in Club (no new netcode)
+- [x] More Club achievements (streaks, rematch revenge, deck unlocks, clues, road)
+
+Live **table** felt, patron rail, resource triad, hourglass, targeting: not in this PR.
 
 **Unofficial fan project.** Not affiliated with Bethesda / ZeniMax / ESO. Not for sale.
 
@@ -45,7 +52,11 @@
 
 ## Web (GitHub Pages — play this)
 
+<<<<<<< HEAD
 `docs/` is a copy of `web/`. Cache-bust `?v=33`.
+=======
+`docs/` is a copy of `web/`. Cache-bust `?v=32`.
+>>>>>>> 3303784 (Rebuild Club economy: rotating rarity shop, collection tabs, challenges.)
 
 | Fix | Notes |
 |---|---|

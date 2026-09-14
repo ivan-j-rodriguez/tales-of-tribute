@@ -1,44 +1,61 @@
 /** Roister's Club profile — gold, unlocks, purses, ranked, cosmetics. */
 import { UPGRADE_TO_BASE, upgradesForPatron } from './upgrades.js';
+import {
+  MATCH_GOLD, CHECKIN_GOLD, CHECKIN_STREAK7_GOLD, PURSE_BUY_COST,
+  priceOf, offerId, buildShopSlate, shopPeriodKey, weeklyKey,
+  currentSeason, nextSeason, buildWeeklyGoals, buildSeasonalGoals,
+  applyChallengeEvent, markShopPurchase, isOfferSoldOut,
+  seedStarterClues, grantCluePack, nyDateStr as ecoNyDate,
+  rarityOf, formatRarity, CLUES_TO_UPGRADE, tomorrowShopSlate,
+  shopContextFromProfile, fillMissedLogins, loginMonthGrid,
+  clueCountOf, baseCardsForDeck, roadGrandPrize,
+} from './economy.js';
+import { BASE_TO_UPGRADE } from './upgrades.js';
 
 export const PROFILE_KEY = 'tot_profile_v1';
 export const STARTER_DECKS = ['pelin', 'crows', 'hlaalu', 'celarus'];
 export const LOCKED_DECKS = ['hunding', 'redeagle', 'orgnum', 'rajhin', 'druid', 'almalexia', 'mora', 'alessia'];
 export const ALL_DECKS = [...STARTER_DECKS, ...LOCKED_DECKS];
 export const FRAGMENTS_TO_UNLOCK = 5;
-export const SACK_BUY_COST = 40;
+export const SACK_BUY_COST = PURSE_BUY_COST;
 
 export const RANK_TIERS = ['Unranked', 'Orichalcum', 'Ebony', 'Quicksilver', 'Voidsteel', 'Rubedite'];
 export const RANK_THRESHOLDS = [0, 0, 100, 250, 450, 700]; // points to enter tier index
 
 export const TABLE_SKINS = [
-  { id: 'high-isle', name: 'High Isle', tag: 'Zone', price: 0, desc: 'Systres limestone, teal surf, and Breton gold.' },
-  { id: 'auridon', name: 'Auridon', tag: 'Zone', price: 80, desc: 'Altmer marble and the azure Abecean.' },
-  { id: 'warden', name: 'Warden', tag: 'Class', price: 90, desc: 'Frostpine grove — ice bloom over deep moss.' },
-  { id: 'nightblade', name: 'Nightblade', tag: 'Class', price: 100, desc: 'Moonlight, void-purple, and a drop of blood.' },
-  { id: 'grahtwood', name: 'Grahtwood', tag: 'Zone', price: 110, desc: 'Valenwood canopy — gold light through leaves.' },
-  { id: 'dragonknight', name: 'Dragonknight', tag: 'Class', price: 120, desc: 'Molten stone and Red Mountain fire.' },
-  { id: 'clockwork', name: 'Clockwork City', tag: 'Zone', price: 120, desc: 'Brass, copper oil, and ticking factotums.' },
-  { id: 'orsinium', name: 'Orsinium', tag: 'Zone', price: 140, desc: 'Iron halls, frost, orichalcum green.' },
-  { id: 'arcanist', name: 'Arcanist', tag: 'Class', price: 150, desc: 'Verdant ink, gold runes, the eye of Mora.' },
-  { id: 'daedra', name: 'Coldharbour', tag: 'Zone', price: 150, desc: 'Soulfire cyan over Molag Bal’s grey waste.' },
-  { id: 'vvardenfell', name: 'Vvardenfell', tag: 'Zone', price: 160, desc: 'Ashfall, kwama amber, the mountain’s glow.' },
-  { id: 'apocrypha', name: 'Apocrypha', tag: 'Zone', price: 180, desc: 'Black ink seas and watching green eyes.' },
-  { id: 'summerset', name: 'Summerset', tag: 'Zone', price: 180, desc: 'Crystal Alinor — aurora over white-gold.' },
-  { id: 'vestige', name: 'Vestige', tag: 'Class', price: 200, desc: 'Aetherial blue — a sky-shard on the table.' },
+  { id: 'high-isle', name: 'High Isle', tag: 'Zone', price: 0, rarity: 'common', desc: 'Systres limestone, teal surf, and Breton gold.' },
+  { id: 'auridon', name: 'Auridon', tag: 'Zone', price: 280, rarity: 'common', desc: 'Altmer marble and the azure Abecean.' },
+  { id: 'warden', name: 'Warden', tag: 'Class', price: 280, rarity: 'common', desc: 'Frostpine grove — ice bloom over deep moss.' },
+  { id: 'nightblade', name: 'Nightblade', tag: 'Class', price: 420, rarity: 'fine', desc: 'Moonlight, void-purple, and a drop of blood.' },
+  { id: 'grahtwood', name: 'Grahtwood', tag: 'Zone', price: 420, rarity: 'fine', desc: 'Valenwood canopy — gold light through leaves.' },
+  { id: 'dragonknight', name: 'Dragonknight', tag: 'Class', price: 420, rarity: 'fine', desc: 'Molten stone and Red Mountain fire.' },
+  { id: 'clockwork', name: 'Clockwork City', tag: 'Zone', price: 640, rarity: 'superior', desc: 'Brass, copper oil, and ticking factotums.' },
+  { id: 'orsinium', name: 'Orsinium', tag: 'Zone', price: 640, rarity: 'superior', desc: 'Iron halls, frost, orichalcum green.' },
+  { id: 'vvardenfell', name: 'Vvardenfell', tag: 'Zone', price: 640, rarity: 'superior', desc: 'Ashfall, kwama amber, the mountain’s glow.' },
+  { id: 'arcanist', name: 'Arcanist', tag: 'Class', price: 960, rarity: 'epic', desc: 'Verdant ink, gold runes, the eye of Mora.' },
+  { id: 'daedra', name: 'Coldharbour', tag: 'Zone', price: 960, rarity: 'epic', desc: 'Soulfire cyan over Molag Bal’s grey waste.' },
+  { id: 'summerset', name: 'Summerset', tag: 'Zone', price: 960, rarity: 'epic', desc: 'Crystal Alinor — aurora over white-gold.' },
+  { id: 'undaunted', name: 'Undaunted Enclave', tag: 'Season', price: 960, rarity: 'epic', seasonal: 'undaunted', desc: 'Torchlight on dungeon stone — a fan nod to the Undaunted Celebration.' },
+  { id: 'high-seas', name: 'Abecean Tide', tag: 'Season', price: 960, rarity: 'epic', seasonal: 'high-seas', desc: 'Salt and sailcloth — a fan nod to High Seas of Tamriel.' },
+  { id: 'apocrypha', name: 'Apocrypha', tag: 'Zone', price: 1400, rarity: 'legendary', desc: 'Black ink seas and watching green eyes.' },
+  { id: 'vestige', name: 'Vestige', tag: 'Class', price: 1400, rarity: 'legendary', desc: 'Aetherial blue — a sky-shard on the table.' },
+  { id: 'witches', name: "Witches' Revel", tag: 'Season', price: 1400, rarity: 'legendary', seasonal: 'witches', desc: 'Pumpkin-fire and crow-feather black — a fan nod to Witches Festival.' },
 ];
 
 export const CARD_BACKS = [
-  { id: 'default', name: 'Roister Back', price: 0, desc: 'Club gold on dark oak.' },
-  { id: 'nightblade', name: 'Shadow Dance', price: 70, desc: 'Void and crimson.' },
-  { id: 'warden', name: 'Frostpine', price: 70, desc: 'Ice over living wood.' },
-  { id: 'dragonknight', name: 'Ember Scale', price: 80, desc: 'Lava-cracked hide.' },
-  { id: 'clockwork', name: 'Brass Circuit', price: 80, desc: 'Sotha Sil’s geometry.' },
-  { id: 'auridon', name: 'Altmer Sun', price: 90, desc: 'Pale gold of Firsthold.' },
-  { id: 'daedra', name: 'Soulfire', price: 90, desc: 'Coldharbour cyan.' },
-  { id: 'arcanist', name: 'Ink & Eye', price: 100, desc: 'Apocryphal gold runes.' },
-  { id: 'apocrypha', name: 'Green Eye', price: 100, desc: 'Hermaeus Mora’s gaze.' },
-  { id: 'vestige', name: 'Aetherial', price: 110, desc: 'Sky-shard glow.' },
+  { id: 'default', name: 'Roister Back', price: 0, rarity: 'common', desc: 'Club gold on dark oak.' },
+  { id: 'warden', name: 'Frostpine', price: 220, rarity: 'common', desc: 'Ice over living wood.' },
+  { id: 'nightblade', name: 'Shadow Dance', price: 340, rarity: 'fine', desc: 'Void and crimson.' },
+  { id: 'dragonknight', name: 'Ember Scale', price: 340, rarity: 'fine', desc: 'Lava-cracked hide.' },
+  { id: 'clockwork', name: 'Brass Circuit', price: 520, rarity: 'superior', desc: 'Sotha Sil’s geometry.' },
+  { id: 'auridon', name: 'Altmer Sun', price: 520, rarity: 'superior', desc: 'Pale gold of Firsthold.' },
+  { id: 'daedra', name: 'Soulfire', price: 780, rarity: 'epic', desc: 'Coldharbour cyan.' },
+  { id: 'arcanist', name: 'Ink & Eye', price: 780, rarity: 'epic', desc: 'Apocryphal gold runes.' },
+  { id: 'undaunted', name: 'Enclave Brand', price: 780, rarity: 'epic', seasonal: 'undaunted', desc: 'Undaunted bronze on dungeon iron.' },
+  { id: 'high-seas', name: 'Tide Sigil', price: 780, rarity: 'epic', seasonal: 'high-seas', desc: 'A wave-cut Abecean seal.' },
+  { id: 'apocrypha', name: 'Green Eye', price: 1100, rarity: 'legendary', desc: 'Hermaeus Mora’s gaze.' },
+  { id: 'vestige', name: 'Aetherial', price: 1100, rarity: 'legendary', desc: 'Sky-shard glow.' },
+  { id: 'witches', name: 'Crow Feather', price: 1100, rarity: 'legendary', seasonal: 'witches', desc: 'Witches Festival black and ember.' },
 ];
 
 export const CARD_BACK_PALETTE = {
@@ -52,10 +69,14 @@ export const CARD_BACK_PALETTE = {
   arcanist: ['#08140c', '#d4af37'],
   apocrypha: ['#0a1810', '#3a9050'],
   vestige: ['#101828', '#60a0ff'],
+  undaunted: ['#1a1410', '#c9a06a'],
+  'high-seas': ['#061820', '#3ec8d8'],
+  witches: ['#14080a', '#e07020'],
 };
 
-export const STORE_FRAGMENT_COST = 35;
-export const STORE_UPGRADE_COST = 55;
+/** @deprecated use priceOf('fragment'|'upgrade', id) — kept so old UI strings fail closed. */
+export const STORE_FRAGMENT_COST = 140;
+export const STORE_UPGRADE_COST = 180;
 
 export const PURSE_RARITIES = ['Common', 'Fine', 'Superior', 'Epic', 'Legendary'];
 
@@ -63,22 +84,35 @@ export const ACHIEVEMENTS = [
   { id: 'first-win', name: 'First Victory', desc: 'Win your first match.', reward: { gold: 20 } },
   { id: 'win-3-random-in-a-row', name: 'Lucky Streak', desc: 'Win 3 random matches in a row.', reward: { gold: 30, purses: 1 } },
   { id: 'win-10', name: 'Seasoned Roister', desc: 'Win 10 matches.', reward: { gold: 50 } },
+  { id: 'win-25', name: 'Club Fixture', desc: 'Win 25 matches.', reward: { gold: 70 } },
+  { id: 'win-50', name: 'Table Legend', desc: 'Win 50 matches.', reward: { gold: 100, purse: 'Superior' } },
+  { id: 'streak-5', name: 'Five in a Row', desc: 'Reach a 5-win streak.', reward: { gold: 40, purses: 1 } },
+  { id: 'streak-10', name: 'Unbroken', desc: 'Reach a 10-win streak.', reward: { gold: 80, purse: 'Epic' } },
+  { id: 'rematch-revenge', name: 'Rematch Revenge', desc: 'Beat a patron pair that just beat you.', reward: { gold: 35 } },
   { id: 'check-in-7', name: 'Club Regular', desc: 'Reach a 7-day check-in streak.', reward: { purses: 1, gold: 25 } },
   { id: 'unlock-second-deck', name: 'New Patron', desc: 'Unlock a deck beyond the Initiate four.', reward: { gold: 25 } },
+  { id: 'unlock-three-decks', name: 'Patron Collector', desc: 'Unlock 3 decks beyond the Initiate four.', reward: { gold: 50 } },
+  { id: 'unlock-all-decks', name: 'Hall of Twelve', desc: 'Unlock every patron deck.', reward: { gold: 150, purse: 'Legendary' } },
   { id: 'open-10-sacks', name: 'Heavy Hauler', desc: 'Open 10 cutpurses.', reward: { gold: 40 } },
   { id: 'upgrade-a-starter-card', name: 'Polished Steel', desc: 'Own an upgrade from a starter deck.', reward: { gold: 15 } },
+  { id: 'clues-30', name: 'Ink-Stained', desc: 'Find clues for 30 cards.', reward: { gold: 30 } },
+  { id: 'clues-80', name: 'Seeker’s Shelf', desc: 'Find clues for 80 cards.', reward: { gold: 60, clues: 4 } },
   { id: 'ranked-orichalcum', name: 'Orichalcum Blade', desc: 'Reach Orichalcum ranked tier.', reward: { gold: 40 } },
   { id: 'unlock-mora', name: 'Seeker of Secrets', desc: 'Unlock Hermaeus Mora.', reward: { gold: 60 } },
+  { id: 'road-clear', name: 'Road’s End', desc: 'Clear a Challenge the Provinces road.', reward: { gold: 80, purse: 'Epic' } },
 ];
 
 function todayStr() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return ecoNyDate();
 }
 function yesterdayStr() {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const today = ecoNyDate();
+  for (let h = 20; h <= 40; h++) {
+    const s = ecoNyDate(new Date(Date.now() - h * 3600_000));
+    if (s !== today) return s;
+  }
+  const d = new Date(Date.now() - 24 * 3600_000);
+  return ecoNyDate(d);
 }
 function emptyFragments() {
   const o = {};
@@ -88,7 +122,7 @@ function emptyFragments() {
 
 export function defaultProfile() {
   return {
-    gold: 80,
+    gold: 60,
     unlockedDecks: [...STARTER_DECKS],
     ownedUpgrades: [],
     deckFragments: emptyFragments(),
@@ -99,19 +133,30 @@ export function defaultProfile() {
     hourglassDefault: false,
     showBotCards: false,
     aiDifficulty: 5,
-    gauntlet: { date: null, cleared: 0, failed: false, failedStop: null },
+    gauntlet: {
+      date: null, roadId: null, order: [], cursor: 0, clearedIds: [],
+      lockedDate: null, lastPlayAt: 0, lastId: null, prizeClaimedRoad: null,
+      failed: false, failedStop: null, cleared: 0,
+    },
     ranked: { tier: 'Unranked', points: 0, placementLeft: 5, winStreak: 0 },
     purses: [{ rarity: 'Common' }], // queued cutpurses
     lastCheckIn: null,
     checkInStreak: 0,
+    loginDays: {},
+    lastLossKey: null,
+    lastMatch: null,
     winStreak: 0,
     randomWinStreak: 0,
-    stats: { wins: 0, losses: 0, matches: 0, sacksOpened: 0 },
+    stats: { wins: 0, losses: 0, matches: 0, sacksOpened: 0, tavernBuys: 0, patronCalls: 0 },
     achievements: {},
     challenges: {
       dailyWin: { progress: 0, target: 2, claimed: false, resetDate: todayStr() },
       streak3: { progress: 0, target: 3, claimed: false },
+      weekly: { weekKey: null, goals: [] },
+      seasonal: { seasonId: null, year: null, goals: [], seasonClaimed: false },
     },
+    cardClues: {},
+    shopPurchases: {},
     // legacy alias
     sacks: 0,
   };
@@ -137,7 +182,15 @@ export function loadProfile() {
     p.hourglassDefault = !!p.hourglassDefault;
     p.showBotCards = !!p.showBotCards;
     p.aiDifficulty = Math.max(1, Math.min(10, Math.round(p.aiDifficulty || 5)));
-    p.gauntlet = { date: null, cleared: 0, failed: false, failedStop: null, ...(p.gauntlet || {}) };
+    p.gauntlet = {
+      date: null, roadId: null, order: [], cursor: 0, clearedIds: [],
+      lockedDate: null, lastPlayAt: 0, lastId: null, prizeClaimedRoad: null,
+      failed: false, failedStop: null, cleared: 0,
+      ...(p.gauntlet || {}),
+    };
+    p.loginDays = p.loginDays && typeof p.loginDays === 'object' ? p.loginDays : {};
+    p.lastLossKey = p.lastLossKey || null;
+    p.lastMatch = p.lastMatch || null;
     p.ranked = { tier: 'Unranked', points: 0, placementLeft: 5, winStreak: 0, ...(p.ranked || {}) };
     p.purses = Array.isArray(p.purses) ? p.purses : [];
     // migrate legacy sacks → purses
@@ -145,13 +198,17 @@ export function loadProfile() {
       for (let i = 0; i < p.sacks; i++) p.purses.push({ rarity: 'Common' });
       p.sacks = 0;
     }
-    p.stats = { wins: 0, losses: 0, matches: 0, sacksOpened: 0, ...(p.stats || {}) };
+    p.stats = { wins: 0, losses: 0, matches: 0, sacksOpened: 0, tavernBuys: 0, patronCalls: 0, ...(p.stats || {}) };
     p.achievements = p.achievements || {};
     p.challenges = {
       dailyWin: { progress: 0, target: 2, claimed: false, resetDate: todayStr(), ...(p.challenges?.dailyWin || {}) },
       streak3: { progress: 0, target: 3, claimed: false, ...(p.challenges?.streak3 || {}) },
+      weekly: { weekKey: null, goals: [], ...(p.challenges?.weekly || {}) },
+      seasonal: { seasonId: null, year: null, goals: [], seasonClaimed: false, ...(p.challenges?.seasonal || {}) },
     };
-    if (typeof p.gold !== 'number') p.gold = 80;
+    p.cardClues = p.cardClues && typeof p.cardClues === 'object' ? p.cardClues : {};
+    p.shopPurchases = p.shopPurchases && typeof p.shopPurchases === 'object' ? p.shopPurchases : {};
+    if (typeof p.gold !== 'number') p.gold = 60;
     if (!p.unlockedSkins.includes('high-isle')) p.unlockedSkins.push('high-isle');
     if (!p.unlockedBacks.includes('default')) p.unlockedBacks.push('default');
     return p;
@@ -162,6 +219,200 @@ export function loadProfile() {
 
 export function saveProfile(p) {
   localStorage.setItem(PROFILE_KEY, JSON.stringify(p));
+}
+
+export function ensureWeeklyChallenges(profile) {
+  const key = weeklyKey();
+  if (!profile.challenges.weekly) profile.challenges.weekly = { weekKey: null, goals: [] };
+  if (profile.challenges.weekly.weekKey !== key || !profile.challenges.weekly.goals?.length) {
+    profile.challenges.weekly = { weekKey: key, goals: buildWeeklyGoals(key, profile) };
+    saveProfile(profile);
+  }
+  return profile.challenges.weekly;
+}
+
+export function ensureSeasonalChallenges(profile) {
+  const season = currentSeason();
+  if (!profile.challenges.seasonal) {
+    profile.challenges.seasonal = { seasonId: null, year: null, goals: [], seasonClaimed: false };
+  }
+  const year = Number(ecoNyDate().slice(0, 4));
+  if (!season) return { season: null, next: nextSeason(), state: profile.challenges.seasonal };
+  if (profile.challenges.seasonal.seasonId !== season.id || profile.challenges.seasonal.year !== year
+      || !profile.challenges.seasonal.goals?.length) {
+    profile.challenges.seasonal = {
+      seasonId: season.id,
+      year,
+      goals: buildSeasonalGoals(season, profile),
+      seasonClaimed: false,
+    };
+    saveProfile(profile);
+  }
+  return { season, next: nextSeason(), state: profile.challenges.seasonal };
+}
+
+export function ensureCardClues(profile, cards = []) {
+  if (!profile.cardClues || typeof profile.cardClues !== 'object') profile.cardClues = {};
+  if (!Object.keys(profile.cardClues).length && cards.length) {
+    profile.cardClues = seedStarterClues(cards);
+    saveProfile(profile);
+  }
+  return profile.cardClues;
+}
+
+export function ensureClubMeta(profile, cards = []) {
+  ensureDailyChallengeReset(profile);
+  ensureWeeklyChallenges(profile);
+  ensureSeasonalChallenges(profile);
+  ensureCardClues(profile, cards);
+  return profile;
+}
+
+export function currentShop(profile, cards = []) {
+  const ctx = shopContextFromProfile(profile, cards, TABLE_SKINS, CARD_BACKS, LOCKED_DECKS);
+  const today = buildShopSlate({ ...ctx, periodKey: shopPeriodKey() });
+  const tomorrow = tomorrowShopSlate(ctx);
+  return { ...today, tomorrow };
+}
+
+export function deckReadyToUnlock(profile, deckId, cards = []) {
+  if (profile.unlockedDecks.includes(deckId)) return true;
+  if ((profile.deckFragments[deckId] || 0) < FRAGMENTS_TO_UNLOCK) return false;
+  const bases = baseCardsForDeck(cards, deckId);
+  if (!bases.length) return (profile.deckFragments[deckId] || 0) >= FRAGMENTS_TO_UNLOCK;
+  return bases.every((c) => clueCountOf(profile, c.id) >= 1);
+}
+
+export function tryUnlockDeck(profile, deckId, cards = []) {
+  if (profile.unlockedDecks.includes(deckId)) return { unlocked: false, already: true };
+  if (!deckReadyToUnlock(profile, deckId, cards)) {
+    return {
+      unlocked: false,
+      fragments: profile.deckFragments[deckId] || 0,
+      needCards: true,
+    };
+  }
+  profile.unlockedDecks.push(deckId);
+  const extras = profile.unlockedDecks.filter((d) => !STARTER_DECKS.includes(d));
+  maybeUnlockAchievement(profile, 'unlock-second-deck', extras.length >= 1);
+  maybeUnlockAchievement(profile, 'unlock-three-decks', extras.length >= 3);
+  maybeUnlockAchievement(profile, 'unlock-all-decks', extras.length >= LOCKED_DECKS.length);
+  if (deckId === 'mora') maybeUnlockAchievement(profile, 'unlock-mora', true);
+  saveProfile(profile);
+  return { unlocked: true, fragments: profile.deckFragments[deckId] || 0 };
+}
+
+export function addCardClue(profile, cardId, cards = []) {
+  if (!cardId) return { added: false };
+  if (!profile.cardClues) profile.cardClues = {};
+  const cur = clueCountOf(profile, cardId);
+  if (cur >= CLUES_TO_UPGRADE) return { added: false, count: cur };
+  profile.cardClues[cardId] = cur + 1;
+  const count = profile.cardClues[cardId];
+  let upgradeId = null;
+  if (count >= CLUES_TO_UPGRADE) {
+    upgradeId = BASE_TO_UPGRADE[cardId] || (UPGRADE_TO_BASE[cardId] ? cardId : null);
+    if (upgradeId && !profile.ownedUpgrades.includes(upgradeId) && UPGRADE_TO_BASE[upgradeId]) {
+      addUpgrade(profile, upgradeId);
+    } else {
+      upgradeId = null;
+    }
+  }
+  const card = (cards || []).find((c) => c.id === cardId);
+  let deckUnlock = null;
+  if (card?.patron && LOCKED_DECKS.includes(card.patron)) {
+    deckUnlock = tryUnlockDeck(profile, card.patron, cards);
+  }
+  const found = Object.keys(profile.cardClues).filter((id) => clueCountOf(profile, id) >= 1).length;
+  maybeUnlockAchievement(profile, 'clues-30', found >= 30);
+  maybeUnlockAchievement(profile, 'clues-80', found >= 80);
+  saveProfile(profile);
+  return { added: true, count, upgradeId, deckUnlock };
+}
+
+export function discoverCards(profile, ids = [], cards = []) {
+  let n = 0;
+  let upgradeId = null;
+  for (const id of ids) {
+    const r = addCardClue(profile, id, cards);
+    if (r.added) n += 1;
+    if (r.upgradeId) upgradeId = r.upgradeId;
+  }
+  return { n, upgradeId };
+}
+
+export function noteClubEvent(profile, ev) {
+  if (!profile) return;
+  ensureWeeklyChallenges(profile);
+  ensureSeasonalChallenges(profile);
+  if (ev.kind === 'buy') profile.stats.tavernBuys = (profile.stats.tavernBuys || 0) + (ev.n || 1);
+  if (ev.kind === 'call') profile.stats.patronCalls = (profile.stats.patronCalls || 0) + (ev.n || 1);
+  applyChallengeEvent(profile, ev);
+  saveProfile(profile);
+}
+
+function pickAutoFragment(profile) {
+  const locked = LOCKED_DECKS.filter((d) => !profile.unlockedDecks.includes(d));
+  if (!locked.length) return null;
+  locked.sort((a, b) => (profile.deckFragments[b] || 0) - (profile.deckFragments[a] || 0));
+  const close = locked.filter((d) => (profile.deckFragments[d] || 0) > 0);
+  return (close[0] || locked[0]);
+}
+
+export function grantReward(profile, reward = {}, cards = []) {
+  const granted = { ...reward };
+  if (reward.gold) profile.gold += reward.gold;
+  if (reward.purses) {
+    for (let i = 0; i < reward.purses; i++) profile.purses.push({ rarity: reward.purse || 'Fine' });
+  } else if (reward.purse) {
+    profile.purses.push({ rarity: reward.purse });
+  }
+  if (reward.fragment) {
+    const deck = reward.fragment === 'auto' ? pickAutoFragment(profile) : reward.fragment;
+    if (deck) {
+      const r = addFragment(profile, deck, cards);
+      granted.fragment = deck;
+      granted.fragmentResult = r;
+    }
+  }
+  if (reward.skin && !profile.unlockedSkins.includes(reward.skin)) {
+    profile.unlockedSkins.push(reward.skin);
+  }
+  if (reward.back && !profile.unlockedBacks.includes(reward.back)) {
+    profile.unlockedBacks.push(reward.back);
+  }
+  if (reward.clues) {
+    granted.clueIds = grantCluePack(profile, cards, reward.clues);
+  }
+  saveProfile(profile);
+  return granted;
+}
+
+export function claimWeeklyGoal(profile, goalId, cards = []) {
+  ensureWeeklyChallenges(profile);
+  const g = profile.challenges.weekly.goals.find((x) => x.id === goalId);
+  if (!g || g.claimed || (g.progress || 0) < g.target) return null;
+  g.claimed = true;
+  return grantReward(profile, g.reward, cards);
+}
+
+export function claimSeasonalGoal(profile, goalId, cards = []) {
+  const { season, state } = ensureSeasonalChallenges(profile);
+  if (!season) return null;
+  const g = state.goals.find((x) => x.id === goalId);
+  if (!g || g.claimed || (g.progress || 0) < g.target) return null;
+  g.claimed = true;
+  return grantReward(profile, g.reward, cards);
+}
+
+export function claimSeasonComplete(profile, cards = []) {
+  const { season, state } = ensureSeasonalChallenges(profile);
+  if (!season || state.seasonClaimed) return null;
+  const allDone = (state.goals || []).every((g) => g.claimed || (g.progress || 0) >= g.target);
+  if (!allDone) return null;
+  for (const g of state.goals) g.claimed = true;
+  state.seasonClaimed = true;
+  return grantReward(profile, season.reward, cards);
 }
 
 export function isDeckUnlocked(profile, deckId) {
@@ -185,14 +436,16 @@ export function doDailyCheckIn(profile) {
   if (profile.lastCheckIn === yest) profile.checkInStreak = (profile.checkInStreak || 0) + 1;
   else profile.checkInStreak = 1;
   profile.lastCheckIn = today;
-  profile.gold += 15;
+  profile.loginDays = fillMissedLogins(profile.loginDays, today);
+  profile.gold += CHECKIN_GOLD;
   profile.purses.push({ rarity: 'Common' });
   let extra = '';
   if (profile.checkInStreak >= 7) {
     profile.purses.push({ rarity: 'Fine' });
-    profile.gold += 25;
+    profile.gold += CHECKIN_STREAK7_GOLD;
     extra = ' Streak bonus!';
   }
+  const grantedGold = profile.checkInStreak >= 7 ? CHECKIN_GOLD + CHECKIN_STREAK7_GOLD : CHECKIN_GOLD;
   const dw = profile.challenges.dailyWin;
   if (dw.resetDate !== today) {
     dw.progress = 0;
@@ -204,7 +457,7 @@ export function doDailyCheckIn(profile) {
   return {
     profile,
     toast: "Roister's daily — the club remembered you." + extra,
-    granted: { gold: profile.checkInStreak >= 7 ? 40 : 15, purses: profile.checkInStreak >= 7 ? 2 : 1 },
+    granted: { gold: grantedGold, purses: profile.checkInStreak >= 7 ? 2 : 1 },
   };
 }
 
@@ -225,30 +478,22 @@ function maybeUnlockAchievement(profile, id, condition) {
   return true;
 }
 
-export function claimAchievement(profile, id) {
+export function claimAchievement(profile, id, cards = []) {
   const def = ACHIEVEMENTS.find(a => a.id === id);
   if (!def || !profile.achievements[id]) return null;
   const key = `claimed_${id}`;
   if (profile.achievements[key]) return null;
   profile.achievements[key] = true;
-  if (def.reward.gold) profile.gold += def.reward.gold;
-  if (def.reward.purses) {
-    for (let i = 0; i < def.reward.purses; i++) profile.purses.push({ rarity: 'Fine' });
-  }
-  if (def.reward.sacks) {
-    for (let i = 0; i < def.reward.sacks; i++) profile.purses.push({ rarity: 'Fine' });
-  }
-  saveProfile(profile);
-  return def.reward;
+  return grantReward(profile, def.reward, cards);
 }
 
 export function claimDailyChallenge(profile) {
   const dw = profile.challenges.dailyWin;
   if (dw.claimed || dw.progress < dw.target) return null;
   dw.claimed = true;
-  profile.purses.push({ rarity: 'Fine' });
+  profile.gold += 12;
   saveProfile(profile);
-  return { purses: 1 };
+  return { gold: 12 };
 }
 
 export function rarityFromStreak(streak, ranked = false) {
@@ -286,13 +531,18 @@ function syncTierFromPoints(ranked) {
 }
 
 /** Record end of a match. */
-export function recordMatchResult(profile, { won, isRandom = false, ranked = false }) {
+export function recordMatchResult(profile, {
+  won, isRandom = false, ranked = false, skipGold = false,
+  patrons = [], rivalPatrons = [], gauntlet = false, aiDifficulty = 0,
+} = {}) {
   profile.stats.matches += 1;
   let purse = null;
+  const winGold = ranked ? MATCH_GOLD.rankedWin : MATCH_GOLD.casualWin;
+  const lossGold = ranked ? MATCH_GOLD.rankedLoss : MATCH_GOLD.casualLoss;
   if (won) {
     profile.stats.wins += 1;
     profile.winStreak = (profile.winStreak || 0) + 1;
-    profile.gold += ranked ? 14 : 8;
+    if (!skipGold) profile.gold += winGold;
     if (isRandom) {
       profile.randomWinStreak = (profile.randomWinStreak || 0) + 1;
       profile.challenges.streak3.progress = profile.randomWinStreak;
@@ -305,6 +555,16 @@ export function recordMatchResult(profile, { won, isRandom = false, ranked = fal
     );
     maybeUnlockAchievement(profile, 'first-win', true);
     maybeUnlockAchievement(profile, 'win-10', profile.stats.wins >= 10);
+    maybeUnlockAchievement(profile, 'win-25', profile.stats.wins >= 25);
+    maybeUnlockAchievement(profile, 'win-50', profile.stats.wins >= 50);
+    maybeUnlockAchievement(profile, 'streak-5', profile.winStreak >= 5);
+    maybeUnlockAchievement(profile, 'streak-10', profile.winStreak >= 10);
+    const oppKey = (rivalPatrons || []).slice().sort().join('+');
+    if (profile.lastLossKey && oppKey && profile.lastLossKey === oppKey) {
+      maybeUnlockAchievement(profile, 'rematch-revenge', true);
+    }
+    profile.lastMatch = { won: true, patrons: [...(patrons || [])], rivalPatrons: [...(rivalPatrons || [])] };
+    profile.lastLossKey = null;
 
     if (ranked) {
       const r = profile.ranked;
@@ -319,14 +579,22 @@ export function recordMatchResult(profile, { won, isRandom = false, ranked = fal
       maybeUnlockAchievement(profile, 'ranked-orichalcum', r.tier !== 'Unranked');
       purse = { rarity: rarityFromStreak(r.winStreak, true) };
       profile.purses.push(purse);
-    } else if (Math.random() < 0.35 || profile.winStreak >= 2) {
+    } else if (!gauntlet && (Math.random() < 0.20 || profile.winStreak >= 3)) {
       purse = { rarity: rarityFromStreak(profile.winStreak, false) };
       profile.purses.push(purse);
     }
 
+    noteClubEvent(profile, {
+      kind: 'win',
+      ranked,
+      gauntlet,
+      patrons,
+      aiDifficulty,
+      winStreak: profile.winStreak,
+    });
     saveProfile(profile);
     return {
-      gold: ranked ? 14 : 8,
+      gold: skipGold ? 0 : winGold,
       purse,
       winStreak: profile.winStreak,
       ranked: profile.ranked,
@@ -335,9 +603,11 @@ export function recordMatchResult(profile, { won, isRandom = false, ranked = fal
 
   profile.stats.losses += 1;
   profile.winStreak = 0;
+  profile.lastLossKey = (rivalPatrons || []).slice().sort().join('+') || profile.lastLossKey;
+  profile.lastMatch = { won: false, patrons: [...(patrons || [])], rivalPatrons: [...(rivalPatrons || [])] };
   if (isRandom) profile.randomWinStreak = 0;
   profile.challenges.streak3.progress = profile.randomWinStreak || 0;
-  profile.gold += ranked ? 5 : 3;
+  if (!skipGold) profile.gold += lossGold;
   if (ranked) {
     const r = profile.ranked;
     r.winStreak = 0;
@@ -345,8 +615,9 @@ export function recordMatchResult(profile, { won, isRandom = false, ranked = fal
     else r.points = Math.max(0, r.points - 8);
     syncTierFromPoints(r);
   }
+  noteClubEvent(profile, { kind: 'loss', ranked, gauntlet, patrons, aiDifficulty });
   saveProfile(profile);
-  return { gold: ranked ? 5 : 3, purse: null, winStreak: 0, ranked: profile.ranked };
+  return { gold: skipGold ? 0 : lossGold, purse: null, winStreak: 0, ranked: profile.ranked };
 }
 
 export function addUpgrade(profile, upgradeId) {
@@ -357,20 +628,17 @@ export function addUpgrade(profile, upgradeId) {
   saveProfile(profile);
 }
 
-export function addFragment(profile, deckId) {
-  if (profile.unlockedDecks.includes(deckId)) return { unlocked: false };
+export function addFragment(profile, deckId, cards = []) {
+  if (profile.unlockedDecks.includes(deckId)) return { unlocked: false, fragments: FRAGMENTS_TO_UNLOCK };
   const cur = (profile.deckFragments[deckId] || 0) + 1;
   profile.deckFragments[deckId] = Math.min(FRAGMENTS_TO_UNLOCK, cur);
-  let unlocked = false;
-  if (profile.deckFragments[deckId] >= FRAGMENTS_TO_UNLOCK) {
-    profile.unlockedDecks.push(deckId);
-    unlocked = true;
-    const extras = profile.unlockedDecks.filter(d => !STARTER_DECKS.includes(d));
-    maybeUnlockAchievement(profile, 'unlock-second-deck', extras.length >= 1);
-    if (deckId === 'mora') maybeUnlockAchievement(profile, 'unlock-mora', true);
-  }
+  const gate = tryUnlockDeck(profile, deckId, cards);
   saveProfile(profile);
-  return { unlocked, fragments: profile.deckFragments[deckId] };
+  return {
+    unlocked: !!gate.unlocked,
+    fragments: profile.deckFragments[deckId],
+    needCards: !!gate.needCards && !gate.unlocked,
+  };
 }
 
 function randInt(a, b) {
@@ -453,7 +721,7 @@ export function openPurse(profile, cards, opts = {}) {
       // slight Mora weight on Epic+
       let deck = pick(lockedDecks);
       if (bias >= 3 && lockedDecks.includes('mora') && Math.random() < 0.4) deck = 'mora';
-      const r = addFragment(profile, deck);
+      const r = addFragment(profile, deck, cards);
       reward = {
         type: 'fragment',
         deck,
@@ -462,7 +730,9 @@ export function openPurse(profile, cards, opts = {}) {
         rarity,
         label: r.unlocked
           ? `Deck unlocked: ${deck}!`
-          : `Fragment: ${deck} (${r.fragments}/${FRAGMENTS_TO_UNLOCK})`,
+          : r.needCards
+            ? `Fragment: ${deck} (${r.fragments}/${FRAGMENTS_TO_UNLOCK}) — still need every card clue`
+            : `Fragment: ${deck} (${r.fragments}/${FRAGMENTS_TO_UNLOCK})`,
       };
     } else reward = goldFallback();
   } else {
@@ -470,6 +740,9 @@ export function openPurse(profile, cards, opts = {}) {
     reward = { type: 'jackpot', gold: 80 + bias * 40, label: `Jackpot! ${80 + bias * 40} gold`, rarity };
   }
 
+  if (reward?.id) discoverCards(profile, [reward.id]);
+  if (reward?.deck) { /* fragment already recorded */ }
+  noteClubEvent(profile, { kind: 'purse' });
   saveProfile(profile);
   return { reward, profile, rarity };
 }
@@ -480,36 +753,61 @@ export function openSack(profile, cards, opts = {}) {
 }
 
 export function buySack(profile) {
-  if (profile.gold < SACK_BUY_COST) return { error: 'Need 40 gold.' };
+  if (profile.gold < SACK_BUY_COST) return { error: `Need ${SACK_BUY_COST} gold.` };
   profile.gold -= SACK_BUY_COST;
   profile.purses.push({ rarity: 'Fine' });
   saveProfile(profile);
   return { ok: true };
 }
 
-export function buyFragment(profile, deckId) {
-  if (profile.unlockedDecks.includes(deckId)) return { error: 'Already unlocked.' };
-  if (!LOCKED_DECKS.includes(deckId)) return { error: 'Invalid deck.' };
-  if (profile.gold < STORE_FRAGMENT_COST) return { error: `Need ${STORE_FRAGMENT_COST} gold.` };
-  profile.gold -= STORE_FRAGMENT_COST;
-  const r = addFragment(profile, deckId);
-  return { ok: true, ...r };
+function assertShopStock(profile, cards, kind, target) {
+  const slate = currentShop(profile, cards);
+  const id = offerId(kind, target);
+  const onSlate = slate.featured.find((o) => o.id === id);
+  if (!onSlate) return { error: 'Not on this slate — returns later.' };
+  if (isOfferSoldOut(profile, slate.periodKey, id)) {
+    return { error: 'Sold out until the slate refreshes.' };
+  }
+  return { slate, id };
 }
 
-export function buyUpgrade(profile, upgradeId, cards) {
+export function buyFragment(profile, deckId, cards = [], opts = {}) {
+  if (profile.unlockedDecks.includes(deckId)) return { error: 'Already unlocked.' };
+  if (!LOCKED_DECKS.includes(deckId)) return { error: 'Invalid deck.' };
+  if (!opts.ignoreShop) {
+    const gate = assertShopStock(profile, cards, 'fragment', deckId);
+    if (gate.error) return gate;
+  }
+  const cost = priceOf('fragment', deckId);
+  if (profile.gold < cost) return { error: `Need ${cost} gold.` };
+  profile.gold -= cost;
+  const r = addFragment(profile, deckId, cards);
+  if (!opts.ignoreShop) markShopPurchase(profile, shopPeriodKey(), offerId('fragment', deckId));
+  saveProfile(profile);
+  return { ok: true, ...r, cost };
+}
+
+export function buyUpgrade(profile, upgradeId, cards, opts = {}) {
   if (profile.ownedUpgrades.includes(upgradeId)) return { error: 'Already owned.' };
   const base = UPGRADE_TO_BASE[upgradeId];
   if (!base) return { error: 'Unknown upgrade.' };
   const card = cards.find(c => c.id === upgradeId);
   const patron = card?.patron;
   if (patron && !isDeckUnlocked(profile, patron)) return { error: 'Unlock the deck first.' };
-  if (profile.gold < STORE_UPGRADE_COST) return { error: `Need ${STORE_UPGRADE_COST} gold.` };
-  profile.gold -= STORE_UPGRADE_COST;
+  if (!opts.ignoreShop) {
+    const gate = assertShopStock(profile, cards, 'upgrade', upgradeId);
+    if (gate.error) return gate;
+  }
+  const cost = priceOf('upgrade', upgradeId, cards);
+  if (profile.gold < cost) return { error: `Need ${cost} gold.` };
+  profile.gold -= cost;
   addUpgrade(profile, upgradeId);
-  return { ok: true };
+  if (!opts.ignoreShop) markShopPurchase(profile, shopPeriodKey(), offerId('upgrade', upgradeId));
+  saveProfile(profile);
+  return { ok: true, cost };
 }
 
-export function buySkin(profile, skinId) {
+export function buySkin(profile, skinId, cards = [], opts = {}) {
   const skin = TABLE_SKINS.find(s => s.id === skinId);
   if (!skin) return { error: 'Unknown skin.' };
   if (profile.unlockedSkins.includes(skinId)) {
@@ -517,15 +815,21 @@ export function buySkin(profile, skinId) {
     saveProfile(profile);
     return { ok: true, equipped: true };
   }
-  if (profile.gold < skin.price) return { error: `Need ${skin.price} gold.` };
-  profile.gold -= skin.price;
+  if (!opts.ignoreShop && skin.price > 0) {
+    const gate = assertShopStock(profile, cards, 'skin', skinId);
+    if (gate.error) return gate;
+  }
+  const cost = skin.price || priceOf('skin', skinId);
+  if (profile.gold < cost) return { error: `Need ${cost} gold.` };
+  profile.gold -= cost;
   profile.unlockedSkins.push(skinId);
   profile.tableSkin = skinId;
+  if (!opts.ignoreShop && skin.price > 0) markShopPurchase(profile, shopPeriodKey(), offerId('skin', skinId));
   saveProfile(profile);
-  return { ok: true };
+  return { ok: true, cost };
 }
 
-export function buyBack(profile, backId) {
+export function buyBack(profile, backId, cards = [], opts = {}) {
   const back = CARD_BACKS.find(b => b.id === backId);
   if (!back) return { error: 'Unknown back.' };
   if (profile.unlockedBacks.includes(backId)) {
@@ -533,12 +837,53 @@ export function buyBack(profile, backId) {
     saveProfile(profile);
     return { ok: true, equipped: true };
   }
-  if (profile.gold < back.price) return { error: `Need ${back.price} gold.` };
-  profile.gold -= back.price;
+  if (!opts.ignoreShop && back.price > 0) {
+    const gate = assertShopStock(profile, cards, 'back', backId);
+    if (gate.error) return gate;
+  }
+  const cost = back.price || priceOf('back', backId);
+  if (profile.gold < cost) return { error: `Need ${cost} gold.` };
+  profile.gold -= cost;
   profile.unlockedBacks.push(backId);
   profile.cardBack = backId;
+  if (!opts.ignoreShop && back.price > 0) markShopPurchase(profile, shopPeriodKey(), offerId('back', backId));
   saveProfile(profile);
-  return { ok: true };
+  return { ok: true, cost };
+}
+
+export function buyShopOffer(profile, offer, cards = []) {
+  if (!offer?.kind) return { error: 'Unknown offer.' };
+  if (offer.kind === 'bundle') return buyBundle(profile, offer, cards);
+  if (!offer.target) return { error: 'Unknown offer.' };
+  if (offer.kind === 'fragment') return buyFragment(profile, offer.target, cards);
+  if (offer.kind === 'upgrade') return buyUpgrade(profile, offer.target, cards);
+  if (offer.kind === 'skin') return buySkin(profile, offer.target, cards);
+  if (offer.kind === 'back') return buyBack(profile, offer.target, cards);
+  return { error: 'Unknown offer.' };
+}
+
+export function buyBundle(profile, offer, cards = []) {
+  const slate = currentShop(profile, cards);
+  if (!slate.bundle || slate.bundle.id !== offer.id) return { error: 'That bundle is not on this slate.' };
+  if (isOfferSoldOut(profile, slate.periodKey, offer.id)) return { error: 'Sold out until the slate refreshes.' };
+  if (profile.gold < offer.price) return { error: `Need ${offer.price} gold.` };
+  profile.gold -= offer.price;
+  const results = [];
+  for (const part of offer.parts || []) {
+    if (part.kind === 'fragment') results.push(addFragment(profile, part.target, cards));
+    else if (part.kind === 'upgrade') { addUpgrade(profile, part.target); results.push({ ok: true }); }
+    else if (part.kind === 'skin' && !profile.unlockedSkins.includes(part.target)) {
+      profile.unlockedSkins.push(part.target);
+      results.push({ ok: true });
+    } else if (part.kind === 'back' && !profile.unlockedBacks.includes(part.target)) {
+      profile.unlockedBacks.push(part.target);
+      results.push({ ok: true });
+    }
+    markShopPurchase(profile, slate.periodKey, part.id);
+  }
+  markShopPurchase(profile, slate.periodKey, offer.id);
+  saveProfile(profile);
+  return { ok: true, results };
 }
 
 export function equipSkin(profile, skinId) {
@@ -648,15 +993,40 @@ function seededShuffle(arr, seedStr) {
   return a;
 }
 
+function newGauntletRoad(today) {
+  const rest = GAUNTLET_STOPS.map((s) => s.id).filter((id) => id !== 'highisle');
+  return {
+    date: today,
+    roadId: today,
+    order: ['highisle', ...seededShuffle(rest, today + ':tot-road')],
+    cursor: 0,
+    clearedIds: [],
+    lockedDate: null,
+    lastPlayAt: 0,
+    lastId: null,
+    prizeClaimedRoad: null,
+    failed: false,
+    failedStop: null,
+    cleared: 0,
+  };
+}
+
 export function ensureGauntletDay(profile) {
   const today = nyDateStr();
-  if (!profile.gauntlet) profile.gauntlet = { date: null, order: [], lastPlayAt: 0, lastId: null };
-  const startOk = profile.gauntlet.order?.[0] === 'highisle';
-  if (profile.gauntlet.date !== today || !profile.gauntlet.order?.length || !startOk) {
-    const rest = GAUNTLET_STOPS.map(s => s.id).filter(id => id !== 'highisle');
-    profile.gauntlet.date = today;
-    profile.gauntlet.order = ['highisle', ...seededShuffle(rest, today + ':tot-road')];
+  if (!profile.gauntlet) profile.gauntlet = newGauntletRoad(today);
+  const g = profile.gauntlet;
+  const complete = Array.isArray(g.order) && g.order.length && (g.cursor || 0) >= g.order.length;
+  const needNew = !g.order?.length || g.order[0] !== 'highisle'
+    || (complete && g.prizeClaimedRoad === g.roadId && g.date !== today);
+  if (needNew) {
+    profile.gauntlet = { ...newGauntletRoad(today), prizeClaimedRoad: g.prizeClaimedRoad || null };
     saveProfile(profile);
+  } else {
+    g.date = g.date || today;
+    if (g.lockedDate && g.lockedDate !== today) {
+      g.lockedDate = null;
+      g.failed = false;
+    }
   }
   return profile.gauntlet;
 }
@@ -671,14 +1041,28 @@ export function roadCrossing(fromId, toId) {
 }
 
 export function gauntletCooldownMs(g) {
-  const last = g?.lastPlayAt || 0;
-  return Math.max(0, last + 24 * 3600_000 - Date.now());
+  const today = nyDateStr();
+  if (g?.lockedDate === today) {
+    return msUntilNextNyMidnight();
+  }
+  return 0;
+}
+
+export function gauntletLockedToday(profile) {
+  const g = ensureGauntletDay(profile);
+  return g.lockedDate === nyDateStr();
 }
 
 export function todaysFeatured(profile) {
   const g = ensureGauntletDay(profile);
-  const id = g.order[0];
-  return GAUNTLET_STOPS.find(s => s.id === id) || GAUNTLET_STOPS[0];
+  const idx = Math.min(g.cursor || 0, Math.max(0, (g.order?.length || 1) - 1));
+  const id = g.order?.[idx];
+  return GAUNTLET_STOPS.find((s) => s.id === id) || GAUNTLET_STOPS[0];
+}
+
+export function roadGrandPrizePreview(profile) {
+  const g = ensureGauntletDay(profile);
+  return roadGrandPrize(g.roadId || nyDateStr());
 }
 
 export function recordGauntletResult(profile, { stopIndex, won }) {
@@ -686,16 +1070,31 @@ export function recordGauntletResult(profile, { stopIndex, won }) {
   const g = profile.gauntlet;
   const stop = GAUNTLET_STOPS[stopIndex];
   if (!stop) return { error: 'bad stop' };
-  g.lastPlayAt = Date.now();
   g.lastId = stop.id;
   if (won) {
     profile.gold += stop.rewardGold;
     profile.purses.push({ rarity: stop.difficulty >= 8 ? 'Epic' : stop.difficulty >= 5 ? 'Superior' : 'Fine' });
+    if (!g.clearedIds) g.clearedIds = [];
+    if (!g.clearedIds.includes(stop.id)) g.clearedIds.push(stop.id);
+    g.cursor = (g.cursor || 0) + 1;
+    g.cleared = g.clearedIds.length;
+    g.failed = false;
+    g.failedStop = null;
+    const complete = g.cursor >= (g.order?.length || 0);
+    let prize = null;
+    if (complete && g.prizeClaimedRoad !== g.roadId) {
+      prize = grantReward(profile, roadGrandPrize(g.roadId), []);
+      g.prizeClaimedRoad = g.roadId;
+      maybeUnlockAchievement(profile, 'road-clear', true);
+    }
+    saveProfile(profile);
+    return { gold: stop.rewardGold, cleared: g.cleared, complete, prize };
   }
+  g.lockedDate = nyDateStr();
+  g.failed = true;
+  g.failedStop = stopIndex;
   saveProfile(profile);
-  return won
-    ? { gold: stop.rewardGold, cleared: 1, complete: false }
-    : { failed: true, failedStop: stopIndex, retryInMs: gauntletCooldownMs(g) };
+  return { failed: true, failedStop: stopIndex, retryInMs: gauntletCooldownMs(g) };
 }
 
 export function setAiDifficulty(profile, n) {

@@ -7,9 +7,9 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta name="theme-color" content="#1e4a48" />
   <title>Tales of Tribute — Fan Table</title>
-  <link rel="stylesheet" href="css/style.css?v=33" />
-  <link rel="stylesheet" href="css/phone-eso.css?v=33" />
-  <link rel="stylesheet" href="css/table-pack.css?v=33" />
+  <link rel="stylesheet" href="css/style.css?v=34" />
+  <link rel="stylesheet" href="css/phone-eso.css?v=34" />
+  <link rel="stylesheet" href="css/table-pack.css?v=34" />
 </head>
 <body>
   <div id="app">
@@ -32,7 +32,7 @@
           <label class="chk"><input type="checkbox" id="chk-hourglass-splash" /> Hourglass (90s)</label>
           <button type="button" id="btn-music" class="music-toggle" title="Music">♪ Music: Off</button>
         </div>
-        <p class="build-stamp" id="build-stamp">build 33</p>
+        <p class="build-stamp" id="build-stamp">build 34</p>
         <p class="disclaimer">Unofficial fan project. Not affiliated with Bethesda Softworks or ZeniMax Online Studios. Not for sale. Card art courtesy of UESP. No real-money purchases — earn gold at the table.</p>
       </div>
     </section>
@@ -70,7 +70,7 @@
         <h2>Challenge the Provinces</h2>
         <button id="btn-gauntlet-back">Back</button>
       </header>
-      <p class="hint" id="gauntlet-hint">Start at Gonfalon Bay. Then the road wanders — horse overland, boat across water. One challenge every 24 hours.</p>
+      <p class="hint" id="gauntlet-hint">Start at Gonfalon Bay. Win opens the next stop. A loss locks the road until NY midnight. Clear the road for a rotating grand prize. Unofficial fan path.</p>
       <div class="gauntlet-map-wrap">
         <img class="gauntlet-map" id="gauntlet-map-img" src="assets/ui/tamriel-map.jpg" alt="Map of Tamriel — provinces" />
         <div class="gauntlet-markers" id="gauntlet-markers"></div>
@@ -107,13 +107,25 @@
       <div class="club-stats" id="club-stats"></div>
       <div class="club-actions">
         <button class="primary" id="btn-open-sack">Open Cutpurse</button>
-        <button id="btn-buy-sack">Buy Purse (40g)</button>
+        <button id="btn-buy-sack">Buy Purse (90g)</button>
         <button id="btn-store">Store</button>
         <button id="btn-collection">Collection</button>
       </div>
+      <h3 class="club-section">Login calendar</h3>
+      <p class="hint">America/New_York midnight. Missed days mark a red X — the Club remembers.</p>
+      <div id="club-calendar" class="login-cal"></div>
+      <h3 class="club-section">Provinces road</h3>
+      <div id="club-road" class="season-banner"></div>
       <h3 class="club-section">Ranked</h3>
       <div id="club-ranked"></div>
-      <h3 class="club-section">Daily Challenge</h3>
+      <h3 class="club-section">Fan tournament</h3>
+      <div id="club-tournament" class="season-banner"></div>
+      <h3 class="club-section">Weekly Challenges</h3>
+      <p class="hint" id="club-weekly-hint"></p>
+      <div id="club-weekly" class="ach-list"></div>
+      <h3 class="club-section">Seasonal</h3>
+      <div id="club-seasonal"></div>
+      <h3 class="club-section">Daily</h3>
       <div id="club-daily"></div>
       <h3 class="club-section">Achievements</h3>
       <div id="club-achievements" class="ach-list"></div>
@@ -126,15 +138,16 @@
         <span class="store-gold" id="store-gold"></span>
         <button id="btn-store-back">Back to Club</button>
       </header>
-      <p class="hint">Spend purse gold only — everything is earnable. No real-money wall.</p>
-      <h3 class="club-section">Table Skins</h3>
-      <div class="store-grid" id="store-skins"></div>
-      <h3 class="club-section">Card Backs</h3>
-      <div class="store-grid" id="store-backs"></div>
-      <h3 class="club-section">Deck Fragments (35g)</h3>
-      <div class="store-grid" id="store-frags"></div>
-      <h3 class="club-section">Card Upgrades (55g)</h3>
-      <div class="store-grid" id="store-upgrades"></div>
+      <p class="hint" id="store-hint">A small rotating slate — most fragments and cosmetics return later. Rarity sets both the price and how often a piece appears. Purse gold only. No real-money wall.</p>
+      <p class="store-timer" id="store-timer"></p>
+      <h3 class="club-section">Slate bundle</h3>
+      <div id="store-bundle"></div>
+      <h3 class="club-section">This slate</h3>
+      <div class="store-grid" id="store-featured"></div>
+      <h3 class="club-section">Tomorrow’s preview</h3>
+      <div class="store-grid" id="store-tomorrow"></div>
+      <h3 class="club-section">Returns later</h3>
+      <div class="store-grid" id="store-later"></div>
     </section>
 
     <!-- COLLECTION -->
@@ -143,8 +156,27 @@
         <h2>Collection</h2>
         <button id="btn-collection-back">Back to Club</button>
       </header>
-      <div class="patron-grid" id="collection-grid"></div>
-      <div id="collection-detail" class="collection-detail hidden"></div>
+      <div class="coll-tabs" role="tablist">
+        <button type="button" class="coll-tab active" data-tab="patrons">Patrons / Decks</button>
+        <button type="button" class="coll-tab" data-tab="clues">Card Clues</button>
+        <button type="button" class="coll-tab" data-tab="upgrades">Upgrades</button>
+      </div>
+      <p class="hint" id="collection-hint"></p>
+      <div id="collection-patrons">
+        <div class="patron-grid" id="collection-grid"></div>
+        <div id="collection-detail" class="collection-detail hidden"></div>
+      </div>
+      <div id="collection-clues" hidden>
+        <div class="store-grid" id="clue-grid"></div>
+      </div>
+      <div id="collection-cosmetics" hidden>
+        <h3 class="club-section">Table designs</h3>
+        <div class="store-grid" id="coll-skins"></div>
+        <h3 class="club-section">Card backs</h3>
+        <div class="store-grid" id="coll-backs"></div>
+        <h3 class="club-section">Card upgrades owned</h3>
+        <div class="collection-cards" id="coll-upgrades"></div>
+      </div>
     </section>
 
 
@@ -154,7 +186,7 @@
         <h2>Settings</h2>
         <button id="btn-settings-back">Back</button>
       </header>
-      <p class="hint">Equip cosmetics here. The Club store still sells them with purse gold.</p>
+      <p class="hint">Equip what you already own. New skins and backs appear on the rotating Club Store slate — they are not always in stock.</p>
       <div class="settings-block">
         <h3 class="club-section">Table</h3>
         <label class="chk settings-row"><input type="checkbox" id="chk-settings-music" /> Music</label>
@@ -381,6 +413,6 @@
       <div class="modal-body" id="card-modal-body"></div>
     </div>
   </div>
-  <script type="module" src="js/app.js?v=33"></script>
+  <script type="module" src="js/app.js?v=34"></script>
 </body>
 </html>
