@@ -1,0 +1,18 @@
+Build 42 board-pass measurements
+portrait 390x844: tavern 386px = 99% vw
+  empty bands T/B 0.5% / 0.5% (need ≤8%)
+  tavern-to-hand gap 9% (need ≤14%)
+  res-to-cards opp/you 29.2/9.2px
+  ring offset 0px (need ≤2)
+  uses near hg true corner false
+  peak 10% of diameter (need ≈10%)
+  tavern discard: false  banner: false
+  medallions 5, gothic tips 4, Treasury tip false
+landscape 844x390: tavern 717.4px = 85% vw (need ≥72%)
+  gutters L/R 0.5% / 15.5%
+  ring offset 0.01px  uses near hg true
+  tavern discard: false  banner: false
+  medallions 5, gothic tips 4, Treasury tip false
+pelin fav-you favored rot=matrix(-1, 0, 0, -1, 0, 0)
+pelin fav-opp unfavored rot=matrix(1, 0, 0, 1, 0, 0)
+treasury rot=none

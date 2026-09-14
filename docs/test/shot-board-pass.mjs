@@ -82,9 +82,14 @@ async function shotCoin(page, name, pid) {
 async function shotRail(page, name) {
   fs.mkdirSync(ART, { recursive: true });
   const box = await page.evaluate(() => {
+    const rail = document.querySelector('#patron-rail');
     const coins = [...document.querySelectorAll('#rail-patrons .patron-coin')];
-    if (!coins.length) return null;
-    const rs = coins.map((el) => el.getBoundingClientRect());
+    const extras = ['#btn-end', '#you-patron-calls', '#opp-patron-calls']
+      .map((s) => document.querySelector(s))
+      .filter(Boolean);
+    const els = [rail, ...coins, ...extras].filter(Boolean);
+    if (!els.length) return null;
+    const rs = els.map((el) => el.getBoundingClientRect());
     const pad = 10;
     const left = Math.min(...rs.map((r) => r.left)) - pad;
     const top = Math.min(...rs.map((r) => r.top)) - pad;
@@ -155,7 +160,7 @@ async function measure(page, fileStem, { w, h }) {
   if (m.peakPct == null || m.peakPct < 7 || m.peakPct > 14) {
     fail(`${fileStem} peak ${m.peakPct}% of diameter (need ≈10%, gate 7–14)`, notes);
   }
-  if ((m.ringMaxOffset || 99) > 2.2) {
+  if (m.ringMaxOffset == null || m.ringMaxOffset > 2.2) {
     fail(`${fileStem} ring offset ${m.ringMaxOffset}px from portrait (need ≤2px)`, { ringAlign: m.ringAlign, notes });
   }
   if (m.usesAtCorner) fail(`${fileStem} patron-use octagons at screen corners`, notes);
@@ -191,7 +196,7 @@ await shotRail(portPage, 'portrait-rail-fav-you');
 await shotCoin(portPage, 'portrait-ring-pelin-fav-you', 'pelin');
 {
   const rot = await portPage.evaluate(() => window.__totTest.layout());
-  if ((rot.ringMaxOffset || 99) > 2.2) fail('portrait fav-you ring offset', rot.ringAlign);
+  if ((rot.ringMaxOffset ?? 99) > 2.2) fail('portrait fav-you ring offset', rot.ringAlign);
 }
 await favorSet(portPage, { pelin: -1, hlaalu: 0, crows: 0, celarus: 0 });
 await new Promise(r => setTimeout(r, 700));
@@ -199,7 +204,7 @@ await shotRail(portPage, 'portrait-rail-fav-opp');
 await shotCoin(portPage, 'portrait-ring-pelin-fav-opp', 'pelin');
 {
   const rot = await portPage.evaluate(() => window.__totTest.layout());
-  if ((rot.ringMaxOffset || 99) > 2.2) fail('portrait fav-opp ring offset', rot.ringAlign);
+  if ((rot.ringMaxOffset ?? 99) > 2.2) fail('portrait fav-opp ring offset', rot.ringAlign);
 }
 await portPage.close();
 
@@ -216,7 +221,7 @@ await shotRail(landPage, 'landscape-rail-fav-you');
 await shotCoin(landPage, 'landscape-ring-pelin-fav-you', 'pelin');
 {
   const rot = await landPage.evaluate(() => window.__totTest.layout());
-  if ((rot.ringMaxOffset || 99) > 2.2) fail('landscape fav-you ring offset', rot.ringAlign);
+  if ((rot.ringMaxOffset ?? 99) > 2.2) fail('landscape fav-you ring offset', rot.ringAlign);
 }
 const oppState = await favorSet(landPage, { pelin: -1, hlaalu: 0, crows: 0, celarus: 0 });
 console.log('landscape fav-opp', JSON.stringify(oppState));
@@ -225,7 +230,7 @@ await shotRail(landPage, 'landscape-rail-fav-opp');
 await shotCoin(landPage, 'landscape-ring-pelin-fav-opp', 'pelin');
 {
   const rot = await landPage.evaluate(() => window.__totTest.layout());
-  if ((rot.ringMaxOffset || 99) > 2.2) fail('landscape fav-opp ring offset', rot.ringAlign);
+  if ((rot.ringMaxOffset ?? 99) > 2.2) fail('landscape fav-opp ring offset', rot.ringAlign);
 }
 await landPage.close();
 

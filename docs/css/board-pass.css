@@ -92,14 +92,14 @@ body.is-portrait #match .felt-table,
     row-gap: 3px !important;
     gap: 3px 0 !important;
     grid-template-rows:
-      auto
+      minmax(70px, 0.95fr)
       auto
       40px
       18px
       auto
       40px
       auto
-      minmax(118px, 1fr) !important;
+      minmax(140px, 1.15fr) !important;
     align-content: stretch !important;
   }
 }
@@ -111,14 +111,14 @@ body.is-portrait #match .felt-table {
   row-gap: 2px !important;
   gap: 2px 0 !important;
   grid-template-rows:
-    auto
+    minmax(70px, 0.95fr)
     auto
     40px
     18px
     auto
     40px
     auto
-    minmax(118px, 1fr) !important;
+    minmax(140px, 1.15fr) !important;
   align-content: stretch !important;
 }
 
@@ -199,12 +199,12 @@ body.is-portrait #match .tavern-zone .card {
 body.is-portrait #match #hand-zone .card,
 body.is-portrait #match #hand-zone button.card,
 body.is-portrait #match .you-fan .card {
-  width: min(54px, calc((100% + 1.6rem) / 5.2)) !important;
+  width: min(72px, calc((100% + 1.2rem) / 5.1)) !important;
   height: auto !important;
   aspect-ratio: 1 / 1.52 !important;
-  min-height: 80px !important;
-  max-height: 92% !important;
-  margin: 0 -6px !important;
+  min-height: 96px !important;
+  max-height: 94% !important;
+  margin: 0 -8px !important;
 }
 
 body.is-portrait #match .rival-fan .card,
@@ -262,14 +262,14 @@ body.is-landscape #match .felt-table {
   row-gap: 2px !important;
   gap: 2px 0 !important;
   grid-template-rows:
-    minmax(32px, 0.5fr)
-    18px
-    32px
+    minmax(34px, 0.55fr)
+    24px
+    44px
     16px
-    minmax(118px, 2.15fr)
-    32px
-    18px
-    minmax(56px, 0.9fr) !important;
+    minmax(108px, 1.95fr)
+    44px
+    24px
+    minmax(58px, 0.95fr) !important;
 }
 
 body.is-landscape #match .felt-opp-hand,
@@ -298,13 +298,12 @@ body.is-landscape #match .agent-slot.empty {
   height: 20px !important;
 }
 
-body.is-landscape #match #opp-res {
-  align-self: end !important;
-}
+body.is-landscape #match .token-row,
+body.is-landscape #match #opp-res,
 body.is-landscape #match #you-res {
-  align-self: start !important;
+  min-height: 44px !important;
+  height: 44px !important;
 }
-body.is-landscape #match .felt-tavern {
   width: 100% !important;
   min-width: 72% !important;
   max-width: none !important;
@@ -629,14 +628,16 @@ body.is-landscape #match .patron-coin .token-dial.tipless .coin-ring.medallion-f
 }
 #match .rail-glass {
   grid-column: 2 !important;
-  grid-row: 1 !important;
+  grid-row: 1 / -1 !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 8px !important;
+  gap: 6px !important;
   padding: 0 !important;
   margin: 0 !important;
+  height: auto !important;
+  max-height: 72% !important;
   align-self: center !important;
   z-index: 3 !important;
 }
@@ -648,6 +649,8 @@ body.is-landscape #match .rail-glass {
   justify-content: center !important;
   align-self: center !important;
 }
+#match .rail-glass > .patron-use-token.opp,
+#match .rail-glass > .patron-use-token.you,
 #match .rail-glass .patron-use-token.opp,
 #match .rail-glass .patron-use-token.you,
 #match .patron-use-token.opp,
@@ -657,12 +660,17 @@ body.is-landscape #match .rail-glass {
   right: auto !important;
   bottom: auto !important;
   left: auto !important;
+  inset: auto !important;
   grid-column: auto !important;
   grid-row: auto !important;
   z-index: 4 !important;
   margin: 0 !important;
+  flex: 0 0 auto !important;
 }
+#match .rail-glass > .patron-use-token.opp { order: 0; }
+#match .rail-glass > .patron-use-token.you { order: 2; }
 #match .eso-hourglass-end {
+  order: 1;
   width: 40px !important;
   padding: 2px 0 4px !important;
 }

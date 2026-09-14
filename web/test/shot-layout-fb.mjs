@@ -143,7 +143,7 @@ async function measure(page, fileStem, { w, h }) {
   if (m.peakPct == null || m.peakPct < 7 || m.peakPct > 14) {
     fail(`${fileStem} peak ${m.peakPct}% of diameter (need ≈10%, gate 7–14)`, notes);
   }
-  if ((m.ringMaxOffset || 99) > 2.2) fail(`${fileStem} ring offset ${m.ringMaxOffset}px`, notes);
+  if (m.ringMaxOffset == null || m.ringMaxOffset > 2.2) fail(`${fileStem} ring offset ${m.ringMaxOffset}px`, notes);
   if (m.usesAtCorner) fail(`${fileStem} patron-use octagons at screen corners`, notes);
   if (!m.usesNearHourglass) fail(`${fileStem} patron-use octagons not on hourglass rail`, notes);
 
