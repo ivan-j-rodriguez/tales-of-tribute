@@ -1,7 +1,10 @@
 /**
- * Build 42 layout-fb gate + before/after artifacts.
+ * Build 50 layout-fb gate + before/after artifacts.
  * Portrait 390×844 / landscape 844×390.
  * Zero getBoundingClientRect intersection for Ivan's overlap pairs.
+ * Also: tavern mid on vw/2, hand mid on vw/2, pendant colinear X,
+ * DRAW/CD labels under four corner piles, left strip high, End Turn
+ * bottom-left, yellow felt orbs gone.
  */
 import http from 'http';
 import fs from 'fs';
@@ -72,14 +75,17 @@ async function ready(page) {
   await new Promise(r => setTimeout(r, 280));
 }
 
-async function paintMidline(page, on) {
-  await page.evaluate((show) => {
+async function paintMidline(page, on, zone = 'hand') {
+  await page.evaluate((show, which) => {
     document.getElementById('tot-review-midline')?.remove();
     if (!show) return;
     const line = document.createElement('div');
     line.id = 'tot-review-midline';
     line.style.cssText = 'position:fixed;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:#e11;z-index:99999;pointer-events:none;';
-    const cards = [...document.querySelectorAll('#hand-zone > .card, #hand-zone > button.card')];
+    const sel = which === 'tavern'
+      ? '#tavern-zone > .card, #tavern-zone > button.card'
+      : '#hand-zone > .card, #hand-zone > button.card';
+    const cards = [...document.querySelectorAll(sel)];
     const mid = cards.length % 2 === 1 ? cards[(cards.length - 1) / 2] : null;
     if (mid) {
       const r = mid.getBoundingClientRect();
@@ -88,7 +94,7 @@ async function paintMidline(page, on) {
       line.appendChild(dot);
     }
     document.body.appendChild(line);
-  }, on);
+  }, on, zone);
 }
 
 async function closeUp(page, name, boxes, vw, vh) {
@@ -140,6 +146,12 @@ async function measure(page, fileStem, { w, h }) {
     youHandCount: m.youHandCount,
     youHandMidX: m.youHandMidX,
     youHandMidDx: m.youHandMidDx,
+    tavernMidX: m.tavernMidX,
+    tavernMidDx: m.tavernMidDx,
+    pendantCenterSpread: m.pendantCenterSpread,
+    drawLabelUnder: m.drawLabelUnder,
+    cdLabelUnder: m.cdLabelUnder,
+    yellowOrbGone: m.yellowOrbGone,
     oppHandMidDx: m.oppHandMidDx,
     oppResToCards: m.oppResToCards,
     youResToCards: m.youResToCards,
@@ -187,11 +199,20 @@ async function measure(page, fileStem, { w, h }) {
       if (m.youHandMidDx == null || Math.abs(m.youHandMidDx) > 4) {
         fail(`${fileStem} hand mid-card top not on vertical center (dx ${m.youHandMidDx}px, need ≤4)`, notes);
       }
+      if (m.tavernMidDx == null || Math.abs(m.tavernMidDx) > 4) {
+        fail(`${fileStem} tavern mid-card top not on vertical center (dx ${m.tavernMidDx}px, need ≤4)`, notes);
+      }
+      if (m.pendantCenterSpread == null || m.pendantCenterSpread > 4) {
+        fail(`${fileStem} patron pendant centers not colinear (spread ${m.pendantCenterSpread}px, need ≤4)`, notes);
+      }
+      if (!m.drawLabelUnder) fail(`${fileStem} DRAW labels not under the four-corner pile graphics`, notes);
+      if (!m.cdLabelUnder) fail(`${fileStem} COOLDOWN labels not under the four-corner pile graphics`, notes);
+      if (!m.yellowOrbGone) fail(`${fileStem} mystery yellow felt orb still visible`, notes);
       if (m.oppHandCount >= 3 && m.oppHandMidDx != null && Math.abs(m.oppHandMidDx) > 8) {
         fail(`${fileStem} opp hand mid-card off vertical center (dx ${m.oppHandMidDx}px)`, notes);
       }
-      /* Build 48 portrait strip sat at top:56% ≈ 473px on 844vh. Need a clear lift. */
-      if ((m.hudTop ?? 99) > 449) fail(`${fileStem} left strip not shifted up (hudTop ${m.hudTop}, build48 was ~473)`, notes);
+      /* Build 49 portrait strip sat at top:44% ≈ 371px. Need a further lift toward top-left. */
+      if ((m.hudTop ?? 99) > 260) fail(`${fileStem} left strip not shifted up (hudTop ${m.hudTop}, build49 was ~371)`, notes);
     } else {
       if ((m.cdRightGap ?? 99) > 130) fail(`${fileStem} landscape COOLDOWN still far from right (gap ${m.cdRightGap}px)`, notes);
       if (!m.hudIsLeftStrip) fail(`${fileStem} landscape match-actions not on the left strip`, notes);
@@ -199,6 +220,13 @@ async function measure(page, fileStem, { w, h }) {
       if (m.youHandMidDx == null || Math.abs(m.youHandMidDx) > 4) {
         fail(`${fileStem} landscape hand mid-card top not on vertical center (dx ${m.youHandMidDx}px, need ≤4)`, notes);
       }
+      if (m.tavernMidDx == null || Math.abs(m.tavernMidDx) > 4) {
+        fail(`${fileStem} landscape tavern mid-card top not on vertical center (dx ${m.tavernMidDx}px, need ≤4)`, notes);
+      }
+      if (m.pendantCenterSpread == null || m.pendantCenterSpread > 4) {
+        fail(`${fileStem} landscape patron pendant centers not colinear (spread ${m.pendantCenterSpread}px, need ≤4)`, notes);
+      }
+      if (!m.yellowOrbGone) fail(`${fileStem} landscape mystery yellow felt orb still visible`, notes);
     }
   }
 
@@ -251,9 +279,14 @@ const treasuryBox = await portPage.evaluate(() => {
   return { x: r.x, y: r.y, w: r.width, h: r.height };
 });
 await closeUp(portPage, `${TAG}-portrait-treasury`, [treasuryBox], 390, 844);
-await paintMidline(portPage, true);
+await paintMidline(portPage, true, 'hand');
 await portPage.screenshot({ path: path.join(ART, `${TAG}-portrait-hand-center.png`), fullPage: false });
+await paintMidline(portPage, true, 'tavern');
+await portPage.screenshot({ path: path.join(ART, `${TAG}-portrait-tavern-center.png`), fullPage: false });
 await paintMidline(portPage, false);
+await closeUp(portPage, `${TAG}-portrait-pendants`, [pBoxes.patronsCluster, pBoxes.patronRail], 390, 844);
+await closeUp(portPage, `${TAG}-portrait-four-corners`, [pBoxes.oppDraw, pBoxes.youDraw, pBoxes.oppCd, pBoxes.youCd], 390, 844);
+await closeUp(portPage, `${TAG}-portrait-end-turn-bl`, [pBoxes.endTurn, pBoxes.youDraw, pBoxes.leaveHud], 390, 844);
 
 await portPage.evaluate(() => window.__totTest.playFirstGold());
 await new Promise(r => setTimeout(r, 420));
@@ -282,8 +315,10 @@ const lBoxes = results.landscape.boxes;
 await closeUp(landPage, `${TAG}-landscape-tavern-vs-piles`, [lBoxes.tavern, lBoxes.deck, lBoxes.oppDraw, lBoxes.youDraw], 844, 390);
 await closeUp(landPage, `${TAG}-landscape-left-gutter`, [lBoxes.oppDraw, lBoxes.deck, lBoxes.youDraw, lBoxes.events], 844, 390);
 await closeUp(landPage, `${TAG}-landscape-right-gutter`, [lBoxes.patronRail, lBoxes.endTurn, lBoxes.oppCd, lBoxes.youCd], 844, 390);
-await paintMidline(landPage, true);
+await paintMidline(landPage, true, 'hand');
 await landPage.screenshot({ path: path.join(ART, `${TAG}-landscape-hand-center.png`), fullPage: false });
+await paintMidline(landPage, true, 'tavern');
+await landPage.screenshot({ path: path.join(ART, `${TAG}-landscape-tavern-center.png`), fullPage: false });
 await paintMidline(landPage, false);
 
 await landPage.evaluate(() => window.__totTest.inspectById('customs-seizure') || window.__totTest.inspectById('toll-of-flesh'));
@@ -298,16 +333,19 @@ if (lFit.titleClipped) fail('landscape inspect title clipped', lFit);
 await landPage.close();
 
 const note = [
-  `Build 49 layout-fb (${TAG})`,
+  `Build 50 layout-fb (${TAG})`,
   `portrait 390x844: tavern ${results.portrait.notes.tavernW}px = ${results.portrait.notes.viewportTavernPct}% vw`,
   `  DRAW left ${results.portrait.notes.drawLeftEdge}px  CD right-gap ${results.portrait.notes.cdRightGap}px`,
   `  hud strip ${results.portrait.notes.hudIsLeftStrip}  hudTop ${results.portrait.notes.hudTop}  endTurn BL ${results.portrait.notes.endTurnBottomLeft}`,
   `  hand n=${results.portrait.notes.youHandCount} midX ${results.portrait.notes.youHandMidX} dx ${results.portrait.notes.youHandMidDx}  oppDx ${results.portrait.notes.oppHandMidDx}`,
+  `  tavern midX ${results.portrait.notes.tavernMidX} dx ${results.portrait.notes.tavernMidDx}  pendants Δx ${results.portrait.notes.pendantCenterSpread}`,
+  `  labels DRAW ${results.portrait.notes.drawLabelUnder} CD ${results.portrait.notes.cdLabelUnder}  orbGone ${results.portrait.notes.yellowOrbGone}`,
   `  hits ${JSON.stringify(results.portrait.notes.hits)}`,
   `landscape 844x390: tavern ${results.landscape.notes.tavernW}px = ${results.landscape.notes.viewportTavernPct}% vw`,
   `  gutters L/R ${results.landscape.notes.leftGutterPct}% / ${results.landscape.notes.rightGutterPct}%`,
   `  DRAW left ${results.landscape.notes.drawLeftEdge}px  CD right-gap ${results.landscape.notes.cdRightGap}px`,
-  `  hud strip ${results.landscape.notes.hudIsLeftStrip}  hand dx ${results.landscape.notes.youHandMidDx}`,
+  `  hud strip ${results.landscape.notes.hudIsLeftStrip}  hand dx ${results.landscape.notes.youHandMidDx}  tavern dx ${results.landscape.notes.tavernMidDx}`,
+  `  pendants Δx ${results.landscape.notes.pendantCenterSpread}  orbGone ${results.landscape.notes.yellowOrbGone}`,
   `  hits ${JSON.stringify(results.landscape.notes.hits)}`,
 ].join('\n');
 fs.writeFileSync(path.join(ART, `${TAG}-layout-fb-measurements.txt`), note + '\n');

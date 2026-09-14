@@ -1,12 +1,13 @@
-/* Build 49 — board/felt hand-center + left-strip lift (on Club 47 / board 48).
+/* Build 50 — board/felt Ivan portrait mark-up (on Club 47 / board 49).
    TWO compositions. Same engine/state. Different positions and sizes.
    Pewter bezel seated on the portrait coin (CSS face = SVG window).
    Round pewter coin + short gothic peak (~10% of diameter).
-   Portrait: DRAW flush left, COOLDOWN flush right, match-actions mid-left
-   strip (raised), End Turn bottom-left under that strip, 5-card hand centered
-   on the true vertical midline (middle-card top at vw/2).
+   Portrait: DRAW/CD in the four corners with labels under the stacks;
+   tavern DECK pile tucked top-left under opp DRAW; SFX/Leave strip high
+   on the left; End Turn in the bottom-left corner above you-DRAW;
+   5 tavern cards + 5-card hand both center on vw/2; patron circles share one X.
    Landscape: piles to the edges, compact left chrome; End Turn stays on the rail;
-   hand still centers on vw/2 without eating the right rail. */
+   tavern + hand still center on vw/2 without eating the right rail. */
 
 #pile-tavern-discard { display: none !important; }
 
@@ -802,14 +803,14 @@ body.is-landscape .inspect-dossier-sheet {
 }
 
 /* ===================================================================
-   Build 49 — Ivan portrait pack. Dual layout; do not copy portrait
+   Build 50 — Ivan portrait mark-up. Dual layout; do not copy portrait
    packing onto landscape.
-   Yellow: DRAW → left edge. Purple: COOLDOWN → right edge.
-   Orange: SFX / settings / Leave → mid-left vertical strip, shifted UP
-   from the build 48 56% seat (DECK scoots up so the pair still clears).
-   Red: End Turn hourglass → bottom-left under that strip (portrait).
-   Blue: right rail rebalance — patrons stay right; octagons stretch.
-   Hand: full-width zone so the opening 5-card fan sits on vw/2.
+   Yellow corners: DRAW / COOLDOWN graphics + labels under the stacks.
+   Blue: tavern DECK pile → top-left under opp DRAW.
+   Red: SFX / settings / Leave strip → further UP toward top-left.
+   Green: End Turn hourglass → bottom-left corner above you-DRAW.
+   Long red: middle tavern card top-center = vw/2 (hand rule from #24 stays).
+   Short red: 5 patron pendant circle-centers share one X.
    =================================================================== */
 
 /* --- Piles to the true L/R edges. Keep labels on-canvas (board overflow:hidden). --- */
@@ -819,19 +820,20 @@ body.is-portrait #match #pile-tavern-draw,
 body.is-landscape #match #pile-opp-draw,
 body.is-landscape #match #pile-you-draw,
 body.is-landscape #match #pile-tavern-draw {
-  left: 0 !important;
+  left: 6px !important;
   min-width: 0 !important;
-  width: 42px !important;
+  width: 48px !important;
   padding: 1px 0 !important;
   display: flex !important;
   flex-direction: column !important;
-  align-items: flex-start !important;
+  align-items: center !important;
 }
-body.is-portrait #match #pile-opp-draw { top: 2px !important; }
-body.is-portrait #match #pile-you-draw { bottom: 2px !important; }
+body.is-portrait #match #pile-opp-draw { top: 4px !important; }
+body.is-portrait #match #pile-you-draw { bottom: 4px !important; }
 body.is-portrait #match #pile-tavern-draw {
-  top: 36% !important;
-  transform: translateY(-50%) !important;
+  top: 70px !important;
+  left: 6px !important;
+  transform: none !important;
 }
 body.is-portrait #match #pile-opp-cd,
 body.is-portrait #match #pile-you-cd {
@@ -848,8 +850,8 @@ body.is-portrait #match #pile-you-cd .pile-label {
   font-size: 0.42rem !important;
   max-width: 64px;
 }
-body.is-portrait #match #pile-opp-cd { top: 2px !important; }
-body.is-portrait #match #pile-you-cd { bottom: 2px !important; }
+body.is-portrait #match #pile-opp-cd { top: 4px !important; }
+body.is-portrait #match #pile-you-cd { bottom: 4px !important; }
 body.is-portrait #match #pile-opp-draw .pile-stack,
 body.is-portrait #match #pile-you-draw .pile-stack,
 body.is-portrait #match #pile-tavern-draw .pile-stack,
@@ -880,7 +882,7 @@ body.is-landscape #match .felt-hud-you {
   z-index: 21 !important;
 }
 body.is-portrait #match .felt-hud-you {
-  top: 44% !important;
+  top: 20% !important;
   bottom: auto !important;
 }
 /* Landscape: compact strip in the opp-draw → DECK gap (the only left-column hole). */
@@ -918,13 +920,13 @@ body.is-landscape #match .you-actions button {
   font-size: 0.42rem !important;
 }
 
-/* --- Portrait End Turn: immediately under the mid-left chrome strip. --- */
+/* --- Portrait End Turn: bottom-left corner, just above you-DRAW. --- */
 body.is-portrait #match .eso-hourglass-end {
   position: fixed !important;
   left: max(2px, env(safe-area-inset-left, 0px)) !important;
   right: auto !important;
-  top: calc(44% + 102px) !important;
-  bottom: auto !important;
+  top: auto !important;
+  bottom: 88px !important;
   width: 44px !important;
   padding: 2px 0 4px !important;
   margin: 0 !important;
@@ -999,10 +1001,10 @@ body.is-portrait #match .felt-you-hand {
   overflow: visible !important;
 }
 body.is-portrait #match .tavern-zone {
-  padding: 0.06rem 86px 0.06rem 50px !important;
+  padding: 0.06rem 80px !important;
 }
 body.is-landscape #match .tavern-zone {
-  padding: 0.08rem 118px 0.08rem 52px !important;
+  padding: 0.08rem 118px !important;
 }
 body.is-landscape #match .felt-you-hand {
   width: 100% !important;
@@ -1011,11 +1013,123 @@ body.is-landscape #match .felt-you-hand {
   overflow: visible !important;
 }
 
-/* Played-effects stay in the upper-left, above the new chrome strip. */
+/* Played-effects sit under the raised chrome strip, clear of top-left piles. */
 body.is-portrait #match .events-rail {
-  top: 52px !important;
-  height: 22% !important;
-  max-height: 22% !important;
+  top: 32% !important;
+  height: 16% !important;
+  max-height: 16% !important;
   width: 42px !important;
+}
+
+/* --- Kill stray felt orbs (board::before / ::after). Keep card glow. --- */
+#match .board::before,
+#match .board::after {
+  display: none !important;
+  content: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* --- Corner pile labels sit under the card-back graphic, on-canvas. --- */
+body.is-portrait #match #pile-opp-draw,
+body.is-portrait #match #pile-you-draw,
+body.is-portrait #match #pile-opp-cd,
+body.is-portrait #match #pile-you-cd,
+body.is-portrait #match #pile-tavern-draw,
+body.is-landscape #match #pile-opp-draw,
+body.is-landscape #match #pile-you-draw,
+body.is-landscape #match #pile-opp-cd,
+body.is-landscape #match #pile-you-cd {
+  overflow: visible !important;
+}
+body.is-portrait #match #pile-opp-cd,
+body.is-portrait #match #pile-you-cd {
+  width: 72px !important;
+  min-width: 72px !important;
+  align-items: center !important;
+}
+body.is-portrait #match .hex-pile .pile-stack,
+body.is-landscape #match .hex-pile .pile-stack {
+  position: relative !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  flex: 0 0 auto !important;
+}
+body.is-portrait #match .hex-pile .pile-count,
+body.is-landscape #match .hex-pile .pile-count {
+  position: absolute !important;
+  top: 14px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 2;
+  pointer-events: none;
+  margin: 0 !important;
+}
+body.is-portrait #match .hex-pile .pile-label,
+body.is-landscape #match .hex-pile .pile-label {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  text-align: center !important;
+  margin-top: 3px !important;
+  font-size: 0.5rem !important;
+  letter-spacing: 0.05em !important;
+  line-height: 1.15 !important;
+  white-space: nowrap !important;
+  opacity: 1 !important;
+  color: #e8dcb0 !important;
+}
+body.is-portrait #match #pile-opp-cd .pile-label,
+body.is-portrait #match #pile-you-cd .pile-label,
+body.is-landscape #match #pile-opp-cd .pile-label,
+body.is-landscape #match #pile-you-cd .pile-label {
+  font-size: 0.46rem !important;
+  max-width: none !important;
+}
+
+/* --- Patron pendants: one common vertical centerline (face / pewter ring). --- */
+body.is-portrait #match .rail-patrons,
+body.is-portrait #match .rail-group,
+body.is-portrait #match .rail-group.rail-opp,
+body.is-portrait #match .rail-group.rail-mid,
+body.is-portrait #match .rail-group.rail-you,
+body.is-landscape #match .rail-patrons,
+body.is-landscape #match .rail-group,
+body.is-landscape #match .rail-group.rail-opp,
+body.is-landscape #match .rail-group.rail-mid,
+body.is-landscape #match .rail-group.rail-you {
+  align-items: center !important;
+  justify-items: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+body.is-portrait #match .rail-patrons,
+body.is-portrait #match .rail-group {
+  width: 52px !important;
+  max-width: 52px !important;
+}
+body.is-landscape #match .rail-patrons,
+body.is-landscape #match .rail-group {
+  width: 56px !important;
+  max-width: 56px !important;
+}
+body.is-portrait #match .patron-coin,
+body.is-landscape #match .patron-coin {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+body.is-portrait #match .patron-coin .token-dial,
+body.is-portrait #match .patron-coin .token-dial.medallion,
+body.is-portrait #match .patron-coin .token-dial.tipless,
+body.is-landscape #match .patron-coin .token-dial,
+body.is-landscape #match .patron-coin .token-dial.medallion,
+body.is-landscape #match .patron-coin .token-dial.tipless {
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 
