@@ -123,6 +123,11 @@ const cal = fillMissedLogins({ '2026-09-10': 'ok' }, '2026-09-14');
 assert(cal['2026-09-11'] === 'miss' && cal['2026-09-14'] === 'ok', 'missed days mark miss, today ok');
 const grid = loginMonthGrid({ '2026-09-14': 'ok' }, sep14);
 assert(grid.cells.some((c) => c.state === 'today' || c.state === 'ok'), 'month grid has today');
+assert(!grid.cells.some((c) => c.date && c.date < '2026-09-14' && c.state === 'miss'),
+  'days before first check-in are not red X');
+const mid = loginMonthGrid({ '2026-09-10': 'ok', '2026-09-12': 'ok', '2026-09-14': 'ok' }, sep14);
+assert(mid.cells.find((c) => c.date === '2026-09-11')?.state === 'miss', 'skipped day after start is red X');
+assert(mid.cells.find((c) => c.date === '2026-09-01')?.state === 'empty', 'pre-start days stay empty');
 
 const mp = defaultProfile();
 const win = recordMatchResult(mp, { won: true, ranked: false, patrons: ['pelin', 'hlaalu'], rivalPatrons: ['crows', 'celarus'] });

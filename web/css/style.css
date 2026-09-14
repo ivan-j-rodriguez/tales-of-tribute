@@ -1111,7 +1111,7 @@ body.skin-witches { --splash-a: rgba(255,120,30,0.28); --splash-b: rgba(80,10,20
 .cal-day.ok { color: var(--gold-bright); border-color: var(--gold); }
 .cal-day.miss { color: #e05050; border-color: #a03030; font-weight: 700; }
 .cal-day.today { box-shadow: 0 0 8px rgba(212,175,55,0.4); }
-.cal-day.future, .cal-day.pad { opacity: 0.35; }
+.cal-day.future, .cal-day.pad, .cal-day.empty { opacity: 0.35; }
 .bundle-card {
   background: var(--panel); border: var(--border); border-radius: 10px;
   padding: 0.85rem; margin-bottom: 1rem;

@@ -522,11 +522,13 @@ export function nyAddDays(nyStr, n) {
 
 export function loginMonthGrid(loginDays = {}, d = new Date()) {
   const { y, m } = nyParts(d);
-  const first = `${y}-${String(m).padStart(2, '0')}-01`;
   const firstDow = new Date(Date.UTC(y, m - 1, 1)).getUTCDay();
   const mondayPad = firstDow === 0 ? 6 : firstDow - 1;
   const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
   const today = nyDateStr(d);
+  const firstOk = Object.keys(loginDays)
+    .filter((k) => loginDays[k] === 'ok' || loginDays[k] === true)
+    .sort()[0] || today;
   const cells = [];
   for (let i = 0; i < mondayPad; i++) cells.push({ date: null, state: 'pad' });
   for (let day = 1; day <= daysInMonth; day++) {
@@ -534,8 +536,9 @@ export function loginMonthGrid(loginDays = {}, d = new Date()) {
     let state = 'future';
     if (date > today) state = 'future';
     else if (loginDays[date] === 'ok' || loginDays[date] === true) state = 'ok';
-    else if (date < today) state = 'miss';
-    else state = 'today';
+    else if (date < today && date >= firstOk) state = 'miss';
+    else if (date < today) state = 'empty';
+    else state = loginDays[date] ? 'ok' : 'today';
     cells.push({ date, day, state });
   }
   return { year: y, month: m, today, cells };

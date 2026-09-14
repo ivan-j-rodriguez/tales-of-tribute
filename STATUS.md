@@ -26,7 +26,7 @@
 - [x] Targeted abilities: full-screen pick modal (title, center row, gold select, Confirm, Show Board, Cancel). Treasury sacrifice (hand or played) → Writ of Coin. Acquire stays on the tavern (no modal). Same picks for Destroy, Knock Out, Replace, Toss, Donate/Discard, Refresh, Confine, Heal, Choose A/B. AI still auto-picks. After confirm: dissolve / KO slash + fly to cooldown / buy arc. End turn streams Power → Prestige.
 - [x] Patron-uses is a smaller gold octagon on the hourglass rail that greys when spent — not a 4th equal resource pip.
 
-## Phase B — Club / meta (build 32)
+## Phase B — Club / meta (build 34)
 
 - [x] Cutpurse-style rewards on **win only**; modest match gold (5/1 casual, 8/2 ranked)
 - [x] Endgame deck gates: fragments **and** one clue for every base card
@@ -52,11 +52,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-<<<<<<< HEAD
-`docs/` is a copy of `web/`. Cache-bust `?v=33`.
-=======
-`docs/` is a copy of `web/`. Cache-bust `?v=32`.
->>>>>>> 3303784 (Rebuild Club economy: rotating rarity shop, collection tabs, challenges.)
+`docs/` is a copy of `web/`. Cache-bust `?v=34`. Overlay board from build 33 is the table source of truth.
 
 | Fix | Notes |
 |---|---|
