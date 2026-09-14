@@ -211,12 +211,12 @@ body.is-portrait #match .tavern-zone .card {
 body.is-portrait #match #hand-zone .card,
 body.is-portrait #match #hand-zone button.card,
 body.is-portrait #match .you-fan .card {
-  width: min(72px, calc((100% + 1.2rem) / 5.1)) !important;
+  width: min(66px, calc((100% + 1.8rem) / 5.35)) !important;
   height: auto !important;
   aspect-ratio: 1 / 1.52 !important;
-  min-height: 96px !important;
+  min-height: 90px !important;
   max-height: 94% !important;
-  margin: 0 -8px !important;
+  margin: 0 -14px !important;
 }
 
 body.is-portrait #match .rival-fan .card,
