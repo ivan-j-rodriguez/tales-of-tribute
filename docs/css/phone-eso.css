@@ -144,14 +144,15 @@
   gap: 2px 6px !important;
   overflow: hidden !important;
   background: transparent !important;
-  align-items: stretch !important;
+  align-content: center !important;
+  align-items: center !important;
   justify-items: stretch !important;
   grid-template-columns: 1fr !important;
   grid-template-rows:
     auto
     auto
     auto
-    minmax(0, 1fr)
+    auto
     auto
     auto
     auto !important;
@@ -815,11 +816,12 @@ body.is-portrait #match .felt-table {
   padding: 22px 0 4px !important;
   gap: 2px 0 !important;
   grid-template-columns: 1fr !important;
+  align-content: center !important;
   grid-template-rows:
     auto
     auto
     auto
-    minmax(0, 1fr)
+    auto
     auto
     auto
     auto !important;

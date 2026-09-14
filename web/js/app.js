@@ -2905,6 +2905,7 @@ function layoutMetrics() {
     const r = el.getBoundingClientRect();
     return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right };
   });
+  const cardH = cards[0]?.h || 0;
   let overlap = 0;
   for (let i = 1; i < cards.length; i++) {
     overlap = Math.max(overlap, cards[i - 1].right - cards[i].x);
@@ -2917,6 +2918,10 @@ function layoutMetrics() {
     && Math.abs(youTok.y - oppTok.y) < 36
     && Math.abs(youTok.x - oppTok.x) < 28
     && youTok.y > hg.y);
+  const hiddenCards = cards.filter((c) => {
+    const covered = rail ? Math.max(0, c.right - rail.x) : 0;
+    return c.w > 0 && covered / c.w > 0.45;
+  }).length;
   return {
     vw, vh,
     matchW: match?.w || 0,
@@ -2930,7 +2935,10 @@ function layoutMetrics() {
     leftGutterPct: feltW ? +(leftGutter / feltW * 100).toFixed(1) : 0,
     rightGutterPct: feltW ? +(rightGutter / feltW * 100).toFixed(1) : 0,
     cardCount: cards.length,
+    cardH: +cardH.toFixed(1),
     cardOverlap: +overlap.toFixed(1),
+    hiddenCards,
+    cards: cards.map((c) => ({ x: +c.x.toFixed(0), w: +c.w.toFixed(0), h: +c.h.toFixed(0) })),
     railW: rail?.w || 0,
     tokensStacked,
     youTok, oppTok, hg,

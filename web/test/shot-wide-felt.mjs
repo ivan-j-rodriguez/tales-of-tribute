@@ -44,7 +44,12 @@ async function ready(page) {
   await page.waitForFunction(() => window.__totTest, { timeout: 20000 });
   await page.evaluate(() => window.__totTest.startQuick());
   await page.waitForFunction(() => window.__totTest.snapshot().hand > 0, { timeout: 8000 });
-  await new Promise(r => setTimeout(r, 400));
+  await page.waitForFunction(() => {
+    const faces = [...document.querySelectorAll('#tavern-zone .card img, #hand-zone .card img')];
+    const sized = [...document.querySelectorAll('#tavern-zone .card')].every(el => el.getBoundingClientRect().height > 40);
+    return sized && faces.length && faces.every(img => img.complete && img.naturalWidth > 0);
+  }, { timeout: 10000 });
+  await new Promise(r => setTimeout(r, 250));
 }
 
 function fail(msg, extra) {
@@ -59,6 +64,28 @@ async function measure(page, name, { w, h }) {
   await page.screenshot({ path: destArt });
   await page.screenshot({ path: destWs });
   const m = await page.evaluate(() => window.__totTest.layout());
+  const debug = await page.evaluate(() => {
+    const ids = ['#opp-res', '#match .felt-tavern', '#you-res', '#tavern-zone', '#hand-zone'];
+    const box = (sel) => {
+      const el = document.querySelector(sel);
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      return { sel, x: +r.x.toFixed(1), y: +r.y.toFixed(1), w: +r.width.toFixed(1), h: +r.height.toFixed(1), area: cs.gridArea, row: cs.gridRow };
+    };
+    const felt = document.querySelector('#match .felt-table');
+    const fcs = felt ? getComputedStyle(felt) : null;
+    return {
+      grid: fcs ? { rows: fcs.gridTemplateRows, areas: fcs.gridTemplateAreas, cols: fcs.gridTemplateColumns } : null,
+      zones: ids.map(box),
+      cards: [...document.querySelectorAll('#tavern-zone .card')].map((el, i) => {
+        const r = el.getBoundingClientRect();
+        const img = el.querySelector('img');
+        return { i, x: +r.x.toFixed(1), y: +r.y.toFixed(1), w: +r.width.toFixed(1), h: +r.height.toFixed(1), src: img?.getAttribute('src') || '', nw: img?.naturalWidth || 0 };
+      }),
+    };
+  });
+  console.log('debug', name, JSON.stringify(debug));
   const snap = await page.evaluate(() => window.__totTest.snapshot());
   const notes = {
     name, viewport: `${w}x${h}`,
@@ -68,7 +95,9 @@ async function measure(page, name, { w, h }) {
     leftGutterPct: m.leftGutterPct,
     rightGutterPct: m.rightGutterPct,
     cardCount: m.cardCount,
+    cardH: m.cardH,
     cardOverlap: m.cardOverlap,
+    hiddenCards: m.hiddenCards,
     tokensStacked: m.tokensStacked,
     railW: +m.railW.toFixed(1),
     triadCount: snap.triadCount,
@@ -76,11 +105,12 @@ async function measure(page, name, { w, h }) {
     treasuryHasTip: snap.treasuryHasTip,
   };
   if (m.viewportTavernPct < 72) fail(`${name} tavern ${m.viewportTavernPct}% < 72%`, notes);
+  if ((m.hiddenCards || 0) > 0) fail(`${name} ${m.hiddenCards} tavern card(s) hidden under the rail`, notes);
+  if ((m.cardH || 0) < 48) fail(`${name} tavern cards too short (${m.cardH}px)`, notes);
   if (m.cardCount >= 2 && m.cardOverlap > 18) fail(`${name} tavern cards overlap ${m.cardOverlap}px`, notes);
   if (m.tokensStacked) fail(`${name} two patron-use tokens stacked under hourglass`, notes);
-  if (h < w && (m.leftGutterPct > 14 || m.rightGutterPct > 14)) {
-    fail(`${name} landscape gutters too wide`, notes);
-  }
+  /* Right-side space is the patron overlay on felt, not a letterbox. Fail only a fat LEFT dead column. */
+  if (h < w && m.leftGutterPct > 10) fail(`${name} landscape left gutter too wide`, notes);
   if (snap.triadCount !== 3) fail(`${name} resource triad is not 3`, notes);
   console.log('ok ', JSON.stringify(notes));
   return notes;
