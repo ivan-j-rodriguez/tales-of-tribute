@@ -30,8 +30,8 @@ import {
   continueAsGuest, signOut, markAccountSeen, accountSeen, permissionCopy,
 } from './auth.js';
 import {
-  createVoice, enableVoice, disableVoice, setMuted, handleVoiceMessage,
-  voiceStatusLine, canUseVoice, voicePref, setVoicePref,
+  createVoice, enableVoice, disableVoice, disableVoiceIfDisallowed, setMuted,
+  handleVoiceMessage, voiceStatusLine, canUseVoice, voiceMicVisible,
 } from './voice.js';
 import { setMusicEnabled, preferMusicFromStorage, warmMuted, playSfx, setMusicCue, setSfxStyle, getSfxStyle, setSfxEnabled, preferSfxFromStorage, isSfxOn } from './music.js';
 import { applyOfficialPatronText, applyOfficialCardText, cardPlayLines, cardComboLines } from './texts.js';
@@ -374,7 +374,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 45';
+  if (stamp) stamp.textContent = 'build 46';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -1933,7 +1933,7 @@ function startMatch(opts = {}) {
   lastRes = { you: {}, opp: {} };
   show('#match');
   renderMatch();
-  paintVoiceChrome();
+  syncVoiceToMatchMode();
   if (isTutorialMatch || (opts.tour && !localStorage.getItem(TOUR_KEY))) {
     startTour(true);
   }
@@ -3282,6 +3282,7 @@ function renderEncy() {
 /* ——— Modes ——— */
 function beginDeckPick(mode) {
   matchMode = mode;
+  syncVoiceToMatchMode();
   pickYou = []; pickOpp = []; pickPhase = 'you';
   isRandomMatch = false;
   isRankedMatch = mode === 'ranked' || isRankedMatch;
@@ -3388,6 +3389,7 @@ function beginRankedDeckPick() {
 
 function beginHotseatPick() {
   matchMode = 'hotseat';
+  syncVoiceToMatchMode();
   pickYou = []; pickOpp = []; pickPhase = 'you';
   isRandomMatch = false;
   isRankedMatch = false;
@@ -3622,6 +3624,7 @@ function startGauntletStop(stop) {
   isRandomMatch = false;
   gauntletStopIndex = GAUNTLET_STOPS.findIndex(s => s.id === stop.id);
   matchMode = 'ai';
+  syncVoiceToMatchMode();
   pickYou = [...stop.you];
   pickOpp = [...stop.opp];
   setHourglass(false);
@@ -3636,6 +3639,7 @@ function startTutorialMatch() {
   isGauntletMatch = false;
   gauntletStopIndex = null;
   matchMode = 'ai';
+  syncVoiceToMatchMode();
   pickYou = ['pelin', 'hlaalu'];
   pickOpp = ['crows', 'celarus'];
   setHourglass(false);
@@ -3704,8 +3708,13 @@ function closeAccountOverlay() {
   renderAccountChrome();
 }
 
+function syncVoiceToMatchMode() {
+  disableVoiceIfDisallowed(voice, net, matchMode);
+  paintVoiceChrome();
+}
+
 function paintVoiceChrome() {
-  const live = !!(voice.wanted || voice.live);
+  const live = voiceMicVisible(matchMode, voice);
   const btn = $('#btn-match-voice');
   if (btn) {
     btn.hidden = !live;
@@ -3724,7 +3733,6 @@ function paintVoiceChrome() {
 }
 
 async function applyVoiceWanted(on) {
-  setVoicePref(!!on);
   if (!on) {
     disableVoice(voice, net);
     paintVoiceChrome();
@@ -3870,6 +3878,7 @@ function bind() {
   $('#btn-random-match').onclick = () => {
     if (isRankedMatch) { toast('Ranked is player vs player — no random AI match.'); return; }
     matchMode = 'ai';
+    syncVoiceToMatchMode();
     startRandomMatch();
   };
 
@@ -4328,6 +4337,26 @@ function installTestHook() {
     },
     startTutorial() {
       startTutorialMatch();
+    },
+    startWithStuckVoice(mode = 'hotseat') {
+      $('#login-overlay')?.classList.remove('show');
+      $('#account-overlay')?.classList.remove('show');
+      $('#crate-overlay')?.classList.remove('show');
+      try { localStorage.setItem(TOUR_KEY, '1'); } catch {}
+      voice.wanted = true;
+      voice.live = true;
+      pickYou = ['pelin', 'hlaalu'];
+      pickOpp = ['crows', 'celarus'];
+      isRandomMatch = false;
+      isRankedMatch = false;
+      isGauntletMatch = false;
+      isTutorialMatch = false;
+      if (mode === 'hotseat') beginHotseatPick();
+      else beginDeckPick('ai');
+      startMatch({ playerFirst: true, difficulty: 1 });
+    },
+    voiceMicHidden() {
+      return !!$('#btn-match-voice')?.hidden;
     },
     openSettingsScreen() {
       $('#login-overlay')?.classList.remove('show');

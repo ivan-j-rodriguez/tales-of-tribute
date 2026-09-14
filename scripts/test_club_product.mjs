@@ -18,7 +18,10 @@ import {
   signUpEmail, signInEmail, continueAsGuest, signOut, isSignedIn, currentSession,
   mergeProfiles, providerStatus, accountHint, permissionCopy,
 } from '../web/js/auth.js';
-import { createVoice, voiceStatusLine, canUseVoice, setMuted } from '../web/js/voice.js';
+import {
+  createVoice, voiceStatusLine, canUseVoice, setMuted,
+  voiceMicVisible, disableVoice, disableVoiceIfDisallowed,
+} from '../web/js/voice.js';
 
 const cards = JSON.parse(readFileSync(new URL('../data/cards.json', import.meta.url), 'utf8')).cards;
 
@@ -36,8 +39,8 @@ assert(/shop|today/i.test(buyErr.error || '') && !/slate/i.test(buyErr.error || 
 const html = readFileSync(new URL('../web/index.html', import.meta.url), 'utf8');
 assert(!/Daily slate/i.test(html), 'index has no Daily slate');
 assert(/Daily stock/.test(html), 'index has Daily stock');
-assert(/build 44/.test(html), 'splash stamp is build 44');
-assert(/\?v=44/.test(html), 'cache bust is 44');
+assert(/build 46/.test(html), 'splash stamp is build 46');
+assert(/\?v=46/.test(html), 'cache bust is 46');
 const splash = html.split('id="splash"')[1]?.split('id="ranked"')[0] || '';
 assert(!/Unofficial/i.test(splash), 'splash body has no unofficial line');
 assert(/id="account-disclaimer"/.test(html) && /id="about-disclaimer"/.test(html), 'disclaimers live on login and About');
@@ -84,6 +87,32 @@ assert(!canUseVoice('ai') && !canUseVoice('hotseat'), 'voice not offered vs AI o
 assert(canUseVoice('remote-host') && canUseVoice('remote-guest'), 'voice offered in Friend/Ranked remote');
 setMuted(voice, true);
 assert(voice.muted, 'mute flag works without a live mic');
+
+const leftover = createVoice();
+leftover.wanted = true;
+leftover.live = true;
+assert(!voiceMicVisible('hotseat', leftover), 'Mic hidden on Hotseat even if Friend voice was on');
+assert(!voiceMicVisible('ai', leftover), 'Mic hidden vs AI even if Friend voice was on');
+assert(voiceMicVisible('remote-host', leftover), 'Mic shown in Friend remote when wanted');
+assert(voiceMicVisible('remote-guest', leftover), 'Mic shown in Ranked guest when wanted');
+assert(!voiceMicVisible('remote-host', createVoice()), 'Mic hidden in remote when voice is off');
+disableVoiceIfDisallowed(leftover, null, 'hotseat');
+assert(!leftover.wanted && !leftover.live, 'entering Hotseat clears leftover Friend voice');
+const keepRemote = createVoice();
+keepRemote.wanted = true;
+disableVoiceIfDisallowed(keepRemote, null, 'remote-host');
+assert(keepRemote.wanted, 'Friend remote keeps wanted');
+disableVoiceIfDisallowed(keepRemote, null, 'ai');
+assert(!keepRemote.wanted && !keepRemote.live, 'entering AI clears leftover Friend voice');
+disableVoice(leftover, null);
+assert(!leftover.wanted && !leftover.live, 'disableVoice clears wanted/live');
+
+assert(/voiceMicVisible\(matchMode, voice\)/.test(app), 'paintVoiceChrome gates Mic on canUseVoice');
+assert(/function beginHotseatPick[\s\S]{0,80}syncVoiceToMatchMode/.test(app), 'Hotseat entry clears voice');
+assert(/function beginDeckPick[\s\S]{0,80}syncVoiceToMatchMode/.test(app), 'deck-pick entry syncs voice to mode');
+assert(/function startTutorialMatch[\s\S]{0,400}syncVoiceToMatchMode/.test(app), 'tutorial AI entry clears voice');
+assert(/function startGauntletStop[\s\S]{0,500}syncVoiceToMatchMode/.test(app), 'gauntlet AI entry clears voice');
+assert(!/voicePref\(/.test(app), 'dead voicePref is not imported');
 
 await continueAsGuest();
 assert(currentSession().guest, 'guest continue works');

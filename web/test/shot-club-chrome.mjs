@@ -62,7 +62,7 @@ function overlap(a, b) {
 const splash = await pageAt('?test=1');
 const stamp = await splash.$eval('#build-stamp', (el) => el.textContent);
 console.log('stamp', stamp);
-if (!/build 44/.test(stamp)) throw new Error(`expected build 44, got ${stamp}`);
+if (!/build 46/.test(stamp)) throw new Error(`expected build 46, got ${stamp}`);
 await shot(splash, 'club_splash.png');
 await splash.close();
 

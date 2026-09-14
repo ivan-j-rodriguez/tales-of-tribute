@@ -109,6 +109,24 @@ if (!/Unofficial/i.test(aboutCopy.text) || !/not for sale/i.test(aboutCopy.text)
 await shot(about, 'club_settings_about.png');
 await about.close();
 
+const leak = await pageAt('?test=1');
+const hotseatMic = await leak.evaluate(() => {
+  window.__totTest.startWithStuckVoice('hotseat');
+  return window.__totTest.voiceMicHidden();
+});
+console.log('hotseat mic hidden', hotseatMic);
+if (!hotseatMic) throw new Error('Hotseat Mic must stay hidden after leftover Friend voice');
+await leak.close();
+
+const aiLeak = await pageAt('?test=1');
+const aiMic = await aiLeak.evaluate(() => {
+  window.__totTest.startWithStuckVoice('ai');
+  return window.__totTest.voiceMicHidden();
+});
+console.log('ai mic hidden', aiMic);
+if (!aiMic) throw new Error('AI Mic must stay hidden after leftover Friend voice');
+await aiLeak.close();
+
 await browser.close();
 server.close();
 console.log('club product shots ok');
