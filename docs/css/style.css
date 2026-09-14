@@ -111,6 +111,9 @@ body.skin-nightblade { --splash-a: rgba(190,210,255,0.22); --splash-b: rgba(160,
 body.skin-arcanist { --splash-a: rgba(212,175,55,0.22); --splash-b: rgba(40,180,80,0.28); --splash-c: rgba(80,230,120,0.12); --splash-base: #03100a; --splash-mid: #0a1810; }
 body.skin-warden { --splash-a: rgba(190,235,255,0.24); --splash-b: rgba(30,120,70,0.36); --splash-c: rgba(140,220,200,0.14); --splash-base: #061410; --splash-mid: #0c241c; }
 body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,150,40,0.22); --splash-c: rgba(80,20,10,0.35); --splash-base: #0a0404; --splash-mid: #1a0a08; }
+body.skin-undaunted { --splash-a: rgba(210,170,90,0.28); --splash-b: rgba(80,50,20,0.4); --splash-c: rgba(180,120,50,0.16); --splash-base: #0e0a08; --splash-mid: #1a1410; }
+body.skin-high-seas { --splash-a: rgba(60,220,230,0.26); --splash-b: rgba(10,60,90,0.4); --splash-c: rgba(240,210,140,0.14); --splash-base: #041018; --splash-mid: #0a2430; }
+body.skin-witches { --splash-a: rgba(255,120,30,0.28); --splash-b: rgba(80,10,20,0.4); --splash-c: rgba(20,0,10,0.3); --splash-base: #0a0406; --splash-mid: #18080c; }
 
 .splash-frame {
   max-width: 36rem;
@@ -1023,6 +1026,96 @@ body.skin-dragonknight { --splash-a: rgba(255,80,20,0.28); --splash-b: rgba(255,
 .skin-swatch.arcanist { background: linear-gradient(135deg, #0a1810, #d4af37 40%, #2ad060); }
 .skin-swatch.warden { background: linear-gradient(135deg, #0c241c, #7ec8d8 45%, #2a8050); }
 .skin-swatch.dragonknight { background: linear-gradient(135deg, #1a0a08, #ff5014 50%, #ff9628); }
+.skin-swatch.undaunted { background: linear-gradient(135deg, #1a1410, #c9a06a 50%, #6a4a22); }
+.skin-swatch.high-seas { background: linear-gradient(135deg, #041018, #3ec8d8 45%, #f0d28c); }
+.skin-swatch.witches { background: linear-gradient(135deg, #18080c, #e07020 50%, #3a080c); }
+
+.store-timer {
+  font-family: 'Cinzel', serif;
+  color: var(--gold-bright);
+  font-size: 0.9rem;
+  margin: 0 0 0.8rem;
+}
+.store-item .rarity-pip {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+}
+.rarity-common { color: #d0d0d0; }
+.rarity-fine { color: #6fc56f; }
+.rarity-superior { color: #5aa0e8; }
+.rarity-epic { color: #c070e8; }
+.rarity-legendary { color: #e8b84a; }
+.store-item.soldout { opacity: 0.55; }
+.store-item.later { opacity: 0.5; filter: grayscale(0.25); }
+.store-item.later button { display: none; }
+.season-banner {
+  background: var(--panel);
+  border: var(--border);
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  margin-bottom: 0.6rem;
+}
+.season-banner h4 { font-family: 'Cinzel', serif; color: var(--gold-bright); margin: 0 0 0.3rem; }
+.season-banner p { font-size: 0.8rem; color: var(--ink-dim); margin: 0; }
+.season-complete { margin: 0.5rem 0 0.75rem; }
+
+.coll-tabs {
+  display: flex; flex-wrap: wrap; gap: 0.4rem;
+  margin: 0 0 0.75rem;
+}
+.coll-tab {
+  font-family: 'Cinzel', serif;
+  background: var(--wood-mid);
+  color: var(--ink);
+  border: var(--border);
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+}
+.coll-tab.active {
+  color: var(--gold-bright);
+  border-color: var(--gold);
+  box-shadow: 0 0 10px rgba(212,175,55,0.3);
+}
+.clue-card { text-align: center; padding: 0.5rem; }
+.clue-card img, .clue-card .clue-unknown {
+  width: 100%; aspect-ratio: 1/1.3; object-fit: cover; object-position: top;
+  border-radius: 6px; display: block; border: 1px solid var(--gold-dim);
+}
+.clue-card .clue-unknown {
+  background: repeating-linear-gradient(45deg, #1a1008, #1a1008 8px, #120c08 8px, #120c08 16px);
+  display: grid; place-items: center; color: var(--ink-dim); font-size: 1.4rem;
+}
+.clue-card.unknown { opacity: 0.75; }
+.clue-card .tag { font-size: 0.7rem; color: var(--ink-dim); margin-top: 0.3rem; }
+.clue-deck { margin-bottom: 1.2rem; }
+.clue-deck-head {
+  display: flex; gap: 0.75rem; align-items: center;
+  margin-bottom: 0.5rem;
+}
+.clue-deck-head img {
+  width: 56px; height: 56px; border-radius: 50%;
+  border: 2px solid var(--gold-dim); object-fit: cover;
+}
+.clue-deck-head h3 { font-family: 'Cinzel', serif; color: var(--gold-bright); margin: 0; }
+.login-cal {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 4px; max-width: 380px; margin-bottom: 1rem;
+}
+.cal-dow { text-align: center; font-size: 0.65rem; color: var(--ink-dim); letter-spacing: 0.06em; }
+.cal-day {
+  aspect-ratio: 1; border: 1px solid var(--gold-dim); border-radius: 6px;
+  display: grid; place-items: center; font-size: 0.7rem; background: var(--panel);
+}
+.cal-day.ok { color: var(--gold-bright); border-color: var(--gold); }
+.cal-day.miss { color: #e05050; border-color: #a03030; font-weight: 700; }
+.cal-day.today { box-shadow: 0 0 8px rgba(212,175,55,0.4); }
+.cal-day.future, .cal-day.pad, .cal-day.empty { opacity: 0.35; }
+.bundle-card {
+  background: var(--panel); border: var(--border); border-radius: 10px;
+  padding: 0.85rem; margin-bottom: 1rem;
+}
 
 .friend-modes {
   display: flex; flex-direction: column; gap: 0.75rem;
