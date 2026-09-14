@@ -188,6 +188,8 @@ function syncBoardLayout() {
   board.style.height = '100%';
   board.style.maxWidth = 'none';
   board.style.transform = 'none';
+  layoutFan($('#hand-zone'), false);
+  layoutFan($('#opp-hand-zone'), true);
 }
 
 let lastToast = '';
@@ -374,7 +376,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 48';
+  if (stamp) stamp.textContent = 'build 49';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -1328,6 +1330,25 @@ function renderMatch() {
   syncBoardLayout();
 }
 
+function cardTopCenterX(el) {
+  if (!el) return 0;
+  try {
+    if (typeof el.getBoxQuads === 'function') {
+      const q = el.getBoxQuads({ box: 'border' })[0];
+      if (q) return (q.p1.x + q.p2.x) / 2;
+    }
+  } catch { /* layout-only; AABB fallback */ }
+  const r = el.getBoundingClientRect();
+  return r.left + r.width / 2;
+}
+
+function fanMidTopX(cards) {
+  const n = cards.length;
+  if (!n) return null;
+  if (n % 2 === 1) return cardTopCenterX(cards[(n - 1) / 2]);
+  return (cardTopCenterX(cards[n / 2 - 1]) + cardTopCenterX(cards[n / 2])) / 2;
+}
+
 function layoutFan(container, rival = false) {
   if (!container) return;
   const cards = [...container.children];
@@ -1336,6 +1357,8 @@ function layoutFan(container, rival = false) {
     card.style.left = '';
     card.style.top = '';
     card.style.bottom = '';
+    card.style.transform = '';
+    card.style.setProperty('--fan-tf', 'none');
     card.style.zIndex = String(i + 1);
   });
   if (!n) return;
@@ -1345,14 +1368,33 @@ function layoutFan(container, rival = false) {
     : Math.min(phone ? 18 : 28, 5 + n * (phone ? 2.4 : 3));
   const start = -spread / 2;
   const step = n === 1 ? 0 : spread / (n - 1);
-  cards.forEach((card, i) => {
+  const poses = cards.map((card, i) => {
     const rot = start + step * i;
     const y = Math.abs(rot) * (rival ? 0.28 : 0.4);
-    const fan = `rotate(${rot.toFixed(2)}deg) translateY(${rival ? y : -y}px)`;
-    card.style.setProperty('--fan-tf', fan);
-    card.style.transform = fan;
-    card.style.zIndex = String(i + 1);
+    return { card, rot, y };
   });
+  const apply = (dx) => {
+    poses.forEach(({ card, rot, y }, i) => {
+      const shift = dx ? `translateX(${dx.toFixed(2)}px) ` : '';
+      const fan = `${shift}rotate(${rot.toFixed(2)}deg) translateY(${rival ? y : -y}px)`;
+      card.style.setProperty('--fan-tf', fan);
+      card.style.transform = fan;
+      card.style.zIndex = String(i + 1);
+    });
+  };
+  apply(0);
+  const vw = window.innerWidth;
+  const midX = fanMidTopX(cards);
+  if (midX == null) return;
+  let dx = vw / 2 - midX;
+  const landscape = document.body.classList.contains('is-landscape');
+  const first = cards[0].getBoundingClientRect();
+  const last = cards[n - 1].getBoundingClientRect();
+  const leftLimit = landscape ? 40 : 46;
+  const rightLimit = landscape ? vw - 124 : vw - 72;
+  if (first.left + dx < leftLimit) dx = leftLimit - first.left;
+  if (last.right + dx > rightLimit) dx = Math.min(dx, rightLimit - last.right);
+  if (Math.abs(dx) >= 0.5) apply(dx);
 }
 
 function flashFx(card, kind) {
@@ -4240,6 +4282,22 @@ function layoutMetrics() {
     && hg.x < vw * 0.24
     && hg.bottom > vh * 0.55
     && (!leaveHud || hg.y >= leaveHud.bottom - 6));
+  const youHandEls = [...document.querySelectorAll('#hand-zone > .card, #hand-zone > button.card')];
+  const oppHandEls = [...document.querySelectorAll('#opp-hand-zone > .card')];
+  const youHandMidX = fanMidTopX(youHandEls);
+  const oppHandMidX = fanMidTopX(oppHandEls);
+  const youHandMidDx = youHandMidX == null ? null : +(youHandMidX - vw / 2).toFixed(2);
+  const oppHandMidDx = oppHandMidX == null ? null : +(oppHandMidX - vw / 2).toFixed(2);
+  const youHandMidCard = youHandEls.length % 2 === 1 ? youHandEls[(youHandEls.length - 1) / 2] : null;
+  const youHandMidTop = youHandMidCard ? youHandMidCard.getBoundingClientRect().y : null;
+  const youHandSpan = youHandEls.length ? (() => {
+    const rs = youHandEls.map((el) => el.getBoundingClientRect());
+    const x = Math.min(...rs.map((r) => r.x));
+    const y = Math.min(...rs.map((r) => r.y));
+    const right = Math.max(...rs.map((r) => r.right));
+    const bottom = Math.max(...rs.map((r) => r.bottom));
+    return { x, y, w: right - x, h: bottom - y, right, bottom };
+  })() : null;
   const tavernCardsTop = tavernCards.length ? Math.min(...tavernCards.map((c) => c.y)) : 0;
   const tavernCardsBot = tavernCards.length ? Math.max(...tavernCards.map((c) => c.bottom)) : 0;
   const oppResToCards = oppRes ? Math.max(0, tavernCardsTop - oppRes.bottom) : 0;
@@ -4266,6 +4324,8 @@ function layoutMetrics() {
     hudVsYouDraw: hit(leaveHud, youDraw) || hit(leaveBtn, youDraw),
     endTurnVsYouDraw: hit(hg, youDraw),
     endTurnVsHud: hit(hg, leaveHud),
+    handVsYouDraw: hit(youHandSpan, youDraw),
+    handVsYouCd: hit(youHandSpan, youCd),
   };
   return {
     vw, vh,
@@ -4306,6 +4366,14 @@ function layoutMetrics() {
     cdRightGap: +cdRightGap.toFixed(1),
     hudIsLeftStrip,
     endTurnBottomLeft,
+    hudTop: leaveHud ? +leaveHud.y.toFixed(1) : null,
+    youHandCount: youHandEls.length,
+    youHandMidX: youHandMidX == null ? null : +youHandMidX.toFixed(2),
+    youHandMidDx,
+    youHandMidTop: youHandMidTop == null ? null : +youHandMidTop.toFixed(1),
+    oppHandCount: oppHandEls.length,
+    oppHandMidX: oppHandMidX == null ? null : +oppHandMidX.toFixed(2),
+    oppHandMidDx,
     oppResToCards: +oppResToCards.toFixed(1),
     youResToCards: +youResToCards.toFixed(1),
     tavernSideSlack: +tavernSideSlack.toFixed(1),

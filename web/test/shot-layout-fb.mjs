@@ -72,6 +72,25 @@ async function ready(page) {
   await new Promise(r => setTimeout(r, 280));
 }
 
+async function paintMidline(page, on) {
+  await page.evaluate((show) => {
+    document.getElementById('tot-review-midline')?.remove();
+    if (!show) return;
+    const line = document.createElement('div');
+    line.id = 'tot-review-midline';
+    line.style.cssText = 'position:fixed;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:#e11;z-index:99999;pointer-events:none;';
+    const cards = [...document.querySelectorAll('#hand-zone > .card, #hand-zone > button.card')];
+    const mid = cards.length % 2 === 1 ? cards[(cards.length - 1) / 2] : null;
+    if (mid) {
+      const r = mid.getBoundingClientRect();
+      const dot = document.createElement('div');
+      dot.style.cssText = `position:fixed;left:${r.left + r.width / 2 - 5}px;top:${r.top - 5}px;width:10px;height:10px;border-radius:50%;background:#e11;z-index:100000;pointer-events:none;`;
+      line.appendChild(dot);
+    }
+    document.body.appendChild(line);
+  }, on);
+}
+
 async function closeUp(page, name, boxes, vw, vh) {
   const union = boxes.filter(Boolean).reduce((acc, b) => {
     if (!acc) return { x: b.x, y: b.y, w: b.w, h: b.h };
@@ -117,6 +136,11 @@ async function measure(page, fileStem, { w, h }) {
     cdRightGap: m.cdRightGap,
     hudIsLeftStrip: m.hudIsLeftStrip,
     endTurnBottomLeft: m.endTurnBottomLeft,
+    hudTop: m.hudTop,
+    youHandCount: m.youHandCount,
+    youHandMidX: m.youHandMidX,
+    youHandMidDx: m.youHandMidDx,
+    oppHandMidDx: m.oppHandMidDx,
     oppResToCards: m.oppResToCards,
     youResToCards: m.youResToCards,
     tavernDiscard: m.tavernDiscard,
@@ -159,9 +183,22 @@ async function measure(page, fileStem, { w, h }) {
       if ((m.cdRightGap ?? 0) < -2) fail(`${fileStem} COOLDOWN clipped past the right edge (gap ${m.cdRightGap}px)`, notes);
       if (!m.hudIsLeftStrip) fail(`${fileStem} match-actions not a mid-left vertical strip`, notes);
       if (!m.endTurnBottomLeft) fail(`${fileStem} End Turn not bottom-left under the left strip`, notes);
+      if (m.youHandCount !== 5) fail(`${fileStem} expected opening 5-card hand (got ${m.youHandCount})`, notes);
+      if (m.youHandMidDx == null || Math.abs(m.youHandMidDx) > 4) {
+        fail(`${fileStem} hand mid-card top not on vertical center (dx ${m.youHandMidDx}px, need ≤4)`, notes);
+      }
+      if (m.oppHandCount >= 3 && m.oppHandMidDx != null && Math.abs(m.oppHandMidDx) > 8) {
+        fail(`${fileStem} opp hand mid-card off vertical center (dx ${m.oppHandMidDx}px)`, notes);
+      }
+      /* Build 48 portrait strip sat at top:56% ≈ 473px on 844vh. Need a clear lift. */
+      if ((m.hudTop ?? 99) > 449) fail(`${fileStem} left strip not shifted up (hudTop ${m.hudTop}, build48 was ~473)`, notes);
     } else {
       if ((m.cdRightGap ?? 99) > 130) fail(`${fileStem} landscape COOLDOWN still far from right (gap ${m.cdRightGap}px)`, notes);
       if (!m.hudIsLeftStrip) fail(`${fileStem} landscape match-actions not on the left strip`, notes);
+      if (m.youHandCount !== 5) fail(`${fileStem} expected opening 5-card hand (got ${m.youHandCount})`, notes);
+      if (m.youHandMidDx == null || Math.abs(m.youHandMidDx) > 4) {
+        fail(`${fileStem} landscape hand mid-card top not on vertical center (dx ${m.youHandMidDx}px, need ≤4)`, notes);
+      }
     }
   }
 
@@ -183,6 +220,8 @@ async function measure(page, fileStem, { w, h }) {
     'hudVsYouDraw',
     'endTurnVsYouDraw',
     'endTurnVsHud',
+    'handVsYouDraw',
+    'handVsYouCd',
   ];
   for (const key of mustClear) {
     if (hits[key]) fail(`${fileStem} overlap ${key}`, { hit: hits[key], notes });
@@ -205,6 +244,16 @@ await closeUp(portPage, `${TAG}-portrait-end-turn`, [pBoxes.endTurn, pBoxes.patr
 await closeUp(portPage, `${TAG}-portrait-draw-left`, [pBoxes.oppDraw, pBoxes.youDraw, pBoxes.deck], 390, 844);
 await closeUp(portPage, `${TAG}-portrait-cd-right`, [pBoxes.oppCd, pBoxes.youCd], 390, 844);
 await closeUp(portPage, `${TAG}-portrait-left-strip`, [pBoxes.leaveHud, pBoxes.endTurn, pBoxes.youDraw], 390, 844);
+const treasuryBox = await portPage.evaluate(() => {
+  const el = document.querySelector('#rail-patrons .patron-coin[data-pid="treasury"], #rail-patrons .patron-coin.treasury');
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  return { x: r.x, y: r.y, w: r.width, h: r.height };
+});
+await closeUp(portPage, `${TAG}-portrait-treasury`, [treasuryBox], 390, 844);
+await paintMidline(portPage, true);
+await portPage.screenshot({ path: path.join(ART, `${TAG}-portrait-hand-center.png`), fullPage: false });
+await paintMidline(portPage, false);
 
 await portPage.evaluate(() => window.__totTest.playFirstGold());
 await new Promise(r => setTimeout(r, 420));
@@ -233,6 +282,9 @@ const lBoxes = results.landscape.boxes;
 await closeUp(landPage, `${TAG}-landscape-tavern-vs-piles`, [lBoxes.tavern, lBoxes.deck, lBoxes.oppDraw, lBoxes.youDraw], 844, 390);
 await closeUp(landPage, `${TAG}-landscape-left-gutter`, [lBoxes.oppDraw, lBoxes.deck, lBoxes.youDraw, lBoxes.events], 844, 390);
 await closeUp(landPage, `${TAG}-landscape-right-gutter`, [lBoxes.patronRail, lBoxes.endTurn, lBoxes.oppCd, lBoxes.youCd], 844, 390);
+await paintMidline(landPage, true);
+await landPage.screenshot({ path: path.join(ART, `${TAG}-landscape-hand-center.png`), fullPage: false });
+await paintMidline(landPage, false);
 
 await landPage.evaluate(() => window.__totTest.inspectById('customs-seizure') || window.__totTest.inspectById('toll-of-flesh'));
 await new Promise(r => setTimeout(r, 420));
@@ -246,15 +298,16 @@ if (lFit.titleClipped) fail('landscape inspect title clipped', lFit);
 await landPage.close();
 
 const note = [
-  `Build 48 layout-fb (${TAG})`,
+  `Build 49 layout-fb (${TAG})`,
   `portrait 390x844: tavern ${results.portrait.notes.tavernW}px = ${results.portrait.notes.viewportTavernPct}% vw`,
   `  DRAW left ${results.portrait.notes.drawLeftEdge}px  CD right-gap ${results.portrait.notes.cdRightGap}px`,
-  `  hud strip ${results.portrait.notes.hudIsLeftStrip}  endTurn BL ${results.portrait.notes.endTurnBottomLeft}`,
+  `  hud strip ${results.portrait.notes.hudIsLeftStrip}  hudTop ${results.portrait.notes.hudTop}  endTurn BL ${results.portrait.notes.endTurnBottomLeft}`,
+  `  hand n=${results.portrait.notes.youHandCount} midX ${results.portrait.notes.youHandMidX} dx ${results.portrait.notes.youHandMidDx}  oppDx ${results.portrait.notes.oppHandMidDx}`,
   `  hits ${JSON.stringify(results.portrait.notes.hits)}`,
   `landscape 844x390: tavern ${results.landscape.notes.tavernW}px = ${results.landscape.notes.viewportTavernPct}% vw`,
   `  gutters L/R ${results.landscape.notes.leftGutterPct}% / ${results.landscape.notes.rightGutterPct}%`,
   `  DRAW left ${results.landscape.notes.drawLeftEdge}px  CD right-gap ${results.landscape.notes.cdRightGap}px`,
-  `  hud strip ${results.landscape.notes.hudIsLeftStrip}`,
+  `  hud strip ${results.landscape.notes.hudIsLeftStrip}  hand dx ${results.landscape.notes.youHandMidDx}`,
   `  hits ${JSON.stringify(results.landscape.notes.hits)}`,
 ].join('\n');
 fs.writeFileSync(path.join(ART, `${TAG}-layout-fb-measurements.txt`), note + '\n');
