@@ -70,6 +70,7 @@ let liftClone = null;
 let liftFromRect = null;
 let pendingPatron = null;
 let targetSession = null;
+let lastTargetPicks = null;
 let gauntletStopIndex = null;
 let isGauntletMatch = false;
 let isTutorialMatch = false;
@@ -633,6 +634,12 @@ function placeInspectStage(wrap, rect, kind) {
   });
 }
 
+function dismissInspectOutside(e) {
+  if (!liftActive || !liftClone) return;
+  if (e.target?.closest?.('.lift-source, .inspect-dossier-sheet')) return;
+  endLift(true);
+}
+
 function startLift(fromEl, def) {
   endLift(true);
   if (!fromEl || !def) return;
@@ -649,6 +656,7 @@ function startLift(fromEl, def) {
   const layer = $('#lift-layer') || document.body;
   const wrap = document.createElement('div');
   wrap.className = 'lift-clone lift-fly lift-inspect lift-dossier-modal';
+  if (targetSession) wrap.classList.add('lift-over-target');
   wrap.innerHTML = `
     <div class="lift-veil"></div>
     <div class="inspect-dossier-sheet">
@@ -660,10 +668,12 @@ function startLift(fromEl, def) {
   `;
   layer.appendChild(wrap);
   liftClone = wrap;
+  document.addEventListener('pointerdown', dismissInspectOutside, true);
   placeInspectStage(wrap, rect, 'card');
 }
 
 function endLift(instant = false) {
+  document.removeEventListener('pointerdown', dismissInspectOutside, true);
   const src = document.querySelector('.lift-source');
   const wrap = liftClone;
   const from = liftFromRect;
@@ -782,6 +792,7 @@ function startPatronLift(fromEl, pid) {
   `;
   layer.appendChild(wrap);
   liftClone = wrap;
+  document.addEventListener('pointerdown', dismissInspectOutside, true);
   placeInspectStage(wrap, rect, 'coin');
 }
 
@@ -1533,6 +1544,7 @@ function setTargetPeek(on) {
 
 function confirmTargetStep() {
   if (!targetSession || !engine) return;
+  if (liftActive) return;
   const step = targetSession.steps[targetSession.idx];
   if (!step) return;
   const need = step.n || 1;
@@ -1645,16 +1657,13 @@ function paintTargetStep() {
   targetSession.picked = [];
   for (const t of legal) {
     if (!tray) break;
-    const el = document.createElement('button');
-    el.type = 'button';
-    el.className = 'card legal-target tray-card';
-    el.dataset.uid = t.uid;
-    const d = cardsById[t.id];
-    el.innerHTML = d
-      ? `<img class="art" src="${artFor(d)}" alt="${d.name}" /><div class="meta"><div class="cname">${d.name}</div></div>`
-      : t.name;
-    el.onclick = () => pickTarget(t.uid);
-    tray.appendChild(el);
+    // Same hold-inspect as in-match: hold opens the dossier and never picks.
+    // Short tap toggles pickTarget; Confirm still required (except board auto-confirm).
+    tray.appendChild(renderCard(t, {
+      extraClass: 'legal-target tray-card',
+      onTap: () => pickTarget(t.uid),
+      onHoldRead: (_inst, el) => startLift(el, cardsById[t.id] || cardsById[_inst.id]),
+    }));
   }
   if (!legal.length) {
     targetSession.idx += 1;
@@ -1664,6 +1673,7 @@ function paintTargetStep() {
 
 function pickTarget(uid) {
   if (!targetSession) return;
+  if (liftActive) return;
   const step = targetSession.steps[targetSession.idx];
   if (!step || !targetSession.legal?.some(t => t.uid === uid)) return;
   const key = step.kind === 'refreshHand' ? 'refreshHand'
@@ -4413,6 +4423,10 @@ function installTestHook() {
         targeting: !!targetSession,
         targetPrompt: $('#target-prompt')?.textContent || '',
         targetBanner: !!$('#target-banner') && !$('#target-banner').hidden,
+        targetPicked: [...(targetSession?.picked || [])],
+        targetTray: document.querySelectorAll('#target-tray .card, #target-tray .tray-card').length,
+        dossierOpen: !!(liftActive && document.querySelector('.lift-fly.lift-dossier-modal')),
+        dossierName: document.querySelector('.lift-text-fly .eso-tip-name')?.textContent || '',
         legalGlow: document.querySelectorAll('#match .card.legal-target, .tray-card.legal-target').length,
         youCallsOnRail: !!document.querySelector('#patron-rail #you-patron-calls'),
         triadCount: document.querySelectorAll('#you-res .eso-tok').length,
@@ -4510,6 +4524,32 @@ function installTestHook() {
         steps: steps.map(s => s.kind),
         legal: engine.legalTargets(steps[0] || {}).length,
       };
+    },
+    startTargetStep(step = { kind: 'replace', n: 1 }) {
+      if (!engine?.state) return { ok: false };
+      lastTargetPicks = null;
+      beginTargetSession({
+        steps: [step],
+        onDone: (picks) => { lastTargetPicks = picks; },
+      });
+      const tray = document.querySelectorAll('#target-tray .card, #target-tray .tray-card').length;
+      return {
+        ok: !!targetSession,
+        prompt: $('#target-prompt')?.textContent || '',
+        tray,
+        legal: engine.legalTargets(step).length,
+        boardPick: !!targetSession?.boardPick || document.body.classList.contains('targeting-board'),
+      };
+    },
+    targetPicked() {
+      return [...(targetSession?.picked || [])];
+    },
+    lastTargetPicks() {
+      return lastTargetPicks;
+    },
+    confirmTarget() {
+      $('#target-confirm')?.click();
+      return { targeting: !!targetSession, picked: [...(targetSession?.picked || [])], last: lastTargetPicks };
     },
     clickTavernDeck() {
       document.querySelector('[data-pile="tavern-draw"]')?.click();

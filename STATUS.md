@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-14 (build 45):** Target-modal hold-inspect rebased onto Club 44. Tavern replace/remove, sacrifice, destroy, KO, confine, toss, donate, refresh, and Treasury trays use the same in-match dossier. Hold (~1s) reads; short tap picks; Confirm still required except board acquire auto-confirm. Dossier sits above the target sheet and never confirms on hold-release. Light felt polish: restore landscape `.felt-tavern` selector; keep portrait empty seats thin. Club product files from main 44. `?v=45`.
+
 **2026-09-14 (build 44):** Club/product pass. Shop is an item store (Daily stock / today’s shop — never “slate”). Lean Club/splash/store/collection copy. Unofficial / fan-made / not Bethesda / not for sale only on Sign in and Settings → About. Email sign-up/in (device vault now; Firebase Auth + Firestore when `web/js/firebase-config.js` is filled). Google / Apple / Phone buttons exist and stay gated until those providers are configured — they do not pretend to work. Guest local play unchanged. Optional 1:1 voice on Friend/Ranked remote rooms via PeerJS media (WebRTC), off by default, mic only on enable. Tutorial match with a skippable guided walkthrough; replay from Settings. Board/felt/patron/targeting CSS untouched. `?v=44`.
 
 **Remaining infra (honest):** Drop a real Firebase web config into `web/js/firebase-config.js` (see `firebase-config.example.js` + `firebase/firestore.rules.example`), enable Email, then Google / Phone / Apple in the console, and add the GitHub Pages host to Auth authorized domains. Apple also needs an Apple Service ID. Voice for Friend/Ranked uses the existing PeerJS room; a TURN server would help symmetric NATs. No extra voice backend is faked.
@@ -71,7 +73,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=44`. Club/product pass (shop language, accounts, tutorial, voice) sits on the build 43 board.
+`docs/` is a copy of `web/`. Cache-bust `?v=45`. Target-modal hold-inspect on top of Club product 44.
 
 | Fix | Notes |
 |---|---|

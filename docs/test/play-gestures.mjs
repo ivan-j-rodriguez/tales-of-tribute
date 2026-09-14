@@ -205,6 +205,88 @@ await page.evaluate(() => document.querySelector('#target-cancel')?.click());
 b = await snap(page);
 assert('treasury cancel does not pay', b.coin === coinBefore && b.targeting === false, b);
 
+// 5c. Target-tray hold inspects, never picks; short tap picks; Confirm works
+await start(page);
+const repl = await page.evaluate(() => window.__totTest.startTargetStep({ kind: 'replace', n: 1 }));
+assert('replace tray opens', !!(repl && repl.ok && repl.tray >= 1 && /REPLACE/i.test(repl.prompt || '')), repl);
+const holdTray = await page.evaluate(async () => {
+  const el = document.querySelector('#target-tray .card') || document.querySelector('#target-tray .tray-card');
+  if (!el) return { ok: false };
+  const uid = el.dataset.uid;
+  const pickedBefore = window.__totTest.targetPicked();
+  el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 7, pointerType: 'touch', isPrimary: true, clientX: 12, clientY: 12 }));
+  await new Promise(r => setTimeout(r, 1250));
+  const mid = window.__totTest.snapshot();
+  const lift = document.querySelector('.lift-fly.lift-dossier-modal');
+  const banner = document.querySelector('#target-banner');
+  const z = {
+    lift: lift ? Number(getComputedStyle(lift).zIndex) || 0 : 0,
+    overlay: banner ? Number(getComputedStyle(banner).zIndex) || 0 : 0,
+  };
+  el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 7, pointerType: 'touch', isPrimary: true, clientX: 12, clientY: 12 }));
+  el.click();
+  const after = window.__totTest.snapshot();
+  return {
+    ok: true,
+    uid,
+    pickedBefore,
+    pickedMid: mid.targetPicked,
+    pickedAfter: after.targetPicked,
+    dossierOpen: mid.dossierOpen,
+    dossierName: mid.dossierName,
+    liftActive: mid.liftActive,
+    targetingMid: mid.targeting,
+    targetingAfter: after.targeting,
+    dossierAfter: after.dossierOpen,
+    z,
+    prompt: mid.targetPrompt,
+  };
+});
+assert('tray hold finds a card', holdTray.ok, holdTray);
+assert('tray hold opens dossier', !!(holdTray.dossierOpen && holdTray.liftActive && holdTray.dossierName), holdTray);
+assert('tray hold keeps targeting', holdTray.targetingMid === true, holdTray);
+assert('tray hold does not pick', (holdTray.pickedMid || []).length === (holdTray.pickedBefore || []).length, holdTray);
+assert('tray hold dossier is above the sheet', holdTray.z.lift > holdTray.z.overlay, holdTray.z);
+assert('tray hold-release does not pick', (holdTray.pickedAfter || []).length === 0 && holdTray.targetingAfter === true, holdTray);
+assert('tray hold-release closes dossier', holdTray.dossierAfter === false, holdTray);
+
+const tapTray = await page.evaluate(() => {
+  const el = document.querySelector('#target-tray .card') || document.querySelector('#target-tray .tray-card');
+  if (!el) return { ok: false };
+  const uid = el.dataset.uid;
+  el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 8, pointerType: 'touch', isPrimary: true, clientX: 12, clientY: 12 }));
+  el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 8, pointerType: 'touch', isPrimary: true, clientX: 12, clientY: 12 }));
+  el.click();
+  return { ok: true, uid, picked: window.__totTest.targetPicked(), selected: el.classList.contains('target-picked') };
+});
+assert('tray short tap picks', tapTray.ok && tapTray.picked.includes(tapTray.uid) && tapTray.selected, tapTray);
+const confirmed = await page.evaluate(() => window.__totTest.confirmTarget());
+const lastPicks = await page.evaluate(() => window.__totTest.lastTargetPicks());
+assert('tray confirm closes targeting', confirmed.targeting === false, confirmed);
+assert('tray confirm keeps the pick', !!(lastPicks && lastPicks.replace && lastPicks.replace.includes(tapTray.uid)), { lastPicks, uid: tapTray.uid });
+
+// 5d. Board legal-target hold inspects without auto-confirming acquire
+await start(page);
+const acq = await page.evaluate(() => window.__totTest.startTargetStep({ kind: 'acquire', maxCost: 99 }));
+assert('acquire board session', !!(acq && acq.ok && acq.boardPick), acq);
+const holdBoard = await page.evaluate(async () => {
+  const el = document.querySelector('#tavern-zone .card.legal-target') || document.querySelector('#tavern-zone .card');
+  if (!el) return { ok: false };
+  el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 9, pointerType: 'touch', isPrimary: true, clientX: 12, clientY: 12 }));
+  await new Promise(r => setTimeout(r, 1250));
+  const mid = window.__totTest.snapshot();
+  el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 9, pointerType: 'touch', isPrimary: true, clientX: 12, clientY: 12 }));
+  return {
+    ok: true,
+    dossierOpen: mid.dossierOpen,
+    targeting: mid.targeting,
+    picked: mid.targetPicked,
+  };
+});
+assert('board hold inspects acquire target', !!(holdBoard.ok && holdBoard.dossierOpen), holdBoard);
+assert('board hold does not auto-confirm', holdBoard.targeting === true && (holdBoard.picked || []).length === 0, holdBoard);
+await page.evaluate(() => document.querySelector('#target-cancel')?.click());
+
 // 6. patron hold reads dossier, does not call
 const held = await holdPatron(page, 'pelin');
 assert('patron hold lifts', !!(held.mid && held.mid.liftActive), held);
