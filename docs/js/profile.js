@@ -9,6 +9,7 @@ import {
   rarityOf, formatRarity, CLUES_TO_UPGRADE, tomorrowShopSlate,
   shopContextFromProfile, fillMissedLogins, loginMonthGrid,
   clueCountOf, baseCardsForDeck, roadGrandPrize,
+  crateVariantForDay, CRATES_PER_MONTH, CRATE_VARIANTS,
 } from './economy.js';
 import { BASE_TO_UPGRADE } from './upgrades.js';
 
@@ -24,38 +25,38 @@ export const RANK_THRESHOLDS = [0, 0, 100, 250, 450, 700]; // points to enter ti
 
 export const TABLE_SKINS = [
   { id: 'high-isle', name: 'High Isle', tag: 'Zone', price: 0, rarity: 'common', desc: 'Systres limestone, teal surf, and Breton gold.' },
-  { id: 'auridon', name: 'Auridon', tag: 'Zone', price: 280, rarity: 'common', desc: 'Altmer marble and the azure Abecean.' },
-  { id: 'warden', name: 'Warden', tag: 'Class', price: 280, rarity: 'common', desc: 'Frostpine grove — ice bloom over deep moss.' },
-  { id: 'nightblade', name: 'Nightblade', tag: 'Class', price: 420, rarity: 'fine', desc: 'Moonlight, void-purple, and a drop of blood.' },
-  { id: 'grahtwood', name: 'Grahtwood', tag: 'Zone', price: 420, rarity: 'fine', desc: 'Valenwood canopy — gold light through leaves.' },
-  { id: 'dragonknight', name: 'Dragonknight', tag: 'Class', price: 420, rarity: 'fine', desc: 'Molten stone and Red Mountain fire.' },
-  { id: 'clockwork', name: 'Clockwork City', tag: 'Zone', price: 640, rarity: 'superior', desc: 'Brass, copper oil, and ticking factotums.' },
-  { id: 'orsinium', name: 'Orsinium', tag: 'Zone', price: 640, rarity: 'superior', desc: 'Iron halls, frost, orichalcum green.' },
-  { id: 'vvardenfell', name: 'Vvardenfell', tag: 'Zone', price: 640, rarity: 'superior', desc: 'Ashfall, kwama amber, the mountain’s glow.' },
-  { id: 'arcanist', name: 'Arcanist', tag: 'Class', price: 960, rarity: 'epic', desc: 'Verdant ink, gold runes, the eye of Mora.' },
-  { id: 'daedra', name: 'Coldharbour', tag: 'Zone', price: 960, rarity: 'epic', desc: 'Soulfire cyan over Molag Bal’s grey waste.' },
-  { id: 'summerset', name: 'Summerset', tag: 'Zone', price: 960, rarity: 'epic', desc: 'Crystal Alinor — aurora over white-gold.' },
-  { id: 'undaunted', name: 'Undaunted Enclave', tag: 'Season', price: 960, rarity: 'epic', seasonal: 'undaunted', desc: 'Torchlight on dungeon stone — a fan nod to the Undaunted Celebration.' },
-  { id: 'high-seas', name: 'Abecean Tide', tag: 'Season', price: 960, rarity: 'epic', seasonal: 'high-seas', desc: 'Salt and sailcloth — a fan nod to High Seas of Tamriel.' },
-  { id: 'apocrypha', name: 'Apocrypha', tag: 'Zone', price: 1400, rarity: 'legendary', desc: 'Black ink seas and watching green eyes.' },
-  { id: 'vestige', name: 'Vestige', tag: 'Class', price: 1400, rarity: 'legendary', desc: 'Aetherial blue — a sky-shard on the table.' },
-  { id: 'witches', name: "Witches' Revel", tag: 'Season', price: 1400, rarity: 'legendary', seasonal: 'witches', desc: 'Pumpkin-fire and crow-feather black — a fan nod to Witches Festival.' },
+  { id: 'auridon', name: 'Auridon', tag: 'Zone', price: 720, rarity: 'common', desc: 'Altmer marble and the azure Abecean.' },
+  { id: 'warden', name: 'Warden', tag: 'Class', price: 720, rarity: 'common', desc: 'Frostpine grove — ice bloom over deep moss.' },
+  { id: 'nightblade', name: 'Nightblade', tag: 'Class', price: 1100, rarity: 'fine', desc: 'Moonlight, void-purple, and a drop of blood.' },
+  { id: 'grahtwood', name: 'Grahtwood', tag: 'Zone', price: 1100, rarity: 'fine', desc: 'Valenwood canopy — gold light through leaves.' },
+  { id: 'dragonknight', name: 'Dragonknight', tag: 'Class', price: 1100, rarity: 'fine', desc: 'Molten stone and Red Mountain fire.' },
+  { id: 'clockwork', name: 'Clockwork City', tag: 'Zone', price: 1680, rarity: 'superior', desc: 'Brass, copper oil, and ticking factotums.' },
+  { id: 'orsinium', name: 'Orsinium', tag: 'Zone', price: 1680, rarity: 'superior', desc: 'Iron halls, frost, orichalcum green.' },
+  { id: 'vvardenfell', name: 'Vvardenfell', tag: 'Zone', price: 1680, rarity: 'superior', desc: 'Ashfall, kwama amber, the mountain’s glow.' },
+  { id: 'arcanist', name: 'Arcanist', tag: 'Class', price: 2600, rarity: 'epic', desc: 'Verdant ink, gold runes, the eye of Mora.' },
+  { id: 'daedra', name: 'Coldharbour', tag: 'Zone', price: 2600, rarity: 'epic', desc: 'Soulfire cyan over Molag Bal’s grey waste.' },
+  { id: 'summerset', name: 'Summerset', tag: 'Zone', price: 2600, rarity: 'epic', desc: 'Crystal Alinor — aurora over white-gold.' },
+  { id: 'undaunted', name: 'Undaunted Enclave', tag: 'Season', price: 2600, rarity: 'epic', seasonal: 'undaunted', desc: 'Torchlight on dungeon stone — a fan nod to the Undaunted Celebration.' },
+  { id: 'high-seas', name: 'Abecean Tide', tag: 'Season', price: 2600, rarity: 'epic', seasonal: 'high-seas', desc: 'Salt and sailcloth — a fan nod to High Seas of Tamriel.' },
+  { id: 'apocrypha', name: 'Apocrypha', tag: 'Zone', price: 3800, rarity: 'legendary', desc: 'Black ink seas and watching green eyes.' },
+  { id: 'vestige', name: 'Vestige', tag: 'Class', price: 3800, rarity: 'legendary', desc: 'Aetherial blue — a sky-shard on the table.' },
+  { id: 'witches', name: "Witches' Revel", tag: 'Season', price: 3800, rarity: 'legendary', seasonal: 'witches', desc: 'Pumpkin-fire and crow-feather black — a fan nod to Witches Festival.' },
 ];
 
 export const CARD_BACKS = [
   { id: 'default', name: 'Roister Back', price: 0, rarity: 'common', desc: 'Club gold on dark oak.' },
-  { id: 'warden', name: 'Frostpine', price: 220, rarity: 'common', desc: 'Ice over living wood.' },
-  { id: 'nightblade', name: 'Shadow Dance', price: 340, rarity: 'fine', desc: 'Void and crimson.' },
-  { id: 'dragonknight', name: 'Ember Scale', price: 340, rarity: 'fine', desc: 'Lava-cracked hide.' },
-  { id: 'clockwork', name: 'Brass Circuit', price: 520, rarity: 'superior', desc: 'Sotha Sil’s geometry.' },
-  { id: 'auridon', name: 'Altmer Sun', price: 520, rarity: 'superior', desc: 'Pale gold of Firsthold.' },
-  { id: 'daedra', name: 'Soulfire', price: 780, rarity: 'epic', desc: 'Coldharbour cyan.' },
-  { id: 'arcanist', name: 'Ink & Eye', price: 780, rarity: 'epic', desc: 'Apocryphal gold runes.' },
-  { id: 'undaunted', name: 'Enclave Brand', price: 780, rarity: 'epic', seasonal: 'undaunted', desc: 'Undaunted bronze on dungeon iron.' },
-  { id: 'high-seas', name: 'Tide Sigil', price: 780, rarity: 'epic', seasonal: 'high-seas', desc: 'A wave-cut Abecean seal.' },
-  { id: 'apocrypha', name: 'Green Eye', price: 1100, rarity: 'legendary', desc: 'Hermaeus Mora’s gaze.' },
-  { id: 'vestige', name: 'Aetherial', price: 1100, rarity: 'legendary', desc: 'Sky-shard glow.' },
-  { id: 'witches', name: 'Crow Feather', price: 1100, rarity: 'legendary', seasonal: 'witches', desc: 'Witches Festival black and ember.' },
+  { id: 'warden', name: 'Frostpine', price: 560, rarity: 'common', desc: 'Ice over living wood.' },
+  { id: 'nightblade', name: 'Shadow Dance', price: 880, rarity: 'fine', desc: 'Void and crimson.' },
+  { id: 'dragonknight', name: 'Ember Scale', price: 880, rarity: 'fine', desc: 'Lava-cracked hide.' },
+  { id: 'clockwork', name: 'Brass Circuit', price: 1360, rarity: 'superior', desc: 'Sotha Sil’s geometry.' },
+  { id: 'auridon', name: 'Altmer Sun', price: 1360, rarity: 'superior', desc: 'Pale gold of Firsthold.' },
+  { id: 'daedra', name: 'Soulfire', price: 2100, rarity: 'epic', desc: 'Coldharbour cyan.' },
+  { id: 'arcanist', name: 'Ink & Eye', price: 2100, rarity: 'epic', desc: 'Apocryphal gold runes.' },
+  { id: 'undaunted', name: 'Enclave Brand', price: 2100, rarity: 'epic', seasonal: 'undaunted', desc: 'Undaunted bronze on dungeon iron.' },
+  { id: 'high-seas', name: 'Tide Sigil', price: 2100, rarity: 'epic', seasonal: 'high-seas', desc: 'A wave-cut Abecean seal.' },
+  { id: 'apocrypha', name: 'Green Eye', price: 3000, rarity: 'legendary', desc: 'Hermaeus Mora’s gaze.' },
+  { id: 'vestige', name: 'Aetherial', price: 3000, rarity: 'legendary', desc: 'Sky-shard glow.' },
+  { id: 'witches', name: 'Crow Feather', price: 3000, rarity: 'legendary', seasonal: 'witches', desc: 'Witches Festival black and ember.' },
 ];
 
 export const CARD_BACK_PALETTE = {
@@ -139,7 +140,10 @@ export function defaultProfile() {
       failed: false, failedStop: null, cleared: 0,
     },
     ranked: { tier: 'Unranked', points: 0, placementLeft: 5, winStreak: 0 },
-    purses: [{ rarity: 'Common' }], // queued cutpurses
+    purses: [],
+    cratesMonth: null,
+    cratesOpened: 0,
+    pendingMatchReward: null,
     lastCheckIn: null,
     checkInStreak: 0,
     loginDays: {},
@@ -208,6 +212,9 @@ export function loadProfile() {
     };
     p.cardClues = p.cardClues && typeof p.cardClues === 'object' ? p.cardClues : {};
     p.shopPurchases = p.shopPurchases && typeof p.shopPurchases === 'object' ? p.shopPurchases : {};
+    p.cratesMonth = p.cratesMonth || null;
+    p.cratesOpened = Number(p.cratesOpened) || 0;
+    p.pendingMatchReward = p.pendingMatchReward || null;
     if (typeof p.gold !== 'number') p.gold = 60;
     if (!p.unlockedSkins.includes('high-isle')) p.unlockedSkins.push('high-isle');
     if (!p.unlockedBacks.includes('default')) p.unlockedBacks.push('default');
@@ -428,24 +435,40 @@ export function purseCount(profile) {
   return (profile.purses || []).length;
 }
 
-/** Daily sign-in. */
-export function doDailyCheckIn(profile) {
+function monthKey(dateStr = todayStr()) {
+  return String(dateStr).slice(0, 7);
+}
+
+export function syncCrateMonth(profile, today = todayStr()) {
+  const mk = monthKey(today);
+  if (profile.cratesMonth !== mk) {
+    profile.cratesMonth = mk;
+    profile.cratesOpened = 0;
+  }
+  return profile;
+}
+
+export function canClaimDailyLogin(profile) {
+  return profile.lastCheckIn !== todayStr();
+}
+
+/** Daily sign-in — only when the player stamps the calendar. */
+export function claimDailyLogin(profile, cards = []) {
   const today = todayStr();
-  if (profile.lastCheckIn === today) return null;
+  if (profile.lastCheckIn === today) return { error: 'Already stamped today.' };
+  syncCrateMonth(profile, today);
   const yest = yesterdayStr();
   if (profile.lastCheckIn === yest) profile.checkInStreak = (profile.checkInStreak || 0) + 1;
   else profile.checkInStreak = 1;
   profile.lastCheckIn = today;
   profile.loginDays = fillMissedLogins(profile.loginDays, today);
-  profile.gold += CHECKIN_GOLD;
-  profile.purses.push({ rarity: 'Common' });
+  let gold = CHECKIN_GOLD;
   let extra = '';
-  if (profile.checkInStreak >= 7) {
-    profile.purses.push({ rarity: 'Fine' });
-    profile.gold += CHECKIN_STREAK7_GOLD;
-    extra = ' Streak bonus!';
+  if (profile.checkInStreak >= 7 && profile.checkInStreak % 7 === 0) {
+    gold += CHECKIN_STREAK7_GOLD;
+    extra = ' Streak bonus.';
   }
-  const grantedGold = profile.checkInStreak >= 7 ? CHECKIN_GOLD + CHECKIN_STREAK7_GOLD : CHECKIN_GOLD;
+  profile.gold += gold;
   const dw = profile.challenges.dailyWin;
   if (dw.resetDate !== today) {
     dw.progress = 0;
@@ -453,12 +476,23 @@ export function doDailyCheckIn(profile) {
     dw.resetDate = today;
   }
   maybeUnlockAchievement(profile, 'check-in-7', profile.checkInStreak >= 7);
+  const crate = crateVariantForDay(today);
+  let crateOffer = null;
+  if (crate && (profile.cratesOpened || 0) < CRATES_PER_MONTH) {
+    crateOffer = { ...crate };
+  }
   saveProfile(profile);
   return {
     profile,
-    toast: "Roister's daily — the club remembered you." + extra,
-    granted: { gold: grantedGold, purses: profile.checkInStreak >= 7 ? 2 : 1 },
+    toast: 'The Club stamped your calendar.' + extra,
+    granted: { gold, crate: crateOffer },
+    crate: crateOffer,
   };
+}
+
+/** @deprecated use claimDailyLogin — auto-claim is gone. */
+export function doDailyCheckIn() {
+  return null;
 }
 
 export function ensureDailyChallengeReset(profile) {
@@ -542,7 +576,7 @@ export function recordMatchResult(profile, {
   if (won) {
     profile.stats.wins += 1;
     profile.winStreak = (profile.winStreak || 0) + 1;
-    if (!skipGold) profile.gold += winGold;
+    /* gold is granted in claimMatchReward after Continue → purse */
     if (isRandom) {
       profile.randomWinStreak = (profile.randomWinStreak || 0) + 1;
       profile.challenges.streak3.progress = profile.randomWinStreak;
@@ -578,10 +612,8 @@ export function recordMatchResult(profile, {
       syncTierFromPoints(r);
       maybeUnlockAchievement(profile, 'ranked-orichalcum', r.tier !== 'Unranked');
       purse = { rarity: rarityFromStreak(r.winStreak, true) };
-      profile.purses.push(purse);
     } else if (!gauntlet && (Math.random() < 0.20 || profile.winStreak >= 3)) {
       purse = { rarity: rarityFromStreak(profile.winStreak, false) };
-      profile.purses.push(purse);
     }
 
     noteClubEvent(profile, {
@@ -592,12 +624,21 @@ export function recordMatchResult(profile, {
       aiDifficulty,
       winStreak: profile.winStreak,
     });
+    const pending = {
+      won: true,
+      empty: false,
+      gold: skipGold ? 0 : winGold,
+      purse,
+      ranked: profile.ranked,
+    };
+    profile.pendingMatchReward = pending;
     saveProfile(profile);
     return {
-      gold: skipGold ? 0 : winGold,
+      gold: pending.gold,
       purse,
       winStreak: profile.winStreak,
       ranked: profile.ranked,
+      pending,
     };
   }
 
@@ -607,7 +648,6 @@ export function recordMatchResult(profile, {
   profile.lastMatch = { won: false, patrons: [...(patrons || [])], rivalPatrons: [...(rivalPatrons || [])] };
   if (isRandom) profile.randomWinStreak = 0;
   profile.challenges.streak3.progress = profile.randomWinStreak || 0;
-  if (!skipGold) profile.gold += lossGold;
   if (ranked) {
     const r = profile.ranked;
     r.winStreak = 0;
@@ -616,8 +656,41 @@ export function recordMatchResult(profile, {
     syncTierFromPoints(r);
   }
   noteClubEvent(profile, { kind: 'loss', ranked, gauntlet, patrons, aiDifficulty });
+  const pending = {
+    won: false,
+    empty: true,
+    gold: skipGold ? 0 : lossGold,
+    purse: null,
+    ranked: profile.ranked,
+  };
+  profile.pendingMatchReward = pending;
   saveProfile(profile);
-  return { gold: skipGold ? 0 : lossGold, purse: null, winStreak: 0, ranked: profile.ranked };
+  return { gold: pending.gold, purse: null, winStreak: 0, ranked: profile.ranked, pending };
+}
+
+export function claimMatchReward(profile, cards = []) {
+  const pending = profile.pendingMatchReward;
+  if (!pending) return { empty: true, gold: 0, rewards: [] };
+  profile.pendingMatchReward = null;
+  if (pending.gold) profile.gold += pending.gold;
+  const rewards = [];
+  if (pending.gold) {
+    rewards.push({ type: 'gold', amount: pending.gold, label: `${pending.gold} gold` });
+  }
+  if (pending.won && pending.purse) {
+    profile.purses.push(pending.purse);
+    const opened = openPurse(profile, cards, { buy: false });
+    if (opened.reward) rewards.push(opened.reward);
+  }
+  saveProfile(profile);
+  return {
+    empty: !!pending.empty,
+    won: !!pending.won,
+    gold: pending.gold || 0,
+    rarity: pending.purse?.rarity || (pending.won ? 'Common' : 'Empty'),
+    rewards,
+    pending,
+  };
 }
 
 export function addUpgrade(profile, upgradeId) {
@@ -663,11 +736,8 @@ export function openPurse(profile, cards, opts = {}) {
   if (profile.purses.length > 0) {
     const p = profile.purses.shift();
     rarity = p.rarity || 'Common';
-  } else if (opts.buy && profile.gold >= SACK_BUY_COST) {
-    profile.gold -= SACK_BUY_COST;
-    rarity = 'Fine';
   } else {
-    return { error: 'No purses and not enough gold.' };
+    return { error: 'No purse waiting — win a match.' };
   }
 
   profile.stats.sacksOpened = (profile.stats.sacksOpened || 0) + 1;
@@ -752,12 +822,75 @@ export function openSack(profile, cards, opts = {}) {
   return openPurse(profile, cards, opts);
 }
 
-export function buySack(profile) {
-  if (profile.gold < SACK_BUY_COST) return { error: `Need ${SACK_BUY_COST} gold.` };
-  profile.gold -= SACK_BUY_COST;
-  profile.purses.push({ rarity: 'Fine' });
+export function buySack() {
+  return { error: 'Purses are won at the table — they cannot be bought.' };
+}
+
+export function buyClue(profile, cardId, cards = [], opts = {}) {
+  if (!opts.ignoreShop) {
+    const gate = assertShopStock(profile, cards, 'clue', cardId);
+    if (gate.error) return gate;
+  }
+  const cost = priceOf('clue', cardId, cards);
+  if (profile.gold < cost) return { error: `Need ${cost} gold.` };
+  profile.gold -= cost;
+  const r = addCardClue(profile, cardId, cards);
+  if (!opts.ignoreShop) markShopPurchase(profile, shopPeriodKey(), offerId('clue', cardId));
   saveProfile(profile);
-  return { ok: true };
+  return { ok: true, ...r, cost };
+}
+
+export function openCrownCrate(profile, cards = [], variant = null) {
+  syncCrateMonth(profile);
+  if ((profile.cratesOpened || 0) >= CRATES_PER_MONTH) {
+    return { error: 'Two Crown Crates a month — the Club is not a crate farm.' };
+  }
+  const crate = variant || CRATE_VARIANTS[0];
+  profile.cratesOpened = (profile.cratesOpened || 0) + 1;
+  const bias = rarityRollBias(crate.rarity === 'common' ? 'Common'
+    : crate.rarity === 'fine' ? 'Fine'
+    : crate.rarity === 'superior' ? 'Superior'
+    : crate.rarity === 'epic' ? 'Epic' : 'Fine');
+  const roll = Math.random();
+  const lockedDecks = LOCKED_DECKS.filter((d) => !profile.unlockedDecks.includes(d));
+  const lockedSkins = TABLE_SKINS.filter((s) => s.price > 0 && !profile.unlockedSkins.includes(s.id));
+  const lockedBacks = CARD_BACKS.filter((b) => b.price > 0 && !profile.unlockedBacks.includes(b.id));
+  let reward;
+  if (roll < 0.42) {
+    const g = 18 + bias * 10 + Math.floor(Math.random() * (16 + bias * 8));
+    profile.gold += g;
+    reward = { type: 'gold', amount: g, label: `${g} crate gold`, rarity: crate.rarity };
+  } else if (roll < 0.68) {
+    const granted = grantCluePack(profile, cards, 1);
+    const id = granted[0];
+    const name = cards.find((c) => c.id === id)?.name || 'a lost page';
+    reward = { type: 'clue', id, label: `Card clue: ${name}`, rarity: crate.rarity };
+  } else if (roll < 0.88 && lockedDecks.length) {
+    const deck = lockedDecks[Math.floor(Math.random() * lockedDecks.length)];
+    const r = addFragment(profile, deck, cards);
+    reward = {
+      type: 'fragment',
+      deck,
+      fragments: r.fragments,
+      unlocked: r.unlocked,
+      rarity: crate.rarity,
+      label: r.unlocked ? `Deck unlocked: ${deck}` : `Fragment: ${deck} (${r.fragments}/${FRAGMENTS_TO_UNLOCK})`,
+    };
+  } else if (roll < 0.96 && lockedBacks.length) {
+    const back = lockedBacks[Math.floor(Math.random() * lockedBacks.length)];
+    profile.unlockedBacks.push(back.id);
+    reward = { type: 'back', id: back.id, label: `Card back: ${back.name}`, rarity: crate.rarity };
+  } else if (lockedSkins.length && bias >= 2) {
+    const skin = lockedSkins[Math.floor(Math.random() * lockedSkins.length)];
+    profile.unlockedSkins.push(skin.id);
+    reward = { type: 'skin', id: skin.id, label: `Table: ${skin.name}`, rarity: crate.rarity };
+  } else {
+    const g = 22 + bias * 8;
+    profile.gold += g;
+    reward = { type: 'gold', amount: g, label: `${g} crate gold`, rarity: crate.rarity };
+  }
+  saveProfile(profile);
+  return { reward, crate, rarity: crate.rarity };
 }
 
 function assertShopStock(profile, cards, kind, target) {
@@ -857,6 +990,7 @@ export function buyShopOffer(profile, offer, cards = []) {
   if (!offer.target) return { error: 'Unknown offer.' };
   if (offer.kind === 'fragment') return buyFragment(profile, offer.target, cards);
   if (offer.kind === 'upgrade') return buyUpgrade(profile, offer.target, cards);
+  if (offer.kind === 'clue') return buyClue(profile, offer.target, cards);
   if (offer.kind === 'skin') return buySkin(profile, offer.target, cards);
   if (offer.kind === 'back') return buyBack(profile, offer.target, cards);
   return { error: 'Unknown offer.' };
@@ -872,6 +1006,7 @@ export function buyBundle(profile, offer, cards = []) {
   for (const part of offer.parts || []) {
     if (part.kind === 'fragment') results.push(addFragment(profile, part.target, cards));
     else if (part.kind === 'upgrade') { addUpgrade(profile, part.target); results.push({ ok: true }); }
+    else if (part.kind === 'clue') results.push(addCardClue(profile, part.target, cards));
     else if (part.kind === 'skin' && !profile.unlockedSkins.includes(part.target)) {
       profile.unlockedSkins.push(part.target);
       results.push({ ok: true });

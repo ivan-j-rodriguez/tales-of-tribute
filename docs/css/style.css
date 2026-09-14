@@ -81,17 +81,16 @@ button.primary {
 /* ——— Splash ——— */
 #splash {
   align-items: center; justify-content: center;
-  --splash-a: rgba(255,180,70,0.18);
-  --splash-b: rgba(30,160,180,0.28);
-  --splash-c: rgba(40,20,60,0.22);
-  --splash-base: #081018;
-  --splash-mid: #123028;
+  --splash-a: rgba(232, 210, 140, 0.42);
+  --splash-b: rgba(40, 170, 168, 0.38);
+  --splash-c: rgba(255, 200, 90, 0.18);
+  --splash-base: #061c22;
+  --splash-mid: #14524c;
   background:
-    radial-gradient(ellipse at 50% 15%, var(--splash-a), transparent 45%),
-    radial-gradient(ellipse at 15% 85%, var(--splash-b), transparent 40%),
-    radial-gradient(ellipse at 85% 70%, var(--splash-c), transparent 35%),
-    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 3px),
-    linear-gradient(180deg, var(--splash-base) 0%, var(--splash-mid) 45%, var(--splash-base) 100%);
+    radial-gradient(ellipse at 50% 0%, var(--splash-a), transparent 48%),
+    radial-gradient(ellipse at 8% 90%, var(--splash-b), transparent 42%),
+    radial-gradient(ellipse at 92% 70%, var(--splash-c), transparent 36%),
+    linear-gradient(180deg, #041318 0%, #0c3434 42%, #163c38 70%, #0a2428 100%);
   text-align: center;
   padding: 1.5rem;
   overflow: auto;
@@ -116,18 +115,19 @@ body.skin-high-seas { --splash-a: rgba(60,220,230,0.26); --splash-b: rgba(10,60,
 body.skin-witches { --splash-a: rgba(255,120,30,0.28); --splash-b: rgba(80,10,20,0.4); --splash-c: rgba(20,0,10,0.3); --splash-base: #0a0406; --splash-mid: #18080c; }
 
 .splash-frame {
-  max-width: 36rem;
-  padding: 2rem 1.5rem;
-  border: 2px solid rgba(212,175,55,0.55);
-  border-radius: 14px;
+  max-width: 38rem;
+  padding: 2.1rem 1.6rem 1.6rem;
+  border: 1px solid rgba(232, 201, 106, 0.65);
+  border-radius: 4px;
   background:
-    linear-gradient(135deg, rgba(212,175,55,0.08), transparent 40%),
-    linear-gradient(180deg, rgba(40,24,14,0.95), rgba(18,10,6,0.98));
+    linear-gradient(180deg, rgba(255, 236, 180, 0.08), transparent 28%),
+    linear-gradient(180deg, rgba(18, 56, 58, 0.94), rgba(8, 28, 32, 0.97));
   box-shadow:
-    0 0 0 1px rgba(0,0,0,0.5),
-    inset 0 0 40px rgba(0,0,0,0.45),
-    0 0 60px rgba(212,175,55,0.15);
+    0 0 0 6px rgba(10, 36, 38, 0.55),
+    inset 0 0 0 1px rgba(255, 220, 140, 0.18),
+    0 18px 50px rgba(0, 0, 0, 0.45);
   display: flex; flex-direction: column; align-items: center; gap: 1rem;
+  position: relative;
 }
 #splash h1 {
   font-family: 'Cinzel', serif;
@@ -953,15 +953,17 @@ body.skin-witches { --splash-a: rgba(255,120,30,0.28); --splash-b: rgba(80,10,20
 .tooltip button { padding: 0.25rem 0.6rem; font-size: 0.75rem; }
 
 /* Club / store / collection / friend */
-#club, #collection, #friend-lobby, #store, #encyclopedia, #settings {
-  background: linear-gradient(180deg, #160e08, #24160e);
+#club, #collection, #friend-lobby, #store, #encyclopedia, #settings, #ranked {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(232, 210, 140, 0.16), transparent 42%),
+    linear-gradient(180deg, #0a2428, #123c3a 55%, #0c2226);
   padding: 1rem;
   overflow: auto;
 }
 .club-header {
   display: flex; align-items: center; gap: 0.75rem;
   margin-bottom: 0.75rem; position: sticky; top: 0;
-  background: #160e08ee; z-index: 2; padding: 0.4rem 0;
+  background: #0a2428ee; z-index: 2; padding: 0.4rem 0;
 }
 .club-header h2, #friend-lobby h2, #collection h2, #store h2, #settings h2 {
   font-family: 'Cinzel', serif; color: var(--gold); margin-right: auto;
@@ -1160,6 +1162,32 @@ body.skin-witches { --splash-a: rgba(255,120,30,0.28); --splash-b: rgba(80,10,20
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: 0.75rem;
+}
+.ency-divider {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.45rem 0.85rem;
+  margin: 0.55rem 0 0.15rem;
+  padding: 0.35rem 0 0.4rem;
+  border-bottom: 2px solid var(--ency-color, var(--gold));
+  color: var(--ency-color, var(--gold));
+}
+.ency-div-name {
+  font-family: 'Cinzel', serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+}
+.ency-div-cap {
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+}
+.ency-divider.deck-mora { --ency-color: #7aa05a; }
+.clue-deck.deck-mora .clue-deck-head,
+.clue-deck .ency-divider {
+  border-bottom: 2px solid var(--ency-color, var(--gold));
+  padding-bottom: 0.4rem;
 }
 .ency-card {
   background: var(--panel); border: var(--border); border-radius: 8px;
@@ -3296,3 +3324,160 @@ html.has-touch #match .card:hover { transform: none !important; }
 @media (orientation: portrait) {
   .hex-pile .pile-art, .hex-pile .pile-stack { width: 48px; height: 74px; }
 }
+
+/* ——— High Isle Club chrome (no #match / felt / table-pack) ——— */
+.hi-kicker {
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  color: #e8c96a;
+  margin: 0;
+}
+.hi-veil {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 110%, rgba(40, 180, 170, 0.18), transparent 45%);
+}
+.splash-actions { max-width: 28rem; }
+#splash .disclaimer { max-width: 26rem; color: #9aa88a; }
+#splash button.store-btn {
+  background:
+    linear-gradient(180deg, rgba(255, 230, 150, 0.28), transparent 45%),
+    linear-gradient(180deg, #2a7a6e, #145248);
+  border-color: #e8c96a;
+}
+#splash button.ranked-btn {
+  background:
+    linear-gradient(180deg, rgba(200, 80, 50, 0.25), transparent 45%),
+    linear-gradient(180deg, #5a2a20, #2a1410);
+  border-color: #d4a060;
+}
+.gold-coin {
+  width: 1.15em; height: 1.15em; vertical-align: -0.2em;
+  display: inline-block;
+  background: url('../assets/ui/tot-gold-coin.svg') center / contain no-repeat;
+}
+.splash-purse span { display: inline-flex; align-items: center; gap: 0.28rem; }
+
+#encyclopedia header { background: #0a2428ee; }
+
+.ranked-screen { color: var(--ink); }
+.ranked-copy { max-width: 36rem; }
+.ranked-crest {
+  font-family: 'Cinzel', serif;
+  color: #e8c96a;
+  font-size: 1.4rem;
+  margin: 0.4rem 0 0.8rem;
+}
+.ranked-status {
+  background: rgba(12, 36, 38, 0.85);
+  border: 1px solid rgba(212, 160, 80, 0.5);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+  max-width: 28rem;
+}
+.ranked-actions {
+  display: flex; flex-direction: column; gap: 0.75rem;
+  max-width: 28rem;
+}
+
+body.ranked-pvp-pick #diff-pick-wrap,
+body.ranked-pvp-pick #btn-ai-rest,
+body.ranked-pvp-pick #btn-random-match,
+body.ranked-pvp-pick #chk-random-match,
+body.ranked-pvp-pick .deckpick-modes .chk:has(#chk-random-match) {
+  display: none !important;
+}
+
+.login-modal, .crate-modal, #sack-overlay .sack-modal {
+  background:
+    linear-gradient(180deg, rgba(255, 236, 180, 0.08), transparent 30%),
+    linear-gradient(180deg, #163c3a, #0a2428);
+  border: 1px solid rgba(232, 201, 106, 0.7);
+  border-radius: 6px;
+  padding: 1.4rem 1.3rem;
+  text-align: center;
+  min-width: min(340px, 92vw);
+  max-width: 440px;
+  box-shadow: 0 0 0 6px rgba(8, 24, 26, 0.5), 0 16px 40px #0008;
+}
+.login-modal h2, .crate-modal h2 {
+  font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 0.4rem;
+}
+.cal-day.crate { box-shadow: inset 0 0 0 2px #c9a227; }
+.cal-day.claimable { cursor: pointer; animation: stamp-pulse 1.4s ease infinite; }
+@keyframes stamp-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 201, 106, 0.35); }
+  50% { box-shadow: 0 0 10px 2px rgba(232, 201, 106, 0.55); }
+}
+.cal-day.ok.just-stamped { animation: stamp-hit 0.45s ease; }
+@keyframes stamp-hit {
+  0% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+.purse-stage { height: 140px; display: grid; place-items: center; margin-bottom: 0.4rem; }
+.purse-bag {
+  width: 92px; height: 100px;
+  background:
+    radial-gradient(circle at 50% 30%, #f0d060 0 14%, transparent 15%),
+    linear-gradient(180deg, #8a5a18, #3a2410);
+  border: 2px solid #e8c96a;
+  border-radius: 46% 46% 38% 38%;
+  position: relative;
+  box-shadow: inset 0 8px 12px rgba(255, 220, 120, 0.18), 0 8px 16px #0008;
+}
+.purse-bag::before {
+  content: '';
+  position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+  width: 36px; height: 14px; border-radius: 8px;
+  background: #c9a227; border: 1px solid #fff0b0;
+}
+.sack-anim .purse-bag, .purse-open .purse-bag {
+  animation: purse-open 0.9s ease forwards;
+}
+@keyframes purse-open {
+  0% { transform: scale(1) rotate(0); }
+  25% { transform: scale(1.12) rotate(-6deg); }
+  50% { transform: scale(0.94) rotate(6deg); }
+  75% { transform: scale(1.08) translateY(-8px); }
+  100% { transform: scale(1); }
+}
+.purse-empty .purse-bag {
+  filter: grayscale(0.7) brightness(0.65);
+  animation: purse-empty 0.7s ease;
+}
+@keyframes purse-empty {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.92) rotate(-3deg); }
+  100% { transform: scale(1); }
+}
+
+.crate-stage {
+  width: 140px; height: 130px; margin: 0 auto 0.6rem;
+  position: relative;
+}
+.crate-body {
+  position: absolute; left: 18px; right: 18px; bottom: 8px; height: 72px;
+  background: linear-gradient(180deg, #6a4a22, #2a180c);
+  border: 2px solid #c9a227;
+  box-shadow: inset 0 0 12px #0008;
+}
+.crate-lid {
+  position: absolute; left: 12px; right: 12px; top: 22px; height: 36px;
+  background: linear-gradient(180deg, #c9a227, #6a4a18);
+  border: 2px solid #f0d060;
+  transform-origin: bottom center;
+  transition: transform 0.7s ease;
+}
+.crate-stage.crate-iron .crate-body { background: linear-gradient(180deg, #6a6a6a, #2a2a2a); }
+.crate-stage.crate-orichalcum .crate-body { background: linear-gradient(180deg, #6a8a3a, #2a3a10); }
+.crate-stage.crate-ebony .crate-body { background: linear-gradient(180deg, #3a2018, #120808); }
+.crate-stage.crate-voidsteel .crate-body { background: linear-gradient(180deg, #203050, #0a1018); border-color: #80c8ff; }
+.crate-stage.crate-open .crate-lid { transform: rotateX(-110deg) translateY(-10px); }
+
+.settings-block#settings-about .hint { text-align: left; line-height: 1.45; }
+
+#store-later:empty, #store-bundle:empty { display: none; }

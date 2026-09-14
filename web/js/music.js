@@ -219,6 +219,27 @@ export function playSfx(kind) {
       beep({ freq: 784, dur: 0.16, type: 'sine', vol: 0.16 });
       beep({ freq: 1046, dur: 0.28, type: 'sine', vol: 0.14 });
       break;
+    case 'celebrate':
+      beep({ freq: 392, dur: 0.1, type: 'triangle', vol: 0.18 });
+      beep({ freq: 523, dur: 0.12, type: 'triangle', vol: 0.2 });
+      beep({ freq: 659, dur: 0.14, type: 'sine', vol: 0.18 });
+      beep({ freq: 784, dur: 0.16, type: 'sine', vol: 0.16 });
+      beep({ freq: 1046, dur: 0.22, type: 'triangle', vol: 0.16 });
+      beep({ freq: 1318, dur: 0.32, type: 'sine', vol: 0.12 });
+      noiseBurst({ dur: 0.14, vol: 0.12, freq: 1800, Q: 0.6 });
+      break;
+    case 'purse':
+      beep({ freq: 880, dur: 0.06, type: 'sine', vol: 0.18 });
+      beep({ freq: 1180, dur: 0.08, type: 'triangle', vol: 0.14 });
+      beep({ freq: 1560, dur: 0.1, type: 'sine', vol: 0.12 });
+      noiseBurst({ dur: 0.08, vol: 0.14, freq: 900, Q: 0.7 });
+      break;
+    case 'crate':
+      noiseBurst({ dur: 0.16, vol: 0.18, freq: 420, Q: 0.5 });
+      beep({ freq: 330, dur: 0.12, type: 'triangle', vol: 0.16, slide: 80 });
+      beep({ freq: 660, dur: 0.14, type: 'sine', vol: 0.14 });
+      beep({ freq: 990, dur: 0.2, type: 'triangle', vol: 0.12 });
+      break;
     case 'tap':
       if (table) noiseBurst({ dur: 0.03, vol: 0.1, freq: 1600, Q: 1 });
       else beep({ freq: 600, dur: 0.04, type: 'sine', vol: 0.1 });

@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-14 (build 35):** Full Club overhaul on the build 33 overlay board. High Isle splash + dedicated Store. Ranked is PvP-only. Daily stingy shop. Win Continue → purse. Login greet + 2 Crown Crates/month. Encyclopedia All-cards scroll uses simple patron dividers — **Hermaeus Mora and Treasury always appear**. No felt/table CSS. `?v=35`.
+
 **2026-09-14 (build 34):** Club economy on top of the build 33 full-bleed overlay board. Shop / collection / challenges only — no felt or table-pack edits. `?v=34`.
 
 **2026-09-14 (build 33):** Spec lock on the full-bleed table — pointed silver medallions (Neutral tip left / you down / opp up; Treasury + Mora never tip), cream prestige hex, overlay chrome. Do not drop [`FEATURE_INVENTORY.md`](FEATURE_INVENTORY.md).
@@ -26,19 +28,18 @@
 - [x] Targeted abilities: full-screen pick modal (title, center row, gold select, Confirm, Show Board, Cancel). Treasury sacrifice (hand or played) → Writ of Coin. Acquire stays on the tavern (no modal). Same picks for Destroy, Knock Out, Replace, Toss, Donate/Discard, Refresh, Confine, Heal, Choose A/B. AI still auto-picks. After confirm: dissolve / KO slash + fly to cooldown / buy arc. End turn streams Power → Prestige.
 - [x] Patron-uses is a smaller gold octagon on the hourglass rail that greys when spent — not a 4th equal resource pip.
 
-## Phase B — Club / meta (build 34)
+## Phase B — Club / meta (build 35)
 
-- [x] Cutpurse-style rewards on **win only**; modest match gold (5/1 casual, 8/2 ranked)
-- [x] Endgame deck gates: fragments **and** one clue for every base card
-- [x] Rotating 2-day shop (NY midnight): weighted rarity, bundle, tomorrow preview, sold-out / returns later
-- [x] Stingy prices; fragments are the long coin sink (Common 90g → Legendary 560g)
-- [x] Collection tabs: Patrons/Decks · Card Clues · Upgrades (backs, tables, cosmetics)
-- [x] Card clues: 3 clues on a card unlocks its upgrade; encyclopedia-by-deck under Card Clues
-- [x] Weekly challenges (Monday NY reset) + seasonal fan themes (Undaunted mid-Sep 2026, High Seas Sep 30)
-- [x] Daily login calendar with red X on missed days
-- [x] Provinces: win → next, lose → lock that NY day, clear road → rotating grand prize
-- [x] Rematch on the win banner (AI/hotseat); fan-tournament hook in Club (no new netcode)
-- [x] More Club achievements (streaks, rematch revenge, deck unlocks, clues, road)
+- [x] High Isle splash; dedicated Store button; Settings has About/credits only (no store)
+- [x] Ranked is its own PvP lobby — never vs AI, no difficulty slider
+- [x] Daily sparse shop: ~4 skins, ~4 backs, 1 fragment (the fragment is the prize), rare expensive clues
+- [x] No mashable Open Cutpurse / Buy Purse shop buttons
+- [x] Match Continue → animated purse (win loot / loss empty). Modest gold 5/1 · 8/2
+- [x] Login greet stamps the calendar; max 2 Crown Crates per month
+- [x] Collection three tabs: Patrons/Decks (Mora included) · Card Clues · Upgrades (fragments, backs, tables)
+- [x] Encyclopedia All-cards scroll: simple patron dividers (name + color). Mora + Treasury groups always in the list. Starters first within a group. No per-patron pages.
+- [x] ToT gold coin art on Club chrome (not match tokens)
+- [x] Weekly / seasonal / achievements / provinces / rematch / Friend lobby kept. No IAP.
 
 Live **table** felt, patron rail, resource triad, hourglass, targeting: not in this PR.
 
@@ -52,7 +53,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=34`. Overlay board from build 33 is the table source of truth.
+`docs/` is a copy of `web/`. Cache-bust `?v=35`. Overlay board from build 33 is the table source of truth.
 
 | Fix | Notes |
 |---|---|

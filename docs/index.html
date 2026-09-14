@@ -7,24 +7,28 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta name="theme-color" content="#1e4a48" />
   <title>Tales of Tribute — Fan Table</title>
-  <link rel="stylesheet" href="css/style.css?v=34" />
-  <link rel="stylesheet" href="css/phone-eso.css?v=34" />
-  <link rel="stylesheet" href="css/table-pack.css?v=34" />
+  <link rel="stylesheet" href="css/style.css?v=35" />
+  <link rel="stylesheet" href="css/phone-eso.css?v=35" />
+  <link rel="stylesheet" href="css/table-pack.css?v=35" />
 </head>
 <body>
   <div id="app">
     <!-- SPLASH -->
     <section id="splash" class="screen active">
-      <div class="splash-frame">
+      <div class="hi-veil" aria-hidden="true"></div>
+      <div class="splash-frame hi-frame">
+        <p class="hi-kicker">High Isle · Roister’s Club</p>
         <h1>Tales of Tribute</h1>
-        <p class="subtitle">A fan table for the Roister’s Club — two patrons, a tavern of five, and the long road to forty prestige.</p>
+        <p class="subtitle">Two patrons, a tavern of five, and the long road to forty prestige.</p>
         <div class="splash-purse" id="splash-purse"></div>
-        <div class="actions">
+        <div class="actions splash-actions">
           <button class="primary" id="btn-play">Play vs AI</button>
           <button id="btn-gauntlet">Challenge the Provinces</button>
-          <button id="btn-ranked">Ranked</button>
+          <button class="ranked-btn" id="btn-ranked">Ranked</button>
           <button id="btn-friend">Play a Friend</button>
+          <button class="primary store-btn" id="btn-splash-store">Store</button>
           <button id="btn-club">Club</button>
+          <button id="btn-splash-collection">Collection</button>
           <button id="btn-ency">Encyclopedia</button>
           <button id="btn-settings">Settings</button>
         </div>
@@ -32,9 +36,28 @@
           <label class="chk"><input type="checkbox" id="chk-hourglass-splash" /> Hourglass (90s)</label>
           <button type="button" id="btn-music" class="music-toggle" title="Music">♪ Music: Off</button>
         </div>
-        <p class="build-stamp" id="build-stamp">build 34</p>
-        <p class="disclaimer">Unofficial fan project. Not affiliated with Bethesda Softworks or ZeniMax Online Studios. Not for sale. Card art courtesy of UESP. No real-money purchases — earn gold at the table.</p>
+        <p class="build-stamp" id="build-stamp">build 35</p>
+        <p class="disclaimer">Unofficial fan project. Not affiliated with Bethesda Softworks or ZeniMax Online Studios.</p>
       </div>
+    </section>
+
+    <!-- RANKED — own PvP lobby, never vs AI -->
+    <section id="ranked" class="screen ranked-screen">
+      <header class="club-header">
+        <h2>Ranked</h2>
+        <button id="btn-ranked-back">Back</button>
+      </header>
+      <div class="ranked-crest" id="ranked-crest"></div>
+      <p class="hint ranked-copy">Roister vs Roister. Hourglass on. No AI. No difficulty slider. Host a room or join a friend’s code — same PeerJS path as Play a Friend. Unofficial. No IAP.</p>
+      <div id="ranked-status" class="ranked-status"></div>
+      <div class="ranked-actions">
+        <button class="primary" id="btn-ranked-host">Host ranked room</button>
+        <div class="join-row">
+          <input id="ranked-join-code" maxlength="4" placeholder="CODE" autocomplete="off" />
+          <button id="btn-ranked-join">Join ranked</button>
+        </div>
+      </div>
+      <p class="hint" id="ranked-lobby-status"></p>
     </section>
 
     <!-- DECK PICK -->
@@ -106,9 +129,7 @@
       </header>
       <div class="club-stats" id="club-stats"></div>
       <div class="club-actions">
-        <button class="primary" id="btn-open-sack">Open Cutpurse</button>
-        <button id="btn-buy-sack">Buy Purse (90g)</button>
-        <button id="btn-store">Store</button>
+        <button class="primary" id="btn-store">Store</button>
         <button id="btn-collection">Collection</button>
       </div>
       <h3 class="club-section">Login calendar</h3>
@@ -136,9 +157,9 @@
       <header class="club-header">
         <h2>Club Store</h2>
         <span class="store-gold" id="store-gold"></span>
-        <button id="btn-store-back">Back to Club</button>
+        <button id="btn-store-back">Back</button>
       </header>
-      <p class="hint" id="store-hint">A small rotating slate — most fragments and cosmetics return later. Rarity sets both the price and how often a piece appears. Purse gold only. No real-money wall.</p>
+      <p class="hint" id="store-hint">Daily slate — four table designs, four card backs, one deck fragment. The fragment is the prize, not pocket gold. Clues are rare and expensive. Purse gold only. No real-money wall.</p>
       <p class="store-timer" id="store-timer"></p>
       <h3 class="club-section">Slate bundle</h3>
       <div id="store-bundle"></div>
@@ -154,7 +175,7 @@
     <section id="collection" class="screen">
       <header class="club-header">
         <h2>Collection</h2>
-        <button id="btn-collection-back">Back to Club</button>
+        <button id="btn-collection-back">Back</button>
       </header>
       <div class="coll-tabs" role="tablist">
         <button type="button" class="coll-tab active" data-tab="patrons">Patrons / Decks</button>
@@ -170,6 +191,8 @@
         <div class="store-grid" id="clue-grid"></div>
       </div>
       <div id="collection-cosmetics" hidden>
+        <h3 class="club-section">Patron fragments</h3>
+        <div class="store-grid" id="coll-frags"></div>
         <h3 class="club-section">Table designs</h3>
         <div class="store-grid" id="coll-skins"></div>
         <h3 class="club-section">Card backs</h3>
@@ -186,7 +209,7 @@
         <h2>Settings</h2>
         <button id="btn-settings-back">Back</button>
       </header>
-      <p class="hint">Equip what you already own. New skins and backs appear on the rotating Club Store slate — they are not always in stock.</p>
+      <p class="hint">Table options only. Cosmetics are equipped in Collection. New pieces appear on the Store slate.</p>
       <div class="settings-block">
         <h3 class="club-section">Table</h3>
         <label class="chk settings-row"><input type="checkbox" id="chk-settings-music" /> Music</label>
@@ -205,10 +228,10 @@
         </div>
         <button type="button" id="btn-replay-tour" class="settings-row-btn">Replay first-match tour</button>
       </div>
-      <h3 class="club-section">Choose table skin</h3>
-      <div class="store-grid" id="settings-skins"></div>
-      <h3 class="club-section">Choose card back</h3>
-      <div class="store-grid" id="settings-backs"></div>
+      <div class="settings-block" id="settings-about">
+        <h3 class="club-section">About</h3>
+        <p class="hint">Unofficial Ivan Rodriguez fan table. Not affiliated with Bethesda Softworks or ZeniMax Online Studios. Not for sale. No in-app purchases. Card art courtesy of UESP. Menu beds are CC-BY Kevin MacLeod (Call to Adventure, Heroic Age, Five Armies, Black Vortex) — never the ESO soundtrack.</p>
+      </div>
     </section>
 
     <!-- MATCH — authentic board -->
@@ -355,11 +378,35 @@
       </div>
     </div>
     <div class="overlay" id="sack-overlay">
-      <div class="sack-modal" id="sack-modal">
-        <div class="sack-anim" id="sack-anim">🪙</div>
+      <div class="sack-modal hi-frame" id="sack-modal">
+        <div class="purse-stage" id="sack-anim">
+          <div class="purse-bag" id="purse-bag" aria-hidden="true"></div>
+        </div>
         <div class="sack-rarity" id="sack-rarity"></div>
         <div class="sack-reward" id="sack-reward"></div>
-        <button class="primary" id="btn-sack-close">Claim</button>
+        <button class="primary" id="btn-sack-close">Continue</button>
+      </div>
+    </div>
+    <div class="overlay" id="login-overlay">
+      <div class="login-modal hi-frame">
+        <h2>The Club remembers</h2>
+        <p class="hint">Stamp today’s prize. Two Crown Crates a month. Opening a crate is the reward — not a shop button.</p>
+        <div id="login-cal" class="login-cal"></div>
+        <p class="hint" id="login-prize-hint"></p>
+        <button class="primary" id="btn-login-claim">Claim today’s stamp</button>
+        <button type="button" id="btn-login-later">Later</button>
+      </div>
+    </div>
+    <div class="overlay" id="crate-overlay">
+      <div class="crate-modal hi-frame" id="crate-modal">
+        <div class="crate-stage crate-closed" id="crate-stage">
+          <div class="crate-lid"></div>
+          <div class="crate-body"></div>
+        </div>
+        <div class="sack-rarity" id="crate-rarity"></div>
+        <div class="sack-reward" id="crate-reward"></div>
+        <button class="primary" id="btn-crate-open">Open Crown Crate</button>
+        <button id="btn-crate-close" hidden>Continue</button>
       </div>
     </div>
     <div class="overlay" id="pile-overlay">
@@ -413,6 +460,6 @@
       <div class="modal-body" id="card-modal-body"></div>
     </div>
   </div>
-  <script type="module" src="js/app.js?v=34"></script>
+  <script type="module" src="js/app.js?v=35"></script>
 </body>
 </html>
