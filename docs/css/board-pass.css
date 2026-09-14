@@ -165,8 +165,8 @@ body.is-portrait #match .patron-rail {
 
 body.is-portrait #match .patron-coin { width: 52px !important; }
 body.is-portrait #match .patron-coin .token-dial.medallion {
-  width: 52px !important;
-  height: 62px !important;
+  width: 54px !important;
+  height: 68px !important;
 }
 body.is-portrait #match .patron-coin .token-dial.tipless {
   width: 44px !important;
@@ -270,8 +270,8 @@ body.is-landscape #match .patron-rail {
 
 body.is-landscape #match .patron-coin { width: 56px !important; }
 body.is-landscape #match .patron-coin .token-dial.medallion {
-  width: 52px !important;
-  height: 62px !important;
+  width: 56px !important;
+  height: 70px !important;
 }
 body.is-landscape #match .patron-coin .token-dial.tipless {
   width: 46px !important;
@@ -315,18 +315,18 @@ body.is-landscape #match .patron-coin .token-dial.tipless {
 #match .patron-coin .token-dial.medallion {
   display: block !important;
   position: relative;
-  width: 54px !important;
-  height: 64px !important;
+  width: 56px !important;
+  height: 70px !important;
   margin: 0 auto;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
   overflow: visible !important;
-  transform-origin: 50% 57%;
+  transform-origin: 50% 59%;
   transition: transform 0.7s cubic-bezier(.4, .12, .2, 1);
   filter: drop-shadow(0 3px 5px #0009);
-  /* Circle + gothic peak (concept art). No letterbox clip that turns it into a pin. */
+  /* Circle + gothic peak (concept art). SVG path is the silhouette. */
   clip-path: none;
 }
 
@@ -369,13 +369,13 @@ body.is-landscape #match .patron-coin .token-dial.tipless {
 
 #match .patron-coin .coin-ring.medallion-face {
   position: absolute !important;
-  /* Window sits in the circular body of viewBox 0 0 100 118, center (50, 67.4) r=31.6 */
-  left: 18.4% !important;
-  top: 30.3% !important;
+  /* Window in viewBox 0 0 100 124, center (50, 73) r=27.4 */
+  left: 22.6% !important;
+  top: 36.8% !important;
   right: auto !important;
   bottom: auto !important;
-  width: 63.2% !important;
-  height: 53.6% !important;
+  width: 54.8% !important;
+  height: 44.2% !important;
   padding: 0 !important;
   border-radius: 50%;
   overflow: hidden;

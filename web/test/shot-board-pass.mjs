@@ -62,9 +62,24 @@ function fail(msg, extra) {
 
 async function shotRail(page, name) {
   fs.mkdirSync(ART, { recursive: true });
-  const rail = await page.$('#rail-patrons') || await page.$('#patron-rail');
-  if (!rail) { fail(`${name} missing patron rail`); return; }
-  await rail.screenshot({ path: path.join(ART, `${name}.png`) });
+  const box = await page.evaluate(() => {
+    const coins = [...document.querySelectorAll('#rail-patrons .patron-coin')];
+    if (!coins.length) return null;
+    const rs = coins.map((el) => el.getBoundingClientRect());
+    const pad = 10;
+    const left = Math.min(...rs.map((r) => r.left)) - pad;
+    const top = Math.min(...rs.map((r) => r.top)) - pad;
+    const right = Math.max(...rs.map((r) => r.right)) + pad;
+    const bottom = Math.max(...rs.map((r) => r.bottom)) + pad;
+    return {
+      x: Math.max(0, left),
+      y: Math.max(0, top),
+      width: Math.min(window.innerWidth, right) - Math.max(0, left),
+      height: Math.min(window.innerHeight, bottom) - Math.max(0, top),
+    };
+  });
+  if (!box || box.width < 8 || box.height < 8) { fail(`${name} missing patron rail`); return; }
+  await page.screenshot({ path: path.join(ART, `${name}.png`), clip: box });
 }
 
 async function measure(page, fileStem, { w, h }) {

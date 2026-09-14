@@ -212,18 +212,18 @@ function patronNeverTips(pat, pid) {
 
 function pewterDefs(uid, field) {
   return `
-    <linearGradient id="${uid}-pew" x1="16%" y1="0" x2="88%" y2="100%">
+    <linearGradient id="${uid}-pew" x1="14%" y1="0" x2="90%" y2="100%">
       <stop offset="0%" stop-color="#f8f3e8"/>
-      <stop offset="14%" stop-color="#d8d0c2"/>
-      <stop offset="36%" stop-color="#8a8478"/>
-      <stop offset="52%" stop-color="#efe6d4"/>
-      <stop offset="74%" stop-color="#6a6458"/>
-      <stop offset="100%" stop-color="#2a261e"/>
+      <stop offset="12%" stop-color="#d4cdc0"/>
+      <stop offset="34%" stop-color="#7a7468"/>
+      <stop offset="50%" stop-color="#efe6d4"/>
+      <stop offset="72%" stop-color="#5c564c"/>
+      <stop offset="100%" stop-color="#241f18"/>
     </linearGradient>
-    <linearGradient id="${uid}-hi" x1="22%" y1="0" x2="80%" y2="100%">
+    <linearGradient id="${uid}-hi" x1="20%" y1="0" x2="82%" y2="100%">
       <stop offset="0%" stop-color="#fffaf0"/>
-      <stop offset="42%" stop-color="#c8c0b0"/>
-      <stop offset="100%" stop-color="#4a453c"/>
+      <stop offset="40%" stop-color="#c8c0b0"/>
+      <stop offset="100%" stop-color="#3a342c"/>
     </linearGradient>
     <radialGradient id="${uid}-fld" cx="36%" cy="28%">
       <stop offset="0%" stop-color="#c43440"/>
@@ -231,15 +231,19 @@ function pewterDefs(uid, field) {
     </radialGradient>`;
 }
 
-/** Bezel bosses / knotwork pips around a circular window. */
-function rimBosses(uid, cx, cy, r, count, skipTop) {
+/** Carved knotwork on the bezel — loops, not a dotted pip ring. */
+function rimKnotwork(uid, cx, cy, r, count, skipTop) {
   const bits = [];
   for (let i = 0; i < count; i++) {
     if (skipTop && i === 0) continue;
-    const a = -Math.PI / 2 + (Math.PI * 2 * i) / count;
-    const x = (cx + r * Math.cos(a)).toFixed(2);
-    const y = (cy + r * Math.sin(a)).toFixed(2);
-    bits.push(`<circle cx="${x}" cy="${y}" r="2.05" fill="url(#${uid}-hi)" stroke="#1c1812" stroke-width="0.45"/>`);
+    const a0 = -Math.PI / 2 + (Math.PI * 2 * i) / count;
+    const a1 = a0 + (Math.PI * 2) / count;
+    const mid = (a0 + a1) / 2;
+    const p = (a, rad) => `${(cx + rad * Math.cos(a)).toFixed(1)} ${(cy + rad * Math.sin(a)).toFixed(1)}`;
+    bits.push(
+      `<path fill="none" stroke="url(#${uid}-hi)" stroke-width="1.15" d="M${p(a0, r)} Q${p(mid, r + 3.4)} ${p(a1, r)}"/>`,
+      `<path fill="none" stroke="#1c1812" stroke-width="0.45" opacity=".55" d="M${p(a0, r - 2.4)} Q${p(mid, r - 5.2)} ${p(a1, r - 2.4)}"/>`,
+    );
   }
   return bits.join('');
 }
@@ -261,42 +265,41 @@ function medallionMarkup(pid, pat, short, favorWord) {
         <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
         <svg class="medallion-svg" viewBox="0 0 100 100" aria-hidden="true">
           <defs>${defs}</defs>
-          <path fill="url(#${uid}-pew)" fill-rule="evenodd" stroke="#1c1812" stroke-width="1.45"
-            d="M50 2 A48 48 0 1 1 49.9 2 Z M50 50 m-31 0 a31 31 0 1 1 62 0 a31 31 0 1 1 -62 0"/>
-          <circle cx="50" cy="50" r="31.8" fill="none" stroke="#1c1812" stroke-width="1.35"/>
-          <circle cx="50" cy="50" r="30.7" fill="none" stroke="#efe6d4" stroke-width="1.05" opacity=".88"/>
-          <circle cx="50" cy="50" r="39.4" fill="none" stroke="#d8d0c2" stroke-width=".55" opacity=".65" stroke-dasharray="2.1 3.4"/>
-          <circle cx="50" cy="50" r="33.2" fill="none" stroke="#5c564c" stroke-width="2.05" stroke-dasharray="3.2 2.1"/>
-          ${rimBosses(uid, 50, 50, 39.6, 12, false)}
+          <path fill="url(#${uid}-pew)" fill-rule="evenodd" stroke="#1c1812" stroke-width="1.5"
+            d="M50 2 A48 48 0 1 1 49.9 2 Z M50 50 m-28 0 a28 28 0 1 1 56 0 a28 28 0 1 1 -56 0"/>
+          <circle cx="50" cy="50" r="28.8" fill="none" stroke="#1c1812" stroke-width="1.4"/>
+          <circle cx="50" cy="50" r="27.6" fill="none" stroke="#efe6d4" stroke-width="1.1" opacity=".9"/>
+          <circle cx="50" cy="50" r="38.6" fill="none" stroke="#5c564c" stroke-width="2.2"/>
+          ${rimKnotwork(uid, 50, 50, 38.2, 10, false)}
         </svg>
       </div>
       <span class="plabel">${short}</span>`;
   }
-  /* Circle + gothic peak as ONE path. Peak is the bezel, not a pip. */
+  /* One path: circular body + gothic ogive. The point is the bezel. */
   const sil = [
-    'M50 1.6',
-    'C55.8 9.4, 62.2 14.2, 68.4 20.6',
-    'C88.2 33.4, 98.1 49.6, 98.1 67.4',
-    'A48.1 48.1 0 1 1 1.9 67.4',
-    'C1.9 49.6, 11.8 33.4, 31.6 20.6',
-    'C37.8 14.2, 44.2 9.4, 50 1.6 Z',
+    'M50 1.2',
+    'C58 11, 67 17, 75 28',
+    'C91 44, 98.2 58, 98.2 73',
+    'A48.2 48.2 0 1 1 1.8 73',
+    'C1.8 58, 9 44, 25 28',
+    'C33 17, 42 11, 50 1.2 Z',
   ].join(' ');
-  const windowHole = 'M50 67.4 m-31.6 0 a31.6 31.6 0 1 1 63.2 0 a31.6 31.6 0 1 1 -63.2 0';
+  const windowHole = 'M50 73 m-27.4 0 a27.4 27.4 0 1 1 54.8 0 a27.4 27.4 0 1 1 -54.8 0';
   return `
     <div class="token-dial medallion" title="${title}">
       <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
-      <svg class="medallion-svg" viewBox="0 0 100 118" aria-hidden="true">
+      <svg class="medallion-svg" viewBox="0 0 100 124" aria-hidden="true">
         <defs>${defs}</defs>
-        <path class="token-point medallion-body" fill="url(#${uid}-pew)" fill-rule="evenodd" stroke="#1c1812" stroke-width="1.45"
+        <path class="token-point medallion-body" fill="url(#${uid}-pew)" fill-rule="evenodd" stroke="#1c1812" stroke-width="1.5"
           d="${sil} ${windowHole}"/>
-        <path fill="none" stroke="url(#${uid}-hi)" stroke-width="1.2" d="M50 4.2 C55.5 11.8, 62 16.4, 69.2 22.6"/>
-        <path fill="none" stroke="#2a261e" stroke-width="0.7" opacity=".55" d="M50 4.2 C44.5 11.8, 38 16.4, 30.8 22.6"/>
-        <circle class="token-finial" cx="50" cy="5.1" r="2.35" fill="url(#${uid}-hi)" stroke="#1c1812" stroke-width="0.7"/>
-        <circle cx="50" cy="67.4" r="32.8" fill="none" stroke="#1c1812" stroke-width="1.45"/>
-        <circle cx="50" cy="67.4" r="31.5" fill="none" stroke="#efe6d4" stroke-width="1.05" opacity=".9"/>
-        <circle cx="50" cy="67.4" r="40.2" fill="none" stroke="#d8d0c2" stroke-width=".55" opacity=".7" stroke-dasharray="2.2 3.6"/>
-        <circle cx="50" cy="67.4" r="34.2" fill="none" stroke="#5c564c" stroke-width="2.1" stroke-dasharray="3.3 2.15"/>
-        ${rimBosses(uid, 50, 67.4, 40.4, 12, true)}
+        <path fill="none" stroke="url(#${uid}-hi)" stroke-width="1.35" d="M50 5 C58 14, 67 20, 76 32"/>
+        <path fill="none" stroke="#1c1812" stroke-width="0.7" opacity=".55" d="M50 5 C42 14, 33 20, 24 32"/>
+        <path fill="none" stroke="url(#${uid}-hi)" stroke-width="1.05" d="M44 18 L50 6 L56 18"/>
+        <circle class="token-finial" cx="50" cy="4.6" r="2.55" fill="url(#${uid}-hi)" stroke="#1c1812" stroke-width="0.7"/>
+        <circle cx="50" cy="73" r="28.4" fill="none" stroke="#1c1812" stroke-width="1.45"/>
+        <circle cx="50" cy="73" r="27.2" fill="none" stroke="#efe6d4" stroke-width="1.1" opacity=".92"/>
+        <circle cx="50" cy="73" r="39.4" fill="none" stroke="#5c564c" stroke-width="2.25"/>
+        ${rimKnotwork(uid, 50, 73, 38.6, 10, true)}
       </svg>
     </div>
     <span class="plabel">${short}</span>`;
