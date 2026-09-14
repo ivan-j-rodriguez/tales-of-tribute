@@ -960,6 +960,10 @@ body.skin-witches { --splash-a: rgba(255,120,30,0.28); --splash-b: rgba(80,10,20
   padding: 1rem;
   overflow: auto;
 }
+#encyclopedia {
+  --ency-chrome: 0px;
+  padding: 0 1rem 1rem;
+}
 .club-header {
   display: flex; align-items: center; gap: 0.75rem;
   margin-bottom: 0.75rem; position: sticky; top: 0;
@@ -1091,7 +1095,7 @@ body.skin-witches { --splash-a: rgba(255,120,30,0.28); --splash-b: rgba(80,10,20
 }
 .clue-card.unknown { opacity: 0.75; }
 .clue-card .tag { font-size: 0.7rem; color: var(--ink-dim); margin-top: 0.3rem; }
-.clue-deck { margin-bottom: 1.2rem; }
+.clue-deck { margin-bottom: 1.2rem; scroll-margin-top: 4.5rem; }
 .clue-deck-head {
   display: flex; gap: 0.75rem; align-items: center;
   margin-bottom: 0.5rem;
@@ -1150,37 +1154,75 @@ body.skin-witches { --splash-a: rgba(255,120,30,0.28); --splash-b: rgba(80,10,20
 .coll-card .tag { padding: 0.25rem; color: var(--ink-dim); }
 
 #encyclopedia header {
-  display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;
-  margin-bottom: 1rem; position: sticky; top: 0; background: #160e08ee; padding: 0.5rem 0; z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "title back"
+    "filter search";
+  gap: 0.35rem 0.45rem;
+  align-items: center;
+  margin: 0 -1rem 0.65rem;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: #0a2428;
+  padding: 0.75rem 1rem 0.55rem;
+  box-shadow: 0 10px 14px #0a2428;
 }
-#encyclopedia h2 { font-family: 'Cinzel', serif; color: var(--gold); margin-right: auto; }
+#encyclopedia h2 {
+  grid-area: title;
+  font-family: 'Cinzel', serif;
+  color: var(--gold);
+  margin: 0;
+  font-size: 1.15rem;
+}
+#encyclopedia #btn-ency-back { grid-area: back; }
 #encyclopedia select, #encyclopedia input {
   background: var(--wood-mid); color: var(--ink); border: var(--border);
   padding: 0.4rem 0.6rem; border-radius: 6px; font-family: inherit;
 }
+#encyclopedia select { grid-area: filter; width: 100%; min-width: 0; }
+#encyclopedia input { grid-area: search; width: 100%; min-width: 0; }
 .ency-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+}
+.ency-deck {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+.ency-deck-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: 0.75rem;
 }
 .ency-patron-head,
 .ency-divider {
-  grid-column: 1 / -1;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin: 0.75rem 0 0.15rem;
-  padding: 0.45rem 0 0.55rem;
+  gap: 0.85rem;
+  margin: 0;
+  padding: 0.45rem 0.2rem 0.55rem;
   border-bottom: 2px solid var(--ency-color, var(--gold));
   color: var(--ency-color, var(--gold));
+  background: transparent;
+}
+#encyclopedia .ency-patron-head {
+  position: sticky;
+  top: var(--ency-chrome, 5.7rem);
+  z-index: 2;
+  background: #0c282c;
+  box-shadow: 0 8px 10px #0c282c;
 }
 .clue-deck .ency-patron-head {
   margin-top: 0.25rem;
 }
 .clue-deck-count { margin: 0.15rem 0 0.55rem; }
 .ency-patron-token {
-  width: 64px;
-  height: 64px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid var(--ency-color, var(--gold));
@@ -3387,7 +3429,7 @@ html.has-touch #match .card:hover { transform: none !important; }
 }
 .splash-purse span { display: inline-flex; align-items: center; gap: 0.28rem; }
 
-#encyclopedia header { background: #0a2428ee; }
+#encyclopedia header { background: #0a2428; }
 
 .ranked-screen { color: var(--ink); }
 .ranked-copy { max-width: 36rem; }

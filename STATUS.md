@@ -1,6 +1,6 @@
 # Status
 
-**2026-09-14 (build 36):** Encyclopedia All-cards scroll opens each deck with the **patron portrait/token + name**, then that patron’s cards. Locked patrons stay grey/`???`. Mora and Treasury always appear. Collection Patrons + Card Clues match. No felt/table CSS. `?v=36`.
+**2026-09-14 (build 37):** Encyclopedia All-cards scroll opens each deck with the **patron portrait/token + name**, then that patron’s cards. Locked patrons stay grey/`???`. Mora and Treasury always appear. Collection Patrons + Card Clues match. No felt/table CSS. `?v=37`.
 
 **2026-09-14 (build 35):** Full Club overhaul on the build 33 overlay board. High Isle splash + dedicated Store. Ranked is PvP-only. Daily stingy shop. Win Continue → purse. Login greet + 2 Crown Crates/month. Encyclopedia All-cards scroll uses simple patron dividers — **Hermaeus Mora and Treasury always appear**. No felt/table CSS. `?v=35`.
 
@@ -30,7 +30,7 @@
 - [x] Targeted abilities: full-screen pick modal (title, center row, gold select, Confirm, Show Board, Cancel). Treasury sacrifice (hand or played) → Writ of Coin. Acquire stays on the tavern (no modal). Same picks for Destroy, Knock Out, Replace, Toss, Donate/Discard, Refresh, Confine, Heal, Choose A/B. AI still auto-picks. After confirm: dissolve / KO slash + fly to cooldown / buy arc. End turn streams Power → Prestige.
 - [x] Patron-uses is a smaller gold octagon on the hourglass rail that greys when spent — not a 4th equal resource pip.
 
-## Phase B — Club / meta (build 36)
+## Phase B — Club / meta (build 37)
 
 - [x] High Isle splash; dedicated Store button; Settings has About/credits only (no store)
 - [x] Ranked is its own PvP lobby — never vs AI, no difficulty slider
@@ -55,7 +55,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=36`. Overlay board from build 33 is the table source of truth.
+`docs/` is a copy of `web/`. Cache-bust `?v=37`. Overlay board from build 33 is the table source of truth.
 
 | Fix | Notes |
 |---|---|

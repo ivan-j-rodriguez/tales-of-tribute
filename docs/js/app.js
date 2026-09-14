@@ -254,7 +254,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 36';
+  if (stamp) stamp.textContent = 'build 37';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -2559,6 +2559,7 @@ function renderCollection() {
       const unlocked = isDeckUnlocked(profile, id);
       const el = document.createElement('div');
       el.className = 'patron-card' + (unlocked ? '' : ' locked');
+      el.dataset.deck = id;
       const frag = fragmentProgress(profile, id);
       const ups = upgradesForPatron(DATA.cards, id);
       const owned = ups.filter((u) => profile.ownedUpgrades.includes(u)).length;
@@ -2822,18 +2823,31 @@ function renderEncy() {
   const rawPid = sel?.value || '';
   const pid = rawPid ? canonPatron(rawPid) : '';
   const filtered = DATA.cards.filter((c) => {
-    if (rawPid && canonPatron(c.patron) !== pid) return false;
-    if (q && !c.name.toLowerCase().includes(q) && !(c.playText || '').toLowerCase().includes(q)) return false;
+    const deck = canonPatron(c.patron);
+    if (rawPid && deck !== pid) return false;
+    if (q) {
+      const p = patronRecord(deck);
+      const hay = [c.name, c.playText, p.name, p.short, deck].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
     return true;
   });
   const grid = $('#ency-grid');
   if (!grid) return;
   grid.innerHTML = '';
+  const chrome = $('#encyclopedia header');
+  const ency = $('#encyclopedia');
+  if (ency && chrome) ency.style.setProperty('--ency-chrome', `${Math.round(chrome.getBoundingClientRect().height)}px`);
   const viewingAll = !rawPid;
   const groups = groupCardsByDeck(filtered);
   for (const g of groups) {
     if (!g.cards.length && !(viewingAll && g.id !== 'other')) continue;
-    grid.appendChild(encyPatronHead(g.id));
+    const section = document.createElement('section');
+    section.className = `ency-deck deck-${g.id}`;
+    section.dataset.deck = g.id;
+    section.appendChild(encyPatronHead(g.id));
+    const box = document.createElement('div');
+    box.className = 'ency-deck-cards';
     for (const c of g.cards) {
       const deckLocked = canonPatron(c.patron) !== 'treasury' && !isDeckUnlocked(profile, c.patron);
       const el = document.createElement('div');
@@ -2842,8 +2856,10 @@ function renderEncy() {
         ? `<div class="clue-unknown">?</div><div class="info"><strong>???</strong></div>`
         : `<img src="${artFor(c)}" alt="${c.name}" /><div class="info"><strong>${c.name}</strong>${c.cost} · ${c.type}${c.upgraded ? ' · ▲' : ''}</div>`;
       if (!deckLocked) el.addEventListener('click', () => showCardModal(c));
-      grid.appendChild(el);
+      box.appendChild(el);
     }
+    section.appendChild(box);
+    grid.appendChild(section);
   }
 }
 
