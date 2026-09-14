@@ -1,5 +1,5 @@
 /**
- * Build 37 board-pass gate + artifacts.
+ * Build 40 board-pass gate + artifacts.
  * Portrait 390×844 / landscape 844×390.
  * Gothic medallion silhouette IS the favor tip. No in-match landscape banner.
  */
@@ -101,6 +101,7 @@ async function measure(page, fileStem, { w, h }) {
     cardH: m.cardH,
     midGapPct: m.midGapPct,
     peakPct: m.peakPct,
+    hits: m.hits,
     tavernDiscard: m.tavernDiscard,
     medallions: m.medallions,
     pointedTips: m.pointedTips,
@@ -126,6 +127,11 @@ async function measure(page, fileStem, { w, h }) {
   }
   if (m.peakPct == null || m.peakPct < 7 || m.peakPct > 14) {
     fail(`${fileStem} peak ${m.peakPct}% of diameter (need ≈10%, gate 7–14)`, notes);
+  }
+  if (m.hits) {
+    for (const [k, v] of Object.entries(m.hits)) {
+      if (v) fail(`${fileStem} overlap ${k}`, notes);
+    }
   }
   console.log('ok ', JSON.stringify(notes));
   return notes;
@@ -176,7 +182,7 @@ if (pelinOpp?.favor !== 'unfavored') fail('pelin fav-opp not unfavored', pelinOp
 if (treas && treas.rot !== 'none') fail('treasury rotated', treas);
 
 const note = [
-  'Build 39 board-pass measurements',
+  'Build 40 board-pass measurements',
   `portrait 390x844: tavern ${results.portrait.tavernW}px = ${results.portrait.viewportTavernPct}% vw`,
   `  empty bands T/B ${results.portrait.topBandPct}% / ${results.portrait.botBandPct}% (need ≤8%)`,
   `  tavern-to-hand gap ${results.portrait.midGapPct}% (need ≤16%)`,

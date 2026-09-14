@@ -221,6 +221,8 @@ async function assertInspect(page, label) {
   assert(`${label} hex on screen`, fit.hexOn, { hex: fit.hex, vw: fit.vw, vh: fit.vh, metrics: fit.metrics });
   assert(`${label} tooltip on screen`, fit.textOn, fit.text);
   assert(`${label} name on screen`, fit.nameOn, fit.name);
+  assert(`${label} dossier modal`, fit.modal === true && fit.sheetOn !== false, fit.sheet);
+  assert(`${label} title not clipped`, fit.titleClipped !== true, fit.name);
   assert(`${label} Gain 2 Coin`, /Gain 2 Coin/.test(fit.tipText || ''), fit.tipText);
   assert(`${label} Draw 1 card`, /Draw 1 card/.test(fit.tipText || ''), fit.tipText);
   assert(`${label} no token stub`, !/(?:^|\n)\s*2 Coin\./i.test(fit.tipText || '') && !/(?:^|\n)\s*Draw 1\.(?!\s*card)/i.test(fit.tipText || ''), fit.tipText);
