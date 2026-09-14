@@ -95,10 +95,10 @@ body.is-portrait #match .felt-table,
       auto
       44px
       22px
-      minmax(150px, 1.2fr)
+      minmax(160px, 1.35fr)
       44px
       auto
-      minmax(148px, 1.05fr) !important;
+      minmax(100px, 0.85fr) !important;
     align-content: stretch !important;
   }
 }
@@ -114,15 +114,14 @@ body.is-portrait #match .felt-table {
     auto
     44px
     22px
-    minmax(150px, 1.2fr)
+    minmax(160px, 1.35fr)
     44px
     auto
-    minmax(148px, 1.05fr) !important;
+    minmax(100px, 0.85fr) !important;
   align-content: stretch !important;
 }
 
 body.is-portrait #match .felt-opp-hand,
-body.is-portrait #match .felt-you-hand,
 body.is-portrait #match .felt-opp-agents,
 body.is-portrait #match .felt-you-agents {
   width: 100% !important;
@@ -136,9 +135,14 @@ body.is-portrait #match .felt-opp-hand {
   align-self: start !important;
 }
 body.is-portrait #match .felt-you-hand {
+  width: calc(100% - 208px) !important;
+  max-width: none !important;
+  margin: 0 0 0 52px !important;
+  justify-self: start !important;
   min-height: 0 !important;
   height: auto !important;
   align-self: stretch !important;
+  overflow: hidden !important;
 }
 body.is-portrait #match #hand-zone,
 body.is-portrait #match .you-fan {
@@ -181,12 +185,12 @@ body.is-portrait #match .tavern-zone .card {
 body.is-portrait #match #hand-zone .card,
 body.is-portrait #match #hand-zone button.card,
 body.is-portrait #match .you-fan .card {
-  width: min(102px, 26vw) !important;
+  width: min(54px, calc((100% + 1.6rem) / 5.2)) !important;
   height: auto !important;
   aspect-ratio: 1 / 1.52 !important;
-  min-height: 140px !important;
+  min-height: 80px !important;
   max-height: 92% !important;
-  margin: 0 -14px !important;
+  margin: 0 -6px !important;
 }
 
 body.is-portrait #match .rival-fan .card,
@@ -242,24 +246,40 @@ body.is-landscape #match .felt-table {
   row-gap: 2px !important;
   gap: 2px 0 !important;
   grid-template-rows:
-    minmax(42px, 0.72fr)
-    auto
-    40px
-    22px
-    minmax(96px, 1.7fr)
-    40px
-    auto
-    minmax(72px, 1.25fr) !important;
+    minmax(36px, 0.65fr)
+    24px
+    44px
+    20px
+    minmax(90px, 1.65fr)
+    44px
+    24px
+    minmax(68px, 1.15fr) !important;
 }
 
 body.is-landscape #match .felt-opp-hand,
-body.is-landscape #match .felt-you-hand,
 body.is-landscape #match .felt-opp-agents,
 body.is-landscape #match .felt-you-agents {
   width: 100% !important;
   max-width: none !important;
   margin: 0 !important;
   justify-self: stretch !important;
+}
+body.is-landscape #match .felt-you-hand {
+  width: calc(100% - 248px) !important;
+  max-width: none !important;
+  margin: 0 0 0 56px !important;
+  justify-self: start !important;
+  overflow: hidden !important;
+}
+body.is-landscape #match .felt-you-agents,
+body.is-landscape #match .felt-opp-agents {
+  min-height: 24px !important;
+  height: 24px !important;
+  overflow: hidden !important;
+}
+body.is-landscape #match .agent-slot.empty {
+  width: 22px !important;
+  height: 20px !important;
 }
 
 body.is-landscape #match .felt-tavern {
@@ -327,23 +347,33 @@ body.is-landscape #match .patron-coin .token-dial.tipless {
   height: 46px !important;
 }
 
-/* Piles sit in the L/R chrome strips — never on tavern cards. */
+/* Piles sit in the L/R chrome strips — never on tavern cards or Leave. */
 #match #pile-opp-draw { top: 6px !important; left: 2px !important; }
-#match #pile-opp-cd { top: 6px !important; right: 122px !important; }
+#match #pile-opp-cd { top: 6px !important; right: 124px !important; }
 #match #pile-tavern-draw { top: 52% !important; left: 2px !important; transform: translateY(-50%) !important; }
 #match #pile-you-draw { bottom: 8px !important; left: 2px !important; }
-#match #pile-you-cd { bottom: 8px !important; right: 122px !important; }
+#match #pile-you-cd { bottom: 8px !important; right: 124px !important; }
 
 body.is-portrait #match #pile-opp-cd { top: 6px !important; right: 108px !important; }
 body.is-portrait #match #pile-you-cd { bottom: 8px !important; right: 108px !important; }
 
+#match .felt-table > .hex-pile,
+#match #pile-opp-draw,
+#match #pile-opp-cd,
+#match #pile-tavern-draw,
+#match #pile-you-draw,
+#match #pile-you-cd {
+  z-index: 16 !important;
+}
 #match .felt-hud-you {
-  right: 176px !important;
+  right: 192px !important;
   bottom: 8px !important;
   left: auto !important;
+  width: auto !important;
+  z-index: 17 !important;
 }
 body.is-portrait #match .felt-hud-you {
-  right: 160px !important;
+  right: 190px !important;
   bottom: 10px !important;
 }
 

@@ -187,7 +187,7 @@ if (!pFit.nameOn) fail('portrait inspect name clipped', pFit);
 if (pFit.sheet && !pFit.sheetOn) fail('portrait inspect sheet clipped', pFit);
 if (pFit.titleClipped) fail('portrait inspect title clipped', pFit);
 if (!/CUSTOMS SEIZURE|TOLL OF FLESH/i.test(pFit.tipText || '')) fail('portrait inspect missing title', pFit);
-portPage.close();
+await portPage.close();
 
 const landPage = await browser.newPage();
 await landPage.setViewport({ width: 844, height: 390, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
@@ -207,7 +207,7 @@ if (!lFit.textOn) fail('landscape inspect text clipped', lFit);
 if (!lFit.nameOn) fail('landscape inspect name clipped', lFit);
 if (lFit.sheet && !lFit.sheetOn) fail('landscape inspect sheet clipped', lFit);
 if (lFit.titleClipped) fail('landscape inspect title clipped', lFit);
-landPage.close();
+await landPage.close();
 
 const note = [
   `Build 40 layout-fb (${TAG})`,
