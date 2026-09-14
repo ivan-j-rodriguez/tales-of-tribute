@@ -52,7 +52,12 @@ async function shot(page, name) {
 const land = await browser.newPage();
 await land.setViewport({ width: 844, height: 390, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 await ready(land);
-await shot(land, 'table_landscape_packed');
+await shot(land, 'table_landscape_coins');
+const coin = await land.$('#rail-patrons .patron-coin[data-pid="pelin"], #rail-patrons .patron-coin[data-side="you"]');
+if (coin) {
+  await coin.screenshot({ path: '/opt/cursor/artifacts/patron_token_pelin_closeup.png' });
+  console.log('wrote /opt/cursor/artifacts/patron_token_pelin_closeup.png');
+}
 await land.evaluate(() => window.__totTest.inspectById('toll-of-flesh'));
 await new Promise((r) => setTimeout(r, 420));
 const landFit = await land.evaluate(() => window.__totTest.inspectFit());
@@ -66,7 +71,7 @@ await land.close();
 const portPage = await browser.newPage();
 await portPage.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 await ready(portPage);
-await shot(portPage, 'table_portrait_packed');
+await shot(portPage, 'table_portrait_coins');
 await portPage.evaluate(() => window.__totTest.inspectById('toll-of-flesh'));
 await new Promise((r) => setTimeout(r, 420));
 const portFit = await portPage.evaluate(() => window.__totTest.inspectFit());
@@ -76,6 +81,16 @@ console.log('portrait inspect', JSON.stringify({
 }));
 await shot(portPage, 'inspect_toll_portrait');
 await portPage.close();
+
+const nativePage = await browser.newPage();
+await nativePage.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+await nativePage.goto(`http://127.0.0.1:${port}/?test=1&native=1`, { waitUntil: 'domcontentloaded' });
+await nativePage.waitForFunction(() => window.__totTest, { timeout: 20000 });
+await nativePage.evaluate(() => window.__totTest.startQuick());
+await nativePage.waitForFunction(() => window.__totTest.snapshot().hand > 0, { timeout: 8000 });
+await new Promise((r) => setTimeout(r, 350));
+await shot(nativePage, 'table_portrait_native');
+await nativePage.close();
 
 await browser.close();
 server.close();
