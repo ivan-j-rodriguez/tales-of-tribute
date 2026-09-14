@@ -280,7 +280,7 @@ function medallionMarkup(pid, pat, short, favorWord) {
     return `
       <div class="token-dial medallion tipless" title="${title}">
         <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
-        <svg class="medallion-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <svg class="medallion-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
           <defs>${defs}</defs>
           <circle class="medallion-window" cx="50" cy="50" r="28" fill="transparent"/>
           <path fill="url(#${uid}-pew)" fill-rule="evenodd" stroke="#1c1812" stroke-width="1.5"
@@ -4405,6 +4405,23 @@ function layoutMetrics() {
   const endEl = document.querySelector('#btn-end');
   const endFilter = endEl ? getComputedStyle(endEl).filter : '';
   const endTurnGlowOn = !!(endEl && endEl.classList.contains('can-end') && /drop-shadow/i.test(endFilter));
+  const treasCoin = document.querySelector('#rail-patrons .patron-coin[data-pid="treasury"], #rail-patrons .patron-coin.treasury');
+  const treasDial = treasCoin?.querySelector('.token-dial');
+  const treasFace = treasCoin?.querySelector('.coin-ring.medallion-face');
+  const treasSvg = treasCoin?.querySelector('.medallion-svg');
+  const rb = (el) => {
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return { w: +r.width.toFixed(2), h: +r.height.toFixed(2), x: +r.x.toFixed(2), y: +r.y.toFixed(2) };
+  };
+  const treasuryDialBox = rb(treasDial);
+  const treasuryFaceBox = rb(treasFace);
+  const treasurySvgBox = rb(treasSvg);
+  const roundish = (b) => !!(b && b.w > 12 && b.h > 12 && Math.abs(b.w - b.h) <= 2);
+  const treasuryDialRound = roundish(treasuryDialBox);
+  const treasuryFaceRound = roundish(treasuryFaceBox);
+  const treasurySvgRound = roundish(treasurySvgBox);
+  const treasuryCircle = treasuryDialRound && treasuryFaceRound && treasurySvgRound;
   const youHandSpan = youHandEls.length ? (() => {
     const rs = youHandEls.map((el) => el.getBoundingClientRect());
     const x = Math.min(...rs.map((r) => r.x));
@@ -4507,6 +4524,13 @@ function layoutMetrics() {
     pileBg,
     playableGlowOn,
     endTurnGlowOn,
+    treasuryDialBox,
+    treasuryFaceBox,
+    treasurySvgBox,
+    treasuryDialRound,
+    treasuryFaceRound,
+    treasurySvgRound,
+    treasuryCircle,
     oppHandCount: oppHandEls.length,
     oppHandMidX: oppHandMidX == null ? null : +oppHandMidX.toFixed(2),
     oppHandMidDx,

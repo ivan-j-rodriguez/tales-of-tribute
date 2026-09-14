@@ -1253,3 +1253,99 @@ body.is-landscape #match .rail-group.rail-you {
   box-shadow: none !important;
 }
 
+/* Treasury / Mora: true 1:1 circle. Tipless (no gothic peak). Phone-eso
+   still sets .patron-coin / .token-dial to a wide 58×32 / 108×48 capsule;
+   percentage insets + preserveAspectRatio=none then squash the pewter ring
+   into a horizontal oval. Lock a square box and a square face. */
+body.is-portrait #match .patron-coin.tipless,
+body.is-portrait #match .patron-coin.treasury,
+body.is-portrait #match .patron-coin.mora,
+body.is-portrait #match .patron-coin[data-pid="treasury"],
+body.is-portrait #match .patron-coin[data-pid="mora"],
+body.is-landscape #match .patron-coin.tipless,
+body.is-landscape #match .patron-coin.treasury,
+body.is-landscape #match .patron-coin.mora,
+body.is-landscape #match .patron-coin[data-pid="treasury"],
+body.is-landscape #match .patron-coin[data-pid="mora"] {
+  width: 44px !important;
+  height: auto !important;
+  min-height: 44px !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+body.is-landscape #match .patron-coin.tipless,
+body.is-landscape #match .patron-coin.treasury,
+body.is-landscape #match .patron-coin.mora,
+body.is-landscape #match .patron-coin[data-pid="treasury"],
+body.is-landscape #match .patron-coin[data-pid="mora"] {
+  width: 46px !important;
+  min-height: 46px !important;
+}
+body.is-portrait #match .patron-coin.tipless .token-dial.medallion.tipless,
+body.is-portrait #match .patron-coin.treasury .token-dial.medallion.tipless,
+body.is-portrait #match .patron-coin.mora .token-dial.medallion.tipless,
+body.is-portrait #match .patron-coin[data-pid="treasury"] .token-dial.medallion.tipless,
+body.is-portrait #match .patron-coin[data-pid="mora"] .token-dial.medallion.tipless,
+body.is-landscape #match .patron-coin.tipless .token-dial.medallion.tipless,
+body.is-landscape #match .patron-coin.treasury .token-dial.medallion.tipless,
+body.is-landscape #match .patron-coin.mora .token-dial.medallion.tipless,
+body.is-landscape #match .patron-coin[data-pid="treasury"] .token-dial.medallion.tipless,
+body.is-landscape #match .patron-coin[data-pid="mora"] .token-dial.medallion.tipless {
+  display: block !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  max-width: 44px !important;
+  max-height: 44px !important;
+  aspect-ratio: 1 / 1 !important;
+  flex: 0 0 44px !important;
+  transform: none !important;
+  clip-path: none !important;
+  overflow: visible !important;
+}
+body.is-landscape #match .patron-coin.tipless .token-dial.medallion.tipless,
+body.is-landscape #match .patron-coin.treasury .token-dial.medallion.tipless,
+body.is-landscape #match .patron-coin.mora .token-dial.medallion.tipless,
+body.is-landscape #match .patron-coin[data-pid="treasury"] .token-dial.medallion.tipless,
+body.is-landscape #match .patron-coin[data-pid="mora"] .token-dial.medallion.tipless {
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+  min-height: 46px !important;
+  max-width: 46px !important;
+  max-height: 46px !important;
+  flex: 0 0 46px !important;
+}
+body.is-portrait #match .patron-coin.tipless .token-dial.medallion.tipless .coin-ring.medallion-face,
+body.is-portrait #match .patron-coin.treasury .token-dial.medallion.tipless .coin-ring.medallion-face,
+body.is-portrait #match .patron-coin.mora .token-dial.medallion.tipless .coin-ring.medallion-face,
+body.is-portrait #match .patron-coin[data-pid="treasury"] .token-dial.medallion.tipless .coin-ring.medallion-face,
+body.is-portrait #match .patron-coin[data-pid="mora"] .token-dial.medallion.tipless .coin-ring.medallion-face,
+body.is-landscape #match .patron-coin.tipless .token-dial.medallion.tipless .coin-ring.medallion-face,
+body.is-landscape #match .patron-coin.treasury .token-dial.medallion.tipless .coin-ring.medallion-face,
+body.is-landscape #match .patron-coin.mora .token-dial.medallion.tipless .coin-ring.medallion-face,
+body.is-landscape #match .patron-coin[data-pid="treasury"] .token-dial.medallion.tipless .coin-ring.medallion-face,
+body.is-landscape #match .patron-coin[data-pid="mora"] .token-dial.medallion.tipless .coin-ring.medallion-face {
+  inset: unset !important;
+  left: 22% !important;
+  top: 22% !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 56% !important;
+  height: 56% !important;
+  aspect-ratio: 1 / 1 !important;
+  border-radius: 50% !important;
+  transform: none !important;
+}
+body.is-portrait #match .patron-coin.tipless .medallion-svg,
+body.is-portrait #match .patron-coin.treasury .medallion-svg,
+body.is-portrait #match .patron-coin.mora .medallion-svg,
+body.is-landscape #match .patron-coin.tipless .medallion-svg,
+body.is-landscape #match .patron-coin.treasury .medallion-svg,
+body.is-landscape #match .patron-coin.mora .medallion-svg {
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+}
+

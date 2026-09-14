@@ -2,7 +2,7 @@
 
 Ivan follow-up on build 50 / PR #25. Puppeteer 390×844 + 844×390. All layout-fb overlap hits: false.
 
-Portrait: tavern mid dx **0px**, hand mid dx **0px**, pendant face Δx **0px**, patron col X **328** (build 50 was ~338), middle-patron gap **30.5px**, DECK left of tavern and band-centered (dy **−0.01px**), pile card-back **true**, playable + End Turn gold glow **true**, yellow orbs gone.
+Portrait: tavern mid dx **0px**, hand mid dx **0px**, pendant face Δx **0.02px**, patron col X **328** (build 50 was ~338), middle-patron gap **33px**, Treasury face **24.63×24.63** (true 1:1 circle, tipless), DECK left of tavern and band-centered (dy **−0.01px**), pile card-back **true**, playable + End Turn gold glow **true**, yellow orbs gone.
 
 Landscape: tavern mid dx **−0.01px**, hand mid dx **−0.01px**, pendant Δx **0.01px**, DECK beside tavern (dy **0px**). End Turn stays on the right rail.
 
@@ -17,7 +17,7 @@ Landscape: tavern mid dx **−0.01px**, hand mid dx **−0.01px**, pendant Δx *
 | Portrait hand on midline | before-portrait-hand-center.png | after-portrait-hand-center.png |
 | Landscape felt | before-landscape-844x390.png | after-landscape-844x390.png |
 | Landscape DECK beside tavern | — | after-landscape-deck-beside-tavern.png |
-| Treasury ring seated | — | after-portrait-treasury.png |
+| Treasury 1:1 circle (tipless) | — | after-portrait-treasury.png |
 | Hold-inspect | — | after-portrait-inspect.png |
 
 Gates: tavern mid dx ≤4px; hand mid dx ≤4px; pendant face Δx ≤4px; patron column left of build-50; middle patron circle clear (≥8px); DECK left of tavern and vertically centered on the band; opp DRAW top-left; pile stacks use `card-back.svg`; playable / End Turn gold glow on; yellow felt orbs gone; DRAW/CD labels under stacks; left strip hudTop < 260; End Turn bottom-left (portrait); overlap hits from #15/#18/#19/#23/#24 stay false. Club files from main 50.

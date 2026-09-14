@@ -167,6 +167,10 @@ async function measure(page, fileStem, { w, h }) {
     pileUsesCardBack: m.pileUsesCardBack,
     playableGlowOn: m.playableGlowOn,
     endTurnGlowOn: m.endTurnGlowOn,
+    treasuryCircle: m.treasuryCircle,
+    treasuryDialBox: m.treasuryDialBox,
+    treasuryFaceBox: m.treasuryFaceBox,
+    treasurySvgBox: m.treasurySvgBox,
     oppHandMidDx: m.oppHandMidDx,
     oppResToCards: m.oppResToCards,
     youResToCards: m.youResToCards,
@@ -231,6 +235,7 @@ async function measure(page, fileStem, { w, h }) {
       if (!m.pileUsesCardBack) fail(`${fileStem} pile stacks missing card-back art (${m.pileBg})`, notes);
       if (!m.playableGlowOn) fail(`${fileStem} playable-card gold glow missing`, notes);
       if (!m.endTurnGlowOn) fail(`${fileStem} End Turn gold glow missing`, notes);
+      if (!m.treasuryCircle) fail(`${fileStem} Treasury not a 1:1 circle (dial ${JSON.stringify(m.treasuryDialBox)} face ${JSON.stringify(m.treasuryFaceBox)} svg ${JSON.stringify(m.treasurySvgBox)})`, notes);
       if (m.oppHandCount >= 3 && m.oppHandMidDx != null && Math.abs(m.oppHandMidDx) > 8) {
         fail(`${fileStem} opp hand mid-card off vertical center (dx ${m.oppHandMidDx}px)`, notes);
       }
@@ -257,6 +262,7 @@ async function measure(page, fileStem, { w, h }) {
       if (!m.pileUsesCardBack) fail(`${fileStem} landscape pile stacks missing card-back art (${m.pileBg})`, notes);
       if (!m.playableGlowOn) fail(`${fileStem} landscape playable-card gold glow missing`, notes);
       if (!m.endTurnGlowOn) fail(`${fileStem} landscape End Turn gold glow missing`, notes);
+      if (!m.treasuryCircle) fail(`${fileStem} landscape Treasury not a 1:1 circle (dial ${JSON.stringify(m.treasuryDialBox)} face ${JSON.stringify(m.treasuryFaceBox)} svg ${JSON.stringify(m.treasurySvgBox)})`, notes);
     }
   }
 
@@ -388,6 +394,7 @@ const note = [
   `  patrons x ${results.portrait.notes.patronColX} leftOf50 ${results.portrait.notes.patronColLeftOf50} midGap ${results.portrait.notes.middlePatronGapMin} clear ${results.portrait.notes.middlePatronClear}`,
   `  DECK left ${results.portrait.notes.deckLeftOfTavern} dy ${results.portrait.notes.deckTavernMidDy} beside ${results.portrait.notes.deckBesideTavern}  oppDRAW corner ${results.portrait.notes.oppDrawIsCorner}`,
   `  pileBack ${results.portrait.notes.pileUsesCardBack}  playableGlow ${results.portrait.notes.playableGlowOn}  endGlow ${results.portrait.notes.endTurnGlowOn}`,
+  `  treasury circle ${results.portrait.notes.treasuryCircle} dial ${JSON.stringify(results.portrait.notes.treasuryDialBox)} face ${JSON.stringify(results.portrait.notes.treasuryFaceBox)}`,
   `  hits ${JSON.stringify(results.portrait.notes.hits)}`,
   `landscape 844x390: tavern ${results.landscape.notes.tavernW}px = ${results.landscape.notes.viewportTavernPct}% vw`,
   `  gutters L/R ${results.landscape.notes.leftGutterPct}% / ${results.landscape.notes.rightGutterPct}%`,
@@ -397,6 +404,7 @@ const note = [
   `  patrons x ${results.landscape.notes.patronColX} leftOf50 ${results.landscape.notes.patronColLeftOf50} midGap ${results.landscape.notes.middlePatronGapMin} clear ${results.landscape.notes.middlePatronClear}`,
   `  DECK left ${results.landscape.notes.deckLeftOfTavern} dy ${results.landscape.notes.deckTavernMidDy} beside ${results.landscape.notes.deckBesideTavern}`,
   `  pileBack ${results.landscape.notes.pileUsesCardBack}  playableGlow ${results.landscape.notes.playableGlowOn}  endGlow ${results.landscape.notes.endTurnGlowOn}`,
+  `  treasury circle ${results.landscape.notes.treasuryCircle} dial ${JSON.stringify(results.landscape.notes.treasuryDialBox)} face ${JSON.stringify(results.landscape.notes.treasuryFaceBox)}`,
   `  hits ${JSON.stringify(results.landscape.notes.hits)}`,
 ].join('\n');
 fs.writeFileSync(path.join(ART, `${TAG}-layout-fb-measurements.txt`), note + '\n');
