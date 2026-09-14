@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-14 (build 32):** Full-bleed felt rescue. Patron rail, piles, and played-effects are overlays — they no longer steal tavern width. Portrait + landscape tavern band ≥ 72% of the viewport.
+
 **2026-09-14 (build 31):** Patron tokens are circular silver/gold tribute coins again (no brown arrow nameplates). Felt packed so tavern + hand grow; empty agent seats stay thin hex outlines. `?native=1` hides the landscape banner for Expo Go.
 
 **2026-09-14 (Phase A, build 30):** Board authenticity, official copy, patron-uses placement, and targeted abilities. Rebased on main (table pack + inspect).
@@ -41,11 +43,11 @@
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=31`.
+`docs/` is a copy of `web/`. Cache-bust `?v=32`.
 
 | Fix | Notes |
 |---|---|
-| Field | Events rail overlays the felt. Board is `1fr + slim patron rail`. |
+| Field | Felt is 100% of `#match`. Patrons / piles / effects overlay it. Tavern band ≥ 72% viewport. |
 | Hourglass | Mid-high on the right, with silver/bronze patron-call busts. |
 | Tokens | Circular coins. Point left / down / up for favor. Mora + Treasury stay still. |
 | Copy | `texts.js` official sentences + UESP patron lines. Harvest Season = “Draw 1 card.” |

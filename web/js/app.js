@@ -225,7 +225,7 @@ function onSplashEnter() {
   }
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 31';
+  if (stamp) stamp.textContent = 'build 32';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -1052,13 +1052,15 @@ function renderMatch() {
     if (yourTurn && engine.canCallPatron(pid)) el.classList.add('callable');
     if (prevFavor[pid] && prevFavor[pid] !== favorWord.toLowerCase()) el.classList.add('just-flipped');
     const short = (pat.short || pat.name || pid).replace(/^The\s+/i, '');
-    const neverTurn = !!(pat.alwaysNeutral || pat.abilities?.alwaysNeutral || pid === 'treasury' || pid === 'mora');
+    const alwaysN = !!(pat.alwaysNeutral || pat.abilities?.alwaysNeutral || pid === 'treasury' || pid === 'mora');
     el.innerHTML = `
-      <div class="token-dial" title="${favorWord} — ${pat.name || short}">
-        ${neverTurn ? '' : '<span class="token-point" aria-hidden="true"></span>'}
-        <span class="coin-ring"><img src="${patronArt(pid)}" alt="${short}" draggable="false" /></span>
+      <div class="token-dial wood-pendant" title="${favorWord} — ${pat.name || short}">
+        ${alwaysN ? '' : '<span class="wood-tip" aria-hidden="true"></span>'}
+        <span class="wood-bar">
+          <span class="wood-name">${short}</span>
+          <span class="coin-ring"><img src="${patronArt(pid)}" alt="${short}" draggable="false" /></span>
+        </span>
       </div>
-      <span class="plabel">${short}</span>
     `;
     bindCardGesture(el, {
       onTap: () => openPatronConfirm(pid, 'call'),
@@ -2881,6 +2883,60 @@ function bind() {
   });
 }
 
+function layoutMetrics() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const box = (sel) => {
+    const el = document.querySelector(sel);
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom };
+  };
+  const match = box('#match');
+  const board = box('#match .board');
+  const felt = box('#match .felt-table');
+  const tavern = box('#tavern-zone') || box('#match .felt-tavern');
+  const band = box('#match .felt-tavern');
+  const rail = box('#patron-rail');
+  const youTok = box('#you-patron-calls');
+  const oppTok = box('#opp-patron-calls');
+  const hg = box('#btn-end');
+  const cards = [...document.querySelectorAll('#tavern-zone .card')].map((el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right };
+  });
+  let overlap = 0;
+  for (let i = 1; i < cards.length; i++) {
+    overlap = Math.max(overlap, cards[i - 1].right - cards[i].x);
+  }
+  const feltW = felt?.w || board?.w || vw;
+  const tavernW = band?.w || tavern?.w || 0;
+  const leftGutter = felt && tavern ? tavern.x - felt.x : 0;
+  const rightGutter = felt && tavern ? felt.right - tavern.right : 0;
+  const tokensStacked = !!(youTok && oppTok && hg
+    && Math.abs(youTok.y - oppTok.y) < 36
+    && Math.abs(youTok.x - oppTok.x) < 28
+    && youTok.y > hg.y);
+  return {
+    vw, vh,
+    matchW: match?.w || 0,
+    boardW: board?.w || 0,
+    feltW,
+    tavernW,
+    tavernPct: feltW ? +(tavernW / feltW * 100).toFixed(1) : 0,
+    viewportTavernPct: vw ? +(tavernW / vw * 100).toFixed(1) : 0,
+    leftGutter: +leftGutter.toFixed(1),
+    rightGutter: +rightGutter.toFixed(1),
+    leftGutterPct: feltW ? +(leftGutter / feltW * 100).toFixed(1) : 0,
+    rightGutterPct: feltW ? +(rightGutter / feltW * 100).toFixed(1) : 0,
+    cardCount: cards.length,
+    cardOverlap: +overlap.toFixed(1),
+    railW: rail?.w || 0,
+    tokensStacked,
+    youTok, oppTok, hg,
+  };
+}
+
 function installTestHook() {
   window.__totTest = {
     lastToast: () => lastToast,
@@ -2900,7 +2956,7 @@ function installTestHook() {
         id: el.dataset.pid,
         side: el.dataset.side,
         favor: el.dataset.favor,
-        tip: !!el.querySelector('.token-point'),
+        tip: !!el.querySelector('.wood-tip, .token-point'),
         pip: !!el.querySelector('.favor-pip'),
         wood: !!el.querySelector('.wood-pendant, .wood-bar, .wood-name'),
         ring: !!el.querySelector('.coin-ring'),
@@ -2968,8 +3024,10 @@ function installTestHook() {
           return piles.some((p) => p && !(acts.right < p.left || acts.left > p.right || acts.bottom < p.top || acts.top > p.bottom));
         })(),
         nativeShell: document.body.classList.contains('is-native'),
+        layout: layoutMetrics(),
       };
     },
+    layout: layoutMetrics,
     inspectById(id) {
       const d = cardsById[id];
       const el = document.querySelector('#hand-zone .card, #tavern-zone .card');

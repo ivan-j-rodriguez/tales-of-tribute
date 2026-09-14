@@ -1,5 +1,5 @@
-/* Build 31 — wide field, floating effects, tribute coins.
-   Loaded after style.css so these rules win the cascade. */
+/* Build 32 — overlay chrome on a full-bleed felt.
+   Structural width lives here; table-pack.css (loaded last) is the lock. */
 
 :root {
   --eso-felt: #0d2a28;
@@ -35,9 +35,6 @@
   --felt: var(--eso-felt) !important;
   --felt-deep: var(--eso-felt-deep) !important;
 }
-
-html.is-native .landscape-tip,
-body.is-native .landscape-tip { display: none !important; }
 
 .landscape-tip {
   position: absolute;
@@ -75,10 +72,10 @@ body.is-native .landscape-tip { display: none !important; }
   max-width: none !important;
   max-height: none !important;
   flex: 1 1 auto;
-  display: grid !important;
+  display: block !important;
   position: relative !important;
-  grid-template-columns: minmax(0, 1fr) minmax(132px, 16.5%) !important;
-  grid-template-rows: 1fr !important;
+  grid-template-columns: none !important;
+  grid-template-rows: none !important;
   transform: none !important;
   overflow: hidden !important;
   border: none;
@@ -149,23 +146,23 @@ body.is-native .landscape-tip { display: none !important; }
   background: transparent !important;
   align-items: stretch !important;
   justify-items: stretch !important;
-  grid-template-columns: minmax(48px, 8%) minmax(0, 1fr) minmax(48px, 8%) !important;
+  grid-template-columns: 1fr !important;
   grid-template-rows:
-    minmax(44px, 0.7fr)
     auto
     auto
-    minmax(150px, 1.8fr)
+    auto
+    minmax(0, 1fr)
     auto
     auto
-    minmax(108px, 1.25fr) !important;
+    auto !important;
   grid-template-areas:
-    "opp-draw opp-hand   opp-cd"
-    ".        opp-agents ."
-    ".        opp-res    ."
-    "tavern-d tavern     tavern-x"
-    ".        you-res    ."
-    ".        you-agents ."
-    "you-draw you-hand   you-cd" !important;
+    "opp-hand"
+    "opp-agents"
+    "opp-res"
+    "tavern"
+    "you-res"
+    "you-agents"
+    "you-hand" !important;
 }
 
 #match .felt-hud-opp,
@@ -204,7 +201,8 @@ body.is-native .landscape-tip { display: none !important; }
   grid-area: tavern !important;
   position: relative !important;
   inset: auto !important;
-  width: 100% !important;
+  width: clamp(72%, 78%, 85%) !important;
+  justify-self: center !important;
   height: auto !important;
   min-height: 0 !important;
   display: flex !important;
@@ -240,14 +238,12 @@ body.is-native .landscape-tip { display: none !important; }
   overflow: visible !important;
 }
 #match .felt-hud-you {
-  position: absolute !important;
-  grid-area: auto !important;
-  top: max(8px, env(safe-area-inset-top, 0px)) !important;
-  left: max(8px, env(safe-area-inset-left, 0px)) !important;
-  justify-self: start !important;
-  align-self: start !important;
+  grid-area: you-hand !important;
+  position: relative !important;
+  justify-self: end !important;
+  align-self: end !important;
   width: auto !important;
-  z-index: 24;
+  z-index: 12;
   pointer-events: auto;
 }
 
@@ -257,21 +253,16 @@ body.is-native .landscape-tip { display: none !important; }
 #match #pile-tavern-discard,
 #match #pile-you-draw,
 #match #pile-you-cd {
-  position: relative !important;
-  top: auto !important;
-  left: auto !important;
-  right: auto !important;
-  bottom: auto !important;
+  position: absolute !important;
   margin: 0 !important;
-  align-self: center !important;
-  justify-self: center !important;
+  z-index: 8 !important;
 }
-#match #pile-opp-draw { grid-area: opp-draw !important; }
-#match #pile-opp-cd { grid-area: opp-cd !important; }
-#match #pile-tavern-draw { grid-area: tavern-d !important; }
-#match #pile-tavern-discard { grid-area: tavern-x !important; }
-#match #pile-you-draw { grid-area: you-draw !important; }
-#match #pile-you-cd { grid-area: you-cd !important; }
+#match #pile-opp-draw { top: 8px; left: 6px; grid-area: unset !important; }
+#match #pile-opp-cd { top: 8px; right: 10px; grid-area: unset !important; }
+#match #pile-tavern-draw { top: 50%; left: 6px; transform: translateY(-112%); grid-area: unset !important; }
+#match #pile-tavern-discard { top: 50%; right: 10px; transform: translateY(-112%); grid-area: unset !important; }
+#match #pile-you-draw { bottom: 10px; left: 6px; grid-area: unset !important; }
+#match #pile-you-cd { bottom: 10px; right: 10px; grid-area: unset !important; }
 
 /* Stacked card-back piles */
 #match .hex-pile,
@@ -379,11 +370,11 @@ body.is-native .landscape-tip { display: none !important; }
   border: 1px solid #c9a227;
 }
 #match .eso-tok.tok-prestige {
-  width: 36px; height: 40px;
+  width: 38px; height: 42px;
   clip-path: polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0 50%);
-  color: #3a342c;
-  text-shadow: 0 1px 0 #fff8;
-  background: linear-gradient(180deg, #f7f3ea, #d2cbc0 55%, #9a9288);
+  color: #f4f8ff;
+  text-shadow: 0 1px 2px #0008;
+  background: linear-gradient(180deg, #9fd0ff, #2f6cb4 55%, #123a72);
   box-shadow: 0 2px 4px #0006;
 }
 #match .eso-tok.tok-power {
@@ -429,8 +420,8 @@ body.is-native .landscape-tip { display: none !important; }
   padding: 0.15rem 0.25rem !important;
 }
 #match .tavern-zone .card {
-  width: min(118px, 14.2vw, calc((100% - 0.8rem) / 5.08)) !important;
-  height: calc(min(118px, 14.2vw) * 1.52) !important;
+  width: min(78px, 9vw, calc((100% - 1rem) / 5.15)) !important;
+  height: calc(min(78px, 9vw) * 1.52) !important;
   flex: 0 0 auto !important;
   max-width: none !important;
   transform: none !important;
@@ -471,10 +462,10 @@ body.is-native .landscape-tip { display: none !important; }
   left: auto !important;
   top: auto !important;
   bottom: auto !important;
-  width: min(104px, 12.6vw, calc((100% + 2.2rem) / 5.15)) !important;
-  height: calc(min(104px, 12.6vw) * 1.52) !important;
-  margin: 0 -14px;
-  transform: var(--fan-tf, none) !important;
+  width: min(64px, 7.6vw, calc((100% + 1.6rem) / 5.3)) !important;
+  height: calc(min(64px, 7.6vw) * 1.52) !important;
+  margin: 0 -10px;
+  transform: none !important;
 }
 
 #match .felt-you-agents,
@@ -485,26 +476,22 @@ body.is-native .landscape-tip { display: none !important; }
   align-items: center;
   gap: 8px;
 }
-#match .felt-you-agents,
-#match .felt-opp-agents,
-#match .agents-row {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  min-height: 0 !important;
-}
 #match .agent-slot.empty {
-  width: 20px !important;
-  height: 26px !important;
-  border: 1px solid rgba(212, 175, 55, 0.42);
-  border-radius: 0;
-  clip-path: polygon(50% 0%, 100% 15%, 100% 85%, 50% 100%, 0% 85%, 0% 15%);
+  width: clamp(36px, 5.2vw, 52px) !important;
+  height: clamp(46px, 7.6vw, 68px) !important;
+  border: 1px dashed rgba(212, 175, 55, 0.5);
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: rgba(0, 0, 0, 0.12);
 }
-#match .agent-slot .slot-label { display: none; }
+#match .agent-slot .slot-label {
+  font-size: 0.48rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c8b888;
+}
 #match .agent-slot.filled .card {
   width: clamp(36px, 5.2vw, 52px) !important;
   height: clamp(50px, 7.8vw, 72px) !important;
@@ -578,124 +565,160 @@ body.is-native .landscape-tip { display: none !important; }
   filter: drop-shadow(0 0 12px #ffe9a0) drop-shadow(0 0 8px #7fd0ff) !important;
 }
 
-/* Right rail: circular tribute coins; hourglass sits mid-high */
+/* Right rail: overlay on the felt — never a second grid column */
 #match .patron-rail {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
   width: auto !important;
   min-width: 0 !important;
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) 44px !important;
-  grid-template-rows: 1fr !important;
-  align-items: center !important;
-  padding: 10px 4px 10px 0 !important;
+  grid-template-columns: auto auto !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  align-items: stretch !important;
+  padding: 8px 4px 10px 8px !important;
   overflow: visible !important;
+  z-index: 16;
+  pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.2), rgba(24, 16, 8, 0.5)),
-    repeating-linear-gradient(180deg, transparent, transparent 7px, rgba(212, 175, 55, 0.04) 7px, rgba(212, 175, 55, 0.04) 8px) !important;
-  border-left: 1px solid rgba(212, 175, 55, 0.3) !important;
+    linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(16, 12, 8, 0.28) 55%, rgba(16, 12, 8, 0.42) 100%) !important;
+  border-left: none !important;
 }
+#match .patron-rail > * { pointer-events: auto; }
 #match .rail-patrons {
   grid-column: 1;
-  grid-row: 1;
+  grid-row: 2;
   display: flex !important;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  gap: 10px;
+  align-items: stretch;
+  gap: 12px;
   height: auto;
   padding: 0;
 }
-#match .rail-group { gap: 10px !important; align-items: center !important; }
+#match .rail-group { gap: 16px !important; align-items: stretch !important; }
 #match .patron-coin {
-  width: 58px !important;
-  height: auto !important;
+  width: 108px !important;
+  height: 48px !important;
   position: relative;
   overflow: visible !important;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 #match .patron-coin .wood-pendant,
-#match .patron-coin .wood-tip,
-#match .patron-coin .wood-bar,
-#match .patron-coin .wood-name,
-#match .patron-coin .favor-pip { display: none !important; }
 #match .patron-coin .token-dial {
-  display: block !important;
+  display: flex !important;
+  align-items: center;
+  width: 108px !important;
+  height: 48px !important;
   position: relative;
-  width: 50px !important;
-  height: 62px !important;
-  margin: 0 auto;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
-  transform-origin: 50% 64%;
-  transition: transform 0.65s cubic-bezier(.4, .12, .2, 1);
+  transform-origin: 78% 50%;
+  transition: transform 0.7s cubic-bezier(.4, .12, .2, 1);
 }
-#match .patron-coin .token-point {
-  display: block !important;
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 13px;
-  height: 15px;
-  transform: translateX(-50%);
-  background: linear-gradient(180deg, #f7f2e8, #c9c0b0 42%, #8a8276);
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-  z-index: 2;
+#match .patron-coin.neutral .wood-pendant,
+#match .patron-coin.neutral .token-dial { transform: rotate(0deg); }
+#match .patron-coin.fav-you .wood-pendant,
+#match .patron-coin.fav-you .token-dial { transform: rotate(-90deg); }
+#match .patron-coin.fav-opp .wood-pendant,
+#match .patron-coin.fav-opp .token-dial { transform: rotate(90deg); }
+#match .patron-coin.treasury .wood-pendant,
+#match .patron-coin.treasury .token-dial,
+#match .patron-coin[data-pid="treasury"] .wood-pendant,
+#match .patron-coin[data-pid="treasury"] .token-dial {
+  transform: none !important;
 }
-#match .patron-coin .coin-ring {
-  position: absolute !important;
-  left: 50% !important;
-  bottom: 0 !important;
-  right: auto !important;
-  width: 50px !important;
-  height: 50px !important;
-  padding: 3px !important;
-  border-radius: 50%;
-  background: conic-gradient(from 22deg, #5c564c, #f3eee4, #c9c0b0, #3a342c, #f3eee4, #5c564c) !important;
-  box-shadow: 0 2px 6px #0008, inset 0 0 0 1px rgba(255, 244, 210, 0.35) !important;
+#match .patron-coin .wood-tip {
+  width: 16px;
+  height: 30px;
+  flex: 0 0 16px;
+  background: linear-gradient(180deg, #d8b06a, #8a5828 55%, #4a2c10);
+  clip-path: polygon(100% 0, 0 50%, 100% 100%);
+  box-shadow: -1px 1px 2px #0008;
+}
+#match .patron-coin .wood-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 38px;
+  flex: 1;
+  padding: 0 5px 0 6px;
+  background:
+    linear-gradient(180deg, rgba(255, 230, 160, 0.28), transparent 40%),
+    linear-gradient(180deg, #c4924a, #7a4a1c 58%, #3e240c);
+  border: 1px solid #e6c878;
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+  box-shadow: 0 2px 4px #0007, inset 0 1px 0 #fff4;
+}
+#match .patron-coin .wood-name {
+  flex: 1;
+  min-width: 0;
+  font-family: 'Cinzel', serif;
+  font-size: 0.52rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #f3e6b8;
+  text-shadow: 0 1px 2px #000a;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#match .patron-coin .token-frame,
+#match .patron-coin .token-point,
+#match .patron-coin .plabel { display: none !important; }
+#match .patron-coin .coin-ring {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 30px !important;
+  height: 30px !important;
+  padding: 2px !important;
+  border-radius: 50%;
+  flex: 0 0 30px;
+  background: #1a1612 !important;
+  box-shadow: 0 0 0 1px #e8dcc0, inset 0 0 0 1px #000 !important;
+  overflow: hidden;
+  transition: transform 0.7s cubic-bezier(.4, .12, .2, 1);
 }
 #match .patron-coin .coin-ring img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
-  transition: transform 0.65s cubic-bezier(.4, .12, .2, 1);
+  transition: transform 0.7s cubic-bezier(.4, .12, .2, 1);
 }
-#match .patron-coin .plabel {
-  display: block !important;
-  font-family: 'Cinzel', serif;
-  font-size: 0.46rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #e8dcb0;
-  text-align: center;
+#match .patron-coin.fav-you .coin-ring,
+#match .patron-coin.fav-you .coin-ring img { transform: rotate(90deg); }
+#match .patron-coin.fav-opp .coin-ring,
+#match .patron-coin.fav-opp .coin-ring img { transform: rotate(-90deg); }
+#match .patron-coin.treasury .coin-ring,
+#match .patron-coin.treasury .coin-ring img,
+#match .patron-coin.neutral .coin-ring,
+#match .patron-coin.neutral .coin-ring img { transform: none; }
+#match .patron-coin.callable .wood-bar {
+  box-shadow: 0 0 10px rgba(180, 255, 90, 0.55), 0 2px 4px #0007;
 }
-#match .patron-coin .token-dial,
-#match .patron-coin.neutral .token-dial,
-#match .patron-coin.fav-you .token-dial,
-#match .patron-coin.fav-opp .token-dial {
-  transform: none;
-}
-#match .patron-coin img { transform: none; }
-#match .patron-coin.treasury .coin-ring {
-  background: conic-gradient(from 0deg, #c9a227, #fff6c0, #d4af37, #8a6a20, #fff6c0, #c9a227) !important;
-}
-#match .patron-coin.callable .token-dial {
-  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.7));
+#match .patron-coin .favor-pip { display: none !important; }
+#match .patron-coin.treasury .wood-tip { display: none !important; }
+#match .patron-coin.treasury .wood-bar {
+  border-left: 1px solid #e6c878;
+  border-radius: 10px;
 }
 
 #match .rail-glass {
   grid-column: 2;
-  grid-row: 1;
+  grid-row: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 10px;
-  padding: 18% 0 0 !important;
+  align-self: start;
+  gap: 8px;
+  padding: 14% 0 0 !important;
   margin-top: 0;
 }
 
@@ -783,77 +806,72 @@ body.is-native .landscape-tip { display: none !important; }
   border: none !important;
 }
 
-/* Portrait — compact but complete table, never a rotate-gate.
-   Events rail is an overlay, so the board is felt + patron rail only. */
+/* Portrait — compact vertically, full width. Never a rotate-gate. */
 body.is-portrait #match .board {
-  grid-template-columns: minmax(0, 1fr) minmax(72px, 20%) !important;
+  display: block !important;
+  grid-template-columns: none !important;
 }
 body.is-portrait #match .felt-table {
-  padding: 10px 4px 4px !important;
-  gap: 2px 4px !important;
-  grid-template-columns: minmax(36px, 11%) minmax(0, 1fr) minmax(36px, 11%) !important;
+  padding: 22px 0 4px !important;
+  gap: 2px 0 !important;
+  grid-template-columns: 1fr !important;
   grid-template-rows:
-    minmax(36px, 0.58fr)
     auto
     auto
-    minmax(128px, 1.75fr)
+    auto
+    minmax(0, 1fr)
     auto
     auto
-    minmax(104px, 1.2fr) !important;
+    auto !important;
 }
 body.is-portrait #match .tavern-zone .card {
-  width: min(92px, calc((100% - 0.4rem) / 5.05)) !important;
-  height: min(140px, calc(min(92px, 22vw) * 1.52), 96%) !important;
+  width: min(58px, calc((100% - 0.5rem) / 5.1)) !important;
+  height: calc(min(58px, 15vw) * 1.52) !important;
 }
 body.is-portrait #match #hand-zone .card,
 body.is-portrait #match #hand-zone button.card,
 body.is-portrait #match .you-fan .card {
-  width: min(86px, calc((100% + 1.8rem) / 5.1)) !important;
-  height: min(128px, calc(min(86px, 20vw) * 1.52), 94%) !important;
-  transform: var(--fan-tf, none) !important;
+  width: min(52px, calc((100% + 1.4rem) / 5.2)) !important;
+  height: calc(min(52px, 13vw) * 1.52) !important;
 }
 body.is-portrait #match .rival-fan .card,
 body.is-portrait #match #opp-hand-zone .card {
   width: min(34px, calc((100% + 0.8rem) / 6.2)) !important;
   height: calc(min(34px, 8vw) * 1.35) !important;
 }
-body.is-portrait #match .agent-slot.empty {
-  width: 16px !important;
-  height: 22px !important;
-}
+body.is-portrait #match .agent-slot.empty,
 body.is-portrait #match .agent-slot.filled .card {
-  width: clamp(40px, 10vw, 56px) !important;
-  height: clamp(56px, 14vw, 80px) !important;
+  width: clamp(28px, 7vw, 40px) !important;
+  height: clamp(36px, 9vw, 52px) !important;
 }
 body.is-portrait #match .patron-rail {
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) 34px !important;
-  grid-template-rows: 1fr !important;
-  padding: 8px 2px 8px 0 !important;
+  position: absolute !important;
+  grid-template-columns: auto auto !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  padding: 8px 2px 10px 6px !important;
   gap: 0;
 }
 body.is-portrait #match .rail-patrons {
   grid-column: 1;
-  grid-row: 1;
+  grid-row: 2;
   height: auto;
   padding: 0;
-  gap: 8px;
+  gap: 10px;
 }
 body.is-portrait #match .rail-glass {
   grid-column: 2;
-  grid-row: 1;
-  padding-top: 0 !important;
+  grid-row: 2;
+  padding-top: 16% !important;
   margin-top: 0;
-  justify-content: center;
 }
-body.is-portrait #match .patron-coin {
-  width: 52px !important;
-  height: auto !important;
-}
+body.is-portrait #match .patron-coin,
+body.is-portrait #match .patron-coin .wood-pendant,
 body.is-portrait #match .patron-coin .token-dial {
-  width: 44px !important;
-  height: 54px !important;
+  width: 58px !important;
+  height: 32px !important;
 }
+body.is-portrait #match .patron-coin .wood-name { display: none; }
 body.is-portrait #match .patron-rail { overflow: visible !important; }
 body.is-portrait #match .eso-hourglass-end { width: 56px; padding: 4px 0 6px !important; }
 body.is-portrait #match .eso-hourglass-end .hg-svg {
@@ -917,6 +935,16 @@ body.is-portrait #match .pile-stack {
 }
 .patron-use-token.empty .num { color: #ece8e0; }
 .patron-use-token.opp { transform: scale(0.86); opacity: 0.92; }
+#match .patron-use-token.opp {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  justify-self: center;
+}
+#match .patron-use-token.you {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  justify-self: center;
+}
 
 .target-overlay {
   position: fixed;

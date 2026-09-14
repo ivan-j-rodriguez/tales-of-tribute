@@ -1,95 +1,340 @@
-/* Build 31 — tribute coins + packed felt (portrait, landscape, Expo WebView).
-   Loaded after phone-eso.css so these rules win the cascade. */
+/* Build 32 — full-bleed felt + overlay chrome.
+   Loaded last so these rules win the cascade.
+   Felt is 100% of #match. Piles, effects, patrons, hourglass float ON it.
+   No grid columns that steal tavern width. */
 
-html.is-native .landscape-tip,
-body.is-native .landscape-tip { display: none !important; }
-
-/* Slim rail: circular coins, not 90px nameplates */
+/* ——— One play surface. No letterbox pillar. ——— */
 #match .board {
-  grid-template-columns: minmax(0, 1fr) minmax(84px, 12.5%) !important;
+  display: block !important;
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  grid-template-columns: none !important;
+  grid-template-rows: none !important;
+  overflow: hidden !important;
+  transform: none !important;
 }
 
-/* Felt: tavern + hand take leftover space. Agent rows stay auto/thin.
-   Hands and tavern span the full felt; piles sit in the corners on top. */
+#match .board::before { top: 10px !important; left: 18% !important; right: auto !important; }
+#match .board::after { top: 10px !important; right: 22% !important; left: auto !important; }
+
 #match .felt-table {
-  align-content: stretch !important;
-  align-items: stretch !important;
-  justify-items: stretch !important;
+  display: grid !important;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 4px 0 6px !important;
   row-gap: 3px !important;
-  column-gap: 4px !important;
-  padding: 6px 4px 8px !important;
-  grid-template-columns: minmax(44px, 8%) minmax(0, 1fr) minmax(44px, 8%) !important;
+  column-gap: 0 !important;
+  gap: 3px 0 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  align-content: stretch !important;
+  align-items: center !important;
+  justify-items: stretch !important;
+  grid-template-columns: 1fr !important;
   grid-template-rows:
-    minmax(44px, 0.7fr)
     auto
     auto
-    minmax(168px, 2fr)
+    auto
+    minmax(0, 1fr)
     auto
     auto
-    minmax(118px, 1.32fr) !important;
+    auto !important;
+  grid-template-areas:
+    "opp-hand"
+    "opp-agents"
+    "opp-res"
+    "tavern"
+    "you-res"
+    "you-agents"
+    "you-hand" !important;
 }
 
-#match .felt-opp-hand,
-#match .felt-tavern,
-#match .felt-you-hand,
-#match #opp-res,
-#match #you-res,
-#match .felt-opp-agents,
-#match .felt-you-agents {
-  grid-column: 1 / -1 !important;
+#match .felt-table > * {
+  grid-column: 1 !important;
 }
-#match .felt-opp-hand { padding: 0 36px; z-index: 3; }
-#match .felt-you-hand { padding: 0 36px; z-index: 3; }
-#match .felt-tavern { padding: 0 34px; z-index: 3; }
+
+#match .felt-hud-opp,
+#match .felt-tools,
+#match .felt-played,
+#match .sr-pile { display: none !important; }
+
+#match .felt-opp-hand {
+  grid-area: opp-hand !important;
+  grid-row: auto !important;
+  position: relative !important;
+  inset: auto !important;
+  width: min(92%, 100%) !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  justify-self: center !important;
+  overflow: visible !important;
+}
+#match .felt-opp-agents {
+  grid-area: opp-agents !important;
+  grid-row: auto !important;
+  position: relative !important;
+  width: min(78%, 100%) !important;
+  justify-self: center !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+#match #opp-res {
+  grid-area: opp-res !important;
+  grid-row: auto !important;
+  grid-column: 1 !important;
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  justify-self: center !important;
+}
+#match .felt-tavern {
+  grid-area: tavern !important;
+  grid-row: auto !important;
+  position: relative !important;
+  inset: auto !important;
+  width: clamp(72%, 78vw, 85%) !important;
+  max-width: 85% !important;
+  min-width: 72% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  justify-self: center !important;
+  overflow: visible !important;
+}
+#match #you-res {
+  grid-area: you-res !important;
+  grid-row: auto !important;
+  grid-column: 1 !important;
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  justify-self: center !important;
+}
+#match .felt-you-agents {
+  grid-area: you-agents !important;
+  grid-row: auto !important;
+  position: relative !important;
+  width: min(78%, 100%) !important;
+  justify-self: center !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+#match .felt-you-hand {
+  grid-area: you-hand !important;
+  grid-row: auto !important;
+  position: relative !important;
+  inset: auto !important;
+  width: min(94%, 100%) !important;
+  justify-self: center !important;
+  height: auto !important;
+  min-height: 72px !important;
+  overflow: visible !important;
+}
+
+/* Chrome buttons dock in a safe corner — never cover the hand */
+#match .felt-hud-you {
+  position: absolute !important;
+  grid-area: unset !important;
+  grid-row: auto !important;
+  grid-column: auto !important;
+  right: 6px !important;
+  bottom: 6px !important;
+  left: auto !important;
+  top: auto !important;
+  width: auto !important;
+  justify-self: auto !important;
+  align-self: auto !important;
+  z-index: 18 !important;
+  pointer-events: auto;
+}
+
+/* ——— Piles: corner overlays. Never reserved columns. ——— */
+#match .felt-table > .hex-pile,
+#match #pile-opp-draw,
+#match #pile-opp-cd,
+#match #pile-tavern-draw,
+#match #pile-tavern-discard,
+#match #pile-you-draw,
+#match #pile-you-cd {
+  position: absolute !important;
+  grid-area: unset !important;
+  grid-row: auto !important;
+  grid-column: auto !important;
+  inset: auto !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  margin: 0 !important;
+  align-self: auto !important;
+  justify-self: auto !important;
+  z-index: 8 !important;
+  background: rgba(6, 14, 12, 0.28) !important;
+  border-radius: 8px;
+  padding: 2px 3px !important;
+}
+
+#match #pile-opp-draw { top: 8px !important; left: 6px !important; }
+#match #pile-opp-cd { top: 8px !important; right: 10px !important; }
+#match #pile-tavern-draw { top: 50% !important; left: 6px !important; transform: translateY(-112%) !important; }
+#match #pile-tavern-discard { top: 50% !important; right: 10px !important; transform: translateY(-112%) !important; }
+#match #pile-you-draw { bottom: 10px !important; left: 6px !important; }
+#match #pile-you-cd { bottom: 10px !important; right: 10px !important; }
+
 #match .hex-pile,
 #match .pile-btn {
-  z-index: 10 !important;
+  min-width: 48px !important;
+  color: #efe6c8 !important;
+}
+#match .pile-stack {
+  position: relative;
+  display: block;
+  width: 44px;
+  height: 64px;
+  margin: 0 auto;
+}
+#match .pile-stack i {
+  position: absolute;
+  inset: 0;
+  border-radius: 5px;
+  border: 1px solid #d4af37;
+  box-shadow: 0 2px 4px #0008;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(212, 175, 55, 0.4), transparent 42%),
+    repeating-linear-gradient(135deg, #3a2412 0 5px, #26160c 5px 8px);
+}
+#match .pile-stack i:nth-child(1) { transform: translate(-5px, 3px) rotate(-8deg); opacity: 0.7; }
+#match .pile-stack i:nth-child(2) { transform: translate(4px, 2px) rotate(7deg); opacity: 0.85; }
+#match .pile-stack i:nth-child(3) {
+  transform: none;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(240, 210, 120, 0.35), transparent 46%),
+    linear-gradient(160deg, #5a3820, #1e1208);
+}
+#match .hex-pile .pile-count,
+#match .pile-count {
+  font-size: 0.8rem !important;
+  color: #f3e6b0 !important;
+  text-shadow: 0 1px 3px #000c;
+  font-weight: 700;
+}
+#match .hex-pile .pile-label,
+#match .pile-label {
+  font-size: 0.48rem !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #d8cba0 !important;
+  opacity: 1 !important;
 }
 
-#match .felt-tavern {
-  justify-content: center !important;
-  min-height: 0 !important;
-  height: 100% !important;
+/* ——— Played Effects: translucent left overlay; fade when empty ——— */
+#match .events-rail {
+  position: absolute !important;
+  left: 4px !important;
+  top: 14% !important;
+  width: 56px !important;
+  min-width: 0 !important;
+  max-height: 42% !important;
+  padding: 5px 2px !important;
+  background: linear-gradient(180deg, rgba(8, 12, 10, 0.28), rgba(8, 12, 10, 0.05)) !important;
+  border: none !important;
+  overflow: hidden;
+  z-index: 11;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
 }
+#match .events-rail .event-hex { pointer-events: auto; }
+#match .events-rail:not(:has(.event-hex)) { opacity: 0.22; }
+
+/* ——— Tavern band: 72–85% of the felt, five readable cards ——— */
 #match .tavern-band {
   flex: 1 1 auto !important;
-  min-height: 0 !important;
-  width: 100%;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  min-height: 0 !important;
+  width: 100% !important;
 }
 #match .tavern-zone {
-  height: 100% !important;
-  max-height: 100% !important;
+  width: 100% !important;
+  height: auto !important;
   min-height: 0 !important;
-  align-items: center !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  gap: 0.12rem !important;
-}
-
-#match .tavern-zone .card {
-  width: min(124px, 15vw, calc((100% - 0.6rem) / 5.05)) !important;
-  height: min(188px, calc(min(124px, 15vw) * 1.52), 98%) !important;
-  max-height: 100% !important;
-}
-
-#match .felt-you-hand {
-  min-height: 0 !important;
-  height: 100% !important;
+  max-height: none !important;
   display: flex !important;
-  align-items: flex-end !important;
+  flex-wrap: nowrap !important;
+  justify-content: space-evenly !important;
+  align-items: center !important;
+  gap: 0.45rem !important;
+  overflow: visible !important;
+  background: rgba(0, 0, 0, 0.16) !important;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 10px;
+  padding: 0.2rem 0.35rem !important;
 }
-#match .felt-opp-hand { min-height: 0 !important; }
+#match .tavern-zone .card {
+  width: min(110px, 14.5vw, calc((100% - 1.8rem) / 5.05)) !important;
+  height: calc(min(110px, 14.5vw, calc((100% - 1.8rem) / 5.05)) * 1.52) !important;
+  flex: 0 0 auto !important;
+  max-width: none !important;
+  transform: none !important;
+}
 
+#match .turn-chip {
+  position: absolute !important;
+  top: -1.05rem;
+  left: 50%;
+  transform: translateX(-50%) !important;
+  z-index: 5;
+  margin: 0;
+}
+
+#match .token-row { min-height: 0 !important; padding: 1px 0 !important; }
+
+#match .felt-you-agents,
+#match .felt-opp-agents {
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 1px 0 !important;
+}
+#match .agent-slot.empty {
+  width: clamp(26px, 4vw, 38px) !important;
+  height: clamp(24px, 4.4vw, 34px) !important;
+  border: 1px dashed rgba(212, 175, 55, 0.4);
+  background: rgba(0, 0, 0, 0.08);
+}
+#match .agent-slot.filled .card {
+  width: clamp(38px, 5.2vw, 54px) !important;
+  height: clamp(52px, 7.8vw, 76px) !important;
+}
+
+/* Hand: gentle fan across the felt */
 #match #hand-zone,
 #match #hand-zone.you-fan,
+#match #hand-zone.fan-hand,
 #match .you-fan {
-  align-items: flex-end !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  justify-content: center;
+  align-items: flex-end;
+  height: auto !important;
+  min-height: 0 !important;
+  width: 100%;
+  position: relative !important;
+  overflow: visible !important;
 }
-
 #match #hand-zone .card,
 #match #hand-zone button.card,
 #match #hand-zone.you-fan button.card,
@@ -98,268 +343,119 @@ body.is-native .landscape-tip { display: none !important; }
   left: auto !important;
   top: auto !important;
   bottom: auto !important;
-  width: min(104px, 12.6vw, calc((100% + 2.2rem) / 5.15)) !important;
-  height: min(156px, calc(min(104px, 12.6vw) * 1.52), 94%) !important;
-  margin: 0 -14px !important;
-  transform: var(--fan-tf, none) !important;
-  transform-origin: 50% 110% !important;
+  width: min(92px, 12vw, calc((100% + 1.2rem) / 5.4)) !important;
+  height: calc(min(92px, 12vw, calc((100% + 1.2rem) / 5.4)) * 1.52) !important;
+  margin: 0 -8px !important;
+  transform: none !important;
 }
 
+#match .rival-fan,
+#match #opp-hand-zone {
+  height: auto !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  justify-content: center;
+  align-items: center;
+  overflow: visible !important;
+}
 #match .rival-fan .card,
 #match #opp-hand-zone .card {
   position: relative !important;
   left: auto !important;
   top: auto !important;
   bottom: auto !important;
-  width: min(48px, 5.8vw, calc((100% + 1.2rem) / 6.1)) !important;
-  height: calc(min(48px, 5.8vw) * 1.35) !important;
-  margin: 0 -8px !important;
-  transform: var(--fan-tf, none) !important;
+  width: min(44px, 5.2vw, calc((100% + 1rem) / 6.4)) !important;
+  height: calc(min(44px, 5.2vw, calc((100% + 1rem) / 6.4)) * 1.35) !important;
+  margin: 0 -6px !important;
+  transform: none !important;
 }
 
-/* Empty agent seats = thin hex outlines, not vacant rectangles */
-#match .felt-you-agents,
-#match .felt-opp-agents,
-#match .agents-row {
-  min-height: 0 !important;
-  height: auto !important;
-  padding: 1px 0 !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  gap: 10px !important;
-}
-#match .agent-slot.empty {
-  width: 22px !important;
-  height: 28px !important;
-  border: 1px solid rgba(212, 175, 55, 0.55);
-  background: rgba(212, 175, 55, 0.05) !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  clip-path: polygon(50% 0%, 100% 15%, 100% 85%, 50% 100%, 0% 85%, 0% 15%);
-}
-#match .agent-slot.empty .slot-label { display: none !important; }
-#match .agent-slot.filled .card {
-  width: clamp(44px, 6.2vw, 64px) !important;
-  height: clamp(64px, 9.2vw, 92px) !important;
-}
+#match .felt-you-hand { min-height: 78px !important; }
+#match .felt-opp-hand { min-height: 36px !important; }
 
-/* Resource tokens: official shapes, close to the tavern */
-#match .token-row { min-height: 0 !important; padding: 0 !important; gap: 0.85rem !important; }
-#match .eso-tok.tok-prestige {
-  width: 36px !important;
-  height: 40px !important;
-  clip-path: polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0 50%);
-  background: linear-gradient(180deg, #f7f3ea, #d2cbc0 55%, #9a9288) !important;
-  color: #3a342c !important;
-  text-shadow: 0 1px 0 #fff8 !important;
-}
-
-/* SFX / gear / Leave — float top-left, never sit on DRAW / COOLDOWN */
-#match .felt-hud-you {
-  position: absolute !important;
-  grid-area: auto !important;
-  top: max(8px, env(safe-area-inset-top, 0px)) !important;
-  left: max(8px, env(safe-area-inset-left, 0px)) !important;
-  right: auto !important;
-  bottom: auto !important;
-  justify-self: start !important;
-  align-self: start !important;
-  width: auto !important;
-  z-index: 24 !important;
-}
-#match .you-actions {
-  background: rgba(6, 14, 12, 0.55);
-  border: 1px solid rgba(212, 175, 55, 0.28);
-}
-
-/* Patron rail: stacked tribute coins + hourglass */
+/* ——— Patron rail: slim right overlay. Does not shrink the felt. ——— */
 #match .patron-rail {
-  grid-template-columns: minmax(0, 1fr) minmax(36px, 44px) !important;
-  padding: 8px 4px 8px 2px !important;
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 28% !important;
+  display: grid !important;
+  grid-template-columns: auto auto !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
   align-items: center !important;
+  justify-items: end !important;
+  padding: 8px 4px 10px 8px !important;
   overflow: visible !important;
+  pointer-events: none;
+  z-index: 16;
+  background:
+    linear-gradient(90deg, rgba(8, 14, 12, 0) 0%, rgba(10, 16, 14, 0.22) 42%, rgba(16, 12, 8, 0.38) 100%) !important;
+  border-left: none !important;
+  box-shadow: none !important;
+}
+#match .patron-rail > * { pointer-events: auto; }
+
+#match .patron-use-token.opp {
+  grid-column: 1 / -1 !important;
+  grid-row: 1 !important;
+  justify-self: center !important;
+  margin: 2px 0 6px !important;
 }
 #match .rail-patrons {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  display: flex !important;
+  flex-direction: column;
   justify-content: center !important;
-  align-items: center !important;
+  align-items: stretch;
   align-self: center !important;
   height: auto !important;
-  gap: 8px !important;
+  gap: 10px !important;
   padding: 0 !important;
-}
-#match .rail-group {
-  gap: 8px !important;
-  align-items: center !important;
 }
 #match .rail-glass {
-  align-self: center !important;
-  justify-content: center !important;
-  padding: 0 !important;
-}
-#match .eso-hourglass-end {
-  width: 40px !important;
-  padding: 2px 0 4px !important;
-  gap: 2px;
-}
-#match .eso-hourglass-end .hg-svg {
-  width: 30px !important;
-  height: 50px !important;
-}
-#match .eso-hourglass-end .eso-end-caption { font-size: 0.46rem; }
-
-/* Real ESO patron tokens — round portrait, ornate bezel, optional favor point */
-#match .patron-coin {
-  width: 58px !important;
-  height: auto !important;
+  grid-column: 2 !important;
+  grid-row: 2 !important;
   display: flex !important;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start !important;
+  align-self: start !important;
+  gap: 6px;
+  padding: 12% 0 0 !important;
+  margin-top: 0;
+}
+#match .patron-use-token.you {
+  grid-column: 1 / -1 !important;
+  grid-row: 3 !important;
+  justify-self: center !important;
+  margin: 8px 0 2px !important;
+}
+
+#match .eso-hourglass-end {
+  width: 48px !important;
+  padding: 4px 0 6px !important;
   gap: 2px;
-  overflow: visible !important;
 }
+#match .eso-hourglass-end .hg-svg {
+  width: 36px !important;
+  height: 60px !important;
+}
+#match .eso-hourglass-end .eso-end-caption { font-size: 0.5rem; }
+
+#match .patron-coin,
 #match .patron-coin .wood-pendant,
-#match .patron-coin .wood-tip,
-#match .patron-coin .wood-bar,
-#match .patron-coin .wood-name,
-#match .patron-coin .favor-pip { display: none !important; }
-
 #match .patron-coin .token-dial {
-  display: block !important;
-  position: relative;
-  width: 56px !important;
-  height: 56px !important;
-  margin: 0 auto;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  overflow: visible !important;
-}
-#match .patron-coin .token-point {
-  display: block !important;
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 15px;
-  height: 17px;
-  transform: translateX(-50%);
-  background:
-    linear-gradient(180deg, #fff8ee, #d8d0c4 42%, #9a9286 78%, #4a453c);
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-  filter: drop-shadow(0 0 1px #f3eee4) drop-shadow(0 1px 2px #000a);
-  z-index: 3;
-}
-#match .patron-coin .coin-ring {
-  position: absolute !important;
-  left: 50% !important;
-  top: 50% !important;
-  bottom: auto !important;
-  right: auto !important;
-  width: 54px !important;
-  height: 54px !important;
-  padding: 3px !important;
-  transform: translate(-50%, -50%) !important;
-  border-radius: 50%;
-  flex: none !important;
-  overflow: hidden;
-  background:
-    conic-gradient(from 22deg, #5c564c, #f3eee4, #c9c0b0, #3a342c, #f3eee4, #5c564c) !important;
-  box-shadow:
-    0 2px 6px #0008,
-    inset 0 0 0 1px rgba(255, 244, 210, 0.35),
-    inset 0 0 6px #0006 !important;
-}
-#match .patron-coin .coin-ring img,
-#match .patron-coin.neutral img,
-#match .patron-coin.fav-you img,
-#match .patron-coin.fav-opp img,
-#match .patron-coin.treasury img,
-#match .patron-coin.mora img,
-#match .patron-coin[data-pid="mora"] img,
-#match .patron-coin[data-pid="treasury"] img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-  display: block;
-  transition: transform 0.65s cubic-bezier(.4, .12, .2, 1);
-}
-#match .patron-coin .plabel {
-  display: block !important;
-  font-family: 'Cinzel', serif;
-  font-size: 0.46rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #e8dcb0;
-  text-shadow: 0 1px 2px #000c;
-  line-height: 1.1;
-  max-width: 62px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: center;
+  width: 96px !important;
+  height: 38px !important;
 }
 
-/* Coin face stays upright. Only the favor point travels around the rim. */
-#match .patron-coin .token-dial,
-#match .patron-coin.neutral .token-dial,
-#match .patron-coin.fav-you .token-dial,
-#match .patron-coin.fav-opp .token-dial,
-#match .patron-coin.treasury .token-dial,
-#match .patron-coin.mora .token-dial,
-#match .patron-coin[data-pid="mora"] .token-dial,
-#match .patron-coin[data-pid="treasury"] .token-dial {
-  transform: none !important;
-}
-#match .patron-coin img,
-#match .patron-coin.neutral img,
-#match .patron-coin.fav-you img,
-#match .patron-coin.fav-opp img,
-#match .patron-coin.treasury img,
-#match .patron-coin.mora img,
-#match .patron-coin[data-pid="mora"] img,
-#match .patron-coin[data-pid="treasury"] img {
-  transform: none !important;
-}
-#match .patron-coin .token-point {
-  z-index: 3;
-}
-#match .patron-coin.neutral .token-point {
-  left: 1px;
-  top: 50%;
-  transform: translate(-70%, -50%) rotate(-90deg);
-}
-#match .patron-coin.fav-you .token-point {
-  left: 50%;
-  top: auto;
-  bottom: -1px;
-  transform: translate(-50%, 35%) rotate(180deg);
-}
-#match .patron-coin.fav-opp .token-point {
-  left: 50%;
-  top: 0;
-  transform: translate(-50%, -20%) rotate(0deg);
-}
-#match .patron-coin.treasury .coin-ring {
-  background:
-    conic-gradient(from 0deg, #c9a227, #fff6c0, #d4af37, #8a6a20, #fff6c0, #c9a227) !important;
-}
-#match .patron-coin.callable .token-dial {
-  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.7));
-}
-#match .patron-coin.just-flipped .token-dial { transition-duration: 0.7s; }
-
-/* Inspect coin stays a round medallion */
-.lift-coin-fly {
-  filter: drop-shadow(0 12px 22px #000c);
-}
-.lift-coin-fly img {
-  clip-path: none !important;
-  border-radius: 50%;
-}
-
-/* ——— Inspect: hex + tooltip must fit the viewport with padding ——— */
+/* ——— Inspect stay-on-screen (kept from build 30) ——— */
 .lift-fly { overflow: visible !important; }
 .lift-hex-fly {
   overflow: visible !important;
@@ -381,74 +477,95 @@ body.is-native .landscape-tip { display: none !important; }
   overflow-wrap: anywhere;
   max-width: 100%;
 }
-.eso-tip-patron { white-space: normal; max-width: 46%; }
+.eso-tip-patron {
+  white-space: normal;
+  max-width: 46%;
+}
 
-/* Portrait — packed felt, coins stay coins */
+/* ——— Portrait: compact vertically, WIDE horizontally ——— */
 body.is-portrait #match .board {
-  grid-template-columns: minmax(0, 1fr) minmax(64px, 17%) !important;
+  display: block !important;
+  grid-template-columns: none !important;
 }
 body.is-portrait #match .felt-table {
-  align-content: stretch !important;
-  padding: 10px 2px 6px !important;
+  padding: 22px 0 6px !important;
   row-gap: 3px !important;
-  grid-template-columns: minmax(40px, 9%) minmax(0, 1fr) minmax(40px, 9%) !important;
+  gap: 3px 0 !important;
+  grid-template-columns: 1fr !important;
   grid-template-rows:
-    minmax(40px, 0.58fr)
     auto
     auto
-    minmax(168px, 2fr)
+    auto
+    minmax(0, 1fr)
     auto
     auto
-    minmax(124px, 1.28fr) !important;
-}
-body.is-portrait #match .felt-opp-hand,
-body.is-portrait #match .felt-you-hand,
-body.is-portrait #match .felt-tavern {
-  padding-left: 30px;
-  padding-right: 30px;
+    auto !important;
 }
 body.is-portrait #match .felt-tavern {
-  overflow: hidden !important;
+  width: clamp(72%, 78%, 84%) !important;
+  min-width: 72% !important;
+}
+body.is-portrait #match .tavern-zone {
+  gap: 0.28rem !important;
+  padding: 0.12rem 0.22rem !important;
 }
 body.is-portrait #match .tavern-zone .card {
-  width: min(100px, calc((100% - 0.35rem) / 5.08)) !important;
-  height: min(152px, calc(min(100px, 24vw) * 1.52), 98%) !important;
-  margin: 0 1px !important;
+  width: min(78px, calc((100% - 0.7rem) / 5.05)) !important;
+  height: calc(min(78px, calc((100% - 0.7rem) / 5.05)) * 1.52) !important;
 }
 body.is-portrait #match #hand-zone .card,
 body.is-portrait #match #hand-zone button.card,
 body.is-portrait #match .you-fan .card {
-  width: min(102px, calc((100% + 2.4rem) / 5.05)) !important;
-  height: min(154px, calc(min(102px, 26vw) * 1.52), 96%) !important;
-  margin: 0 -16px !important;
+  width: min(70px, calc((100% + 1rem) / 5.3)) !important;
+  height: calc(min(70px, calc((100% + 1rem) / 5.3)) * 1.52) !important;
 }
 body.is-portrait #match .agent-slot.empty {
-  width: 16px !important;
-  height: 22px !important;
+  width: clamp(22px, 5.4vw, 32px) !important;
+  height: clamp(20px, 4.8vw, 28px) !important;
 }
 body.is-portrait #match .patron-rail {
-  grid-template-columns: minmax(0, 1fr) 34px !important;
-  grid-template-rows: 1fr !important;
-  align-content: center !important;
-  justify-items: center !important;
+  display: grid !important;
+  grid-template-columns: auto auto !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  max-width: 34% !important;
+  padding: 10px 3px 12px 6px !important;
 }
-body.is-portrait #match .patron-coin { width: 54px !important; }
+body.is-portrait #match .patron-coin .wood-name { display: none; }
+body.is-portrait #match .patron-coin,
+body.is-portrait #match .patron-coin .wood-pendant,
 body.is-portrait #match .patron-coin .token-dial {
-  width: 48px !important;
-  height: 48px !important;
+  width: 52px !important;
+  height: 32px !important;
 }
-body.is-portrait #match .patron-coin .coin-ring {
-  width: 48px !important;
-  height: 48px !important;
-}
-body.is-portrait #match .patron-coin .plabel { font-size: 0.4rem; }
+body.is-portrait #match .eso-hourglass-end { width: 40px; padding: 4px 0 6px !important; }
 body.is-portrait #match .eso-hourglass-end .hg-svg {
-  width: 26px !important;
-  height: 42px !important;
+  width: 30px !important;
+  height: 50px !important;
 }
+body.is-portrait #match .pile-stack {
+  width: 36px;
+  height: 52px;
+}
+body.is-portrait #match #pile-opp-cd { right: 8px !important; }
+body.is-portrait #match #pile-tavern-discard { right: 8px !important; }
+body.is-portrait #match #pile-you-cd { right: 8px !important; }
 body.is-portrait #match .felt-hud-you {
-  top: max(8px, env(safe-area-inset-top, 0px)) !important;
+  right: 4px !important;
+  bottom: 4px !important;
 }
-body.is-native.is-portrait #match .felt-table {
-  padding-top: 8px !important;
+
+@media (orientation: landscape) {
+  #match .board {
+    width: 100% !important;
+    height: 100% !important;
+    transform: none !important;
+  }
+  #match .felt-tavern {
+    width: clamp(72%, 80%, 85%) !important;
+    min-width: 72% !important;
+  }
+  #match .tavern-zone .card {
+    width: min(104px, 11.5vw, calc((100% - 1.6rem) / 5.05), calc(34vh / 1.52)) !important;
+    height: calc(min(104px, 11.5vw, calc((100% - 1.6rem) / 5.05), calc(34vh / 1.52)) * 1.52) !important;
+  }
 }
