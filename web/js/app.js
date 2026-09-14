@@ -4358,6 +4358,53 @@ function layoutMetrics() {
     return cs.content === 'none' || cs.display === 'none' || w < 1 || h < 1 || op === 0;
   };
   const yellowOrbGone = orbGone(boardBefore) && orbGone(boardAfter);
+  const BUILD50_PORTRAIT_PATRON_FACE_X = 338;
+  const BUILD50_LANDSCAPE_PATRON_FACE_X = 765;
+  const patronColX = pendantFaceXs.length
+    ? +(pendantFaceXs.reduce((a, b) => a + b, 0) / pendantFaceXs.length).toFixed(2)
+    : null;
+  const patronColLeftOf50 = patronColX == null ? false : (vh > vw
+    ? patronColX <= BUILD50_PORTRAIT_PATRON_FACE_X - 6
+    : patronColX <= BUILD50_LANDSCAPE_PATRON_FACE_X - 6);
+  const pendantFaceBoxes = [...document.querySelectorAll('#rail-patrons .patron-coin .coin-ring.medallion-face')]
+    .map((el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom, cy: r.top + r.height / 2 };
+    })
+    .sort((a, b) => a.y - b.y);
+  const pendantFaceGaps = [];
+  for (let i = 1; i < pendantFaceBoxes.length; i++) {
+    pendantFaceGaps.push(+(pendantFaceBoxes[i].y - pendantFaceBoxes[i - 1].bottom).toFixed(2));
+  }
+  const middlePatronIdx = pendantFaceBoxes.length === 5 ? 2 : Math.floor(pendantFaceBoxes.length / 2);
+  const middlePatronGapMin = pendantFaceGaps.length >= 2 && middlePatronIdx > 0 && middlePatronIdx < pendantFaceBoxes.length
+    ? Math.min(
+      pendantFaceGaps[middlePatronIdx - 1] ?? 99,
+      pendantFaceGaps[middlePatronIdx] ?? 99,
+    )
+    : (pendantFaceGaps.length ? Math.min(...pendantFaceGaps) : 0);
+  const middlePatronClear = pendantFaceGaps.length
+    ? pendantFaceGaps.every((g) => g >= 6) && middlePatronGapMin >= 8
+    : false;
+  const tavernBandBox = box('#match .felt-tavern') || box('#match .tavern-band') || tavernZone;
+  const firstTavernCard = tavernCards[0] || null;
+  const deckLeftOfTavern = !!(deck && firstTavernCard && deck.right <= firstTavernCard.x + 2);
+  const deckCy = deck ? deck.y + deck.h / 2 : null;
+  const tavernBandCy = tavernBandBox ? tavernBandBox.y + tavernBandBox.h / 2 : null;
+  const deckTavernMidDy = (deckCy != null && tavernBandCy != null)
+    ? +(deckCy - tavernBandCy).toFixed(2)
+    : null;
+  const deckBesideTavern = !!(deckLeftOfTavern && deckTavernMidDy != null && Math.abs(deckTavernMidDy) <= 14);
+  const oppDrawIsCorner = !!(oppDraw && oppDraw.x < 20 && oppDraw.y < 24);
+  const pileSheet = document.querySelector('#pile-you-draw .pile-stack i, #pile-tavern-draw .pile-stack i, #pile-opp-draw .pile-stack i');
+  const pileBg = pileSheet ? getComputedStyle(pileSheet).backgroundImage : '';
+  const pileUsesCardBack = /card-back/i.test(pileBg || '');
+  const playableEl = document.querySelector('#match .card.playable, #match .card.affordable');
+  const playableFilter = playableEl ? getComputedStyle(playableEl).filter : '';
+  const playableGlowOn = !!(playableEl && /drop-shadow/i.test(playableFilter));
+  const endEl = document.querySelector('#btn-end');
+  const endFilter = endEl ? getComputedStyle(endEl).filter : '';
+  const endTurnGlowOn = !!(endEl && endEl.classList.contains('can-end') && /drop-shadow/i.test(endFilter));
   const youHandSpan = youHandEls.length ? (() => {
     const rs = youHandEls.map((el) => el.getBoundingClientRect());
     const x = Math.min(...rs.map((r) => r.x));
@@ -4447,6 +4494,19 @@ function layoutMetrics() {
     drawLabelUnder,
     cdLabelUnder,
     yellowOrbGone,
+    patronColX,
+    patronColLeftOf50,
+    pendantFaceGaps,
+    middlePatronGapMin: +Number(middlePatronGapMin || 0).toFixed(2),
+    middlePatronClear,
+    deckLeftOfTavern,
+    deckTavernMidDy,
+    deckBesideTavern,
+    oppDrawIsCorner,
+    pileUsesCardBack,
+    pileBg,
+    playableGlowOn,
+    endTurnGlowOn,
     oppHandCount: oppHandEls.length,
     oppHandMidX: oppHandMidX == null ? null : +oppHandMidX.toFixed(2),
     oppHandMidDx,

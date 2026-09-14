@@ -1,10 +1,13 @@
 /**
- * Build 50 layout-fb gate + before/after artifacts.
+ * Build 51 layout-fb gate + before/after artifacts.
  * Portrait 390×844 / landscape 844×390.
  * Zero getBoundingClientRect intersection for Ivan's overlap pairs.
  * Also: tavern mid on vw/2, hand mid on vw/2, pendant colinear X,
  * DRAW/CD labels under four corner piles, left strip high, End Turn
- * bottom-left, yellow felt orbs gone.
+ * bottom-left, yellow felt orbs gone, patron column left of build 50,
+ * middle patron circle clear of neighbors, DECK left of tavern +
+ * vertically centered on the tavern band, pile stacks use card-back.svg,
+ * playable / End Turn gold glow present.
  */
 import http from 'http';
 import fs from 'fs';
@@ -152,6 +155,18 @@ async function measure(page, fileStem, { w, h }) {
     drawLabelUnder: m.drawLabelUnder,
     cdLabelUnder: m.cdLabelUnder,
     yellowOrbGone: m.yellowOrbGone,
+    patronColX: m.patronColX,
+    patronColLeftOf50: m.patronColLeftOf50,
+    pendantFaceGaps: m.pendantFaceGaps,
+    middlePatronGapMin: m.middlePatronGapMin,
+    middlePatronClear: m.middlePatronClear,
+    deckLeftOfTavern: m.deckLeftOfTavern,
+    deckTavernMidDy: m.deckTavernMidDy,
+    deckBesideTavern: m.deckBesideTavern,
+    oppDrawIsCorner: m.oppDrawIsCorner,
+    pileUsesCardBack: m.pileUsesCardBack,
+    playableGlowOn: m.playableGlowOn,
+    endTurnGlowOn: m.endTurnGlowOn,
     oppHandMidDx: m.oppHandMidDx,
     oppResToCards: m.oppResToCards,
     youResToCards: m.youResToCards,
@@ -208,6 +223,14 @@ async function measure(page, fileStem, { w, h }) {
       if (!m.drawLabelUnder) fail(`${fileStem} DRAW labels not under the four-corner pile graphics`, notes);
       if (!m.cdLabelUnder) fail(`${fileStem} COOLDOWN labels not under the four-corner pile graphics`, notes);
       if (!m.yellowOrbGone) fail(`${fileStem} mystery yellow felt orb still visible`, notes);
+      if (!m.patronColLeftOf50) fail(`${fileStem} patron column not left of build-50 baseline (x ${m.patronColX})`, notes);
+      if (!m.middlePatronClear) fail(`${fileStem} middle patron circle still overlapping neighbors (gaps ${JSON.stringify(m.pendantFaceGaps)} min ${m.middlePatronGapMin})`, notes);
+      if (!m.deckLeftOfTavern) fail(`${fileStem} DECK not left of tavern cards`, notes);
+      if (!m.deckBesideTavern) fail(`${fileStem} DECK not vertically centered with tavern (dy ${m.deckTavernMidDy})`, notes);
+      if (!m.oppDrawIsCorner) fail(`${fileStem} opp DRAW left the top-left corner`, notes);
+      if (!m.pileUsesCardBack) fail(`${fileStem} pile stacks missing card-back art (${m.pileBg})`, notes);
+      if (!m.playableGlowOn) fail(`${fileStem} playable-card gold glow missing`, notes);
+      if (!m.endTurnGlowOn) fail(`${fileStem} End Turn gold glow missing`, notes);
       if (m.oppHandCount >= 3 && m.oppHandMidDx != null && Math.abs(m.oppHandMidDx) > 8) {
         fail(`${fileStem} opp hand mid-card off vertical center (dx ${m.oppHandMidDx}px)`, notes);
       }
@@ -227,6 +250,13 @@ async function measure(page, fileStem, { w, h }) {
         fail(`${fileStem} landscape patron pendant centers not colinear (spread ${m.pendantCenterSpread}px, need ≤4)`, notes);
       }
       if (!m.yellowOrbGone) fail(`${fileStem} landscape mystery yellow felt orb still visible`, notes);
+      if (!m.patronColLeftOf50) fail(`${fileStem} landscape patron column not left of build-50 (x ${m.patronColX})`, notes);
+      if (!m.middlePatronClear) fail(`${fileStem} landscape middle patron circle overlapping neighbors (gaps ${JSON.stringify(m.pendantFaceGaps)})`, notes);
+      if (!m.deckLeftOfTavern) fail(`${fileStem} landscape DECK not left of tavern cards`, notes);
+      if (!m.deckBesideTavern) fail(`${fileStem} landscape DECK not vertically centered with tavern (dy ${m.deckTavernMidDy})`, notes);
+      if (!m.pileUsesCardBack) fail(`${fileStem} landscape pile stacks missing card-back art (${m.pileBg})`, notes);
+      if (!m.playableGlowOn) fail(`${fileStem} landscape playable-card gold glow missing`, notes);
+      if (!m.endTurnGlowOn) fail(`${fileStem} landscape End Turn gold glow missing`, notes);
     }
   }
 
@@ -287,6 +317,19 @@ await paintMidline(portPage, false);
 await closeUp(portPage, `${TAG}-portrait-pendants`, [pBoxes.patronsCluster, pBoxes.patronRail], 390, 844);
 await closeUp(portPage, `${TAG}-portrait-four-corners`, [pBoxes.oppDraw, pBoxes.youDraw, pBoxes.oppCd, pBoxes.youCd], 390, 844);
 await closeUp(portPage, `${TAG}-portrait-end-turn-bl`, [pBoxes.endTurn, pBoxes.youDraw, pBoxes.leaveHud], 390, 844);
+await closeUp(portPage, `${TAG}-portrait-deck-beside-tavern`, [pBoxes.deck, pBoxes.tavern, pBoxes.oppDraw], 390, 844);
+await closeUp(portPage, `${TAG}-portrait-pile-backs`, [pBoxes.oppDrawStack || pBoxes.oppDraw, pBoxes.youDrawStack || pBoxes.youDraw, pBoxes.deck], 390, 844);
+const handGlowBox = await portPage.evaluate(() => {
+  const cards = [...document.querySelectorAll('#hand-zone .card.playable, #hand-zone .card.affordable')];
+  if (!cards.length) return null;
+  const rs = cards.map((el) => el.getBoundingClientRect());
+  const x = Math.min(...rs.map((r) => r.x));
+  const y = Math.min(...rs.map((r) => r.y));
+  const right = Math.max(...rs.map((r) => r.right));
+  const bottom = Math.max(...rs.map((r) => r.bottom));
+  return { x, y, w: right - x, h: bottom - y };
+});
+await closeUp(portPage, `${TAG}-portrait-gold-glow`, [pBoxes.endTurn, handGlowBox], 390, 844);
 
 await portPage.evaluate(() => window.__totTest.playFirstGold());
 await new Promise(r => setTimeout(r, 420));
@@ -312,6 +355,7 @@ await landPage.setViewport({ width: 844, height: 390, deviceScaleFactor: 2, isMo
 await ready(landPage);
 results.landscape = await measure(landPage, `${TAG}-landscape-844x390`, { w: 844, h: 390 });
 const lBoxes = results.landscape.boxes;
+await closeUp(landPage, `${TAG}-landscape-deck-beside-tavern`, [lBoxes.deck, lBoxes.tavern, lBoxes.oppDraw], 844, 390);
 await closeUp(landPage, `${TAG}-landscape-tavern-vs-piles`, [lBoxes.tavern, lBoxes.deck, lBoxes.oppDraw, lBoxes.youDraw], 844, 390);
 await closeUp(landPage, `${TAG}-landscape-left-gutter`, [lBoxes.oppDraw, lBoxes.deck, lBoxes.youDraw, lBoxes.events], 844, 390);
 await closeUp(landPage, `${TAG}-landscape-right-gutter`, [lBoxes.patronRail, lBoxes.endTurn, lBoxes.oppCd, lBoxes.youCd], 844, 390);
@@ -333,19 +377,25 @@ if (lFit.titleClipped) fail('landscape inspect title clipped', lFit);
 await landPage.close();
 
 const note = [
-  `Build 50 layout-fb (${TAG})`,
+  `Build 51 layout-fb (${TAG})`,
   `portrait 390x844: tavern ${results.portrait.notes.tavernW}px = ${results.portrait.notes.viewportTavernPct}% vw`,
   `  DRAW left ${results.portrait.notes.drawLeftEdge}px  CD right-gap ${results.portrait.notes.cdRightGap}px`,
   `  hud strip ${results.portrait.notes.hudIsLeftStrip}  hudTop ${results.portrait.notes.hudTop}  endTurn BL ${results.portrait.notes.endTurnBottomLeft}`,
   `  hand n=${results.portrait.notes.youHandCount} midX ${results.portrait.notes.youHandMidX} dx ${results.portrait.notes.youHandMidDx}  oppDx ${results.portrait.notes.oppHandMidDx}`,
   `  tavern midX ${results.portrait.notes.tavernMidX} dx ${results.portrait.notes.tavernMidDx}  pendants Δx ${results.portrait.notes.pendantCenterSpread}`,
   `  labels DRAW ${results.portrait.notes.drawLabelUnder} CD ${results.portrait.notes.cdLabelUnder}  orbGone ${results.portrait.notes.yellowOrbGone}`,
+  `  patrons x ${results.portrait.notes.patronColX} leftOf50 ${results.portrait.notes.patronColLeftOf50} midGap ${results.portrait.notes.middlePatronGapMin} clear ${results.portrait.notes.middlePatronClear}`,
+  `  DECK left ${results.portrait.notes.deckLeftOfTavern} dy ${results.portrait.notes.deckTavernMidDy} beside ${results.portrait.notes.deckBesideTavern}  oppDRAW corner ${results.portrait.notes.oppDrawIsCorner}`,
+  `  pileBack ${results.portrait.notes.pileUsesCardBack}  playableGlow ${results.portrait.notes.playableGlowOn}  endGlow ${results.portrait.notes.endTurnGlowOn}`,
   `  hits ${JSON.stringify(results.portrait.notes.hits)}`,
   `landscape 844x390: tavern ${results.landscape.notes.tavernW}px = ${results.landscape.notes.viewportTavernPct}% vw`,
   `  gutters L/R ${results.landscape.notes.leftGutterPct}% / ${results.landscape.notes.rightGutterPct}%`,
   `  DRAW left ${results.landscape.notes.drawLeftEdge}px  CD right-gap ${results.landscape.notes.cdRightGap}px`,
   `  hud strip ${results.landscape.notes.hudIsLeftStrip}  hand dx ${results.landscape.notes.youHandMidDx}  tavern dx ${results.landscape.notes.tavernMidDx}`,
   `  pendants Δx ${results.landscape.notes.pendantCenterSpread}  orbGone ${results.landscape.notes.yellowOrbGone}`,
+  `  patrons x ${results.landscape.notes.patronColX} leftOf50 ${results.landscape.notes.patronColLeftOf50} midGap ${results.landscape.notes.middlePatronGapMin} clear ${results.landscape.notes.middlePatronClear}`,
+  `  DECK left ${results.landscape.notes.deckLeftOfTavern} dy ${results.landscape.notes.deckTavernMidDy} beside ${results.landscape.notes.deckBesideTavern}`,
+  `  pileBack ${results.landscape.notes.pileUsesCardBack}  playableGlow ${results.landscape.notes.playableGlowOn}  endGlow ${results.landscape.notes.endTurnGlowOn}`,
   `  hits ${JSON.stringify(results.landscape.notes.hits)}`,
 ].join('\n');
 fs.writeFileSync(path.join(ART, `${TAG}-layout-fb-measurements.txt`), note + '\n');

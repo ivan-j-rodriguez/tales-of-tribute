@@ -1,13 +1,16 @@
-/* Build 50 — board/felt Ivan portrait mark-up (on Club 47 / board 49).
+/* Build 51 — board/felt Ivan follow-up on 50 (Club 47 / board 50).
    TWO compositions. Same engine/state. Different positions and sizes.
    Pewter bezel seated on the portrait coin (CSS face = SVG window).
    Round pewter coin + short gothic peak (~10% of diameter).
    Portrait: DRAW/CD in the four corners with labels under the stacks;
-   tavern DECK pile tucked top-left under opp DRAW; SFX/Leave strip high
-   on the left; End Turn in the bottom-left corner above you-DRAW;
-   5 tavern cards + 5-card hand both center on vw/2; patron circles share one X.
-   Landscape: piles to the edges, compact left chrome; End Turn stays on the rail;
-   tavern + hand still center on vw/2 without eating the right rail. */
+   tavern DECK pile LEFT of the tavern row at the band's vertical center;
+   SFX/Leave strip high on the left; End Turn bottom-left above you-DRAW;
+   5 tavern cards + 5-card hand both center on vw/2; patron circles share one X,
+   column shifted a bit left with air between coins.
+   Landscape: piles to the edges, DECK beside the tavern, compact left chrome;
+   End Turn stays on the rail; tavern + hand still center on vw/2.
+   Pile stacks show authentic card-back art. Stray top orbs stay gone;
+   playable / End Turn / hand / combo gold glow is kept. */
 
 #pile-tavern-discard { display: none !important; }
 
@@ -597,6 +600,7 @@ body.is-landscape #match .patron-coin .token-dial.tipless .coin-ring.medallion-f
 }
 
 #match .felt-tavern {
+  position: relative !important;
   width: 100% !important;
   min-width: 72% !important;
   margin-left: 0 !important;
@@ -803,14 +807,14 @@ body.is-landscape .inspect-dossier-sheet {
 }
 
 /* ===================================================================
-   Build 50 — Ivan portrait mark-up. Dual layout; do not copy portrait
-   packing onto landscape.
+   Build 50 seating kept, then build 51 follow-up. Dual layout; do not
+   copy portrait packing onto landscape.
    Yellow corners: DRAW / COOLDOWN graphics + labels under the stacks.
-   Blue: tavern DECK pile → top-left under opp DRAW.
+   Blue: tavern DECK pile → LEFT of the tavern cards at the band center.
    Red: SFX / settings / Leave strip → further UP toward top-left.
    Green: End Turn hourglass → bottom-left corner above you-DRAW.
    Long red: middle tavern card top-center = vw/2 (hand rule from #24 stays).
-   Short red: 5 patron pendant circle-centers share one X.
+   Short red: 5 patron pendant circle-centers share one X, column a bit left.
    =================================================================== */
 
 /* --- Piles to the true L/R edges. Keep labels on-canvas (board overflow:hidden). --- */
@@ -869,8 +873,8 @@ body.is-portrait #match #pile-you-cd .pile-stack {
 
 body.is-landscape #match #pile-opp-draw { top: 2px !important; }
 body.is-landscape #match #pile-you-draw { bottom: 2px !important; }
-body.is-landscape #match #pile-opp-cd { top: 2px !important; right: 118px !important; }
-body.is-landscape #match #pile-you-cd { bottom: 2px !important; right: 118px !important; }
+body.is-landscape #match #pile-opp-cd { top: 2px !important; right: 128px !important; }
+body.is-landscape #match #pile-you-cd { bottom: 2px !important; right: 128px !important; }
 
 /* --- Match-actions: vertical strip mid-left (not bottom-center) --- */
 body.is-portrait #match .felt-hud-you,
@@ -1137,5 +1141,115 @@ body.is-landscape #match .patron-coin .token-dial.medallion,
 body.is-landscape #match .patron-coin .token-dial.tipless {
   margin-left: auto !important;
   margin-right: auto !important;
+}
+
+/* ===================================================================
+   Build 51 — Ivan follow-up on 50. Board/felt only.
+   1) Patron column a bit LEFT; vertical gaps so the middle circle reads
+      as a full coin (not clipped against neighbors). Centers stay colinear.
+   2) Tavern DECK is a child of .felt-tavern: LEFT of the row, vertically
+      centered on the tavern band. Opp DRAW stays top-left; you DRAW
+      bottom-left; COOLDOWNs stay in the right corners.
+   3) Pile stacks use assets/ui/card-back.svg — not brown blobs.
+   4) Stray #match .board::before/::after top orbs stay gone. Playable /
+      End Turn / hand / combo gold glow is not stripped.
+   =================================================================== */
+
+/* DECK is positioned inside .felt-tavern, so top:50% is the band midline. */
+body.is-portrait #match #pile-tavern-draw,
+body.is-landscape #match #pile-tavern-draw {
+  position: absolute !important;
+  left: 6px !important;
+  right: auto !important;
+  top: 50% !important;
+  bottom: auto !important;
+  transform: translateY(-50%) !important;
+  z-index: 16 !important;
+}
+body.is-portrait #match #pile-tavern-draw .pile-stack {
+  width: 36px !important;
+  height: 54px !important;
+}
+body.is-landscape #match #pile-tavern-draw .pile-stack {
+  width: 36px !important;
+  height: 54px !important;
+}
+
+/* Patron column: widen the rail from the left (right:0) so coins sit
+   further from the edge; open vertical air around the middle circle. */
+body.is-portrait #match .patron-rail {
+  width: 92px !important;
+  max-width: 98px !important;
+  padding: 8px 12px 10px 4px !important;
+}
+body.is-portrait #match .tavern-zone {
+  padding: 0.06rem 90px !important;
+}
+body.is-portrait #match .rail-patrons {
+  gap: 8px !important;
+  min-height: 42% !important;
+  justify-content: space-evenly !important;
+}
+body.is-portrait #match .rail-group,
+body.is-portrait #match .rail-group.rail-opp,
+body.is-portrait #match .rail-group.rail-mid,
+body.is-portrait #match .rail-group.rail-you {
+  gap: 12px !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+body.is-portrait #match .rail-group.rail-mid {
+  margin-top: 8px !important;
+  margin-bottom: 8px !important;
+}
+body.is-landscape #match .patron-rail {
+  width: 128px !important;
+  max-width: 134px !important;
+  padding: 6px 12px 8px 8px !important;
+}
+body.is-landscape #match .tavern-zone {
+  padding: 0.08rem 128px !important;
+}
+body.is-landscape #match .rail-patrons {
+  gap: 8px !important;
+}
+body.is-landscape #match .rail-group,
+body.is-landscape #match .rail-group.rail-opp,
+body.is-landscape #match .rail-group.rail-mid,
+body.is-landscape #match .rail-group.rail-you {
+  gap: 8px !important;
+}
+
+/* Authentic teal/gold card-back art on every pile sheet. Stacked offsets stay. */
+#match .hex-pile .pile-stack i,
+#match .pile-stack i,
+#match .pile-stack i.card-back-face,
+#match .pile-stack i:nth-child(3),
+#match .pile-stack-cd i,
+#match .pile-stack-cd i.card-back-face {
+  background-image:
+    linear-gradient(180deg, rgba(255,236,170,0.14), transparent 32%),
+    var(--card-back) !important;
+  background-color: #12382f !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  border: 1px solid #d4af37 !important;
+}
+#match .pile-stack i:nth-child(3)::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Stray non-card top orbs only. Do not touch playable / End Turn / combo glow. */
+#match .board::before,
+#match .board::after {
+  display: none !important;
+  content: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
 }
 
