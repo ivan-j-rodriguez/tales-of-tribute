@@ -1,7 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { createElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -47,6 +48,21 @@ true;
 `;
 }
 
+function WebIFrame({ uri, onLoad }) {
+  return createElement('iframe', {
+    src: uri,
+    title: 'Tales of Tribute',
+    allow: 'autoplay; fullscreen',
+    style: {
+      border: 'none',
+      width: '100%',
+      height: '100%',
+      backgroundColor: FELT,
+    },
+    onLoad,
+  });
+}
+
 function TableShell() {
   const insets = useSafeAreaInsets();
   const webRef = useRef(null);
@@ -54,60 +70,73 @@ function TableShell() {
   const [error, setError] = useState(null);
   const uri = useMemo(() => tableUrl(), []);
   const injected = useMemo(() => nativeCss(insets), [insets]);
+  const onWeb = Platform.OS === 'web';
+
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 8000);
+    return () => clearTimeout(t);
+  }, [uri]);
+
+  const loaded = useCallback(() => setLoading(false), []);
 
   const reload = useCallback(() => {
     setError(null);
     setLoading(true);
-    webRef.current?.reload();
-  }, []);
+    if (onWeb) {
+      webRef.current = Date.now();
+      setError(null);
+    } else {
+      webRef.current?.reload();
+    }
+  }, [onWeb]);
 
   return (
     <View style={styles.fill}>
       <StatusBar hidden style="light" />
-      <WebView
-        ref={webRef}
-        source={{ uri }}
-        style={styles.fill}
-        originWhitelist={['*']}
-        javaScriptEnabled
-        domStorageEnabled
-        allowsInlineMediaPlayback
-        mediaPlaybackRequiresUserAction={false}
-        allowsFullscreenVideo
-        bounces={false}
-        overScrollMode="never"
-        automaticallyAdjustContentInsets={false}
-        contentInsetAdjustmentBehavior="never"
-        automaticallyAdjustsScrollIndicatorInsets={false}
-        setSupportMultipleWindows={false}
-        allowsBackForwardNavigationGestures={false}
-        hideKeyboardAccessoryView
-        showsHorizontalScrollIndicator={false}
-        showsVerticalScrollIndicator={false}
-        mixedContentMode="always"
-        thirdPartyCookiesEnabled
-        sharedCookiesEnabled
-        injectedJavaScript={injected}
-        injectedJavaScriptBeforeContentLoaded={injected}
-        onLoadStart={() => {
-          setLoading(true);
-          setError(null);
-        }}
-        onLoadEnd={() => setLoading(false)}
-        onError={(event) => {
-          setLoading(false);
-          setError(event.nativeEvent?.description || 'Could not load the table.');
-        }}
-        onHttpError={(event) => {
-          const code = event.nativeEvent?.statusCode;
-          if (code && code >= 400) {
+      {onWeb ? (
+        <WebIFrame key={webRef.current || 'iframe'} uri={uri} onLoad={loaded} />
+      ) : (
+        <WebView
+          ref={webRef}
+          source={{ uri }}
+          style={styles.fill}
+          originWhitelist={['*']}
+          javaScriptEnabled
+          domStorageEnabled
+          allowsInlineMediaPlayback
+          mediaPlaybackRequiresUserAction={false}
+          allowsFullscreenVideo
+          bounces={false}
+          overScrollMode="never"
+          automaticallyAdjustContentInsets={false}
+          contentInsetAdjustmentBehavior="never"
+          automaticallyAdjustsScrollIndicatorInsets={false}
+          setSupportMultipleWindows={false}
+          allowsBackForwardNavigationGestures={false}
+          hideKeyboardAccessoryView
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          mixedContentMode="always"
+          thirdPartyCookiesEnabled
+          sharedCookiesEnabled
+          injectedJavaScript={injected}
+          injectedJavaScriptBeforeContentLoaded={injected}
+          onLoadEnd={loaded}
+          onError={(event) => {
             setLoading(false);
-            setError(`Table HTTP ${code}`);
-          }
-        }}
-      />
+            setError(event.nativeEvent?.description || 'Could not load the table.');
+          }}
+          onHttpError={(event) => {
+            const code = event.nativeEvent?.statusCode;
+            if (code && code >= 400) {
+              setLoading(false);
+              setError(`Table HTTP ${code}`);
+            }
+          }}
+        />
+      )}
       {loading && !error ? (
-        <View style={styles.cover} pointerEvents="none">
+        <View style={[styles.cover, styles.coverIgnore]}>
           <ActivityIndicator color={GOLD} size="large" />
           <Text style={styles.coverText}>Opening the table…</Text>
         </View>
@@ -149,6 +178,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 28,
+  },
+  coverIgnore: {
+    pointerEvents: 'none',
   },
   coverText: {
     marginTop: 14,

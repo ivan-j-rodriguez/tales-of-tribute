@@ -60,7 +60,7 @@ This Cloud VM has **no Xcode / Simulator / Swift**. The Xcode project is intende
 
 **Web:** `cd web && python3 -m http.server 8080`
 
-**Expo Go:** install Expo Go, then open https://snack.expo.dev/pzo0vkEnrFNGI0TAERfXI (or `cd expo && npm install && npx expo start --tunnel`).
+**Expo Go:** install Expo Go, then open https://snack.expo.dev/7AYkuR0_NYXNHQWGuUj9E (or `cd expo && npm install && npx expo start --tunnel`).
 
 **iOS:** Open `ios/TalesOfTribute/TalesOfTribute.xcodeproj` in Xcode 15+, run on iOS 17+.
 

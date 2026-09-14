@@ -33,11 +33,11 @@ The SwiftUI app above still needs Xcode 15+. **Expo Go** wraps the same `web/` t
 1. Install **[Expo Go](https://apps.apple.com/app/expo-go/id982107779)**.
 2. Open this public Snack (no Expo account required):
 
-   **https://snack.expo.dev/pzo0vkEnrFNGI0TAERfXI**
+   **https://snack.expo.dev/7AYkuR0_NYXNHQWGuUj9E**
 
    Or scan `expo/assets/expo-go-qr.png`, or paste this into Expo Go:
 
-   `exp://u.expo.dev/933fd9c0-1666-11e7-afca-d980795c5824?runtime-version=exposdk%3A54.0.0&channel-name=production&snack=pzo0vkEnrFNGI0TAERfXI`
+   `exp://u.expo.dev/933fd9c0-1666-11e7-afca-d980795c5824?runtime-version=exposdk%3A54.0.0&channel-name=production&snack=7AYkuR0_NYXNHQWGuUj9E`
 
 3. Tap **Open with Expo Go**.
 4. Play. Portrait and landscape both work. The felt is edge-to-edge; the notch is padded. `?native=1` hides the landscape banner.

@@ -13,11 +13,11 @@ Card art is ~80MB, so Expo Go does **not** embed `web/assets`. The WebView opens
 1. Install **[Expo Go](https://apps.apple.com/app/expo-go/id982107779)** from the App Store.
 2. Open the public Snack (no Expo login):
 
-   **https://snack.expo.dev/pzo0vkEnrFNGI0TAERfXI**
+   **https://snack.expo.dev/7AYkuR0_NYXNHQWGuUj9E**
 
    Camera / Expo Go can also scan `assets/expo-go-qr.png`, or open:
 
-   `exp://u.expo.dev/933fd9c0-1666-11e7-afca-d980795c5824?runtime-version=exposdk%3A54.0.0&channel-name=production&snack=pzo0vkEnrFNGI0TAERfXI`
+   `exp://u.expo.dev/933fd9c0-1666-11e7-afca-d980795c5824?runtime-version=exposdk%3A54.0.0&channel-name=production&snack=7AYkuR0_NYXNHQWGuUj9E`
 
 3. Tap **Open with Expo Go**.
 4. Rotate freely — portrait and landscape are both enabled. Status bar is hidden; the felt still respects the notch.
