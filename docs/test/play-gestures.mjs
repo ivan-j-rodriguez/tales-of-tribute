@@ -148,6 +148,8 @@ assert('tavern sits near vertical center', a.tavernCenter === true, a);
 assert('gold tip is in-game sentence', /Gain 1 Coin/i.test(a.goldTip || ''), a.goldTip);
 assert('harvest is Draw 1 card', /Draw 1 card/i.test(a.harvestTip || ''), a.harvestTip);
 assert('treasury has no favor tip', a.treasuryHasTip === false, a.patrons);
+assert('no tavern discard pile', a.tavernDiscard === false, a);
+assert('pointed patrons have a gothic tip', a.patrons.filter(p => p.id !== 'treasury' && p.id !== 'mora').every(p => p.tip && p.medallion), a.patrons);
 assert('patron tokens are coins not nameplates', a.woodPendants === 0 && a.coinRings >= 5, a);
 assert('empty agent seats stay thin', a.agentEmptyH > 0 && a.agentEmptyH <= 36 && a.agentsRowH <= 48, a);
 assert('sfx leave miss piles', a.actionsOverlapPile === false, a);

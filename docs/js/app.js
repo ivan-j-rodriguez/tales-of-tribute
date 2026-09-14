@@ -203,6 +203,67 @@ function patronRecord(id) {
   };
 }
 
+function patronNeverTips(pat, pid) {
+  return !!(pat?.alwaysNeutral || pat?.abilities?.alwaysNeutral || pid === 'treasury' || pid === 'mora');
+}
+
+/** Ornate pewter gothic medallion. Tip = favor. Treasury + Mora stay circular. */
+function medallionMarkup(pid, pat, short, favorWord) {
+  const uid = `med-${pid}`;
+  const field = pat?.color || '#6b1218';
+  const art = patronArt(pid);
+  const title = `${favorWord} — ${pat?.name || short}`;
+  const neverTurn = patronNeverTips(pat, pid);
+  const pew = `
+    <linearGradient id="${uid}-pew" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7f2e8"/>
+      <stop offset="18%" stop-color="#d8d2c6"/>
+      <stop offset="40%" stop-color="#9a9488"/>
+      <stop offset="62%" stop-color="#ece6da"/>
+      <stop offset="82%" stop-color="#6e685c"/>
+      <stop offset="100%" stop-color="#3a362e"/>
+    </linearGradient>
+    <radialGradient id="${uid}-hi" cx="32%" cy="28%">
+      <stop offset="0%" stop-color="#fffaf0" stop-opacity=".7"/>
+      <stop offset="100%" stop-color="#fffaf0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="${uid}-fld" cx="38%" cy="30%">
+      <stop offset="0%" stop-color="#9a2434"/>
+      <stop offset="100%" stop-color="${field}"/>
+    </radialGradient>`;
+  if (neverTurn) {
+    return `
+      <div class="token-dial medallion tipless" title="${title}">
+        <svg class="medallion-svg" viewBox="0 0 100 100" aria-hidden="true">
+          <defs>${pew}</defs>
+          <circle cx="50" cy="50" r="47.5" fill="url(#${uid}-pew)" stroke="#2a261e" stroke-width="1.5"/>
+          <circle cx="50" cy="50" r="41" fill="none" stroke="#1c1812" stroke-width="2.1"/>
+          <circle cx="50" cy="50" r="39.2" fill="none" stroke="#efe8da" stroke-width="1.15" opacity=".8"/>
+          <circle cx="50" cy="50" r="40" fill="none" stroke="#6a6458" stroke-width="2.6" stroke-dasharray="3.5 2.2"/>
+          <circle cx="50" cy="50" r="34.5" fill="url(#${uid}-fld)"/>
+          <circle cx="50" cy="50" r="47.5" fill="url(#${uid}-hi)" pointer-events="none"/>
+        </svg>
+        <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
+      </div>
+      <span class="plabel">${short}</span>`;
+  }
+  return `
+    <div class="token-dial medallion" title="${title}">
+      <svg class="medallion-svg" viewBox="0 0 100 128" aria-hidden="true">
+        <defs>${pew}</defs>
+        <path class="token-point medallion-body" fill="url(#${uid}-pew)" stroke="#2a261e" stroke-width="1.5"
+          d="M50 2 C59 18, 78 34, 88 54 A 45 45 0 1 1 12 54 C22 34, 41 18, 50 2 Z"/>
+        <circle cx="50" cy="78" r="41.5" fill="none" stroke="#1c1812" stroke-width="2.2"/>
+        <circle cx="50" cy="78" r="39.6" fill="none" stroke="#efe8da" stroke-width="1.2" opacity=".82"/>
+        <circle cx="50" cy="78" r="40.4" fill="none" stroke="#6a6458" stroke-width="2.7" stroke-dasharray="3.6 2.3"/>
+        <circle cx="50" cy="78" r="34.5" fill="url(#${uid}-fld)"/>
+        <circle cx="50" cy="78" r="41.5" fill="url(#${uid}-hi)" pointer-events="none"/>
+      </svg>
+      <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
+    </div>
+    <span class="plabel">${short}</span>`;
+}
+
 function applyTableSkin() {
   if (!profile) return;
   const id = profile.tableSkin || 'high-isle';
@@ -968,7 +1029,6 @@ function pileEl(which) {
     'opp-cooldown': '#pile-opp-cd',
     'opp-draw': '#pile-opp-draw',
     'opp-hand': '#pile-opp-hand',
-    'tavern-discard': '#pile-tavern-discard',
     'hand': '#hand-zone',
     'tavern': '#tavern-zone',
     'played': '#you-played',
@@ -1064,7 +1124,6 @@ function renderMatch() {
   $('#cnt-you-draw').textContent = you.draw.length;
   $('#cnt-you-played').textContent = you.played.length;
   $('#cnt-you-cd').textContent = you.cooldown.length;
-  $('#cnt-tavern-discard').textContent = s.tavernDiscard.length;
   const tdraw = $('#cnt-tavern-draw');
   if (tdraw) tdraw.textContent = (s.tavernPile || []).length;
   renderEventsRail(you, s);
@@ -1085,21 +1144,16 @@ function renderMatch() {
     const el = document.createElement('div');
     const favor = favYou ? 'fav-you' : favOpp ? 'fav-opp' : 'neutral';
     const favorWord = favYou ? 'Favored' : favOpp ? 'Unfavored' : 'Neutral';
-    el.className = 'patron-coin ' + (pid === 'treasury' ? 'treasury ' : '') + favor;
+    const neverTurn = patronNeverTips(pat, pid);
+    el.className = 'patron-coin ' + (pid === 'treasury' ? 'treasury ' : '') + (pid === 'mora' ? 'mora ' : '') + favor + (neverTurn ? ' tipless' : '');
     el.dataset.pid = pid;
     el.dataset.favor = favorWord.toLowerCase();
     el.dataset.side = pid === 'treasury' ? 'mid' : (youPats.includes(pid) ? 'you' : 'opp');
+    el.style.setProperty('--patron-field', pat.color || '#6b1218');
     if (yourTurn && engine.canCallPatron(pid)) el.classList.add('callable');
     if (prevFavor[pid] && prevFavor[pid] !== favorWord.toLowerCase()) el.classList.add('just-flipped');
     const short = (pat.short || pat.name || pid).replace(/^The\s+/i, '');
-    const neverTurn = !!(pat.alwaysNeutral || pat.abilities?.alwaysNeutral || pid === 'treasury' || pid === 'mora');
-    el.innerHTML = `
-      <div class="token-dial" title="${favorWord} — ${pat.name || short}">
-        ${neverTurn ? '' : '<span class="token-point" aria-hidden="true"></span>'}
-        <span class="coin-ring"><img src="${patronArt(pid)}" alt="${short}" draggable="false" /></span>
-      </div>
-      <span class="plabel">${short}</span>
-    `;
+    el.innerHTML = medallionMarkup(pid, pat, short, favorWord);
     bindCardGesture(el, {
       onTap: () => openPatronConfirm(pid, 'call'),
       onHoldRead: () => startPatronLift(el, pid),
@@ -3443,10 +3497,15 @@ function layoutMetrics() {
   for (let i = 1; i < cards.length; i++) {
     overlap = Math.max(overlap, cards[i - 1].right - cards[i].x);
   }
+  const oppHand = box('#match .felt-opp-hand');
+  const youHand = box('#match .felt-you-hand');
   const feltW = felt?.w || board?.w || vw;
+  const feltH = felt?.h || board?.h || vh;
   const tavernW = band?.w || tavern?.w || 0;
   const leftGutter = felt && tavern ? tavern.x - felt.x : 0;
   const rightGutter = felt && tavern ? felt.right - tavern.right : 0;
+  const topBand = felt && oppHand ? Math.max(0, oppHand.y - felt.y) : 0;
+  const botBand = felt && youHand ? Math.max(0, felt.bottom - youHand.bottom) : 0;
   const tokensStacked = !!(youTok && oppTok && hg
     && Math.abs(youTok.y - oppTok.y) < 36
     && Math.abs(youTok.x - oppTok.x) < 28
@@ -3467,6 +3526,14 @@ function layoutMetrics() {
     rightGutter: +rightGutter.toFixed(1),
     leftGutterPct: feltW ? +(leftGutter / feltW * 100).toFixed(1) : 0,
     rightGutterPct: feltW ? +(rightGutter / feltW * 100).toFixed(1) : 0,
+    feltH,
+    topBand: +topBand.toFixed(1),
+    botBand: +botBand.toFixed(1),
+    topBandPct: feltH ? +(topBand / feltH * 100).toFixed(1) : 0,
+    botBandPct: feltH ? +(botBand / feltH * 100).toFixed(1) : 0,
+    tavernDiscard: !!document.querySelector('#pile-tavern-discard'),
+    medallions: document.querySelectorAll('#rail-patrons .medallion').length,
+    pointedTips: document.querySelectorAll('#rail-patrons .token-point').length,
     cardCount: cards.length,
     cardH: +cardH.toFixed(1),
     cardOverlap: +overlap.toFixed(1),
@@ -3501,6 +3568,9 @@ function installTestHook() {
         pip: !!el.querySelector('.favor-pip'),
         wood: !!el.querySelector('.wood-pendant, .wood-bar, .wood-name'),
         ring: !!el.querySelector('.coin-ring'),
+        medallion: !!el.querySelector('.medallion'),
+        tipless: el.classList.contains('tipless'),
+        rot: getComputedStyle(el.querySelector('.token-dial') || el).transform,
       }));
       const cluster = $('#rail-patrons')?.getBoundingClientRect();
       const rail = $('#patron-rail')?.getBoundingClientRect();
@@ -3546,6 +3616,8 @@ function installTestHook() {
         hourglassMid: !!(felt && hg && hg.top < felt.top + felt.height * 0.72),
         midMatchHgToggle: !!document.querySelector('#btn-hg-toggle'),
         treasuryHasTip: coins.some(c => c.id === 'treasury' && c.tip),
+        moraHasTip: coins.some(c => c.id === 'mora' && c.tip),
+        tavernDiscard: !!document.querySelector('#pile-tavern-discard'),
         resPatronTok: !!document.querySelector('#you-res .tok-patron'),
         railPatronTok: !!document.querySelector('#you-patron-calls'),
         targeting: !!targetSession,

@@ -1,4 +1,4 @@
-/* Build 33 — full-bleed felt + overlay chrome + silver medallions.
+/* Build 35 — full-bleed felt + overlay chrome + gothic medallions.
    Loaded last so these rules win the cascade.
    Felt is 100% of #match. Piles, effects, patrons, hourglass float ON it.
    No grid columns that steal tavern width. */
@@ -35,8 +35,8 @@
   gap: 3px 0 !important;
   overflow: hidden !important;
   background: transparent !important;
-  align-content: center !important;
-  align-items: center !important;
+  align-content: stretch !important;
+  align-items: stretch !important;
   justify-items: stretch !important;
   grid-template-columns: 1fr !important;
   grid-template-rows:
@@ -163,7 +163,6 @@
 #match #pile-opp-draw,
 #match #pile-opp-cd,
 #match #pile-tavern-draw,
-#match #pile-tavern-discard,
 #match #pile-you-draw,
 #match #pile-you-cd {
   position: absolute !important;
@@ -186,8 +185,8 @@
 
 #match #pile-opp-draw { top: 8px !important; left: 6px !important; }
 #match #pile-opp-cd { top: 8px !important; right: 10px !important; }
-#match #pile-tavern-draw { top: 50% !important; left: 6px !important; transform: translateY(-112%) !important; }
-#match #pile-tavern-discard { top: 50% !important; right: 10px !important; transform: translateY(-112%) !important; }
+#match #pile-tavern-draw { top: 50% !important; left: 6px !important; transform: translateY(-50%) !important; }
+#match #pile-tavern-discard { display: none !important; }
 #match #pile-you-draw { bottom: 10px !important; left: 6px !important; }
 #match #pile-you-cd { bottom: 10px !important; right: 10px !important; }
 
@@ -631,18 +630,19 @@ body.is-portrait #match .board {
   grid-template-columns: none !important;
 }
 body.is-portrait #match .felt-table {
-  padding: 22px 0 6px !important;
+  padding: 4px 0 6px !important;
   row-gap: 3px !important;
   gap: 3px 0 !important;
+  align-content: stretch !important;
   grid-template-columns: 1fr !important;
   grid-template-rows:
+    minmax(58px, 0.92fr)
     auto
+    30px
+    minmax(128px, 1.85fr)
+    30px
     auto
-    auto
-    auto
-    auto
-    auto
-    auto !important;
+    minmax(118px, 1.7fr) !important;
 }
 body.is-portrait #match .felt-tavern {
   width: 74% !important;
@@ -699,7 +699,6 @@ body.is-portrait #match .pile-stack {
   height: 52px;
 }
 body.is-portrait #match #pile-opp-cd { right: 8px !important; }
-body.is-portrait #match #pile-tavern-discard { right: 8px !important; }
 body.is-portrait #match #pile-you-cd { right: 8px !important; }
 body.is-portrait #match .felt-hud-you {
   right: 4px !important;
