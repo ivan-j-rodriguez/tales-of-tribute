@@ -358,13 +358,14 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 38';
+  if (stamp) stamp.textContent = 'build 39';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
   show('#splash');
-  if (canClaimDailyLogin(profile)) openLoginGreet();
-  else if (profile.pendingCrate) openCrateCeremony(profile.pendingCrate);
+  const testShell = new URLSearchParams(location.search).has('test');
+  if (!testShell && canClaimDailyLogin(profile)) openLoginGreet();
+  else if (!testShell && profile.pendingCrate) openCrateCeremony(profile.pendingCrate);
 }
 
 function botRevealAllowed() {
@@ -3606,6 +3607,8 @@ function installTestHook() {
     lastToast: () => lastToast,
     startQuick() {
       try { localStorage.setItem(TOUR_KEY, '1'); } catch {}
+      $('#login-overlay')?.classList.remove('show');
+      $('#crate-overlay')?.classList.remove('show');
       pickYou = ['pelin', 'hlaalu'];
       pickOpp = ['crows', 'celarus'];
       matchMode = 'ai';
