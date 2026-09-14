@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-14 (build 47):** Club Store horizontal overflow. Featured hero `::after` glow leaked past `.bundle-card` because `#store .bundle-card` was `overflow: visible`; `#store.scrollWidth` was ~54px wider than the viewport on a 390px phone. Cards clip the glow again; store grids wrap. Board CSS untouched. `?v=47`.
+
 **2026-09-14 (build 46):** Club voice Mic gate follow-up. Match Mic is hidden unless Friend/Ranked remote (`canUseVoice`) and voice is wanted or live. Hotseat / AI / tutorial / gauntlet / random AI clear leftover Friend `wanted`. Dead unused `voicePref()` removed. Board CSS untouched. `?v=46`.
 
 **2026-09-14 (build 45):** Target-modal hold-inspect rebased onto Club 44. Tavern replace/remove, sacrifice, destroy, KO, confine, toss, donate, refresh, and Treasury trays use the same in-match dossier. Hold (~1s) reads; short tap picks; Confirm still required except board acquire auto-confirm. Dossier sits above the target sheet and never confirms on hold-release. Light felt polish: restore landscape `.felt-tavern` selector; keep portrait empty seats thin. Club product files from main 44. `?v=45`.
@@ -75,7 +77,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=46`. Club voice Mic gate follow-up on board 45 (target-modal hold-inspect).
+`docs/` is a copy of `web/`. Cache-bust `?v=47`. Club Store overflow clip on board 45 (target-modal hold-inspect).
 
 | Fix | Notes |
 |---|---|

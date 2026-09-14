@@ -59,10 +59,23 @@ function overlap(a, b) {
   return !(a.bottom <= b.top || b.bottom <= a.top || a.right <= b.left || b.right <= a.left);
 }
 
+async function assertNoHorizontalOverflow(page, sel, label) {
+  const m = await page.evaluate((s) => {
+    const el = document.querySelector(s);
+    if (!el) return null;
+    return { sw: el.scrollWidth, cw: el.clientWidth };
+  }, sel);
+  if (!m) throw new Error(`missing ${label}`);
+  console.log('overflow', label, m);
+  if (m.sw > m.cw + 1) {
+    throw new Error(`${label} horizontal overflow: scrollWidth ${m.sw} > clientWidth ${m.cw}`);
+  }
+}
+
 const splash = await pageAt('?test=1');
 const stamp = await splash.$eval('#build-stamp', (el) => el.textContent);
 console.log('stamp', stamp);
-if (!/build 46/.test(stamp)) throw new Error(`expected build 46, got ${stamp}`);
+if (!/build 47/.test(stamp)) throw new Error(`expected build 47, got ${stamp}`);
 await shot(splash, 'club_splash.png');
 await splash.close();
 
@@ -139,12 +152,22 @@ if (/No IAP/i.test(bundle.hint) || /unofficial/i.test(bundle.hint)) throw new Er
 if (/slate/i.test(bundle.hint + bundle.copy + bundle.footnote)) throw new Error('store UI still says slate');
 if ((bundle.hint.match(/[.]/g) || []).length > 1) throw new Error('store intro should be one tight line');
 await store.evaluate(() => { document.querySelector('#store').scrollTop = 0; });
+await assertNoHorizontalOverflow(store, '#store', 'store 390');
 await new Promise((r) => setTimeout(r, 200));
 await shot(store, 'club_store_intro.png');
 await store.evaluate(() => document.querySelector('#store-featured-block')?.scrollIntoView({ block: 'start' }));
 await new Promise((r) => setTimeout(r, 200));
+await assertNoHorizontalOverflow(store, '#store', 'store 390 after hero scroll');
 await shot(store, 'club_store_hero_bundle.png');
 await store.close();
+
+const storeWide = await pageAt('?test=1&shop=14', { w: 1024, h: 768 });
+await storeWide.evaluate(() => window.__totTest.openStore());
+await new Promise((r) => setTimeout(r, 400));
+await storeWide.evaluate(() => { document.querySelector('#store').scrollTop = 0; });
+await assertNoHorizontalOverflow(storeWide, '#store', 'store 1024');
+await shot(storeWide, 'club_store_wide.png');
+await storeWide.close();
 
 const coll = await pageAt('?test=1');
 await coll.evaluate(() => window.__totTest.openDeckSheet('mora'));

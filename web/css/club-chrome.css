@@ -121,9 +121,7 @@
 #club .ach-row,
 #club .ach-list,
 #club .login-cal,
-#club .hint,
-#store .bundle-card,
-#store .store-hero {
+#club .hint {
   overflow: visible;
 }
 #club .season-banner h4,
@@ -324,6 +322,44 @@
 .store-section .club-section {
   margin: 0 !important;
   padding: 0;
+}
+
+/* Featured hero glow (::after, right: -20%) must clip at the card. An
+   earlier overflow:visible on #store .bundle-card let that pseudo-element
+   inflate #store.scrollWidth (~54px on a 390px phone). */
+#store .bundle-card,
+#store .store-hero {
+  overflow: hidden;
+  max-width: 100%;
+  min-width: 0;
+}
+#store .store-section,
+#store .store-grid,
+#store .store-nav,
+#store-bundle,
+#store-featured-hero {
+  max-width: 100%;
+  min-width: 0;
+}
+#store .store-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(160px, 100%), 1fr));
+}
+#store .hero-art-row {
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+}
+#store .hero-art-row > div {
+  min-width: 0;
+  flex: 1 1 8rem;
+}
+#store .bundle-card h4,
+#store .store-hero h4,
+#store .bundle-card p,
+#store .store-hero p,
+#store .bundle-part strong {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .store-item {
