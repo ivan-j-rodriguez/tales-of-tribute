@@ -1029,6 +1029,7 @@ body.is-portrait #match .pile-stack {
   flex: 0 0 auto;
   position: relative;
   transition: transform 0.18s ease;
+  touch-action: manipulation;
 }
 .target-tray .tray-card:hover,
 .target-tray .tray-card:focus {

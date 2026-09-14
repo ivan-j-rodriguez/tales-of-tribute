@@ -158,6 +158,14 @@ body.is-portrait #match #opp-res {
 body.is-portrait #match #you-res {
   align-self: start !important;
 }
+body.is-portrait #match .agent-slot.empty {
+  width: clamp(20px, 5vw, 28px) !important;
+  height: clamp(18px, 4.2vw, 24px) !important;
+}
+body.is-portrait #match .felt-you-agents,
+body.is-portrait #match .felt-opp-agents {
+  min-height: 22px !important;
+}
 body.is-portrait #match #turn-ind,
 body.is-portrait #match .turn-chip {
   align-self: end !important;
@@ -304,6 +312,7 @@ body.is-landscape #match #you-res {
   min-height: 44px !important;
   height: 44px !important;
 }
+body.is-landscape #match .felt-tavern {
   width: 100% !important;
   min-width: 72% !important;
   max-width: none !important;
@@ -675,13 +684,21 @@ body.is-landscape #match .rail-glass {
   padding: 2px 0 4px !important;
 }
 
-/* Hold-inspect: dark dossier modal. Full card + title inside the sheet. */
+/* Hold-inspect: dark dossier modal. Full card + title inside the sheet.
+   Must sit above the targeting tray (z-index 11000) so hold-to-read works in-modal. */
+#lift-layer {
+  z-index: 13000 !important;
+}
 .lift-fly.lift-dossier-modal {
   display: flex !important;
   align-items: center;
   justify-content: center;
   pointer-events: none;
   overflow: hidden !important;
+  z-index: 13001 !important;
+}
+.lift-fly.lift-over-target {
+  z-index: 13001 !important;
 }
 .lift-fly.lift-dossier-modal .lift-veil {
   background: rgba(6, 10, 12, 0.86) !important;
