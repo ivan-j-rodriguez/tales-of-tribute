@@ -1,4 +1,4 @@
-/* Build 32 — overlay chrome on a full-bleed felt.
+/* Build 33 — overlay chrome on a full-bleed felt.
    Structural width lives here; table-pack.css (loaded last) is the lock. */
 
 :root {
@@ -371,11 +371,11 @@
   border: 1px solid #c9a227;
 }
 #match .eso-tok.tok-prestige {
-  width: 38px; height: 42px;
-  clip-path: polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0 50%);
-  color: #f4f8ff;
-  text-shadow: 0 1px 2px #0008;
-  background: linear-gradient(180deg, #9fd0ff, #2f6cb4 55%, #123a72);
+  width: 36px; height: 42px;
+  clip-path: polygon(50% 0%, 100% 16%, 100% 84%, 50% 100%, 0% 84%, 0% 16%);
+  color: #3a342c;
+  text-shadow: 0 1px 0 #fff6;
+  background: linear-gradient(180deg, #f7f3ea, #d2cbc0 55%, #9a9288);
   box-shadow: 0 2px 4px #0006;
 }
 #match .eso-tok.tok-power {

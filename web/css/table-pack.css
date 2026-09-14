@@ -1,4 +1,4 @@
-/* Build 32 — full-bleed felt + overlay chrome.
+/* Build 33 — full-bleed felt + overlay chrome + silver medallions.
    Loaded last so these rules win the cascade.
    Felt is 100% of #match. Piles, effects, patrons, hourglass float ON it.
    No grid columns that steal tavern width. */
@@ -461,11 +461,141 @@
 }
 #match .eso-hourglass-end .eso-end-caption { font-size: 0.5rem; }
 
-#match .patron-coin,
+/* Spec: pointed silver medallions. Tip = favor. Face stays upright. */
+#match .patron-coin {
+  width: 54px !important;
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  overflow: visible !important;
+}
 #match .patron-coin .wood-pendant,
+#match .patron-coin .wood-tip,
+#match .patron-coin .wood-bar,
+#match .patron-coin .wood-name,
+#match .patron-coin .favor-pip { display: none !important; }
+
 #match .patron-coin .token-dial {
-  width: 88px !important;
-  height: 36px !important;
+  display: block !important;
+  position: relative;
+  width: 46px !important;
+  height: 58px !important;
+  margin: 0 auto;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  transform-origin: 50% 64%;
+  transition: transform 0.65s cubic-bezier(.4, .12, .2, 1);
+}
+#match .patron-coin .token-point {
+  display: block !important;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 12px;
+  height: 14px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #f7f2e8, #c9c0b0 42%, #8a8276 78%, #4a453c);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  filter: drop-shadow(0 1px 1px #0008);
+  z-index: 2;
+}
+#match .patron-coin .coin-ring {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 0 !important;
+  right: auto !important;
+  top: auto !important;
+  width: 46px !important;
+  height: 46px !important;
+  padding: 3px !important;
+  border-radius: 50%;
+  flex: none !important;
+  overflow: hidden;
+  background:
+    conic-gradient(from 22deg, #5c564c, #f3eee4, #c9c0b0, #3a342c, #f3eee4, #5c564c) !important;
+  box-shadow:
+    0 2px 6px #0008,
+    inset 0 0 0 1px rgba(255, 244, 210, 0.35),
+    inset 0 0 6px #0006 !important;
+}
+#match .patron-coin .coin-ring img,
+#match .patron-coin.neutral img,
+#match .patron-coin.fav-you img,
+#match .patron-coin.fav-opp img,
+#match .patron-coin.treasury img,
+#match .patron-coin.mora img,
+#match .patron-coin[data-pid="mora"] img,
+#match .patron-coin[data-pid="treasury"] img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+  transition: transform 0.65s cubic-bezier(.4, .12, .2, 1);
+}
+#match .patron-coin .plabel {
+  display: block !important;
+  font-family: 'Cinzel', serif;
+  font-size: 0.46rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #e8dcb0;
+  text-shadow: 0 1px 2px #000c;
+  line-height: 1.1;
+  max-width: 58px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Neutral left · you down · rival up. Face counter-rotates so the portrait stays upright. */
+#match .patron-coin.neutral .token-dial { transform: rotate(-90deg) !important; }
+#match .patron-coin.fav-you .token-dial { transform: rotate(180deg) !important; }
+#match .patron-coin.fav-opp .token-dial { transform: rotate(0deg) !important; }
+#match .patron-coin.neutral img { transform: rotate(90deg) !important; }
+#match .patron-coin.fav-you img { transform: rotate(-180deg) !important; }
+#match .patron-coin.fav-opp img { transform: rotate(0deg) !important; }
+
+#match .patron-coin.treasury .token-dial,
+#match .patron-coin.treasury.neutral .token-dial,
+#match .patron-coin.treasury.fav-you .token-dial,
+#match .patron-coin.treasury.fav-opp .token-dial,
+#match .patron-coin[data-pid="treasury"] .token-dial,
+#match .patron-coin.mora .token-dial,
+#match .patron-coin[data-pid="mora"] .token-dial,
+#match .patron-coin.mora.fav-you .token-dial,
+#match .patron-coin.mora.fav-opp .token-dial,
+#match .patron-coin.mora.neutral .token-dial {
+  transform: none !important;
+}
+#match .patron-coin.treasury img,
+#match .patron-coin[data-pid="treasury"] img,
+#match .patron-coin.mora img,
+#match .patron-coin[data-pid="mora"] img {
+  transform: none !important;
+}
+#match .patron-coin.treasury .coin-ring {
+  background:
+    conic-gradient(from 0deg, #c9a227, #fff6c0, #d4af37, #8a6a20, #fff6c0, #c9a227) !important;
+}
+#match .patron-coin.callable .token-dial {
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.7));
+}
+#match .patron-coin.just-flipped .token-dial { transition-duration: 0.7s; }
+
+/* Spec resources: gold circle / cream hex / red diamond */
+#match .eso-tok.tok-prestige {
+  width: 36px !important;
+  height: 42px !important;
+  clip-path: polygon(50% 0%, 100% 16%, 100% 84%, 50% 100%, 0% 84%, 0% 16%) !important;
+  color: #3a342c !important;
+  text-shadow: 0 1px 0 #fff6 !important;
+  background: linear-gradient(180deg, #f7f3ea, #d2cbc0 55%, #9a9288) !important;
 }
 
 /* ——— Inspect stay-on-screen (kept from build 30) ——— */
@@ -549,12 +679,15 @@ body.is-portrait #match .patron-rail {
   max-width: 22% !important;
   padding: 10px 2px 12px 4px !important;
 }
-body.is-portrait #match .patron-coin .wood-name { display: none; }
-body.is-portrait #match .patron-coin,
-body.is-portrait #match .patron-coin .wood-pendant,
+body.is-portrait #match .patron-coin .plabel { display: none !important; }
+body.is-portrait #match .patron-coin { width: 44px !important; }
 body.is-portrait #match .patron-coin .token-dial {
-  width: 52px !important;
-  height: 32px !important;
+  width: 40px !important;
+  height: 50px !important;
+}
+body.is-portrait #match .patron-coin .coin-ring {
+  width: 40px !important;
+  height: 40px !important;
 }
 body.is-portrait #match .eso-hourglass-end { width: 40px; padding: 4px 0 6px !important; }
 body.is-portrait #match .eso-hourglass-end .hg-svg {

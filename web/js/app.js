@@ -225,7 +225,7 @@ function onSplashEnter() {
   }
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 32';
+    if (stamp) stamp.textContent = 'build 33';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -1052,15 +1052,13 @@ function renderMatch() {
     if (yourTurn && engine.canCallPatron(pid)) el.classList.add('callable');
     if (prevFavor[pid] && prevFavor[pid] !== favorWord.toLowerCase()) el.classList.add('just-flipped');
     const short = (pat.short || pat.name || pid).replace(/^The\s+/i, '');
-    const alwaysN = !!(pat.alwaysNeutral || pat.abilities?.alwaysNeutral || pid === 'treasury' || pid === 'mora');
+    const neverTurn = !!(pat.alwaysNeutral || pat.abilities?.alwaysNeutral || pid === 'treasury' || pid === 'mora');
     el.innerHTML = `
-      <div class="token-dial wood-pendant" title="${favorWord} — ${pat.name || short}">
-        ${alwaysN ? '' : '<span class="wood-tip" aria-hidden="true"></span>'}
-        <span class="wood-bar">
-          <span class="wood-name">${short}</span>
-          <span class="coin-ring"><img src="${patronArt(pid)}" alt="${short}" draggable="false" /></span>
-        </span>
+      <div class="token-dial" title="${favorWord} — ${pat.name || short}">
+        ${neverTurn ? '' : '<span class="token-point" aria-hidden="true"></span>'}
+        <span class="coin-ring"><img src="${patronArt(pid)}" alt="${short}" draggable="false" /></span>
       </div>
+      <span class="plabel">${short}</span>
     `;
     bindCardGesture(el, {
       onTap: () => openPatronConfirm(pid, 'call'),

@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-14 (build 33):** Spec lock on the full-bleed table — pointed silver medallions (Neutral tip left / you down / opp up; Treasury + Mora never tip), cream prestige hex, overlay chrome. Do not drop [`FEATURE_INVENTORY.md`](FEATURE_INVENTORY.md).
+
 **2026-09-14 (build 32):** Full-bleed felt rescue. Patron rail, piles, and played-effects are overlays — they no longer steal tavern width. Portrait + landscape tavern band ≥ 72% of the viewport. Layout is CSS/DOM only — do not drop anything in [`FEATURE_INVENTORY.md`](FEATURE_INVENTORY.md).
 
 **2026-09-14 (build 31):** Patron tokens are circular silver/gold tribute coins again (no brown arrow nameplates). Felt packed so tavern + hand grow; empty agent seats stay thin hex outlines. `?native=1` hides the landscape banner for Expo Go.
@@ -43,13 +45,13 @@
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=32`.
+`docs/` is a copy of `web/`. Cache-bust `?v=33`.
 
 | Fix | Notes |
 |---|---|
 | Field | Felt is 100% of `#match`. Patrons / piles / effects overlay it. Tavern band ≥ 72% viewport. |
 | Hourglass | Mid-high on the right, with silver/bronze patron-call busts. |
-| Tokens | Circular coins. Point left / down / up for favor. Mora + Treasury stay still. |
+| Tokens | Silver medallions. Point left / down / up for favor. Mora + Treasury stay still. Prestige is a cream hex. |
 | Copy | `texts.js` official sentences + UESP patron lines. Harvest Season = “Draw 1 card.” |
 | Targeting | `GameEngine.targetingStepsForPlay/Patron` + in-match banner. |
 

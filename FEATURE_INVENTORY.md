@@ -3,8 +3,8 @@
 ## Board / match (must keep)
 - Full-bleed felt both orientations; overlay/transparency/fade for piles, effects, patrons
 - Tavern 5 center; card-back piles visible
-- Coin/Prestige/Power triad only; patron-uses one octagon/player on hourglass rail
-- Left-pointing pendants; Treasury no tip; dials turn; all three favor texts
+- Coin (gold circle) / Prestige (cream hex) / Power (red diamond) triad only; patron-uses one octagon/player on hourglass rail
+- Pointed silver medallions; tip = favor (Neutral left, you down, opp up); Treasury + Mora never tip; hold shows all three favor texts
 - Hourglass glow; playable glow; floating translucent combo/effects
 - Tap play / hold inspect; exact sentences; no vignette clip
 - Targeting modals for sacrifice/destroy/KO/confine/replace/toss/donate/refresh/choose-one + animations
