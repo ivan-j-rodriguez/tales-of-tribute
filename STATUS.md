@@ -65,7 +65,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=42`. Dual-orientation board from PR #15 sits under Club chrome 42.
+`docs/` is a copy of `web/`. Cache-bust `?v=42`. Dual-orientation board from PR #15 plus seating/pack sits under Club chrome 42.
 
 | Fix | Notes |
 |---|---|

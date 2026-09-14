@@ -1,6 +1,7 @@
-/* Build 40 — board/felt spacing pass.
+/* Build 42 — board/felt seating + pack pass.
    TWO compositions. Same engine/state. Different positions and sizes.
-   Round pewter coin + short gothic peak (~10% of diameter) — unchanged.
+   Pewter bezel seated on the portrait coin (CSS face = SVG window).
+   Round pewter coin + short gothic peak (~10% of diameter).
    Chrome uses the L/R edges. Nothing covers anything else. */
 
 #pile-tavern-discard { display: none !important; }
@@ -65,8 +66,8 @@
 #match .token-row,
 #match #opp-res,
 #match #you-res {
-  min-height: 44px !important;
-  height: 44px !important;
+  min-height: 40px !important;
+  height: 40px !important;
   overflow: visible !important;
   z-index: 7 !important;
 }
@@ -93,12 +94,12 @@ body.is-portrait #match .felt-table,
     grid-template-rows:
       auto
       auto
-      44px
-      22px
-      minmax(160px, 1.35fr)
-      44px
+      40px
+      18px
       auto
-      minmax(100px, 0.85fr) !important;
+      40px
+      auto
+      minmax(118px, 1fr) !important;
     align-content: stretch !important;
   }
 }
@@ -112,12 +113,12 @@ body.is-portrait #match .felt-table {
   grid-template-rows:
     auto
     auto
-    44px
-    22px
-    minmax(160px, 1.35fr)
-    44px
+    40px
+    18px
     auto
-    minmax(100px, 0.85fr) !important;
+    40px
+    auto
+    minmax(118px, 1fr) !important;
   align-content: stretch !important;
 }
 
@@ -151,6 +152,17 @@ body.is-portrait #match .you-fan {
   align-items: flex-end !important;
 }
 
+body.is-portrait #match #opp-res {
+  align-self: end !important;
+}
+body.is-portrait #match #you-res {
+  align-self: start !important;
+}
+body.is-portrait #match #turn-ind,
+body.is-portrait #match .turn-chip {
+  align-self: end !important;
+}
+
 body.is-portrait #match .felt-tavern {
   width: 100% !important;
   min-width: 72% !important;
@@ -169,17 +181,19 @@ body.is-portrait #match .tavern-zone {
 }
 
 body.is-portrait #match .tavern-zone {
-  gap: 0.18rem !important;
-  padding: 0.1rem 102px 0.1rem 52px !important;
+  gap: 0.14rem !important;
+  padding: 0.06rem 102px 0.06rem 52px !important;
   box-sizing: border-box !important;
+  justify-content: center !important;
+  align-items: center !important;
 }
 
 body.is-portrait #match .tavern-zone .card {
-  width: min(72px, calc((100% - 0.4rem) / 5.08)) !important;
+  width: min(86px, calc((100% - 0.35rem) / 5.05)) !important;
   height: auto !important;
   aspect-ratio: 1 / 1.52 !important;
-  min-height: 72px !important;
-  max-height: 96% !important;
+  min-height: 0 !important;
+  max-height: 98% !important;
 }
 
 body.is-portrait #match #hand-zone .card,
@@ -206,7 +220,7 @@ body.is-portrait #match .patron-rail {
   max-width: 108px !important;
   display: grid !important;
   grid-template-columns: 56px 40px !important;
-  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  grid-template-rows: minmax(0, 1fr) !important;
   padding: 8px 2px 10px 4px !important;
   background: linear-gradient(90deg, rgba(8, 14, 12, 0) 0%, rgba(10, 16, 14, 0.18) 55%, rgba(16, 12, 8, 0.32) 100%) !important;
 }
@@ -214,11 +228,13 @@ body.is-portrait #match .patron-rail {
 body.is-portrait #match .patron-coin { width: 52px !important; }
 body.is-portrait #match .patron-coin .token-dial.medallion {
   width: 52px !important;
-  height: 58px !important;
+  height: auto !important;
+  aspect-ratio: 100 / 110 !important;
 }
 body.is-portrait #match .patron-coin .token-dial.tipless {
   width: 44px !important;
   height: 44px !important;
+  aspect-ratio: 1 / 1 !important;
 }
 body.is-portrait #match .patron-coin .plabel { display: none !important; }
 body.is-portrait #match .eso-hourglass-end .hg-svg {
@@ -246,14 +262,14 @@ body.is-landscape #match .felt-table {
   row-gap: 2px !important;
   gap: 2px 0 !important;
   grid-template-rows:
-    minmax(36px, 0.65fr)
-    24px
-    44px
-    20px
-    minmax(90px, 1.65fr)
-    44px
-    24px
-    minmax(68px, 1.15fr) !important;
+    minmax(32px, 0.5fr)
+    18px
+    32px
+    16px
+    minmax(118px, 2.15fr)
+    32px
+    18px
+    minmax(56px, 0.9fr) !important;
 }
 
 body.is-landscape #match .felt-opp-hand,
@@ -282,6 +298,12 @@ body.is-landscape #match .agent-slot.empty {
   height: 20px !important;
 }
 
+body.is-landscape #match #opp-res {
+  align-self: end !important;
+}
+body.is-landscape #match #you-res {
+  align-self: start !important;
+}
 body.is-landscape #match .felt-tavern {
   width: 100% !important;
   min-width: 72% !important;
@@ -300,18 +322,19 @@ body.is-landscape #match .tavern-zone {
 }
 
 body.is-landscape #match .tavern-zone {
-  justify-content: space-evenly !important;
-  gap: 0.4rem !important;
-  padding: 0.12rem 124px 0.12rem 58px !important;
+  justify-content: center !important;
+  gap: 0.32rem !important;
+  padding: 0.08rem 118px 0.08rem 56px !important;
   box-sizing: border-box !important;
+  align-items: center !important;
 }
 
 body.is-landscape #match .tavern-zone .card {
-  width: min(96px, 10.6vw, calc((100% - 1.4rem) / 5.05)) !important;
+  width: min(118px, 13.2vw, calc((100% - 1.1rem) / 5.08)) !important;
   height: auto !important;
   aspect-ratio: 1 / 1.52 !important;
-  min-height: 78px !important;
-  max-height: 92% !important;
+  min-height: 92px !important;
+  max-height: 96% !important;
 }
 
 body.is-landscape #match #hand-zone .card,
@@ -334,23 +357,26 @@ body.is-landscape #match .patron-rail {
   max-width: 124px !important;
   display: grid !important;
   grid-template-columns: 58px 48px !important;
+  grid-template-rows: minmax(0, 1fr) !important;
   padding: 6px 4px 8px 10px !important;
 }
 
 body.is-landscape #match .patron-coin { width: 56px !important; }
 body.is-landscape #match .patron-coin .token-dial.medallion {
   width: 54px !important;
-  height: 60px !important;
+  height: auto !important;
+  aspect-ratio: 100 / 110 !important;
 }
 body.is-landscape #match .patron-coin .token-dial.tipless {
   width: 46px !important;
   height: 46px !important;
+  aspect-ratio: 1 / 1 !important;
 }
 
 /* Piles sit in the L/R chrome strips — never on tavern cards or Leave. */
 #match #pile-opp-draw { top: 6px !important; left: 2px !important; }
 #match #pile-opp-cd { top: 6px !important; right: 124px !important; }
-#match #pile-tavern-draw { top: 52% !important; left: 2px !important; transform: translateY(-50%) !important; }
+#match #pile-tavern-draw { top: 50% !important; left: 2px !important; transform: translateY(-50%) !important; }
 #match #pile-you-draw { bottom: 8px !important; left: 2px !important; }
 #match #pile-you-cd { bottom: 8px !important; right: 124px !important; }
 
@@ -402,23 +428,25 @@ body.is-portrait #match .felt-hud-you {
   display: block !important;
   position: relative;
   width: 54px !important;
-  height: 60px !important;
+  height: auto !important;
+  aspect-ratio: 100 / 110 !important;
   margin: 0 auto;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
   overflow: visible !important;
-  transform-origin: 50% 51%;
+  /* Coin circle is (50, 56) in viewBox 0 0 100 110 → 50.909% down. */
+  transform-origin: 50% 50.909%;
   transition: transform 0.7s cubic-bezier(.4, .12, .2, 1);
   filter: drop-shadow(0 3px 5px #0009);
-  /* Round coin + short gothic peak. SVG path is the silhouette. */
   clip-path: none;
 }
 
 #match .patron-coin .token-dial.tipless {
   width: 46px !important;
   height: 46px !important;
+  aspect-ratio: 1 / 1 !important;
   transform: none !important;
   transform-origin: 50% 50%;
   clip-path: circle(48% at 50% 50%);
@@ -435,6 +463,8 @@ body.is-portrait #match .felt-hud-you {
 #match .patron-coin .token-dial.medallion .medallion-svg {
   position: absolute;
   inset: 0;
+  width: 100% !important;
+  height: 100% !important;
   z-index: 3;
   pointer-events: none;
 }
@@ -453,31 +483,45 @@ body.is-portrait #match .felt-hud-you {
   filter: none !important;
 }
 
-#match .patron-coin .coin-ring.medallion-face {
+/*
+ * Seat the portrait in the SVG window. viewBox 0 0 100 110, circle (50,56) r=27.
+ * preserveAspectRatio=none so % of the dial == viewBox units.
+ * Beat table-pack / phone-eso .coin-ring width/height (portrait 40px left-offset).
+ */
+body.is-portrait #match .patron-coin .token-dial.medallion .coin-ring.medallion-face,
+body.is-landscape #match .patron-coin .token-dial.medallion .coin-ring.medallion-face,
+#match .patron-coin .token-dial.medallion .coin-ring.medallion-face {
   position: absolute !important;
-  /* Window in viewBox 0 0 100 110, circle (50, 56) r=27 */
+  inset: 26.3636% 23% 24.5455% 23% !important;
   left: 23% !important;
-  top: 26.4% !important;
-  right: auto !important;
-  bottom: auto !important;
-  width: 54% !important;
-  height: 49.1% !important;
+  top: 26.3636% !important;
+  right: 23% !important;
+  bottom: 24.5455% !important;
+  width: auto !important;
+  height: auto !important;
   padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
   border-radius: 50%;
   overflow: hidden;
   background:
     radial-gradient(circle at 34% 28%, #c43440, var(--patron-field, #6b1218)) !important;
   box-shadow: none !important;
   z-index: 1;
-  transform-origin: 50% 50%;
+  transform-origin: 50% 50% !important;
   transition: transform 0.7s cubic-bezier(.4, .12, .2, 1);
 }
 
+body.is-portrait #match .patron-coin .token-dial.tipless .coin-ring.medallion-face,
+body.is-landscape #match .patron-coin .token-dial.tipless .coin-ring.medallion-face,
 #match .patron-coin .token-dial.tipless .coin-ring.medallion-face {
-  left: 12% !important;
-  top: 12% !important;
-  width: 76% !important;
-  height: 76% !important;
+  inset: 22% !important;
+  left: 22% !important;
+  top: 22% !important;
+  right: 22% !important;
+  bottom: 22% !important;
+  width: auto !important;
+  height: auto !important;
 }
 
 #match .patron-coin .medallion-face img,
@@ -569,25 +613,30 @@ body.is-portrait #match .felt-hud-you {
   margin-bottom: 2px !important;
 }
 
-/* Hourglass + End Turn sit in column 2, beside medals — not under them. */
+/* Hourglass + End Turn + patron-use octagons sit together on the right rail. */
 #match .patron-rail {
   display: grid !important;
   grid-template-columns: auto auto !important;
-  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  grid-template-rows: minmax(0, 1fr) !important;
   align-items: stretch !important;
   justify-items: center !important;
 }
 #match .rail-patrons {
   grid-column: 1 !important;
-  grid-row: 2 !important;
+  grid-row: 1 !important;
   z-index: 2 !important;
+  align-self: center !important;
 }
 #match .rail-glass {
   grid-column: 2 !important;
-  grid-row: 2 !important;
+  grid-row: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
   padding: 0 !important;
   margin: 0 !important;
-  justify-content: center !important;
   align-self: center !important;
   z-index: 3 !important;
 }
@@ -599,21 +648,19 @@ body.is-landscape #match .rail-glass {
   justify-content: center !important;
   align-self: center !important;
 }
-#match .patron-use-token.opp {
+#match .rail-glass .patron-use-token.opp,
+#match .rail-glass .patron-use-token.you,
+#match .patron-use-token.opp,
+#match .patron-use-token.you {
   position: relative !important;
   top: auto !important;
   right: auto !important;
-  grid-column: 2 !important;
-  grid-row: 1 !important;
-  z-index: 4 !important;
-}
-#match .patron-use-token.you {
-  position: relative !important;
   bottom: auto !important;
-  right: auto !important;
-  grid-column: 2 !important;
-  grid-row: 3 !important;
+  left: auto !important;
+  grid-column: auto !important;
+  grid-row: auto !important;
   z-index: 4 !important;
+  margin: 0 !important;
 }
 #match .eso-hourglass-end {
   width: 40px !important;
