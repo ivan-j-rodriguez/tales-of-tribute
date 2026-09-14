@@ -24,6 +24,15 @@ import {
   baseCardsForDeck,
 } from './economy.js';
 import { hostRoom, joinRoom } from './netplay.js';
+import {
+  installProfileSync, currentSession, isSignedIn, accountHint, providerStatus,
+  signUpEmail, signInEmail, signInProvider, startPhoneSignIn, confirmPhoneSignIn,
+  continueAsGuest, signOut, markAccountSeen, accountSeen, permissionCopy,
+} from './auth.js';
+import {
+  createVoice, enableVoice, disableVoice, setMuted, handleVoiceMessage,
+  voiceStatusLine, canUseVoice, voicePref, setVoicePref,
+} from './voice.js';
 import { setMusicEnabled, preferMusicFromStorage, warmMuted, playSfx, setMusicCue, setSfxStyle, getSfxStyle, setSfxEnabled, preferSfxFromStorage, isSfxOn } from './music.js';
 import { applyOfficialPatronText, applyOfficialCardText, cardPlayLines, cardComboLines } from './texts.js';
 import { overlayOfficialCardText, overlayOfficialPatronText } from './officialText.js';
@@ -63,22 +72,25 @@ let pendingPatron = null;
 let targetSession = null;
 let gauntletStopIndex = null;
 let isGauntletMatch = false;
+let isTutorialMatch = false;
+let voice = createVoice();
+let phoneConfirm = null;
 
 const TURN_SECONDS = 90;
 const HOLD_MS = 1000;
 const AGENT_SLOTS = 4;
 const TOUR_KEY = 'tot_tour_v2';
 
-/** Guided first-match walkthrough — plain language, one spotlight at a time. */
+/** Guided tutorial match — plain language, one spotlight at a time. */
 const TOUR_STEPS = [
-  { sel: '#hand-zone', text: 'This is your hand. Tap a card to play it. Hold about a second to open the dossier and read it — release to put it back.' },
-  { sel: '#tavern-zone', text: 'Coin buys from the tavern — the five cards in the middle. Tap one you can afford; it flies to your cooldown pile.' },
-  { sel: '#you-res', text: 'Power fights enemy agents. Leftover Power becomes Prestige at end of turn — unless a Taunt agent is still standing in their way.' },
-  { sel: '#pile-you-draw', text: 'Your draw pile is cards you have not seen yet. Bought cards wait in cooldown until the deck reshuffles — then they join your draw again.' },
-  { sel: '#you-agents', text: 'Agents sit in these slots and stay until knocked out. Empty gold outlines show open Agent slots. Taunt agents must be hit first.' },
-  { sel: '#tavern-zone', text: 'Contract cards are one-and-done — they exile after use (or when a contract agent is defeated). They do not come back through cooldown.' },
-  { sel: '#patron-rail', text: 'Patron coins live on the right (plus Treasury). You get one patron call per turn — flip favor toward yourself.' },
-  { sel: '#turn-ind', text: 'You win at 40 prestige if they cannot pass you on their last chance, at 80 outright, or by favoring all 4 patrons.' },
+  { sel: '#hand-zone', text: 'Your hand. Tap a card to play it. Hold to read it.' },
+  { sel: '#you-res', text: 'Coin buys from the tavern. Power knocks out agents. Leftover Power becomes Prestige when you end the turn.' },
+  { sel: '#tavern-zone', text: 'The tavern is five cards in the middle. Spend Coin to buy one — it waits in cooldown until your deck reshuffles.' },
+  { sel: '#events-rail', text: 'Combos fire when you play extra cards of the same patron in one turn. Watch played effects on the left.' },
+  { sel: '#you-agents', text: 'Agents stay in these slots until knocked out. Empty outlines are open seats. Taunt agents must be hit first.' },
+  { sel: '#patron-rail', text: 'Patrons live here, plus Treasury. One call per turn. Calling flips favor toward you.' },
+  { sel: '#btn-end', text: 'End Turn when you are done. Power converts to Prestige unless a Taunt agent is still in the way.' },
+  { sel: '#turn-ind', text: 'Win at 40 prestige if they cannot pass you, at 80 outright, or by favoring all four patrons.' },
 ];
 
 function polishCardCopy(card) {
@@ -361,13 +373,17 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 43';
+  if (stamp) stamp.textContent = 'build 44';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
+  renderAccountChrome();
   show('#splash');
   const testShell = new URLSearchParams(location.search).has('test');
-  if (!testShell && canClaimDailyLogin(profile)) openLoginGreet();
+  const nudge = $('#tutorial-nudge');
+  if (nudge) nudge.hidden = testShell || !!localStorage.getItem(TOUR_KEY);
+  if (!testShell && !accountSeen()) openAccountOverlay({ first: true });
+  else if (!testShell && canClaimDailyLogin(profile)) openLoginGreet();
   else if (!testShell && profile.pendingCrate) openCrateCeremony(profile.pendingCrate);
 }
 
@@ -1907,11 +1923,14 @@ function startMatch(opts = {}) {
   lastRes = { you: {}, opp: {} };
   show('#match');
   renderMatch();
-  // Tour is opt-in from Settings — never cover the table on first play.
+  paintVoiceChrome();
+  if (isTutorialMatch || (opts.tour && !localStorage.getItem(TOUR_KEY))) {
+    startTour(true);
+  }
 
-  if (hourglassOn && canControl()) startHourglass();
+  if (hourglassOn && canControl() && !tourActive) startHourglass();
   else syncHourglassUI();
-  if (matchMode === 'ai' && !isRankedMatch && engine.state.active === 1) maybeAI();
+  if (matchMode === 'ai' && !isRankedMatch && engine.state.active === 1 && !tourActive) maybeAI();
 }
 
 function flashCombo(n) {
@@ -1945,6 +1964,9 @@ function showWin(data) {
       });
       rewardLine = `+${r.gold}g`;
       if (r.purse) purseNote = ` · ${r.purse.rarity} cutpurse`;
+    } else if (isTutorialMatch) {
+      rewardLine = 'Tutorial complete';
+      purseNote = '';
     } else if (isGauntletMatch && gauntletStopIndex != null) {
       const awardWin = engine.state.winner === 0;
       const g = recordGauntletResult(profile, { stopIndex: gauntletStopIndex, won: awardWin });
@@ -2002,9 +2024,12 @@ function finishWinOverlay(rematch) {
     isRandomMatch = false;
     isRankedMatch = false;
     isGauntletMatch = false;
+    isTutorialMatch = false;
     gauntletStopIndex = null;
     rankedPeerPicks = [];
     document.body.classList.remove('ranked-pvp-pick');
+    disableVoice(voice, net);
+    paintVoiceChrome();
     if (rematch) {
       beginRematch();
       return;
@@ -2074,6 +2099,7 @@ function reasonText(r) {
 }
 
 async function maybeAI() {
+  if (tourActive) return;
   if (!engine || !ai || engine.state.winner != null) return;
   if (engine.state.active === 1) {
     await ai.takeTurn(ai.actionDelay());
@@ -2200,6 +2226,10 @@ function endTour() {
   if (root) root.hidden = true;
   $('#tour-hole')?.classList.remove('show');
   localStorage.setItem(TOUR_KEY, '1');
+  const nudge = $('#tutorial-nudge');
+  if (nudge) nudge.hidden = true;
+  if (engine && matchMode === 'ai' && !isRankedMatch && engine.state.active === 1) maybeAI();
+  else if (hourglassOn && canControl() && engine && !engine.state.winner) startHourglass();
 }
 
 function showTourStep() {
@@ -2275,6 +2305,16 @@ function renderSettings() {
   const live = settingsReturnScreen === '#match' && !!engine?.state;
   hg?.closest('.settings-row')?.classList.toggle('prematch-only-hidden', live);
   $('#diff-slider-settings')?.closest('.diff-block')?.classList.toggle('prematch-only-hidden', live);
+  renderAccountChrome();
+  const mic = $('#chk-settings-mic');
+  if (mic) mic.checked = !!(profile.permissions?.mic);
+  const permAuth = $('#settings-perm-auth');
+  if (permAuth) {
+    const st = providerStatus();
+    permAuth.textContent = st.cloud
+      ? 'Sign-in uses Club cloud. Google/Apple/Phone only request scopes when you tap them.'
+      : 'Email sign-up saves this browser. Google, Apple, and Phone wait on Club cloud (Firebase) — those buttons stay gated until then.';
+  }
 }
 
 function leaveSettings() {
@@ -2355,8 +2395,8 @@ function renderClub() {
     roadEl.innerHTML = `
       <h4>Challenge the Provinces</h4>
       <p>${done ? 'Road cleared — grand prize claimed.' : `Next: ${featured.name} (${(g.cursor || 0) + 1}/${g.order?.length || 0}).`}
-      ${lock ? ' Lost today — locked until NY midnight.' : ' Win advances. A loss locks the road for the day.'}
-      Grand prize: ${prize.label}. Unofficial fan road.</p>
+      ${lock ? ' Lost today — locked until midnight ET.' : ' Win advances. A loss locks the road for the day.'}
+      Grand prize: ${prize.label}.</p>
       <button type="button" id="btn-club-road">Open the map</button>
     `;
     $('#btn-club-road')?.addEventListener('click', () => openGauntlet());
@@ -2376,8 +2416,8 @@ function renderClub() {
   const tourney = $('#club-tournament');
   if (tourney) {
     tourney.innerHTML = `
-      <h4>Fan tables</h4>
-      <p>Unofficial Club brackets when a host posts one — pass-and-play or a friend’s room. No netcode invented here, no IAP, not a Bethesda event.</p>
+      <h4>Friend tables</h4>
+      <p>Host a bracket with pass-and-play or a friend’s room.</p>
       <button type="button" id="btn-club-friend">Play a Friend</button>
     `;
     $('#btn-club-friend')?.addEventListener('click', () => {
@@ -2388,7 +2428,7 @@ function renderClub() {
 
   const weekHint = $('#club-weekly-hint');
   if (weekHint) {
-    weekHint.textContent = `Resets Monday 00:00 America/New_York · week of ${weeklyKey()} · ${fmtCountdown(msUntilWeeklyReset())} left`;
+    weekHint.textContent = `Resets Monday 00:00 ET · ${fmtCountdown(msUntilWeeklyReset())} left`;
   }
   const weeklyBox = $('#club-weekly');
   if (weeklyBox) {
@@ -2407,7 +2447,7 @@ function renderClub() {
     const next = nextSeason();
     const st = profile.challenges.seasonal;
     if (!season) {
-      seasonBox.innerHTML = `<div class="season-banner"><h4>Between festivals</h4><p>Next fan theme: ${next?.name || '—'}. Unofficial — not affiliated with Bethesda / ESO.</p></div>`;
+      seasonBox.innerHTML = `<div class="season-banner"><h4>Between festivals</h4><p>Next theme: ${next?.name || '—'}.</p></div>`;
     } else {
       seasonBox.innerHTML = `
         <div class="season-banner">
@@ -2581,7 +2621,7 @@ function renderBundleHero(b, periodKey) {
     <div class="bundle-card store-hero">
       <p class="bundle-kicker">Featured · ${formatRarity(b.rarity)} parcel</p>
       <h4>Roister’s Binding</h4>
-      <p>A High Isle pairing for the finer table — ${names}. Bound in Club gold before the Gonfalon slate turns.</p>
+      <p>${names}. Bound in Club gold until stock turns.</p>
       <div class="bundle-parts">${parts}</div>
       <div class="bundle-cta">
         <div class="price">${sold ? 'Sold out' : b.price + 'g'}</div>
@@ -2591,13 +2631,13 @@ function renderBundleHero(b, periodKey) {
 }
 
 function renderFeaturedPrize(offer) {
-  if (!offer) return '<p class="hint">The featured prize rides with tomorrow’s slate.</p>';
+  if (!offer) return '<p class="hint">The featured prize rides with tomorrow’s shop.</p>';
   return `
     <div class="store-hero">
       <p class="bundle-kicker">Featured prize</p>
       <div class="hero-art-row">${offerThumb(offer)}<div>
         <h4>${offerTitle(offer)}</h4>
-        <p>A patron shard on today’s High Isle slate. Win the purse, then claim the road.</p>
+        <p>A patron shard in today’s shop. Win the purse, then claim it.</p>
       </div></div>
       <div class="bundle-cta">
         <div class="price">${offer.price}g · ${formatRarity(offer.rarity)}</div>
@@ -2612,7 +2652,7 @@ function renderStore() {
   $('#store-gold').textContent = `${profile.gold}g`;
   const slate = shopSlateNow();
   const timer = $('#store-timer');
-  if (timer) timer.textContent = `Slate refreshes in ${fmtCountdown(msUntilShopRefresh())} · America/New_York midnight.`;
+  if (timer) timer.textContent = `Shop refreshes in ${fmtCountdown(msUntilShopRefresh())} · midnight ET.`;
 
   const frags = (slate.featured || []).filter((o) => o.kind === 'fragment');
   const cosmetics = (slate.featured || []).filter((o) => o.kind === 'skin' || o.kind === 'back');
@@ -2659,13 +2699,13 @@ function renderStore() {
   const fragBox = $('#store-fragments');
   if (fragBox) {
     fragBox.innerHTML = '';
-    if (!frags.length) fragBox.innerHTML = '<p class="hint">No patron fragment on this slate — watch tomorrow’s preview.</p>';
+    if (!frags.length) fragBox.innerHTML = '<p class="hint">No patron fragment today — see tomorrow’s preview.</p>';
     else for (const o of frags) fragBox.appendChild(renderOfferCard(o));
   }
   const cosBox = $('#store-cosmetics');
   if (cosBox) {
     cosBox.innerHTML = '';
-    if (!cosmetics.length) cosBox.innerHTML = '<p class="hint">No table or back on this slate.</p>';
+    if (!cosmetics.length) cosBox.innerHTML = '<p class="hint">No table or back in today’s stock.</p>';
     else for (const o of cosmetics) cosBox.appendChild(renderOfferCard(o));
   }
   const tom = $('#store-tomorrow');
@@ -2709,14 +2749,14 @@ function deckUnlockState(deckId) {
   const missingFrag = Math.max(0, FRAGMENTS_TO_UNLOCK - frag);
   const missingClues = Math.max(0, bases.length - found);
   let status = 'Unlocked';
-  let how = 'This patron already sits at your table. Win matches to finish remaining card clues. Cosmetics equip from the Upgrades tab.';
+  let how = 'This patron already sits at your table. Win matches to finish remaining card clues. Equip cosmetics on the Upgrades tab.';
   if (!unlocked) {
     status = ready ? 'Ready to unlock' : 'Locked';
     const bits = [];
     if (missingFrag) bits.push(`${missingFrag} more fragment${missingFrag === 1 ? '' : 's'} from the Club Store, Crown Crates, or match rewards`);
-    if (missingClues) bits.push(`a clue for ${missingClues} more base card${missingClues === 1 ? '' : 's'} — win on this road or buy a clue when it appears on the slate`);
+    if (missingClues) bits.push(`a clue for ${missingClues} more base card${missingClues === 1 ? '' : 's'} — win matches or buy a clue when it appears in the shop`);
     how = ready
-      ? 'Fragments and every base clue are in. Claim unlock below — the Club opens the patron the moment the last shard is set.'
+      ? 'Fragments and every base clue are in. Claim unlock below.'
       : `Still locked. Need ${bits.join(' · ') || 'progress on this road'}.`;
   }
   return { unlocked, frag, ready, bases, found, status, how, missingFrag, missingClues };
@@ -2748,7 +2788,7 @@ function showDeckSheet(deckId) {
         <p class="sheet-status">${st.status}</p>
       </div>
     </div>
-    <p class="sheet-blurb">${st.unlocked ? (DECK_CAPTIONS[deckId] || '') : 'A locked High Isle road. Fragments and card clues open the true name.'}</p>
+    <p class="sheet-blurb">${st.unlocked ? (DECK_CAPTIONS[deckId] || '') : 'Locked. Fragments and card clues open the true name.'}</p>
     <div class="sheet-progress">
       ${starter ? '' : sheetMeter('Patron fragments', st.frag, FRAGMENTS_TO_UNLOCK)}
       ${sheetMeter('Base card clues', st.found, Math.max(1, st.bases.length))}
@@ -2788,7 +2828,7 @@ function showClueSheet(c) {
       </div>
     </div>
     <div class="sheet-progress">${sheetMeter('Clues toward upgrade', n, CLUES_TO_UPGRADE)}</div>
-    <div class="sheet-how"><strong>How to unlock.</strong> Win matches to discover this card, or buy a clue when it appears on the daily Club Store slate. ${CLUES_TO_UPGRADE} clues on a known card unlock its upgrade.</div>
+    <div class="sheet-how"><strong>How to unlock.</strong> Win matches to find this card, or buy a clue when it appears in the daily shop. ${CLUES_TO_UPGRADE} clues on a known card unlock its upgrade.</div>
     <button type="button" id="btn-sheet-deck">View ${p.short || 'patron'} road</button>
   `);
   $('#btn-sheet-deck')?.addEventListener('click', () => showDeckSheet(deck));
@@ -2802,8 +2842,8 @@ function showCosmeticSheet(kind, id) {
   const eq = kind === 'skin' ? profile.tableSkin === id : profile.cardBack === id;
   const swatch = kind === 'skin' ? `<div class="skin-swatch ${id}"></div>` : `<div class="back-swatch back-${id}"></div>`;
   const how = owned
-    ? 'Owned. Equip it here — cosmetics never sit behind a real-money wall.'
-    : 'Appears on the rotating Club Store slate. Win matches to fill the purse, then claim it in gold. Seasonal pieces wait for their festival.';
+    ? 'Owned. Equip it here.'
+    : 'Appears in the rotating Club Store. Win matches for gold, then buy it. Seasonal pieces wait for their festival.';
   openClubSheet(`
     <div class="sheet-hero">
       ${swatch}
@@ -2844,8 +2884,8 @@ function showOfferSheet(offer, { preview = false, sold = false } = {}) {
   }
   openClubSheet(`
     <h3 id="club-sheet-title">${offerTitle(offer)}</h3>
-    <p class="sheet-blurb">${preview ? 'Returns on a later slate.' : sold ? 'Already claimed this slate.' : 'A Club Store offer. Purse gold only.'}</p>
-    <div class="sheet-how"><strong>How to unlock.</strong> Win matches to fill the purse, then buy when the rotating slate shows this piece. No IAP.</div>
+    <p class="sheet-blurb">${preview ? 'Returns in a later shop.' : sold ? 'Already claimed today.' : 'A Club Store offer. Purse gold only.'}</p>
+    <div class="sheet-how"><strong>How to unlock.</strong> Win matches to fill the purse, then buy when the rotating shop shows this piece.</div>
   `);
 }
 
@@ -2870,10 +2910,10 @@ function renderCollection() {
   const clues = countClues(profile, DATA.cards);
   if (hint) {
     hint.textContent = collectionTab === 'patrons'
-      ? 'Tap a patron for progress, lock reasons, and how to unlock. Fragments plus every base clue open a locked road.'
+      ? 'Tap a patron for progress and how to unlock. Fragments plus every base clue open a locked deck.'
       : collectionTab === 'clues'
-        ? `${clues.have}/${clues.total} cards found. ${CLUES_TO_UPGRADE} clues on a card unlocks its upgrade. Tap any row for progress and how to unlock.`
-        : 'Tap a fragment, table, or back for progress and how to unlock. Equip owned cosmetics here.';
+        ? `${clues.have}/${clues.total} cards found. ${CLUES_TO_UPGRADE} clues unlock an upgrade.`
+        : 'Tap a fragment, table, or back to unlock or equip.';
   }
 
   const grid = $('#collection-grid');
@@ -3015,7 +3055,7 @@ function renderCollectionUpgrades() {
   if (ups) {
     ups.innerHTML = '';
     const owned = (profile.ownedUpgrades || []).map((id) => cardsById[id]).filter(Boolean);
-    if (!owned.length) ups.innerHTML = '<p class="hint">No card upgrades yet — find clues at the table or buy them when the slate turns.</p>';
+    if (!owned.length) ups.innerHTML = '<p class="hint">No card upgrades yet — find clues at the table or buy them in the shop.</p>';
     else {
       ups.innerHTML = '';
       for (const c of owned) {
@@ -3236,6 +3276,7 @@ function beginDeckPick(mode) {
   isRandomMatch = false;
   isRankedMatch = mode === 'ranked' || isRankedMatch;
   isGauntletMatch = false;
+  isTutorialMatch = false;
   gauntletStopIndex = null;
   if (isRankedMatch) setHourglass(true);
   if ($('#chk-random-match')) $('#chk-random-match').checked = false;
@@ -3256,7 +3297,7 @@ function renderRankedLobby() {
   if (crest) crest.textContent = `${r.tier || 'Unranked'} · ${r.points || 0} pts`;
   const st = $('#ranked-status');
   if (st) {
-    st.innerHTML = `<strong>${r.tier || 'Unranked'}</strong><p>${r.points || 0} points · placement left ${r.placementLeft ?? 5} · streak ${r.winStreak || 0}. Ranked is never vs AI.</p>`;
+    st.innerHTML = `<strong>${r.tier || 'Unranked'}</strong><p>${r.points || 0} points · placement left ${r.placementLeft ?? 5} · streak ${r.winStreak || 0}.</p>`;
   }
 }
 
@@ -3280,6 +3321,7 @@ async function beginRankedHost() {
   isRankedMatch = true;
   matchMode = 'remote-host';
   if (status) status.innerHTML = `Room <strong>${net.code}</strong> — waiting for a Roister.`;
+  attachVoiceToNet();
   net.onMessage((msg) => {
     if (msg.type === 'peer-ready' || msg.type === 'hello') {
       if (status) status.textContent = `Guest joined ${net.code}. Choose your two patrons.`;
@@ -3306,6 +3348,7 @@ async function beginRankedJoin() {
   }
   isRankedMatch = true;
   matchMode = 'remote-guest';
+  attachVoiceToNet();
   net.send({ type: 'hello' });
   net.onMessage((msg) => {
     if (msg.type === 'ranked-picks') {
@@ -3355,6 +3398,7 @@ async function beginHostRoom() {
   status.innerHTML = `Room code: <strong style="letter-spacing:.2em">${net.code}</strong> — waiting for guest…`;
   matchMode = 'remote-host';
   isRankedMatch = false;
+  attachVoiceToNet();
   net.onMessage((msg) => {
     if (msg.type === 'peer-ready' || msg.type === 'hello') {
       status.textContent = `Guest joined room ${net.code}. Pick decks, then Begin.`;
@@ -3382,6 +3426,7 @@ async function beginJoinRoom() {
   }
   matchMode = 'remote-guest';
   status.textContent = `Connected to ${code}. Waiting for host to start…`;
+  attachVoiceToNet();
   net.send({ type: 'hello' });
   net.onMessage((msg) => {
     if (msg.type === 'match-start') {
@@ -3573,12 +3618,150 @@ function startGauntletStop(stop) {
   startMatch({ difficulty: stop.difficulty });
 }
 
+function startTutorialMatch() {
+  profile = loadProfile();
+  isTutorialMatch = true;
+  isRankedMatch = false;
+  isRandomMatch = false;
+  isGauntletMatch = false;
+  gauntletStopIndex = null;
+  matchMode = 'ai';
+  pickYou = ['pelin', 'hlaalu'];
+  pickOpp = ['crows', 'celarus'];
+  setHourglass(false);
+  localStorage.removeItem(TOUR_KEY);
+  const nudge = $('#tutorial-nudge');
+  if (nudge) nudge.hidden = true;
+  startMatch({ playerFirst: true, difficulty: 1, tour: true });
+}
+
+function renderAccountChrome() {
+  const hint = $('#settings-account-hint');
+  if (hint) hint.textContent = accountHint();
+  const signed = isSignedIn();
+  const s = currentSession();
+  const splashBtn = $('#btn-splash-account');
+  if (splashBtn) splashBtn.textContent = signed ? (s.email || 'Account') : 'Sign in';
+  const out = $('#btn-settings-signout');
+  if (out) out.hidden = !signed;
+  const inBtn = $('#btn-settings-account');
+  if (inBtn) inBtn.textContent = signed ? 'Manage account' : 'Sign in / Sign up';
+  const st = providerStatus();
+  const g = $('#btn-auth-google');
+  const a = $('#btn-auth-apple');
+  const p = $('#btn-auth-phone');
+  if (g) {
+    g.disabled = !st.google.ready;
+    g.title = st.google.reason || 'Sign in with Google';
+  }
+  if (a) {
+    a.disabled = !st.apple.ready;
+    a.title = st.apple.reason || 'Sign in with Apple';
+  }
+  if (p) {
+    p.disabled = !st.phone.ready;
+    p.title = st.phone.reason || 'Send SMS code';
+  }
+  const ph = $('#account-provider-hint');
+  if (ph) {
+    const bits = [];
+    if (!st.google.ready) bits.push(st.google.reason);
+    if (!st.apple.ready) bits.push(st.apple.reason);
+    if (!st.phone.ready) bits.push(st.phone.reason);
+    ph.textContent = bits.filter(Boolean).join(' ') || permissionCopy().google;
+  }
+  const status = $('#account-status');
+  if (status) {
+    status.textContent = st.cloud
+      ? 'Signed-in progress syncs across devices.'
+      : 'Email works on this device. Cloud sync needs Firebase — see Settings → About and STATUS.md. Guest play always works.';
+  }
+}
+
+function openAccountOverlay({ first = false } = {}) {
+  markAccountSeen();
+  renderAccountChrome();
+  const title = $('#account-title');
+  if (title) title.textContent = first ? 'Welcome' : 'Sign in';
+  const guest = $('#btn-auth-guest');
+  if (guest) guest.textContent = first ? 'Play as guest' : 'Stay a guest';
+  $('#account-overlay')?.classList.add('show');
+}
+
+function closeAccountOverlay() {
+  markAccountSeen();
+  $('#account-overlay')?.classList.remove('show');
+  renderAccountChrome();
+}
+
+function paintVoiceChrome() {
+  const live = !!(voice.wanted || voice.live);
+  const btn = $('#btn-match-voice');
+  if (btn) {
+    btn.hidden = !live;
+    btn.textContent = voice.muted ? 'Mic off' : 'Mic';
+    btn.classList.toggle('muted', !!voice.muted);
+  }
+  const line = voiceStatusLine(voice);
+  const fh = $('#voice-friend-hint');
+  const rh = $('#voice-ranked-hint');
+  if (fh && ($('#friend-lobby')?.classList.contains('active'))) fh.textContent = line;
+  if (rh && ($('#ranked')?.classList.contains('active'))) rh.textContent = line;
+  const friend = $('#chk-voice-friend');
+  const ranked = $('#chk-voice-ranked');
+  if (friend) friend.checked = !!voice.wanted;
+  if (ranked) ranked.checked = !!voice.wanted;
+}
+
+async function applyVoiceWanted(on) {
+  setVoicePref(!!on);
+  if (!on) {
+    disableVoice(voice, net);
+    paintVoiceChrome();
+    return;
+  }
+  voice.wanted = true;
+  if (!net?.ok || !canUseVoice(matchMode)) {
+    voice.waitingPeer = true;
+    voice.error = null;
+    paintVoiceChrome();
+    toast('Voice will ask for the mic once the remote room connects.');
+    return;
+  }
+  profile = loadProfile();
+  profile.permissions = { ...(profile.permissions || {}), mic: true };
+  saveProfile(profile);
+  const res = await enableVoice(voice, net, { onChange: paintVoiceChrome });
+  if (res.error) toast(res.error);
+  else toast(voiceStatusLine(voice));
+  paintVoiceChrome();
+}
+
+function attachVoiceToNet() {
+  if (!net?.ok) return;
+  net.onMessage((msg) => {
+    if (!msg) return;
+    if (msg.type === 'voice-ready' || msg.type === 'voice-off') {
+      handleVoiceMessage(voice, net, msg, { onChange: paintVoiceChrome });
+    }
+  });
+  if (voice.wanted) applyVoiceWanted(true);
+}
+
 /* ——— Wire ——— */
 function bind() {
   $('#btn-play').onclick = () => {
     setHourglass($('#chk-hourglass-splash')?.checked || !!profile?.hourglassDefault);
     beginDeckPick('ai');
   };
+  $('#btn-tutorial')?.addEventListener('click', () => startTutorialMatch());
+  $('#btn-nudge-tutorial')?.addEventListener('click', () => startTutorialMatch());
+  $('#btn-nudge-skip')?.addEventListener('click', () => {
+    localStorage.setItem(TOUR_KEY, '1');
+    const nudge = $('#tutorial-nudge');
+    if (nudge) nudge.hidden = true;
+  });
+  $('#btn-splash-account')?.addEventListener('click', () => openAccountOverlay());
   $('#btn-gauntlet')?.addEventListener('click', () => openGauntlet());
   $('#btn-gauntlet-back')?.addEventListener('click', () => onSplashEnter());
   $('#btn-gauntlet-play')?.addEventListener('click', () => {
@@ -3590,7 +3773,11 @@ function bind() {
   $('#btn-ranked-back')?.addEventListener('click', () => onSplashEnter());
   $('#btn-ranked-host')?.addEventListener('click', () => beginRankedHost());
   $('#btn-ranked-join')?.addEventListener('click', () => beginRankedJoin());
-  $('#btn-friend').onclick = () => { $('#friend-status').textContent = ''; show('#friend-lobby'); };
+  $('#btn-friend').onclick = () => {
+    $('#friend-status').textContent = '';
+    paintVoiceChrome();
+    show('#friend-lobby');
+  };
   $('#btn-club').onclick = () => { renderClub(); show('#club'); };
   $('#btn-ency').onclick = () => { renderEncy(); show('#encyclopedia'); };
   $('#btn-settings').onclick = () => openSettings('#splash');
@@ -3771,13 +3958,97 @@ function bind() {
   });
   $('#btn-replay-tour')?.addEventListener('click', () => {
     localStorage.removeItem(TOUR_KEY);
-    const returnTo = settingsReturnScreen;
     leaveSettings();
-    if (returnTo === '#match' && engine?.state) {
-      setTimeout(() => startTour(true), 200);
+    startTutorialMatch();
+  });
+  $('#btn-settings-account')?.addEventListener('click', () => openAccountOverlay());
+  $('#btn-settings-signout')?.addEventListener('click', async () => {
+    await signOut();
+    profile = loadProfile();
+    renderSettings();
+    refreshSplashPurse();
+    toast('Signed out — guest play stays on this device.');
+  });
+  $('#chk-settings-mic')?.addEventListener('change', async (e) => {
+    profile = loadProfile();
+    if (e.target.checked) {
+      if (!canUseVoice(matchMode) || !net?.ok) {
+        e.target.checked = false;
+        toast('Turn on voice from a Friend or Ranked room. The mic is only requested then.');
+        return;
+      }
+      await applyVoiceWanted(true);
+      e.target.checked = !!voice.wanted;
     } else {
-      toast('Tour will play on your next vs AI match.');
+      profile.permissions = { ...(profile.permissions || {}), mic: false };
+      saveProfile(profile);
+      await applyVoiceWanted(false);
     }
+    renderSettings();
+  });
+  $('#chk-voice-friend')?.addEventListener('change', (e) => applyVoiceWanted(!!e.target.checked));
+  $('#chk-voice-ranked')?.addEventListener('change', (e) => applyVoiceWanted(!!e.target.checked));
+  $('#btn-match-voice')?.addEventListener('click', () => {
+    setMuted(voice, !voice.muted);
+    paintVoiceChrome();
+  });
+  $('#btn-auth-signin')?.addEventListener('click', async () => {
+    const res = await signInEmail($('#account-email')?.value, $('#account-password')?.value);
+    if (res.error) { toast(res.error); return; }
+    profile = loadProfile();
+    closeAccountOverlay();
+    refreshSplashPurse();
+    toast('Signed in.');
+  });
+  $('#btn-auth-signup')?.addEventListener('click', async () => {
+    const res = await signUpEmail($('#account-email')?.value, $('#account-password')?.value);
+    if (res.error) { toast(res.error); return; }
+    profile = loadProfile();
+    closeAccountOverlay();
+    refreshSplashPurse();
+    toast('Club account saved.');
+  });
+  $('#btn-auth-google')?.addEventListener('click', async () => {
+    const res = await signInProvider('google');
+    if (res.error) { toast(res.error); return; }
+    profile = loadProfile();
+    closeAccountOverlay();
+    refreshSplashPurse();
+    toast('Signed in with Google.');
+  });
+  $('#btn-auth-apple')?.addEventListener('click', async () => {
+    const res = await signInProvider('apple');
+    if (res.error) { toast(res.error); return; }
+    profile = loadProfile();
+    closeAccountOverlay();
+    refreshSplashPurse();
+    toast('Signed in with Apple.');
+  });
+  $('#btn-auth-phone')?.addEventListener('click', async () => {
+    const res = await startPhoneSignIn($('#account-phone')?.value, $('#btn-auth-phone'));
+    if (res.error) { toast(res.error); return; }
+    phoneConfirm = res.confirmation;
+    $('#account-sms').hidden = false;
+    $('#btn-auth-sms').hidden = false;
+    toast('Code sent. Enter it to finish.');
+  });
+  $('#btn-auth-sms')?.addEventListener('click', async () => {
+    const res = await confirmPhoneSignIn(phoneConfirm, $('#account-sms')?.value);
+    if (res.error) { toast(res.error); return; }
+    profile = loadProfile();
+    closeAccountOverlay();
+    refreshSplashPurse();
+    toast('Signed in with phone.');
+  });
+  $('#btn-auth-guest')?.addEventListener('click', async () => {
+    await continueAsGuest();
+    profile = loadProfile();
+    closeAccountOverlay();
+    refreshSplashPurse();
+  });
+  $('#btn-auth-close')?.addEventListener('click', () => closeAccountOverlay());
+  $('#account-overlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'account-overlay') closeAccountOverlay();
   });
 
   $$('.pile-btn').forEach(btn => {
@@ -3999,6 +4270,7 @@ function installTestHook() {
     startQuick() {
       try { localStorage.setItem(TOUR_KEY, '1'); } catch {}
       $('#login-overlay')?.classList.remove('show');
+      $('#account-overlay')?.classList.remove('show');
       $('#crate-overlay')?.classList.remove('show');
       pickYou = ['pelin', 'hlaalu'];
       pickOpp = ['crows', 'celarus'];
@@ -4006,21 +4278,25 @@ function installTestHook() {
       isRandomMatch = false;
       isRankedMatch = false;
       isGauntletMatch = false;
+      isTutorialMatch = false;
       startMatch({ playerFirst: true, difficulty: 1 });
     },
     openClub() {
       $('#login-overlay')?.classList.remove('show');
+      $('#account-overlay')?.classList.remove('show');
       renderClub();
       show('#club');
     },
     openStore() {
       $('#login-overlay')?.classList.remove('show');
+      $('#account-overlay')?.classList.remove('show');
       storeReturnScreen = '#splash';
       renderStore();
       show('#store');
     },
     openCollection() {
       $('#login-overlay')?.classList.remove('show');
+      $('#account-overlay')?.classList.remove('show');
       storeReturnScreen = '#splash';
       renderCollection();
       show('#collection');
@@ -4036,6 +4312,35 @@ function installTestHook() {
     },
     shopHasBundle() {
       return !!shopSlateNow().bundle;
+    },
+    openAccount() {
+      openAccountOverlay();
+    },
+    startTutorial() {
+      startTutorialMatch();
+    },
+    openSettingsScreen() {
+      $('#login-overlay')?.classList.remove('show');
+      $('#account-overlay')?.classList.remove('show');
+      openSettings('#splash');
+    },
+    storeCopy() {
+      return {
+        hint: $('#store-hint')?.textContent || '',
+        daily: document.querySelector('#store-daily-block .club-section')?.textContent || '',
+        timer: $('#store-timer')?.textContent || '',
+        footnote: document.querySelector('.store-footnote')?.textContent || '',
+        bundle: document.querySelector('#store-bundle p')?.textContent || '',
+      };
+    },
+    tourText() {
+      return $('#tour-text')?.textContent || '';
+    },
+    accountDisclaimer() {
+      return $('#account-disclaimer')?.textContent || '';
+    },
+    aboutDisclaimer() {
+      return $('#about-disclaimer')?.textContent || '';
     },
     snapshot() {
       const p = engine?.state?.players[0];
@@ -4255,6 +4560,7 @@ function installTestHook() {
 
 loadData().then(() => {
   applyNativeShell();
+  installProfileSync();
   profile = loadProfile();
   hourglassOn = !!profile.hourglassDefault;
   bind();

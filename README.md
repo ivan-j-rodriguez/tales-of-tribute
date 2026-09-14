@@ -5,7 +5,7 @@
 A playable two-player Tales of Tribute table:
 
 - **iOS 17+ (priority)** — SwiftUI landscape client that matches the live ESO board (wooden pendants, hourglass, fanned hand).
-- **Web preview** — static SPA (AI, daily gauntlet, shop, ranked, hotseat).
+- **Web preview** — static SPA (AI, daily gauntlet, shop, ranked, hotseat, Club accounts).
 
 ## iOS (Xcode 15+, Mac)
 

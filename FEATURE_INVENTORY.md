@@ -16,3 +16,4 @@
 - Rotating rare shop, bundles, tomorrow preview, 5× cosmetics
 - Collection tabs; cutpurse on win only; stingy coins; fragments/clues; endgame deck gates
 - Tamriel dailies path; weekly/seasonal challenges; login calendar red-X; rematch/tournament; achievements; encyclopedia-by-deck; iOS/Expo kept
+- Club Store (rotating daily stock — never called a slate); email/guest accounts with optional Firebase sync; skippable tutorial match; optional Friend/Ranked voice (off by default)

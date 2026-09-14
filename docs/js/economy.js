@@ -218,7 +218,7 @@ export const SEASONS = [
     start: '12-20',
     end: '01-07',
     wrapYear: true,
-    blurb: 'Fan theme of ESO’s year-end New Life Festival — toasts, gifts, and a long table.',
+    blurb: 'New Life — toasts, gifts, and a long table.',
     reward: { gold: 90, back: 'default', clues: 4 },
   },
   {
@@ -226,7 +226,7 @@ export const SEASONS = [
     name: "Jester's Festival",
     start: '03-20',
     end: '04-04',
-    blurb: 'Fan theme of the spring Jester’s Festival — pranks at the club, not a Bethesda event.',
+    blurb: 'Jester’s Festival — pranks at the Club table.',
     reward: { gold: 80, clues: 5 },
   },
   {
@@ -234,7 +234,7 @@ export const SEASONS = [
     name: 'Anniversary Jubilee',
     start: '04-05',
     end: '04-20',
-    blurb: 'Fan theme of ESO’s Anniversary Jubilee — a toast to the Club’s own table.',
+    blurb: 'Anniversary Jubilee — a toast at the Club table.',
     reward: { gold: 100, purse: 'Superior' },
   },
   {
@@ -242,7 +242,7 @@ export const SEASONS = [
     name: 'Zeal of Zenithar',
     start: '06-20',
     end: '07-08',
-    blurb: 'Fan theme of Zeal of Zenithar — honest work, honest coin.',
+    blurb: 'Zeal of Zenithar — honest work, honest coin.',
     reward: { gold: 80, fragment: 'auto' },
   },
   {
@@ -250,7 +250,7 @@ export const SEASONS = [
     name: "Whitestrake's Mayhem",
     start: '07-20',
     end: '08-08',
-    blurb: 'Fan theme of Whitestrake’s Mayhem — Pelinal would approve of a loud table.',
+    blurb: 'Whitestrake’s Mayhem — a loud table.',
     reward: { gold: 70, purse: 'Epic' },
   },
   {
@@ -258,7 +258,7 @@ export const SEASONS = [
     name: 'Undaunted Celebration',
     start: '09-10',
     end: '09-29',
-    blurb: 'Fan theme of the mid-September Undaunted Celebration — dungeon grit at the Club. Unofficial.',
+    blurb: 'Undaunted Celebration — dungeon grit at the Club.',
     reward: { skin: 'undaunted', gold: 80, clues: 3 },
   },
   {
@@ -266,7 +266,7 @@ export const SEASONS = [
     name: 'High Seas of Tamriel',
     start: '09-30',
     end: '10-14',
-    blurb: 'Fan theme of High Seas of Tamriel (ESO: Sep 30–Oct 14, 2026). Unofficial — no Bethesda affiliation.',
+    blurb: 'High Seas of Tamriel — salt, sailcloth, and Abecean gold.',
     reward: { skin: 'high-seas', back: 'high-seas', gold: 90 },
   },
   {
@@ -274,7 +274,7 @@ export const SEASONS = [
     name: "Witches Festival",
     start: '10-20',
     end: '11-07',
-    blurb: 'Fan theme of the autumn Witches Festival — crow-feather black and pumpkin-fire.',
+    blurb: 'Witches Festival — crow-feather black and pumpkin-fire.',
     reward: { skin: 'witches', back: 'witches', gold: 100 },
   },
 ];

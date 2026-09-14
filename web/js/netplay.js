@@ -59,15 +59,19 @@ export async function hostRoom() {
         ok: true,
         code,
         peer,
+        role: 'host',
         get conn() { return conn; },
+        get remotePeerId() { return conn?.peer || api._remotePeerId || ''; },
+        set remotePeerId(id) { api._remotePeerId = id; },
         send(msg) { if (conn?.open) conn.send(msg); },
         onMessage(fn) { handlers.push(fn); },
         destroy() { try { conn?.close(); peer.destroy(); } catch {} },
       };
       peer.on('connection', (c) => {
         conn = c;
+        api.remotePeerId = c.peer;
         c.on('data', (data) => handlers.forEach(fn => fn(data)));
-        c.on('open', () => handlers.forEach(fn => fn({ type: 'peer-ready' })));
+        c.on('open', () => handlers.forEach(fn => fn({ type: 'peer-ready', peerId: c.peer })));
       });
       resolve(api);
     });
@@ -105,10 +109,14 @@ export async function joinRoom(code) {
           code: String(code).toUpperCase(),
           peer,
           conn,
+          role: 'guest',
+          get remotePeerId() { return conn?.peer || api._remotePeerId || ''; },
+          set remotePeerId(id) { api._remotePeerId = id; },
           send(msg) { if (conn.open) conn.send(msg); },
           onMessage(fn) { handlers.push(fn); },
           destroy() { try { conn.close(); peer.destroy(); } catch {} },
         };
+        api.remotePeerId = conn.peer;
         conn.on('data', (data) => handlers.forEach(fn => fn(data)));
         resolve(api);
       });

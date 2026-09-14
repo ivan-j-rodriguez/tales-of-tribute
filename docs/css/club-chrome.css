@@ -5,7 +5,7 @@
 
 #splash, #club, #store, #collection, #settings, #encyclopedia, #ranked,
 #gauntlet, #friend-lobby, #deckpick,
-#login-overlay, #crate-overlay, #sack-overlay, #card-modal, #club-sheet {
+#login-overlay, #crate-overlay, #sack-overlay, #card-modal, #club-sheet, #account-overlay {
   --hi-navy: #06141c;
   --hi-deep: #030b12;
   --hi-teal: #0c3d48;
@@ -683,3 +683,80 @@
   #card-modal .club-card-art { max-height: min(38vh, 220px); }
   #card-modal .eso-tip-name { font-size: clamp(0.95rem, 4vw, 1.25rem) !important; }
 }
+
+.tutorial-nudge {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  color: var(--hi-cream);
+  background: rgba(3, 11, 18, 0.45);
+  border: 1px solid rgba(230, 197, 106, 0.35);
+  border-radius: 10px;
+  padding: 0.45rem 0.65rem;
+  max-width: 22rem;
+}
+.tutorial-nudge[hidden] { display: none !important; }
+.tutorial-nudge button { padding: 0.28rem 0.65rem; font-size: 0.78rem; }
+
+.account-modal {
+  max-width: min(26rem, 94vw);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 1.1rem 1rem 1rem;
+}
+.account-modal h2 { color: var(--hi-gold); margin: 0; }
+.account-modal .disclaimer {
+  color: #9aa88a !important;
+  font-size: 0.78rem !important;
+  line-height: 1.35;
+  margin: 0;
+}
+.account-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hi-ink-dim);
+}
+.account-field input,
+#account-sms {
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid rgba(230, 197, 106, 0.4);
+  background: rgba(3, 11, 18, 0.65);
+  color: var(--hi-cream);
+  font-size: 0.95rem;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.account-actions, .account-providers {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+.account-actions button, .account-providers button { flex: 1 1 7rem; }
+.account-providers button:disabled,
+#btn-auth-phone:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+#settings-about .disclaimer {
+  color: #c9bda0;
+}
+.settings-row .hint-inline {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--hi-ink-dim);
+  margin-top: 0.15rem;
+}
+#btn-match-voice.muted { opacity: 0.55; }

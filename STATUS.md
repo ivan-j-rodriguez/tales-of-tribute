@@ -1,5 +1,9 @@
 # Status
 
+**2026-09-14 (build 44):** Club/product pass. Shop is an item store (Daily stock / today’s shop — never “slate”). Lean Club/splash/store/collection copy. Unofficial / fan-made / not Bethesda / not for sale only on Sign in and Settings → About. Email sign-up/in (device vault now; Firebase Auth + Firestore when `web/js/firebase-config.js` is filled). Google / Apple / Phone buttons exist and stay gated until those providers are configured — they do not pretend to work. Guest local play unchanged. Optional 1:1 voice on Friend/Ranked remote rooms via PeerJS media (WebRTC), off by default, mic only on enable. Tutorial match with a skippable guided walkthrough; replay from Settings. Board/felt/patron/targeting CSS untouched. `?v=44`.
+
+**Remaining infra (honest):** Drop a real Firebase web config into `web/js/firebase-config.js` (see `firebase-config.example.js` + `firebase/firestore.rules.example`), enable Email, then Google / Phone / Apple in the console, and add the GitHub Pages host to Auth authorized domains. Apple also needs an Apple Service ID. Voice for Friend/Ranked uses the existing PeerJS room; a TURN server would help symmetric NATs. No extra voice backend is faked.
+
 **2026-09-14 (build 43):** Board/felt seating + pack rebased onto Club 42 (PR #17). Pewter bezels centered on the portrait coin (~10% gothic peak; Treasury + Mora tipless). Portrait packs toward the tavern. Gold patron-use octagons sit on the hourglass / End Turn rail. Landscape tavern cards stay large and centered with chrome in the gutters. Club hub spacing / store intro / `club-chrome.css` from main 42. `?v=43`.
 
 **2026-09-14 (build 42):** Club hub section heads no longer sit on card titles or weekly meta (PROVINCES ROAD / FAN TOURNAMENT / WEEKLY CHALLENGES). Club Store intro is one inviting line; Unofficial / No IAP lives on the store footer and Settings. No felt / board-pass / table-pack / phone-eso match edits. `?v=42`.
@@ -67,7 +71,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=43`. Board seating/pack from PR #18 sits under Club chrome 42.
+`docs/` is a copy of `web/`. Cache-bust `?v=44`. Club/product pass (shop language, accounts, tutorial, voice) sits on the build 43 board.
 
 | Fix | Notes |
 |---|---|
@@ -99,7 +103,7 @@ See [`FEATURE_INVENTORY.md`](FEATURE_INVENTORY.md). Board layout work is CSS/DOM
 
 ## Tests
 
-- Linux: `node scripts/test_ios_engine.mjs` and `node scripts/test_phase_a.mjs`.
+- Linux: `node scripts/test_ios_engine.mjs`, `node scripts/test_phase_a.mjs`, and `node scripts/test_club_product.mjs`.
 - Gestures (Chrome): `cd web/test && node play-gestures.mjs`.
 - Mac: `cd ios/TributeCore && swift test`.
 

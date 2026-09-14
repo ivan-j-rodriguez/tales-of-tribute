@@ -162,9 +162,16 @@ export function defaultProfile() {
     },
     cardClues: {},
     shopPurchases: {},
+    permissions: { mic: false },
+    updatedAt: 0,
     // legacy alias
     sacks: 0,
   };
+}
+
+let profileSaveHook = null;
+export function setProfileSaveHook(fn) {
+  profileSaveHook = typeof fn === 'function' ? fn : null;
 }
 
 export function loadProfile() {
@@ -217,6 +224,8 @@ export function loadProfile() {
     p.cratesOpened = Number(p.cratesOpened) || 0;
     p.pendingCrate = resolveCrateVariant(p.pendingCrate);
     p.pendingMatchReward = p.pendingMatchReward || null;
+    p.permissions = { mic: false, ...(p.permissions || {}) };
+    p.updatedAt = Number(p.updatedAt) || 0;
     if (typeof p.gold !== 'number') p.gold = 60;
     if (!p.unlockedSkins.includes('high-isle')) p.unlockedSkins.push('high-isle');
     if (!p.unlockedBacks.includes('default')) p.unlockedBacks.push('default');
@@ -227,7 +236,9 @@ export function loadProfile() {
 }
 
 export function saveProfile(p) {
+  if (p && typeof p === 'object') p.updatedAt = Date.now();
   localStorage.setItem(PROFILE_KEY, JSON.stringify(p));
+  try { profileSaveHook?.(p); } catch {}
 }
 
 export function ensureWeeklyChallenges(profile) {
@@ -904,9 +915,9 @@ function assertShopStock(profile, cards, kind, target) {
   const slate = currentShop(profile, cards);
   const id = offerId(kind, target);
   const onSlate = slate.featured.find((o) => o.id === id);
-  if (!onSlate) return { error: 'Not on this slate — returns later.' };
+  if (!onSlate) return { error: 'Not in today’s shop — check back later.' };
   if (isOfferSoldOut(profile, slate.periodKey, id)) {
-    return { error: 'Sold out until the slate refreshes.' };
+    return { error: 'Sold out until the shop refreshes.' };
   }
   return { slate, id };
 }
@@ -1005,8 +1016,8 @@ export function buyShopOffer(profile, offer, cards = []) {
 
 export function buyBundle(profile, offer, cards = []) {
   const slate = currentShop(profile, cards);
-  if (!slate.bundle || slate.bundle.id !== offer.id) return { error: 'That bundle is not on this slate.' };
-  if (isOfferSoldOut(profile, slate.periodKey, offer.id)) return { error: 'Sold out until the slate refreshes.' };
+  if (!slate.bundle || slate.bundle.id !== offer.id) return { error: 'That bundle is not in today’s shop.' };
+  if (isOfferSoldOut(profile, slate.periodKey, offer.id)) return { error: 'Sold out until the shop refreshes.' };
   if (profile.gold < offer.price) return { error: `Need ${offer.price} gold.` };
   profile.gold -= offer.price;
   const results = [];

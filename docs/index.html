@@ -7,11 +7,11 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta name="theme-color" content="#06141c" />
   <title>Tales of Tribute — Fan Table</title>
-  <link rel="stylesheet" href="css/style.css?v=43" />
-  <link rel="stylesheet" href="css/phone-eso.css?v=43" />
-  <link rel="stylesheet" href="css/table-pack.css?v=43" />
-  <link rel="stylesheet" href="css/board-pass.css?v=43" />
-  <link rel="stylesheet" href="css/club-chrome.css?v=43" />
+  <link rel="stylesheet" href="css/style.css?v=44" />
+  <link rel="stylesheet" href="css/phone-eso.css?v=44" />
+  <link rel="stylesheet" href="css/table-pack.css?v=44" />
+  <link rel="stylesheet" href="css/board-pass.css?v=44" />
+  <link rel="stylesheet" href="css/club-chrome.css?v=44" />
 </head>
 <body>
   <div id="app">
@@ -21,11 +21,17 @@
       <div class="splash-frame hi-frame">
         <p class="hi-kicker">High Isle · Roister’s Club</p>
         <h1>Tales of Tribute</h1>
-        <p class="subtitle">Two patrons, a tavern of five, and the long road to forty prestige.</p>
+        <p class="subtitle">Two patrons, a tavern of five, forty prestige.</p>
         <div class="splash-purse" id="splash-purse"></div>
+        <p class="tutorial-nudge" id="tutorial-nudge" hidden>
+          New here? Play a short tutorial match.
+          <button type="button" class="primary" id="btn-nudge-tutorial">Play tutorial</button>
+          <button type="button" id="btn-nudge-skip">Skip</button>
+        </p>
         <div class="actions splash-actions">
           <div class="splash-primary">
             <button class="primary splash-play" id="btn-play">Play vs AI</button>
+            <button type="button" id="btn-tutorial">Tutorial</button>
           </div>
           <div class="splash-compete">
             <button class="ranked-btn" id="btn-ranked">Ranked</button>
@@ -40,14 +46,14 @@
             <button class="ghost" id="btn-gauntlet">Provinces</button>
             <button class="ghost" id="btn-ency">Encyclopedia</button>
             <button class="ghost" id="btn-settings">Settings</button>
+            <button class="ghost" id="btn-splash-account">Sign in</button>
           </div>
         </div>
         <div class="splash-toggles">
           <label class="chk"><input type="checkbox" id="chk-hourglass-splash" /> Hourglass (90s)</label>
           <button type="button" id="btn-music" class="music-toggle" title="Music">♪ Music: Off</button>
         </div>
-        <p class="build-stamp" id="build-stamp">build 43</p>
-        <p class="disclaimer">Unofficial fan project. Not affiliated with Bethesda Softworks or ZeniMax Online Studios.</p>
+        <p class="build-stamp" id="build-stamp">build 44</p>
       </div>
     </section>
 
@@ -58,7 +64,7 @@
         <button id="btn-ranked-back">Back</button>
       </header>
       <div class="ranked-crest" id="ranked-crest"></div>
-      <p class="hint ranked-copy">Roister vs Roister. Hourglass on. No AI. No difficulty slider. Host a room or join a friend’s code — same PeerJS path as Play a Friend. Unofficial. No IAP.</p>
+      <p class="hint ranked-copy">Host or join a room. Hourglass on. No AI.</p>
       <div id="ranked-status" class="ranked-status"></div>
       <div class="ranked-actions">
         <button class="primary" id="btn-ranked-host">Host ranked room</button>
@@ -67,13 +73,17 @@
           <button id="btn-ranked-join">Join ranked</button>
         </div>
       </div>
+      <label class="chk settings-row" id="voice-ranked-row">
+        <input type="checkbox" id="chk-voice-ranked" /> Voice chat (optional)
+      </label>
+      <p class="hint" id="voice-ranked-hint">Off by default. Asks for the mic only when you turn it on. Mute anytime.</p>
       <p class="hint" id="ranked-lobby-status"></p>
     </section>
 
     <!-- DECK PICK -->
     <section id="deckpick" class="screen">
       <h2>Choose Your Patrons</h2>
-      <p class="hint" id="deckpick-hint">Tap to select, tap again to deselect. Pick <strong>two</strong> for you, then two for your rival — or let the AI finish.</p>
+      <p class="hint" id="deckpick-hint">Pick <strong>two</strong> patrons for you, then two for your rival — or let the AI finish.</p>
       <div class="pick-meters">
         <div class="pick-meter you" id="pick-you-meter"><span class="pm-label">You</span> <span class="pm-count" id="pick-you-count">0 / 2</span><div class="pm-slots" id="pick-you-slots"></div></div>
         <div class="pick-meter rival" id="pick-opp-meter"><span class="pm-label">Rival</span> <span class="pm-count" id="pick-opp-count">0 / 2</span><div class="pm-slots" id="pick-opp-slots"></div></div>
@@ -103,7 +113,7 @@
         <h2>Challenge the Provinces</h2>
         <button id="btn-gauntlet-back">Back</button>
       </header>
-      <p class="hint" id="gauntlet-hint">Start at Gonfalon Bay. Win opens the next stop. A loss locks the road until NY midnight. Clear the road for a rotating grand prize. Unofficial fan path.</p>
+      <p class="hint" id="gauntlet-hint">Start at Gonfalon Bay. Win opens the next stop. A loss locks the road until midnight ET.</p>
       <div class="gauntlet-map-wrap">
         <img class="gauntlet-map" id="gauntlet-map-img" src="assets/ui/tamriel-map.jpg" alt="Map of Tamriel — provinces" />
         <div class="gauntlet-markers" id="gauntlet-markers"></div>
@@ -118,7 +128,7 @@
     <!-- FRIEND -->
     <section id="friend-lobby" class="screen">
       <h2>Play a Friend</h2>
-      <p class="hint">Pass-and-play on one device, or host/join a remote room (PeerJS).</p>
+      <p class="hint">Pass-and-play on one device, or host/join a remote room.</p>
       <div class="friend-modes">
         <button class="primary" id="btn-hotseat">Pass &amp; Play (Hotseat)</button>
         <button id="btn-host-room">Host Remote Room</button>
@@ -126,6 +136,10 @@
           <input id="join-code" maxlength="4" placeholder="CODE" />
           <button id="btn-join-room">Join Room</button>
         </div>
+        <label class="chk settings-row" id="voice-friend-row">
+          <input type="checkbox" id="chk-voice-friend" /> Voice chat (optional)
+        </label>
+        <p class="hint" id="voice-friend-hint">Off by default. Mic permission only if you enable it. Hotseat has no voice.</p>
         <p class="hint" id="friend-status"></p>
         <button id="btn-friend-back">Back</button>
       </div>
@@ -144,7 +158,7 @@
       </div>
       <div class="club-block">
         <h3 class="club-section">Login calendar</h3>
-        <p class="hint">America/New_York midnight. Missed days mark a red X — the Club remembers.</p>
+        <p class="hint">Midnight ET. Missed days mark a red X.</p>
         <div id="club-calendar" class="login-cal"></div>
       </div>
       <div class="club-block">
@@ -185,11 +199,11 @@
         <span class="store-gold" id="store-gold"></span>
         <button id="btn-store-back">Back</button>
       </header>
-      <p class="hint" id="store-hint">Treasures of High Isle — featured parcels and the day’s slate.</p>
+      <p class="hint" id="store-hint">Today’s shop — rotating stock, purse gold.</p>
       <p class="store-timer" id="store-timer"></p>
       <nav class="store-nav" aria-label="Store sections">
         <a href="#store-featured-block">Featured</a>
-        <a href="#store-daily-block">Daily slate</a>
+        <a href="#store-daily-block">Daily stock</a>
         <a href="#store-fragments-block">Fragments</a>
         <a href="#store-cosmetics-block">Cosmetics</a>
       </nav>
@@ -199,7 +213,7 @@
         <div id="store-featured-hero"></div>
       </section>
       <section class="store-section" id="store-daily-block">
-        <h3 class="club-section">Daily slate</h3>
+        <h3 class="club-section">Daily stock</h3>
         <div class="store-grid" id="store-featured"></div>
       </section>
       <section class="store-section" id="store-fragments-block">
@@ -215,7 +229,7 @@
         <div class="store-grid" id="store-tomorrow"></div>
       </section>
       <div class="store-grid" id="store-later" hidden></div>
-      <p class="store-footnote">Unofficial fan table · No IAP</p>
+      <p class="store-footnote">Purse gold only</p>
     </section>
 
     <!-- COLLECTION -->
@@ -256,7 +270,21 @@
         <h2>Settings</h2>
         <button id="btn-settings-back">Back</button>
       </header>
-      <p class="hint">Table options only. Cosmetics are equipped in Collection. New pieces appear on the Store slate.</p>
+      <p class="hint">Table options. Equip cosmetics in Collection. New pieces appear in the Store.</p>
+      <div class="settings-block" id="settings-account">
+        <h3 class="club-section">Account</h3>
+        <p class="hint" id="settings-account-hint"></p>
+        <button type="button" class="settings-row-btn primary" id="btn-settings-account">Sign in / Sign up</button>
+        <button type="button" class="settings-row-btn" id="btn-settings-signout" hidden>Sign out</button>
+      </div>
+      <div class="settings-block" id="settings-permissions">
+        <h3 class="club-section">Permissions</h3>
+        <p class="hint">Asked only when needed. Nothing is on by default.</p>
+        <label class="chk settings-row"><input type="checkbox" id="chk-settings-mic" /> Microphone
+          <span class="hint-inline">Optional 1:1 voice in Friend/Ranked. The browser asks only when you enable voice.</span>
+        </label>
+        <p class="hint" id="settings-perm-auth">Sign-in: email is local or Club cloud. Google/Apple/Phone stay off until those providers are enabled — we do not request those scopes in advance.</p>
+      </div>
       <div class="settings-block">
         <h3 class="club-section">Table</h3>
         <label class="chk settings-row"><input type="checkbox" id="chk-settings-music" /> Music</label>
@@ -273,11 +301,12 @@
           <div class="diff-label">AI Difficulty <span id="diff-val-settings">5</span></div>
           <div class="diff-slider" id="diff-slider-settings" role="slider" aria-valuemin="1" aria-valuemax="10" aria-valuenow="5" tabindex="0"></div>
         </div>
-        <button type="button" id="btn-replay-tour" class="settings-row-btn">Replay first-match tour</button>
+        <button type="button" id="btn-replay-tour" class="settings-row-btn">Replay tutorial</button>
       </div>
       <div class="settings-block" id="settings-about">
         <h3 class="club-section">About</h3>
-        <p class="hint">Unofficial Ivan Rodriguez fan table. Not for sale. No IAP. Card art courtesy of UESP. Club beds are CC0: RandomMind (The Old Tower Inn, King’s Feast, Market Day), The Cynic Project / cynicmusic.com (A New Town), yd (Tavern), plus an original Night Harbor loop — never Kevin MacLeod, never the ESO soundtrack. See assets/audio/CREDITS.txt.</p>
+        <p class="hint disclaimer" id="about-disclaimer">Unofficial fan-made table. Not affiliated with Bethesda Softworks, ZeniMax Online Studios, or The Elder Scrolls Online. Not for sale. No IAP.</p>
+        <p class="hint">Card art courtesy of UESP. Club beds are CC0: RandomMind (The Old Tower Inn, King’s Feast, Market Day), The Cynic Project / cynicmusic.com (A New Town), yd (Tavern), plus an original Night Harbor loop. See assets/audio/CREDITS.txt.</p>
       </div>
     </section>
 
@@ -351,6 +380,7 @@
           <div class="felt-hud-you">
             <div class="match-actions you-actions">
               <button type="button" id="btn-match-sfx" title="Mute sound effects">SFX</button>
+              <button type="button" id="btn-match-voice" title="Mute voice" hidden>Mic</button>
               <button type="button" id="btn-match-settings" title="Settings">⚙</button>
               <button type="button" id="btn-concede">Leave</button>
             </div>
@@ -430,8 +460,8 @@
     </div>
     <div class="overlay" id="login-overlay">
       <div class="login-modal hi-frame">
-        <h2>The Club remembers</h2>
-        <p class="hint">Stamp today’s prize. Two Crown Crates a month. Opening a crate is the reward — not a shop button.</p>
+        <h2>Daily stamp</h2>
+        <p class="hint">Stamp today. Two Crown Crates a month.</p>
         <div id="login-cal" class="login-cal"></div>
         <p class="hint" id="login-prize-hint"></p>
         <button class="primary" id="btn-login-claim">Claim today’s stamp</button>
@@ -471,6 +501,39 @@
       </div>
       <button type="button" id="target-return" class="target-return" hidden>Return to pick</button>
     </div>
+    <div class="overlay" id="account-overlay">
+      <div class="login-modal hi-frame account-modal">
+        <h2 id="account-title">Sign in</h2>
+        <p class="hint disclaimer" id="account-disclaimer">Unofficial fan-made table. Not affiliated with Bethesda Softworks or ZeniMax Online Studios. Not for sale.</p>
+        <p class="hint" id="account-status"></p>
+        <label class="account-field">Email
+          <input id="account-email" type="email" autocomplete="username" placeholder="you@example.com" />
+        </label>
+        <label class="account-field">Password
+          <input id="account-password" type="password" autocomplete="current-password" placeholder="At least 6 characters" />
+        </label>
+        <div class="account-actions">
+          <button type="button" class="primary" id="btn-auth-signin">Sign in</button>
+          <button type="button" id="btn-auth-signup">Sign up</button>
+        </div>
+        <div class="account-providers">
+          <button type="button" id="btn-auth-google">Google</button>
+          <button type="button" id="btn-auth-apple">Apple</button>
+        </div>
+        <label class="account-field">Phone
+          <input id="account-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+15551234567" />
+        </label>
+        <div class="account-actions">
+          <button type="button" id="btn-auth-phone">Send code</button>
+          <input id="account-sms" inputmode="numeric" maxlength="8" placeholder="SMS code" hidden />
+          <button type="button" id="btn-auth-sms" hidden>Confirm</button>
+        </div>
+        <p class="hint" id="account-provider-hint"></p>
+        <button type="button" class="primary" id="btn-auth-guest">Play as guest</button>
+        <button type="button" id="btn-auth-close">Close</button>
+      </div>
+    </div>
+    <audio id="voice-remote" autoplay playsinline hidden></audio>
     <div class="toast" id="toast"></div>
     <div id="tour-root" class="tour-root" hidden>
       <div class="tour-backdrop" id="tour-backdrop"></div>
@@ -507,6 +570,6 @@
       </div>
     </div>
   </div>
-  <script type="module" src="js/app.js?v=43"></script>
+  <script type="module" src="js/app.js?v=44"></script>
 </body>
 </html>
