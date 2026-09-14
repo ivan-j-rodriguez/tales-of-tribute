@@ -190,6 +190,7 @@ function syncBoardLayout() {
   board.style.transform = 'none';
   layoutFan($('#hand-zone'), false);
   layoutFan($('#opp-hand-zone'), true);
+  layoutTavern();
 }
 
 let lastToast = '';
@@ -376,7 +377,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 49';
+  if (stamp) stamp.textContent = 'build 50';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -1289,6 +1290,7 @@ function renderMatch() {
     }));
   });
   layoutFan(hz, false);
+  layoutTavern();
   // Rival fanned backs (top)
   const ohz = $('#opp-hand-zone');
   if (ohz) {
@@ -1390,11 +1392,31 @@ function layoutFan(container, rival = false) {
   const landscape = document.body.classList.contains('is-landscape');
   const first = cards[0].getBoundingClientRect();
   const last = cards[n - 1].getBoundingClientRect();
-  const leftLimit = landscape ? 40 : 46;
-  const rightLimit = landscape ? vw - 124 : vw - 72;
+  const leftLimit = landscape ? 40 : 52;
+  const rightLimit = landscape ? vw - 124 : vw - 76;
   if (first.left + dx < leftLimit) dx = leftLimit - first.left;
   if (last.right + dx > rightLimit) dx = Math.min(dx, rightLimit - last.right);
   if (Math.abs(dx) >= 0.5) apply(dx);
+}
+
+function layoutTavern() {
+  const tz = $('#tavern-zone');
+  if (!tz) return;
+  tz.style.transform = '';
+  const cards = [...tz.querySelectorAll('.card, button.card')];
+  if (!cards.length) return;
+  const midX = fanMidTopX(cards);
+  if (midX == null) return;
+  const vw = window.innerWidth;
+  let dx = vw / 2 - midX;
+  const first = cards[0].getBoundingClientRect();
+  const last = cards[cards.length - 1].getBoundingClientRect();
+  const landscape = document.body.classList.contains('is-landscape');
+  const leftLimit = landscape ? 56 : 50;
+  const rightLimit = landscape ? vw - 124 : vw - 82;
+  if (first.left + dx < leftLimit) dx = leftLimit - first.left;
+  if (last.right + dx > rightLimit) dx = Math.min(dx, rightLimit - last.right);
+  if (Math.abs(dx) >= 0.4) tz.style.transform = `translateX(${dx.toFixed(2)}px)`;
 }
 
 function flashFx(card, kind) {
@@ -4280,7 +4302,8 @@ function layoutMetrics() {
     && sfxBtn.y + 4 < leaveBtn.y);
   const endTurnBottomLeft = !!(hg
     && hg.x < vw * 0.24
-    && hg.bottom > vh * 0.55
+    && hg.bottom > vh * 0.78
+    && hg.y > vh * 0.62
     && (!leaveHud || hg.y >= leaveHud.bottom - 6));
   const youHandEls = [...document.querySelectorAll('#hand-zone > .card, #hand-zone > button.card')];
   const oppHandEls = [...document.querySelectorAll('#opp-hand-zone > .card')];
@@ -4290,6 +4313,51 @@ function layoutMetrics() {
   const oppHandMidDx = oppHandMidX == null ? null : +(oppHandMidX - vw / 2).toFixed(2);
   const youHandMidCard = youHandEls.length % 2 === 1 ? youHandEls[(youHandEls.length - 1) / 2] : null;
   const youHandMidTop = youHandMidCard ? youHandMidCard.getBoundingClientRect().y : null;
+  const tavernCardEls = [...document.querySelectorAll('#tavern-zone > .card, #tavern-zone > button.card')];
+  const tavernMidX = fanMidTopX(tavernCardEls);
+  const tavernMidDx = tavernMidX == null ? null : +(tavernMidX - vw / 2).toFixed(2);
+  const tavernMidCard = tavernCardEls.length % 2 === 1 ? tavernCardEls[(tavernCardEls.length - 1) / 2] : null;
+  const tavernMidTop = tavernMidCard ? tavernMidCard.getBoundingClientRect().y : null;
+  const pendantFaceXs = [...document.querySelectorAll('#rail-patrons .patron-coin .coin-ring.medallion-face')].map((el) => {
+    const r = el.getBoundingClientRect();
+    return +(r.left + r.width / 2).toFixed(2);
+  });
+  const pendantCenterSpread = pendantFaceXs.length
+    ? +(Math.max(...pendantFaceXs) - Math.min(...pendantFaceXs)).toFixed(2)
+    : null;
+  const labelUnderPile = (pileSel, word) => {
+    const pile = document.querySelector(pileSel);
+    const stack = pile?.querySelector('.pile-stack');
+    const label = pile?.querySelector('.pile-label');
+    if (!pile || !stack || !label) return false;
+    const s = stack.getBoundingClientRect();
+    const l = label.getBoundingClientRect();
+    const text = (label.textContent || '').replace(/\s+/g, '').toUpperCase();
+    if (text !== word) return false;
+    if (s.width < 16 || s.height < 20) return false;
+    if (l.width < 10 || l.height < 6) return false;
+    if (l.top < s.bottom - 10) return false;
+    if (Math.abs((l.left + l.width / 2) - (s.left + s.width / 2)) > 14) return false;
+    if (l.left < -2 || l.right > vw + 2 || l.bottom > vh + 2 || l.top < -2) return false;
+    if (s.left < -2 || s.right > vw + 2 || s.top < -2 || s.bottom > vh + 2) return false;
+    return true;
+  };
+  const drawLabelUnder = labelUnderPile('#pile-opp-draw', 'DRAW') && labelUnderPile('#pile-you-draw', 'DRAW');
+  const cdLabelUnder = labelUnderPile('#pile-opp-cd', 'COOLDOWN') && labelUnderPile('#pile-you-cd', 'COOLDOWN');
+  const boardBefore = document.querySelector('#match .board')
+    ? getComputedStyle(document.querySelector('#match .board'), '::before')
+    : null;
+  const boardAfter = document.querySelector('#match .board')
+    ? getComputedStyle(document.querySelector('#match .board'), '::after')
+    : null;
+  const orbGone = (cs) => {
+    if (!cs) return true;
+    const w = parseFloat(cs.width) || 0;
+    const h = parseFloat(cs.height) || 0;
+    const op = cs.opacity === '' ? 1 : Number(cs.opacity);
+    return cs.content === 'none' || cs.display === 'none' || w < 1 || h < 1 || op === 0;
+  };
+  const yellowOrbGone = orbGone(boardBefore) && orbGone(boardAfter);
   const youHandSpan = youHandEls.length ? (() => {
     const rs = youHandEls.map((el) => el.getBoundingClientRect());
     const x = Math.min(...rs.map((r) => r.x));
@@ -4371,6 +4439,14 @@ function layoutMetrics() {
     youHandMidX: youHandMidX == null ? null : +youHandMidX.toFixed(2),
     youHandMidDx,
     youHandMidTop: youHandMidTop == null ? null : +youHandMidTop.toFixed(1),
+    tavernMidX: tavernMidX == null ? null : +tavernMidX.toFixed(2),
+    tavernMidDx,
+    tavernMidTop: tavernMidTop == null ? null : +tavernMidTop.toFixed(1),
+    pendantFaceXs,
+    pendantCenterSpread,
+    drawLabelUnder,
+    cdLabelUnder,
+    yellowOrbGone,
     oppHandCount: oppHandEls.length,
     oppHandMidX: oppHandMidX == null ? null : +oppHandMidX.toFixed(2),
     oppHandMidDx,
