@@ -1,6 +1,6 @@
 # Status
 
-**2026-09-14 (build 32):** Full-bleed felt rescue. Patron rail, piles, and played-effects are overlays — they no longer steal tavern width. Portrait + landscape tavern band ≥ 72% of the viewport.
+**2026-09-14 (build 32):** Full-bleed felt rescue. Patron rail, piles, and played-effects are overlays — they no longer steal tavern width. Portrait + landscape tavern band ≥ 72% of the viewport. Layout is CSS/DOM only — do not drop anything in [`FEATURE_INVENTORY.md`](FEATURE_INVENTORY.md).
 
 **2026-09-14 (build 31):** Patron tokens are circular silver/gold tribute coins again (no brown arrow nameplates). Felt packed so tavern + hand grow; empty agent seats stay thin hex outlines. `?native=1` hides the landscape banner for Expo Go.
 
@@ -68,6 +68,10 @@ SwiftUI tokens still use the four official shapes/colors. This Phase A pass is w
 5. **Bewilderment** must be played before any non-curse card.
 6. Patron sweep is checked after a call and at end of turn.
 7. Last chance: opponent must **strictly exceed** the 40-holder (equal → 40-holder wins).
+
+## Locked inventory
+
+See [`FEATURE_INVENTORY.md`](FEATURE_INVENTORY.md). Board layout work is CSS/DOM only. Do not delete targeting, inspect, SFX, patron-uses, combo rail, Club/shop/daily/encyclopedia, or iOS/Expo paths.
 
 ## Tests
 

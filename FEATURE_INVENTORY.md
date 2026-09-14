@@ -1,0 +1,16 @@
+# Fan Tribute — Ivan’s locked feature inventory (do not drop)
+
+## Board / match (must keep)
+- Full-bleed felt both orientations; overlay/transparency/fade for piles, effects, patrons
+- Tavern 5 center; card-back piles visible
+- Coin/Prestige/Power triad only; patron-uses one octagon/player on hourglass rail
+- Left-pointing pendants; Treasury no tip; dials turn; all three favor texts
+- Hourglass glow; playable glow; floating translucent combo/effects
+- Tap play / hold inspect; exact sentences; no vignette clip
+- Targeting modals for sacrifice/destroy/KO/confine/replace/toss/donate/refresh/choose-one + animations
+- SFX+mute; pre-match timer+difficulty only; AI; 40/80 + all-favor wins
+
+## Meta (must keep — may be owned by other agent but do not delete)
+- Rotating rare shop, bundles, tomorrow preview, 5× cosmetics
+- Collection tabs; cutpurse on win only; stingy coins; fragments/clues; endgame deck gates
+- Tamriel dailies path; weekly/seasonal challenges; login calendar red-X; rematch/tournament; achievements; encyclopedia-by-deck; iOS/Expo kept
