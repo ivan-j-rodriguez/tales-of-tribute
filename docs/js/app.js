@@ -264,8 +264,9 @@ function medallionMarkup(pid, pat, short, favorWord) {
     return `
       <div class="token-dial medallion tipless" title="${title}">
         <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
-        <svg class="medallion-svg" viewBox="0 0 100 100" aria-hidden="true">
+        <svg class="medallion-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           <defs>${defs}</defs>
+          <circle class="medallion-window" cx="50" cy="50" r="28" fill="transparent"/>
           <path fill="url(#${uid}-pew)" fill-rule="evenodd" stroke="#1c1812" stroke-width="1.5"
             d="M50 2 A48 48 0 1 1 49.9 2 Z M50 50 m-28 0 a28 28 0 1 1 56 0 a28 28 0 1 1 -56 0"/>
           <circle cx="50" cy="50" r="28.8" fill="none" stroke="#1c1812" stroke-width="1.4"/>
@@ -291,8 +292,9 @@ function medallionMarkup(pid, pat, short, favorWord) {
   return `
     <div class="token-dial medallion" title="${title}">
       <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
-      <svg class="medallion-svg" viewBox="0 0 100 110" aria-hidden="true">
+      <svg class="medallion-svg" viewBox="0 0 100 110" preserveAspectRatio="none" aria-hidden="true">
         <defs>${defs}</defs>
+        <circle class="medallion-window" cx="50" cy="56" r="27" fill="transparent"/>
         <path class="token-point medallion-body" fill="url(#${uid}-pew)" fill-rule="evenodd" stroke="#1c1812" stroke-width="1.45"
           d="${sil} ${windowHole}"/>
         <path fill="none" stroke="url(#${uid}-hi)" stroke-width="1.15" d="M50 4.2 C54 8.4, 61 11.6, 67.4 14.6"/>
@@ -359,7 +361,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 42';
+  if (stamp) stamp.textContent = 'build 43';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -3884,6 +3886,51 @@ function layoutMetrics() {
   const youAgents = box('#you-agents');
   const oppAgents = box('#opp-agents');
   const tavernZone = box('#tavern-zone');
+  const ringAlign = [...document.querySelectorAll('#rail-patrons .patron-coin')].map((el) => {
+    const win = el.querySelector('.medallion-window');
+    const face = el.querySelector('.coin-ring.medallion-face');
+    if (!win || !face) return { id: el.dataset.pid, dx: 99, dy: 99, dist: 99 };
+    let wx, wy;
+    const svg = win.ownerSVGElement;
+    const ctm = win.getScreenCTM?.();
+    if (svg && ctm) {
+      const pt = svg.createSVGPoint();
+      pt.x = +win.getAttribute('cx');
+      pt.y = +win.getAttribute('cy');
+      const p = pt.matrixTransform(ctm);
+      wx = p.x; wy = p.y;
+    } else {
+      const a = win.getBoundingClientRect();
+      wx = a.left + a.width / 2;
+      wy = a.top + a.height / 2;
+    }
+    const b = face.getBoundingClientRect();
+    const fx = b.left + b.width / 2;
+    const fy = b.top + b.height / 2;
+    const dx = wx - fx;
+    const dy = wy - fy;
+    return { id: el.dataset.pid, dx: +dx.toFixed(2), dy: +dy.toFixed(2), dist: +Math.hypot(dx, dy).toFixed(2) };
+  });
+  const ringMaxOffset = ringAlign.reduce((m, r) => Math.max(m, r.dist || 0), 0);
+  const tokCenter = (tok) => tok ? { x: tok.x + tok.w / 2, y: tok.y + tok.h / 2 } : null;
+  const distTo = (a, b) => (a && b) ? Math.hypot(a.x - b.x, a.y - b.y) : 999;
+  const hgC = tokCenter(hg);
+  const youTokC = tokCenter(youTok);
+  const oppTokC = tokCenter(oppTok);
+  const usesNearHourglass = distTo(youTokC, hgC) <= 110 && distTo(oppTokC, hgC) <= 110;
+  const usesAtCorner = !!(youTok && oppTok && (
+    (youTok.bottom > vh - 52 && youTok.right > vw - 52)
+    || (oppTok.y < 32 && oppTok.right > vw - 52)
+  ));
+  const tavernCardsTop = tavernCards.length ? Math.min(...tavernCards.map((c) => c.y)) : 0;
+  const tavernCardsBot = tavernCards.length ? Math.max(...tavernCards.map((c) => c.bottom)) : 0;
+  const oppResToCards = oppRes ? Math.max(0, tavernCardsTop - oppRes.bottom) : 0;
+  const youResToCards = youRes ? Math.max(0, youRes.y - tavernCardsBot) : 0;
+  const firstCard = tavernCards[0];
+  const lastCard = tavernCards[tavernCards.length - 1];
+  const cardSpan = (firstCard && lastCard) ? (lastCard.right - firstCard.x) : 0;
+  const tavernInnerW = tavernZone?.w || 0;
+  const tavernSideSlack = tavernInnerW && cardSpan ? Math.max(0, (tavernInnerW - cardSpan) / 2) : 0;
   const hits = {
     tavernVsOppDraw: anyHit(tavernCards, oppDraw ? [oppDraw] : []),
     tavernVsDeck: anyHit(tavernCards, deck ? [deck] : []),
@@ -3928,6 +3975,13 @@ function layoutMetrics() {
     cards: cards.map((c) => ({ x: +c.x.toFixed(0), w: +c.w.toFixed(0), h: +c.h.toFixed(0) })),
     railW: rail?.w || 0,
     tokensStacked,
+    ringAlign,
+    ringMaxOffset: +ringMaxOffset.toFixed(2),
+    usesNearHourglass,
+    usesAtCorner,
+    oppResToCards: +oppResToCards.toFixed(1),
+    youResToCards: +youResToCards.toFixed(1),
+    tavernSideSlack: +tavernSideSlack.toFixed(1),
     youTok, oppTok, hg,
     hits,
     boxes: {

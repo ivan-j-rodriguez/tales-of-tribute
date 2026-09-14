@@ -1,5 +1,5 @@
 /**
- * Build 40 layout-fb gate + before/after artifacts.
+ * Build 42 layout-fb gate + before/after artifacts.
  * Portrait 390×844 / landscape 844×390.
  * Zero getBoundingClientRect intersection for Ivan's overlap pairs.
  */
@@ -109,6 +109,11 @@ async function measure(page, fileStem, { w, h }) {
     cardH: m.cardH,
     midGapPct: m.midGapPct,
     peakPct: m.peakPct,
+    ringMaxOffset: m.ringMaxOffset,
+    usesNearHourglass: m.usesNearHourglass,
+    usesAtCorner: m.usesAtCorner,
+    oppResToCards: m.oppResToCards,
+    youResToCards: m.youResToCards,
     tavernDiscard: m.tavernDiscard,
     medallions: m.medallions,
     pointedTips: m.pointedTips,
@@ -123,18 +128,24 @@ async function measure(page, fileStem, { w, h }) {
   if ((m.cardH || 0) < 52) fail(`${fileStem} tavern cards too short (${m.cardH}px)`, notes);
   if ((m.medallions || 0) < 5) fail(`${fileStem} expected 5 medallions`, notes);
   if (snap.treasuryHasTip) fail(`${fileStem} Treasury has a tip`, notes);
+  if (snap.moraHasTip) fail(`${fileStem} Mora has a tip`, notes);
   if (snap.landscapeBanner) fail(`${fileStem} landscape banner still on the match felt`, notes);
   const pointed = (snap.patrons || []).filter(p => p.id !== 'treasury' && p.id !== 'mora');
   if (!pointed.length || pointed.some(p => !p.tip || p.tipless)) fail(`${fileStem} pointed patrons missing gothic tip`, notes);
   if (w < h) {
     if (m.topBandPct > 8 || m.botBandPct > 8) fail(`${fileStem} empty portrait bands T/B ${m.topBandPct}/${m.botBandPct}`, notes);
-    if ((m.midGapPct || 0) > 16) fail(`${fileStem} tavern-to-hand gap ${m.midGapPct}% (need ≤16%)`, notes);
+    if ((m.midGapPct || 0) > 14) fail(`${fileStem} tavern-to-hand gap ${m.midGapPct}% (need ≤14%)`, notes);
+    if ((m.oppResToCards || 0) > 56) fail(`${fileStem} opp res-to-tavern ${m.oppResToCards}px`, notes);
+    if ((m.youResToCards || 0) > 48) fail(`${fileStem} you res-to-tavern ${m.youResToCards}px`, notes);
   } else {
     if (m.leftGutterPct > 10) fail(`${fileStem} landscape left gutter ${m.leftGutterPct}%`, notes);
   }
   if (m.peakPct == null || m.peakPct < 7 || m.peakPct > 14) {
     fail(`${fileStem} peak ${m.peakPct}% of diameter (need ≈10%, gate 7–14)`, notes);
   }
+  if (m.ringMaxOffset == null || m.ringMaxOffset > 2.2) fail(`${fileStem} ring offset ${m.ringMaxOffset}px`, notes);
+  if (m.usesAtCorner) fail(`${fileStem} patron-use octagons at screen corners`, notes);
+  if (!m.usesNearHourglass) fail(`${fileStem} patron-use octagons not on hourglass rail`, notes);
 
   const hits = m.hits || {};
   const mustClear = TAG === 'before' ? [] : [
@@ -210,7 +221,7 @@ if (lFit.titleClipped) fail('landscape inspect title clipped', lFit);
 await landPage.close();
 
 const note = [
-  `Build 40 layout-fb (${TAG})`,
+  `Build 42 layout-fb (${TAG})`,
   `portrait 390x844: tavern ${results.portrait.notes.tavernW}px = ${results.portrait.notes.viewportTavernPct}% vw`,
   `  hits ${JSON.stringify(results.portrait.notes.hits)}`,
   `landscape 844x390: tavern ${results.landscape.notes.tavernW}px = ${results.landscape.notes.viewportTavernPct}% vw`,
