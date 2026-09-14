@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-14 (build 48):** Board/felt portrait pack rebased onto Club 47 (PR #22 store overflow). DRAW piles flush left; COOLDOWN piles flush right. SFX / settings / Leave become a mid-left vertical strip; End Turn / hourglass moves to bottom-left under that strip (portrait). Right rail rebalances patron-use octagons; patrons stay on the right. Landscape is a dual layout: piles to the edges, compact left chrome, End Turn stays on the right rail. Layout-fb overlap gates from board #15/#18/#19 stay green. Club hub / store / collection / economy from main 47. `?v=48`.
+
 **2026-09-14 (build 47):** Club Store horizontal overflow. Featured hero `::after` glow leaked past `.bundle-card` because `#store .bundle-card` was `overflow: visible`; `#store.scrollWidth` was ~54px wider than the viewport on a 390px phone. Cards clip the glow again; store grids wrap. Board CSS untouched. `?v=47`.
 
 **2026-09-14 (build 46):** Club voice Mic gate follow-up. Match Mic is hidden unless Friend/Ranked remote (`canUseVoice`) and voice is wanted or live. Hotseat / AI / tutorial / gauntlet / random AI clear leftover Friend `wanted`. Dead unused `voicePref()` removed. Board CSS untouched. `?v=46`.
@@ -77,12 +79,12 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=47`. Club Store overflow clip on board 45 (target-modal hold-inspect).
+`docs/` is a copy of `web/`. Cache-bust `?v=48`. Board/felt portrait pack (DRAW left, COOLDOWN right, mid-left chrome strip, End Turn bottom-left) on Club 47.
 
 | Fix | Notes |
 |---|---|
 | Field | Felt is 100% of `#match`. Patrons / piles / effects overlay it. Tavern band ≥ 72% viewport. |
-| Hourglass | Mid-high on the right, with silver/bronze patron-call busts. |
+| Hourglass | Portrait: bottom-left under the mid-left SFX/Leave strip. Landscape: still on the right rail with patron-use octagons. |
 | Tokens | Silver medallions. Point left / down / up for favor. Mora + Treasury stay still. Prestige is a cream hex. |
 | Copy | `texts.js` official sentences + UESP patron lines. Harvest Season = “Draw 1 card.” |
 | Targeting | `GameEngine.targetingStepsForPlay/Patron` + in-match banner. |

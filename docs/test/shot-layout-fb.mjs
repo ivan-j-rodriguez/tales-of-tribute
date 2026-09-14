@@ -112,6 +112,11 @@ async function measure(page, fileStem, { w, h }) {
     ringMaxOffset: m.ringMaxOffset,
     usesNearHourglass: m.usesNearHourglass,
     usesAtCorner: m.usesAtCorner,
+    usesOnRightRail: m.usesOnRightRail,
+    drawLeftEdge: m.drawLeftEdge,
+    cdRightGap: m.cdRightGap,
+    hudIsLeftStrip: m.hudIsLeftStrip,
+    endTurnBottomLeft: m.endTurnBottomLeft,
     oppResToCards: m.oppResToCards,
     youResToCards: m.youResToCards,
     tavernDiscard: m.tavernDiscard,
@@ -145,7 +150,19 @@ async function measure(page, fileStem, { w, h }) {
   }
   if (m.ringMaxOffset == null || m.ringMaxOffset > 2.2) fail(`${fileStem} ring offset ${m.ringMaxOffset}px`, notes);
   if (m.usesAtCorner) fail(`${fileStem} patron-use octagons at screen corners`, notes);
-  if (!m.usesNearHourglass) fail(`${fileStem} patron-use octagons not on hourglass rail`, notes);
+  if (!m.usesNearHourglass) fail(`${fileStem} patron-use octagons not on the right rail`, notes);
+
+  if (TAG !== 'before') {
+    if ((m.drawLeftEdge ?? 99) > 6) fail(`${fileStem} DRAW not at left edge (${m.drawLeftEdge}px)`, notes);
+    if (w < h) {
+      if ((m.cdRightGap ?? 99) > 10) fail(`${fileStem} COOLDOWN not at right edge (gap ${m.cdRightGap}px)`, notes);
+      if (!m.hudIsLeftStrip) fail(`${fileStem} match-actions not a mid-left vertical strip`, notes);
+      if (!m.endTurnBottomLeft) fail(`${fileStem} End Turn not bottom-left under the left strip`, notes);
+    } else {
+      if ((m.cdRightGap ?? 99) > 130) fail(`${fileStem} landscape COOLDOWN still far from right (gap ${m.cdRightGap}px)`, notes);
+      if (!m.hudIsLeftStrip) fail(`${fileStem} landscape match-actions not on the left strip`, notes);
+    }
+  }
 
   const hits = m.hits || {};
   const mustClear = TAG === 'before' ? [] : [
@@ -161,6 +178,9 @@ async function measure(page, fileStem, { w, h }) {
     'effectsVsDeckLabel',
     'leaveVsCooldown',
     'sfxVsCooldown',
+    'hudVsDeck',
+    'endTurnVsYouDraw',
+    'endTurnVsHud',
   ];
   for (const key of mustClear) {
     if (hits[key]) fail(`${fileStem} overlap ${key}`, { hit: hits[key], notes });
@@ -180,6 +200,9 @@ const pBoxes = results.portrait.boxes;
 await closeUp(portPage, `${TAG}-portrait-turn-vs-res`, [pBoxes.turn, pBoxes.oppRes], 390, 844);
 await closeUp(portPage, `${TAG}-portrait-res-vs-agents`, [pBoxes.youRes, pBoxes.youAgents], 390, 844);
 await closeUp(portPage, `${TAG}-portrait-end-turn`, [pBoxes.endTurn, pBoxes.patronRail, pBoxes.patronsCluster], 390, 844);
+await closeUp(portPage, `${TAG}-portrait-draw-left`, [pBoxes.oppDraw, pBoxes.youDraw, pBoxes.deck], 390, 844);
+await closeUp(portPage, `${TAG}-portrait-cd-right`, [pBoxes.oppCd, pBoxes.youCd], 390, 844);
+await closeUp(portPage, `${TAG}-portrait-left-strip`, [pBoxes.leaveHud, pBoxes.endTurn, pBoxes.youDraw], 390, 844);
 
 await portPage.evaluate(() => window.__totTest.playFirstGold());
 await new Promise(r => setTimeout(r, 420));
@@ -221,11 +244,15 @@ if (lFit.titleClipped) fail('landscape inspect title clipped', lFit);
 await landPage.close();
 
 const note = [
-  `Build 42 layout-fb (${TAG})`,
+  `Build 48 layout-fb (${TAG})`,
   `portrait 390x844: tavern ${results.portrait.notes.tavernW}px = ${results.portrait.notes.viewportTavernPct}% vw`,
+  `  DRAW left ${results.portrait.notes.drawLeftEdge}px  CD right-gap ${results.portrait.notes.cdRightGap}px`,
+  `  hud strip ${results.portrait.notes.hudIsLeftStrip}  endTurn BL ${results.portrait.notes.endTurnBottomLeft}`,
   `  hits ${JSON.stringify(results.portrait.notes.hits)}`,
   `landscape 844x390: tavern ${results.landscape.notes.tavernW}px = ${results.landscape.notes.viewportTavernPct}% vw`,
   `  gutters L/R ${results.landscape.notes.leftGutterPct}% / ${results.landscape.notes.rightGutterPct}%`,
+  `  DRAW left ${results.landscape.notes.drawLeftEdge}px  CD right-gap ${results.landscape.notes.cdRightGap}px`,
+  `  hud strip ${results.landscape.notes.hudIsLeftStrip}`,
   `  hits ${JSON.stringify(results.landscape.notes.hits)}`,
 ].join('\n');
 fs.writeFileSync(path.join(ART, `${TAG}-layout-fb-measurements.txt`), note + '\n');

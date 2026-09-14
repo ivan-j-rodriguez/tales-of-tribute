@@ -164,7 +164,7 @@ async function measure(page, fileStem, { w, h }) {
     fail(`${fileStem} ring offset ${m.ringMaxOffset}px from portrait (need ≤2px)`, { ringAlign: m.ringAlign, notes });
   }
   if (m.usesAtCorner) fail(`${fileStem} patron-use octagons at screen corners`, notes);
-  if (!m.usesNearHourglass) fail(`${fileStem} patron-use octagons not on hourglass rail`, notes);
+  if (!m.usesNearHourglass) fail(`${fileStem} patron-use octagons not on the right rail`, notes);
   if (m.hits) {
     for (const [k, v] of Object.entries(m.hits)) {
       if (v) fail(`${fileStem} overlap ${k}`, notes);
