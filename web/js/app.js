@@ -3954,6 +3954,11 @@ function installTestHook() {
       isGauntletMatch = false;
       startMatch({ playerFirst: true, difficulty: 1 });
     },
+    openClub() {
+      $('#login-overlay')?.classList.remove('show');
+      renderClub();
+      show('#club');
+    },
     openStore() {
       $('#login-overlay')?.classList.remove('show');
       storeReturnScreen = '#splash';
