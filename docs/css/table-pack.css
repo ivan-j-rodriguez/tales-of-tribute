@@ -1,4 +1,4 @@
-/* Build 33 — full-bleed felt + overlay chrome + silver medallions.
+/* Build 35 — full-bleed felt + overlay chrome + gothic medallions.
    Loaded last so these rules win the cascade.
    Felt is 100% of #match. Piles, effects, patrons, hourglass float ON it.
    No grid columns that steal tavern width. */
@@ -35,8 +35,8 @@
   gap: 3px 0 !important;
   overflow: hidden !important;
   background: transparent !important;
-  align-content: center !important;
-  align-items: center !important;
+  align-content: stretch !important;
+  align-items: stretch !important;
   justify-items: stretch !important;
   grid-template-columns: 1fr !important;
   grid-template-rows:
@@ -163,7 +163,6 @@
 #match #pile-opp-draw,
 #match #pile-opp-cd,
 #match #pile-tavern-draw,
-#match #pile-tavern-discard,
 #match #pile-you-draw,
 #match #pile-you-cd {
   position: absolute !important;
@@ -186,8 +185,8 @@
 
 #match #pile-opp-draw { top: 8px !important; left: 6px !important; }
 #match #pile-opp-cd { top: 8px !important; right: 10px !important; }
-#match #pile-tavern-draw { top: 50% !important; left: 6px !important; transform: translateY(-112%) !important; }
-#match #pile-tavern-discard { top: 50% !important; right: 10px !important; transform: translateY(-112%) !important; }
+#match #pile-tavern-draw { top: 50% !important; left: 6px !important; transform: translateY(-50%) !important; }
+#match #pile-tavern-discard { display: none !important; }
 #match #pile-you-draw { bottom: 10px !important; left: 6px !important; }
 #match #pile-you-cd { bottom: 10px !important; right: 10px !important; }
 
@@ -490,18 +489,9 @@
   transform-origin: 50% 64%;
   transition: transform 0.65s cubic-bezier(.4, .12, .2, 1);
 }
-#match .patron-coin .token-point {
-  display: block !important;
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 12px;
-  height: 14px;
-  transform: translateX(-50%);
-  background: linear-gradient(180deg, #f7f2e8, #c9c0b0 42%, #8a8276 78%, #4a453c);
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-  filter: drop-shadow(0 1px 1px #0008);
-  z-index: 2;
+#match .patron-coin span.token-point,
+#match .patron-coin .token-point:not(path) {
+  display: none !important;
 }
 #match .patron-coin .coin-ring {
   position: absolute !important;
@@ -631,18 +621,20 @@ body.is-portrait #match .board {
   grid-template-columns: none !important;
 }
 body.is-portrait #match .felt-table {
-  padding: 22px 0 6px !important;
-  row-gap: 3px !important;
-  gap: 3px 0 !important;
+  padding: 4px 0 4px !important;
+  row-gap: 2px !important;
+  gap: 2px 0 !important;
+  align-content: stretch !important;
   grid-template-columns: 1fr !important;
   grid-template-rows:
     auto
     auto
+    26px
     auto
+    26px
     auto
-    auto
-    auto
-    auto !important;
+    minmax(150px, 1fr) !important;
+  align-content: stretch !important;
 }
 body.is-portrait #match .felt-tavern {
   width: 74% !important;
@@ -699,7 +691,6 @@ body.is-portrait #match .pile-stack {
   height: 52px;
 }
 body.is-portrait #match #pile-opp-cd { right: 8px !important; }
-body.is-portrait #match #pile-tavern-discard { right: 8px !important; }
 body.is-portrait #match #pile-you-cd { right: 8px !important; }
 body.is-portrait #match .felt-hud-you {
   right: 4px !important;

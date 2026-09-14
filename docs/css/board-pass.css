@@ -1,0 +1,456 @@
+/* Build 39 — board-only pass.
+   TWO compositions. Same engine/state. Different positions and sizes.
+   Round pewter coin + short gothic peak (~10% of diameter). The metal IS the tip.
+   Loaded last so these rules win. Do not letterbox one layout. */
+
+#pile-tavern-discard { display: none !important; }
+
+/* ——— Shared: felt is the play surface. Chrome overlays it. ——— */
+#match .board {
+  display: block !important;
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  inset: 0 !important;
+  transform: none !important;
+  overflow: hidden !important;
+}
+
+#match .felt-table {
+  display: grid !important;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  column-gap: 0 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  justify-items: stretch !important;
+  grid-template-columns: 1fr !important;
+  grid-template-areas:
+    "opp-hand"
+    "opp-agents"
+    "opp-res"
+    "tavern"
+    "you-res"
+    "you-agents"
+    "you-hand" !important;
+}
+
+#match #pile-tavern-discard { display: none !important; }
+
+/* ===================================================================
+   PORTRAIT — tall stack. Use the height. Marvel Snap / Belote density.
+   =================================================================== */
+body.is-portrait #match .felt-table,
+@media (orientation: portrait) {
+  #match .felt-table {
+    align-content: stretch !important;
+    align-items: stretch !important;
+    padding: 4px 2px 6px !important;
+    row-gap: 3px !important;
+    gap: 3px 0 !important;
+    grid-template-rows:
+      auto
+      auto
+      22px
+      minmax(150px, 1.2fr)
+      22px
+      auto
+      minmax(148px, 1.05fr) !important;
+    align-content: stretch !important;
+  }
+}
+
+body.is-portrait #match .felt-table {
+  align-content: stretch !important;
+  align-items: stretch !important;
+  padding: 4px 2px 4px !important;
+  row-gap: 2px !important;
+  gap: 2px 0 !important;
+  /* Leftover height goes into tavern + hand cards, not an empty band. */
+  grid-template-rows:
+    auto
+    auto
+    22px
+    minmax(150px, 1.2fr)
+    22px
+    auto
+    minmax(148px, 1.05fr) !important;
+  align-content: stretch !important;
+}
+
+body.is-portrait #match .felt-opp-hand,
+body.is-portrait #match .felt-you-hand,
+body.is-portrait #match .felt-opp-agents,
+body.is-portrait #match .felt-you-agents {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  justify-self: stretch !important;
+}
+
+body.is-portrait #match .felt-opp-hand {
+  min-height: 0 !important;
+  align-self: start !important;
+}
+body.is-portrait #match .felt-you-hand {
+  min-height: 0 !important;
+  height: auto !important;
+  align-self: stretch !important;
+}
+body.is-portrait #match #hand-zone,
+body.is-portrait #match .you-fan {
+  height: 100% !important;
+  min-height: 0 !important;
+  align-items: flex-end !important;
+}
+
+body.is-portrait #match .felt-tavern {
+  width: calc(100% - 64px) !important;
+  min-width: 72% !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin-left: 4px !important;
+  justify-self: start !important;
+}
+
+body.is-portrait #match .tavern-band,
+body.is-portrait #match .tavern-zone {
+  height: 100% !important;
+  min-height: 0 !important;
+  width: 100% !important;
+}
+
+body.is-portrait #match .tavern-zone {
+  gap: 0.22rem !important;
+  padding: 0.1rem 0.18rem !important;
+}
+
+body.is-portrait #match .tavern-zone .card {
+  width: min(78px, calc((100% - 0.4rem) / 5.08)) !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1.52 !important;
+  min-height: 110px !important;
+  max-height: 96% !important;
+}
+
+body.is-portrait #match #hand-zone .card,
+body.is-portrait #match #hand-zone button.card,
+body.is-portrait #match .you-fan .card {
+  width: min(102px, 26vw) !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1.52 !important;
+  min-height: 140px !important;
+  max-height: 92% !important;
+  margin: 0 -14px !important;
+}
+
+body.is-portrait #match .rival-fan .card,
+body.is-portrait #match #opp-hand-zone .card {
+  width: min(58px, calc((100% + 0.8rem) / 6.0)) !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1.35 !important;
+  min-height: 52px !important;
+}
+
+body.is-portrait #match .patron-rail {
+  width: auto !important;
+  max-width: 76px !important;
+  padding: 8px 2px 10px 4px !important;
+  background: linear-gradient(90deg, rgba(8, 14, 12, 0) 0%, rgba(10, 16, 14, 0.18) 55%, rgba(16, 12, 8, 0.32) 100%) !important;
+}
+
+body.is-portrait #match .patron-coin { width: 52px !important; }
+body.is-portrait #match .patron-coin .token-dial.medallion {
+  width: 52px !important;
+  height: 58px !important;
+}
+body.is-portrait #match .patron-coin .token-dial.tipless {
+  width: 44px !important;
+  height: 44px !important;
+}
+body.is-portrait #match .patron-coin .plabel { display: none !important; }
+body.is-portrait #match .eso-hourglass-end .hg-svg {
+  width: 28px !important;
+  height: 46px !important;
+}
+body.is-portrait #match .pile-stack { width: 32px; height: 46px; }
+#landscape-tip,
+#match .landscape-tip,
+#match .landscape-tip-off,
+.landscape-tip {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ===================================================================
+   LANDSCAPE — edge-to-edge felt. Wide tavern. Slim right rail.
+   =================================================================== */
+body.is-landscape #match .felt-table {
+  align-content: stretch !important;
+  align-items: stretch !important;
+  padding: 2px 0 2px !important;
+  row-gap: 2px !important;
+  gap: 2px 0 !important;
+  grid-template-rows:
+    minmax(42px, 0.72fr)
+    auto
+    28px
+    minmax(96px, 1.7fr)
+    28px
+    auto
+    minmax(72px, 1.25fr) !important;
+}
+
+body.is-landscape #match .felt-opp-hand,
+body.is-landscape #match .felt-you-hand,
+body.is-landscape #match .felt-opp-agents,
+body.is-landscape #match .felt-you-agents {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  justify-self: stretch !important;
+}
+
+body.is-landscape #match .felt-tavern {
+  width: calc(100% - 118px) !important;
+  min-width: 72% !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin-left: 8px !important;
+  justify-self: start !important;
+}
+
+body.is-landscape #match .tavern-band,
+body.is-landscape #match .tavern-zone {
+  height: 100% !important;
+  min-height: 0 !important;
+  width: 100% !important;
+}
+
+body.is-landscape #match .tavern-zone {
+  justify-content: space-evenly !important;
+  gap: 0.4rem !important;
+  padding: 0.12rem 0.3rem !important;
+}
+
+body.is-landscape #match .tavern-zone .card {
+  width: min(96px, 10.6vw, calc((100% - 1.4rem) / 5.05)) !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1.52 !important;
+  min-height: 78px !important;
+  max-height: 92% !important;
+}
+
+body.is-landscape #match #hand-zone .card,
+body.is-landscape #match #hand-zone button.card,
+body.is-landscape #match .you-fan .card {
+  width: min(72px, 8.2vw, calc((100% + 1rem) / 5.5)) !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1.52 !important;
+  min-height: 64px !important;
+}
+
+body.is-landscape #match .rival-fan .card,
+body.is-landscape #match #opp-hand-zone .card {
+  width: min(42px, 4.8vw, calc((100% + 0.8rem) / 6.3)) !important;
+  min-height: 36px !important;
+}
+
+body.is-landscape #match .patron-rail {
+  max-width: 118px !important;
+  padding: 6px 4px 8px 10px !important;
+}
+
+body.is-landscape #match .patron-coin { width: 56px !important; }
+body.is-landscape #match .patron-coin .token-dial.medallion {
+  width: 54px !important;
+  height: 60px !important;
+}
+body.is-landscape #match .patron-coin .token-dial.tipless {
+  width: 46px !important;
+  height: 46px !important;
+}
+
+/* Piles stay corner overlays — never reserved columns */
+#match #pile-opp-draw { top: 6px !important; left: 4px !important; }
+#match #pile-opp-cd { top: 6px !important; right: 8px !important; }
+#match #pile-tavern-draw { top: 50% !important; left: 4px !important; transform: translateY(-50%) !important; }
+#match #pile-you-draw { bottom: 8px !important; left: 4px !important; }
+#match #pile-you-cd { bottom: 8px !important; right: 8px !important; }
+
+#match .felt-hud-you {
+  right: 72px !important;
+  bottom: 6px !important;
+  left: auto !important;
+}
+
+/* ===================================================================
+   Patron medallions — silver/pewter gothic badge. Tip = favor.
+   Neutral → board/left. You → player/down. Opp → rival/up.
+   Treasury + Mora: circular, never rotate.
+   =================================================================== */
+#match .patron-coin {
+  width: 54px !important;
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  overflow: visible !important;
+}
+
+#match .patron-coin .wood-pendant,
+#match .patron-coin .wood-tip,
+#match .patron-coin .wood-bar,
+#match .patron-coin .wood-name,
+#match .patron-coin .favor-pip { display: none !important; }
+
+#match .patron-coin .token-dial.medallion {
+  display: block !important;
+  position: relative;
+  width: 54px !important;
+  height: 60px !important;
+  margin: 0 auto;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  transform-origin: 50% 51%;
+  transition: transform 0.7s cubic-bezier(.4, .12, .2, 1);
+  filter: drop-shadow(0 3px 5px #0009);
+  /* Round coin + short gothic peak. SVG path is the silhouette. */
+  clip-path: none;
+}
+
+#match .patron-coin .token-dial.tipless {
+  width: 46px !important;
+  height: 46px !important;
+  transform: none !important;
+  transform-origin: 50% 50%;
+  clip-path: circle(48% at 50% 50%);
+  overflow: hidden !important;
+}
+
+#match .patron-coin .medallion-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+#match .patron-coin .token-dial.medallion .medallion-svg {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+#match .patron-coin path.token-point,
+#match .patron-coin path.medallion-body {
+  display: block !important;
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  width: auto !important;
+  height: auto !important;
+  background: none !important;
+  clip-path: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+#match .patron-coin .coin-ring.medallion-face {
+  position: absolute !important;
+  /* Window in viewBox 0 0 100 110, circle (50, 56) r=27 */
+  left: 23% !important;
+  top: 26.4% !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 54% !important;
+  height: 49.1% !important;
+  padding: 0 !important;
+  border-radius: 50%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 34% 28%, #c43440, var(--patron-field, #6b1218)) !important;
+  box-shadow: none !important;
+  z-index: 1;
+  transform-origin: 50% 50%;
+  transition: transform 0.7s cubic-bezier(.4, .12, .2, 1);
+}
+
+#match .patron-coin .token-dial.tipless .coin-ring.medallion-face {
+  left: 12% !important;
+  top: 12% !important;
+  width: 76% !important;
+  height: 76% !important;
+}
+
+#match .patron-coin .medallion-face img,
+#match .patron-coin.neutral .medallion-face img,
+#match .patron-coin.fav-you .medallion-face img,
+#match .patron-coin.fav-opp .medallion-face img {
+  width: 148%;
+  height: 148%;
+  margin: -24%;
+  object-fit: cover;
+  object-position: center 30%;
+  border-radius: 50%;
+  display: block;
+  transform: none !important;
+}
+
+/* Neutral tip toward the board (left). You = down. Rival = up. Face stays upright. */
+#match .patron-coin.neutral:not(.tipless) .token-dial.medallion { transform: rotate(-90deg) !important; }
+#match .patron-coin.fav-you:not(.tipless) .token-dial.medallion { transform: rotate(180deg) !important; }
+#match .patron-coin.fav-opp:not(.tipless) .token-dial.medallion { transform: rotate(0deg) !important; }
+#match .patron-coin.neutral:not(.tipless) .medallion-face { transform: rotate(90deg) !important; }
+#match .patron-coin.fav-you:not(.tipless) .medallion-face { transform: rotate(-180deg) !important; }
+#match .patron-coin.fav-opp:not(.tipless) .medallion-face { transform: none !important; }
+
+#match .patron-coin.tipless .token-dial.medallion,
+#match .patron-coin.treasury .token-dial.medallion,
+#match .patron-coin.mora .token-dial.medallion,
+#match .patron-coin.treasury.neutral .token-dial.medallion,
+#match .patron-coin.mora.neutral .token-dial.medallion,
+#match .patron-coin[data-pid="treasury"] .token-dial.medallion,
+#match .patron-coin[data-pid="mora"] .token-dial.medallion {
+  transform: none !important;
+}
+#match .patron-coin.tipless .medallion-face,
+#match .patron-coin.treasury .medallion-face,
+#match .patron-coin.mora .medallion-face {
+  transform: none !important;
+}
+
+#match .patron-coin.callable .token-dial {
+  filter: drop-shadow(0 0 9px rgba(212, 175, 55, 0.85)) drop-shadow(0 3px 5px #0009);
+}
+#match .patron-coin.just-flipped .token-dial,
+#match .patron-coin.just-flipped .medallion-face { transition-duration: 0.75s; }
+
+#match .patron-coin .plabel {
+  display: block !important;
+  font-family: 'Cinzel', serif;
+  font-size: 0.44rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #e8dcb0;
+  text-shadow: 0 1px 2px #000c;
+  line-height: 1.1;
+  max-width: 58px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}

@@ -164,7 +164,10 @@ function syncBoardLayout() {
   document.body.classList.toggle('is-landscape', matchOn && !portrait);
   document.body.classList.remove('need-landscape');
   const tip = $('#landscape-tip');
-  if (tip) tip.hidden = native || !(matchOn && portrait);
+  if (tip) {
+    tip.hidden = true;
+    tip.setAttribute('hidden', '');
+  }
   const board = match?.querySelector('.board');
   if (!board || !matchOn) return;
   board.style.width = '100%';
@@ -201,6 +204,106 @@ function patronRecord(id) {
     short: pid === 'mora' ? 'Mora' : pid,
     color: DECK_COLORS[pid] || '#c9a227',
   };
+}
+
+function patronNeverTips(pat, pid) {
+  return !!(pat?.alwaysNeutral || pat?.abilities?.alwaysNeutral || pid === 'treasury' || pid === 'mora');
+}
+
+function pewterDefs(uid, field) {
+  return `
+    <linearGradient id="${uid}-pew" x1="14%" y1="0" x2="90%" y2="100%">
+      <stop offset="0%" stop-color="#f8f3e8"/>
+      <stop offset="12%" stop-color="#d4cdc0"/>
+      <stop offset="34%" stop-color="#7a7468"/>
+      <stop offset="50%" stop-color="#efe6d4"/>
+      <stop offset="72%" stop-color="#5c564c"/>
+      <stop offset="100%" stop-color="#241f18"/>
+    </linearGradient>
+    <linearGradient id="${uid}-hi" x1="20%" y1="0" x2="82%" y2="100%">
+      <stop offset="0%" stop-color="#fffaf0"/>
+      <stop offset="40%" stop-color="#c8c0b0"/>
+      <stop offset="100%" stop-color="#3a342c"/>
+    </linearGradient>
+    <radialGradient id="${uid}-fld" cx="36%" cy="28%">
+      <stop offset="0%" stop-color="#c43440"/>
+      <stop offset="100%" stop-color="${field}"/>
+    </radialGradient>`;
+}
+
+/** Carved knotwork on the bezel — loops, not a dotted pip ring. */
+function rimKnotwork(uid, cx, cy, r, count, skipTop) {
+  const bits = [];
+  for (let i = 0; i < count; i++) {
+    if (skipTop && i === 0) continue;
+    const a0 = -Math.PI / 2 + (Math.PI * 2 * i) / count;
+    const a1 = a0 + (Math.PI * 2) / count;
+    const mid = (a0 + a1) / 2;
+    const p = (a, rad) => `${(cx + rad * Math.cos(a)).toFixed(1)} ${(cy + rad * Math.sin(a)).toFixed(1)}`;
+    bits.push(
+      `<path fill="none" stroke="url(#${uid}-hi)" stroke-width="1.15" d="M${p(a0, r)} Q${p(mid, r + 3.4)} ${p(a1, r)}"/>`,
+      `<path fill="none" stroke="#1c1812" stroke-width="0.45" opacity=".55" d="M${p(a0, r - 2.4)} Q${p(mid, r - 5.2)} ${p(a1, r - 2.4)}"/>`,
+    );
+  }
+  return bits.join('');
+}
+
+/**
+ * Ornate pewter gothic medallion. The metal silhouette IS the favor tip:
+ * circular body + integrated gothic peak (not a triangle glued to a coin).
+ */
+function medallionMarkup(pid, pat, short, favorWord) {
+  const uid = `med-${pid}`;
+  const art = patronArt(pid);
+  const field = pat?.color || '#6b1218';
+  const title = `${favorWord} — ${pat?.name || short}`;
+  const neverTurn = patronNeverTips(pat, pid);
+  const defs = pewterDefs(uid, field);
+  if (neverTurn) {
+    return `
+      <div class="token-dial medallion tipless" title="${title}">
+        <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
+        <svg class="medallion-svg" viewBox="0 0 100 100" aria-hidden="true">
+          <defs>${defs}</defs>
+          <path fill="url(#${uid}-pew)" fill-rule="evenodd" stroke="#1c1812" stroke-width="1.5"
+            d="M50 2 A48 48 0 1 1 49.9 2 Z M50 50 m-28 0 a28 28 0 1 1 56 0 a28 28 0 1 1 -56 0"/>
+          <circle cx="50" cy="50" r="28.8" fill="none" stroke="#1c1812" stroke-width="1.4"/>
+          <circle cx="50" cy="50" r="27.6" fill="none" stroke="#efe6d4" stroke-width="1.1" opacity=".9"/>
+          <circle cx="50" cy="50" r="38.6" fill="none" stroke="#5c564c" stroke-width="2.2"/>
+          ${rimKnotwork(uid, 50, 50, 38.2, 10, false)}
+        </svg>
+      </div>
+      <span class="plabel">${short}</span>`;
+  }
+  /*
+   * ROUND pewter coin + short gothic peak (~10% of diameter).
+   * Circle centered at (50, 56), r=45, viewBox 0 0 100 110.
+   * Peak tip at y=2 → 9 units above the circle (9/90 = 10%).
+   */
+  const sil = [
+    'M50 2',
+    'C53.8 6.8, 61 11.2, 68.3 14.9',
+    'A45 45 0 1 1 31.7 14.9',
+    'C39 11.2, 46.2 6.8, 50 2 Z',
+  ].join(' ');
+  const windowHole = 'M50 56 m-27 0 a27 27 0 1 1 54 0 a27 27 0 1 1 -54 0';
+  return `
+    <div class="token-dial medallion" title="${title}">
+      <span class="coin-ring medallion-face"><img src="${art}" alt="${short}" draggable="false" /></span>
+      <svg class="medallion-svg" viewBox="0 0 100 110" aria-hidden="true">
+        <defs>${defs}</defs>
+        <path class="token-point medallion-body" fill="url(#${uid}-pew)" fill-rule="evenodd" stroke="#1c1812" stroke-width="1.45"
+          d="${sil} ${windowHole}"/>
+        <path fill="none" stroke="url(#${uid}-hi)" stroke-width="1.15" d="M50 4.2 C54 8.4, 61 11.6, 67.4 14.6"/>
+        <path fill="none" stroke="#1c1812" stroke-width="0.6" opacity=".5" d="M50 4.2 C46 8.4, 39 11.6, 32.6 14.6"/>
+        <circle class="token-finial" cx="50" cy="3.6" r="1.85" fill="url(#${uid}-hi)" stroke="#1c1812" stroke-width="0.6"/>
+        <circle cx="50" cy="56" r="28" fill="none" stroke="#1c1812" stroke-width="1.4"/>
+        <circle cx="50" cy="56" r="26.8" fill="none" stroke="#efe6d4" stroke-width="1.05" opacity=".92"/>
+        <circle cx="50" cy="56" r="38.4" fill="none" stroke="#5c564c" stroke-width="2.1"/>
+        ${rimKnotwork(uid, 50, 56, 37.8, 12, true)}
+      </svg>
+    </div>
+    <span class="plabel">${short}</span>`;
 }
 
 function applyTableSkin() {
@@ -255,13 +358,14 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 38';
+  if (stamp) stamp.textContent = 'build 39';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
   show('#splash');
-  if (canClaimDailyLogin(profile)) openLoginGreet();
-  else if (profile.pendingCrate) openCrateCeremony(profile.pendingCrate);
+  const testShell = new URLSearchParams(location.search).has('test');
+  if (!testShell && canClaimDailyLogin(profile)) openLoginGreet();
+  else if (!testShell && profile.pendingCrate) openCrateCeremony(profile.pendingCrate);
 }
 
 function botRevealAllowed() {
@@ -968,7 +1072,6 @@ function pileEl(which) {
     'opp-cooldown': '#pile-opp-cd',
     'opp-draw': '#pile-opp-draw',
     'opp-hand': '#pile-opp-hand',
-    'tavern-discard': '#pile-tavern-discard',
     'hand': '#hand-zone',
     'tavern': '#tavern-zone',
     'played': '#you-played',
@@ -1064,7 +1167,6 @@ function renderMatch() {
   $('#cnt-you-draw').textContent = you.draw.length;
   $('#cnt-you-played').textContent = you.played.length;
   $('#cnt-you-cd').textContent = you.cooldown.length;
-  $('#cnt-tavern-discard').textContent = s.tavernDiscard.length;
   const tdraw = $('#cnt-tavern-draw');
   if (tdraw) tdraw.textContent = (s.tavernPile || []).length;
   renderEventsRail(you, s);
@@ -1085,21 +1187,16 @@ function renderMatch() {
     const el = document.createElement('div');
     const favor = favYou ? 'fav-you' : favOpp ? 'fav-opp' : 'neutral';
     const favorWord = favYou ? 'Favored' : favOpp ? 'Unfavored' : 'Neutral';
-    el.className = 'patron-coin ' + (pid === 'treasury' ? 'treasury ' : '') + favor;
+    const neverTurn = patronNeverTips(pat, pid);
+    el.className = 'patron-coin ' + (pid === 'treasury' ? 'treasury ' : '') + (pid === 'mora' ? 'mora ' : '') + favor + (neverTurn ? ' tipless' : '');
     el.dataset.pid = pid;
     el.dataset.favor = favorWord.toLowerCase();
     el.dataset.side = pid === 'treasury' ? 'mid' : (youPats.includes(pid) ? 'you' : 'opp');
+    el.style.setProperty('--patron-field', pat.color || '#6b1218');
     if (yourTurn && engine.canCallPatron(pid)) el.classList.add('callable');
     if (prevFavor[pid] && prevFavor[pid] !== favorWord.toLowerCase()) el.classList.add('just-flipped');
     const short = (pat.short || pat.name || pid).replace(/^The\s+/i, '');
-    const neverTurn = !!(pat.alwaysNeutral || pat.abilities?.alwaysNeutral || pid === 'treasury' || pid === 'mora');
-    el.innerHTML = `
-      <div class="token-dial" title="${favorWord} — ${pat.name || short}">
-        ${neverTurn ? '' : '<span class="token-point" aria-hidden="true"></span>'}
-        <span class="coin-ring"><img src="${patronArt(pid)}" alt="${short}" draggable="false" /></span>
-      </div>
-      <span class="plabel">${short}</span>
-    `;
+    el.innerHTML = medallionMarkup(pid, pat, short, favorWord);
     bindCardGesture(el, {
       onTap: () => openPatronConfirm(pid, 'call'),
       onHoldRead: () => startPatronLift(el, pid),
@@ -3443,10 +3540,26 @@ function layoutMetrics() {
   for (let i = 1; i < cards.length; i++) {
     overlap = Math.max(overlap, cards[i - 1].right - cards[i].x);
   }
+  const oppHand = box('#match .felt-opp-hand');
+  const youHand = box('#match .felt-you-hand') || box('#hand-zone');
   const feltW = felt?.w || board?.w || vw;
+  const feltH = felt?.h || board?.h || vh;
   const tavernW = band?.w || tavern?.w || 0;
+  const tavernBottom = (tavern || band)?.bottom || 0;
+  const handTop = youHand?.y || 0;
+  const midGap = tavernBottom && handTop ? Math.max(0, handTop - tavernBottom) : 0;
+  const peakPath = document.querySelector('#rail-patrons path.token-point');
+  let peakPct = null;
+  if (peakPath) {
+    const bb = peakPath.getBBox();
+    const diameter = bb.width;
+    const peakH = Math.max(0, bb.height - diameter);
+    peakPct = diameter ? +(peakH / diameter * 100).toFixed(1) : null;
+  }
   const leftGutter = felt && tavern ? tavern.x - felt.x : 0;
   const rightGutter = felt && tavern ? felt.right - tavern.right : 0;
+  const topBand = felt && oppHand ? Math.max(0, oppHand.y - felt.y) : 0;
+  const botBand = felt && youHand ? Math.max(0, felt.bottom - youHand.bottom) : 0;
   const tokensStacked = !!(youTok && oppTok && hg
     && Math.abs(youTok.y - oppTok.y) < 36
     && Math.abs(youTok.x - oppTok.x) < 28
@@ -3467,6 +3580,17 @@ function layoutMetrics() {
     rightGutter: +rightGutter.toFixed(1),
     leftGutterPct: feltW ? +(leftGutter / feltW * 100).toFixed(1) : 0,
     rightGutterPct: feltW ? +(rightGutter / feltW * 100).toFixed(1) : 0,
+    feltH,
+    topBand: +topBand.toFixed(1),
+    botBand: +botBand.toFixed(1),
+    topBandPct: feltH ? +(topBand / feltH * 100).toFixed(1) : 0,
+    botBandPct: feltH ? +(botBand / feltH * 100).toFixed(1) : 0,
+    midGap: +midGap.toFixed(1),
+    midGapPct: feltH ? +(midGap / feltH * 100).toFixed(1) : 0,
+    peakPct,
+    tavernDiscard: !!document.querySelector('#pile-tavern-discard'),
+    medallions: document.querySelectorAll('#rail-patrons .medallion').length,
+    pointedTips: document.querySelectorAll('#rail-patrons .token-point').length,
     cardCount: cards.length,
     cardH: +cardH.toFixed(1),
     cardOverlap: +overlap.toFixed(1),
@@ -3483,6 +3607,8 @@ function installTestHook() {
     lastToast: () => lastToast,
     startQuick() {
       try { localStorage.setItem(TOUR_KEY, '1'); } catch {}
+      $('#login-overlay')?.classList.remove('show');
+      $('#crate-overlay')?.classList.remove('show');
       pickYou = ['pelin', 'hlaalu'];
       pickOpp = ['crows', 'celarus'];
       matchMode = 'ai';
@@ -3501,6 +3627,9 @@ function installTestHook() {
         pip: !!el.querySelector('.favor-pip'),
         wood: !!el.querySelector('.wood-pendant, .wood-bar, .wood-name'),
         ring: !!el.querySelector('.coin-ring'),
+        medallion: !!el.querySelector('.medallion'),
+        tipless: el.classList.contains('tipless'),
+        rot: getComputedStyle(el.querySelector('.token-dial') || el).transform,
       }));
       const cluster = $('#rail-patrons')?.getBoundingClientRect();
       const rail = $('#patron-rail')?.getBoundingClientRect();
@@ -3546,6 +3675,14 @@ function installTestHook() {
         hourglassMid: !!(felt && hg && hg.top < felt.top + felt.height * 0.72),
         midMatchHgToggle: !!document.querySelector('#btn-hg-toggle'),
         treasuryHasTip: coins.some(c => c.id === 'treasury' && c.tip),
+        moraHasTip: coins.some(c => c.id === 'mora' && c.tip),
+        tavernDiscard: !!document.querySelector('#pile-tavern-discard'),
+        landscapeBanner: (() => {
+          const tip = document.querySelector('#landscape-tip');
+          if (!tip) return false;
+          const cs = getComputedStyle(tip);
+          return !tip.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' && Number(cs.opacity) > 0 && !!(tip.textContent || '').trim();
+        })(),
         resPatronTok: !!document.querySelector('#you-res .tok-patron'),
         railPatronTok: !!document.querySelector('#you-patron-calls'),
         targeting: !!targetSession,
@@ -3569,6 +3706,12 @@ function installTestHook() {
       };
     },
     layout: layoutMetrics,
+    setFavor(pid, value) {
+      if (!engine?.state) return false;
+      engine.state.favor[pid] = value;
+      renderMatch();
+      return true;
+    },
     inspectById(id) {
       const d = cardsById[id];
       const el = document.querySelector('#hand-zone .card, #tavern-zone .card');

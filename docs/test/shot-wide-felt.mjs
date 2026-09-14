@@ -103,6 +103,11 @@ async function measure(page, name, { w, h }) {
     triadCount: snap.triadCount,
     youCallsOnRail: snap.youCallsOnRail,
     treasuryHasTip: snap.treasuryHasTip,
+    topBandPct: m.topBandPct,
+    botBandPct: m.botBandPct,
+    tavernDiscard: m.tavernDiscard,
+    pointedTips: m.pointedTips,
+    medallions: m.medallions,
   };
   if (m.viewportTavernPct < 72) fail(`${name} tavern ${m.viewportTavernPct}% < 72%`, notes);
   if ((m.hiddenCards || 0) > 0) fail(`${name} ${m.hiddenCards} tavern card(s) hidden under the rail`, notes);
@@ -111,6 +116,10 @@ async function measure(page, name, { w, h }) {
   if (m.tokensStacked) fail(`${name} two patron-use tokens stacked under hourglass`, notes);
   /* Right-side space is the patron overlay on felt, not a letterbox. Fail only a fat LEFT dead column. */
   if (h < w && m.leftGutterPct > 10) fail(`${name} landscape left gutter too wide`, notes);
+  if (w < h && (m.topBandPct > 8 || m.botBandPct > 8)) fail(`${name} portrait empty bands T/B ${m.topBandPct}%/${m.botBandPct}%`, notes);
+  if (m.tavernDiscard) fail(`${name} tavern discard pile still on the felt`, notes);
+  if (snap.treasuryHasTip) fail(`${name} Treasury still has a favor tip`, notes);
+  if ((m.pointedTips || 0) < 1) fail(`${name} no gothic patron tips`, notes);
   if (snap.triadCount !== 3) fail(`${name} resource triad is not 3`, notes);
   console.log('ok ', JSON.stringify(notes));
   return notes;
@@ -131,7 +140,7 @@ results.landscape = await measure(landPage, 'landscape-wide-ok', { w: 844, h: 39
 await landPage.close();
 
 const note = [
-  'Build 32 tavern width gate',
+  'Build 35 board-pass gate',
   `portrait 390x844: tavern ${results.portrait.tavernW}px = ${results.portrait.viewportTavernPct}% of viewport (need ≥72%)`,
   `landscape 844x390: tavern ${results.landscape.tavernW}px = ${results.landscape.viewportTavernPct}% of viewport (need ≥72%)`,
   `portrait gutters L/R ${results.portrait.leftGutterPct}% / ${results.portrait.rightGutterPct}%`,

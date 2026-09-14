@@ -36,7 +36,9 @@
   --felt-deep: var(--eso-felt-deep) !important;
 }
 
-.landscape-tip {
+.landscape-tip,
+#landscape-tip { display: none !important; }
+.landscape-tip-off {
   position: absolute;
   top: max(6px, env(safe-area-inset-top, 0px));
   left: 50%;
@@ -251,7 +253,6 @@
 #match #pile-opp-draw,
 #match #pile-opp-cd,
 #match #pile-tavern-draw,
-#match #pile-tavern-discard,
 #match #pile-you-draw,
 #match #pile-you-cd {
   position: absolute !important;
@@ -260,8 +261,8 @@
 }
 #match #pile-opp-draw { top: 8px; left: 6px; grid-area: unset !important; }
 #match #pile-opp-cd { top: 8px; right: 10px; grid-area: unset !important; }
-#match #pile-tavern-draw { top: 50%; left: 6px; transform: translateY(-112%); grid-area: unset !important; }
-#match #pile-tavern-discard { top: 50%; right: 10px; transform: translateY(-112%); grid-area: unset !important; }
+#match #pile-tavern-draw { top: 50%; left: 6px; transform: translateY(-50%); grid-area: unset !important; }
+#match #pile-tavern-discard { display: none !important; }
 #match #pile-you-draw { bottom: 10px; left: 6px; grid-area: unset !important; }
 #match #pile-you-cd { bottom: 10px; right: 10px; grid-area: unset !important; }
 
@@ -668,7 +669,8 @@
   white-space: nowrap;
 }
 #match .patron-coin .token-frame,
-#match .patron-coin .token-point,
+#match .patron-coin span.token-point,
+#match .patron-coin .token-point:not(path),
 #match .patron-coin .plabel { display: none !important; }
 #match .patron-coin .coin-ring {
   position: relative !important;

@@ -1,10 +1,12 @@
 # Status
 
+**2026-09-14 (build 39):** Board review on PR #12, rebased onto Club 38. Round pewter patron coin + short gothic peak (~10% of diameter). Portrait tavern-to-hand gap packed. No in-match landscape banner. Club/economy/encyclopedia stay on main. `?v=39`.
+
 **2026-09-14 (build 38):** Crown Crate loot follows the crate on the calendar (Iron / Orichalcum / Ebony / Voidsteel), not a hardcoded Iron/Fine roll. Still max 2 crates/month. No felt/table CSS. `?v=38`.
 
 **2026-09-14 (build 37):** Encyclopedia All-cards scroll opens each deck with the **patron portrait/token + name**, then that patron’s cards. Locked patrons stay grey/`???`. Mora and Treasury always appear. Collection Patrons + Card Clues match. No felt/table CSS. `?v=37`.
 
-**2026-09-14 (build 35):** Full Club overhaul on the build 33 overlay board. High Isle splash + dedicated Store. Ranked is PvP-only. Daily stingy shop. Win Continue → purse. Login greet + 2 Crown Crates/month. Encyclopedia All-cards scroll uses simple patron dividers — **Hermaeus Mora and Treasury always appear**. No felt/table CSS. `?v=35`.
+**2026-09-14 (build 35):** Full Club overhaul on the build 33 overlay board. High Isle splash + dedicated Store. Ranked is PvP-only. Daily stingy shop. Win Continue → purse. Login greet + 2 Crown Crates/month. Encyclopedia All-cards scroll uses simple patron dividers — **Hermaeus Mora and Treasury always appear**. No felt/table CSS. `?v=35`. Board-only pass on this PR: no tavern discard; pewter medallions; dual-orientation felt. Club files stay on main.
 
 **2026-09-14 (build 34):** Club economy on top of the build 33 full-bleed overlay board. Shop / collection / challenges only — no felt or table-pack edits. `?v=34`.
 
@@ -57,7 +59,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=38`. Overlay board from build 33 is the table source of truth.
+`docs/` is a copy of `web/`. Cache-bust `?v=39`. Dual-orientation board from this PR sits on Club build 38.
 
 | Fix | Notes |
 |---|---|

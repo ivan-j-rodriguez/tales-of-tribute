@@ -2,7 +2,9 @@
 
 ## Board / match (must keep)
 - Full-bleed felt both orientations; overlay/transparency/fade for piles, effects, patrons
+- Two compositions (portrait stack vs landscape rail) — do not letterbox one CSS
 - Tavern 5 center; card-back piles visible
+- No tavern discard pile (tavern never shows a discard/cooldown next to the row)
 - Coin (gold circle) / Prestige (cream hex) / Power (red diamond) triad only; patron-uses one octagon/player on hourglass rail
 - Pointed silver medallions; tip = favor (Neutral left, you down, opp up); Treasury + Mora never tip; hold shows all three favor texts
 - Hourglass glow; playable glow; floating translucent combo/effects
