@@ -149,7 +149,7 @@ body.is-native .landscape-tip { display: none !important; }
   background: transparent !important;
   align-items: stretch !important;
   justify-items: stretch !important;
-  grid-template-columns: minmax(74px, 12%) minmax(0, 1fr) minmax(74px, 12%) !important;
+  grid-template-columns: minmax(48px, 8%) minmax(0, 1fr) minmax(48px, 8%) !important;
   grid-template-rows:
     minmax(44px, 0.7fr)
     auto
@@ -673,24 +673,13 @@ body.is-native .landscape-tip { display: none !important; }
   color: #e8dcb0;
   text-align: center;
 }
-#match .patron-coin.neutral .token-dial { transform: rotate(-90deg); }
-#match .patron-coin.fav-you .token-dial { transform: rotate(180deg); }
-#match .patron-coin.fav-opp .token-dial { transform: rotate(0deg); }
-#match .patron-coin.neutral img { transform: rotate(90deg); }
-#match .patron-coin.fav-you img { transform: rotate(-180deg); }
-#match .patron-coin.fav-opp img { transform: rotate(0deg); }
-#match .patron-coin.treasury .token-dial,
-#match .patron-coin[data-pid="treasury"] .token-dial,
-#match .patron-coin.mora .token-dial,
-#match .patron-coin[data-pid="mora"] .token-dial {
-  transform: none !important;
+#match .patron-coin .token-dial,
+#match .patron-coin.neutral .token-dial,
+#match .patron-coin.fav-you .token-dial,
+#match .patron-coin.fav-opp .token-dial {
+  transform: none;
 }
-#match .patron-coin.treasury img,
-#match .patron-coin[data-pid="treasury"] img,
-#match .patron-coin.mora img,
-#match .patron-coin[data-pid="mora"] img {
-  transform: none !important;
-}
+#match .patron-coin img { transform: none; }
 #match .patron-coin.treasury .coin-ring {
   background: conic-gradient(from 0deg, #c9a227, #fff6c0, #d4af37, #8a6a20, #fff6c0, #c9a227) !important;
 }

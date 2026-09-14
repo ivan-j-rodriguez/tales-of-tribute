@@ -82,5 +82,15 @@ console.log('portrait inspect', JSON.stringify({
 await shot(portPage, 'inspect_toll_portrait');
 await portPage.close();
 
+const nativePage = await browser.newPage();
+await nativePage.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+await nativePage.goto(`http://127.0.0.1:${port}/?test=1&native=1`, { waitUntil: 'domcontentloaded' });
+await nativePage.waitForFunction(() => window.__totTest, { timeout: 20000 });
+await nativePage.evaluate(() => window.__totTest.startQuick());
+await nativePage.waitForFunction(() => window.__totTest.snapshot().hand > 0, { timeout: 8000 });
+await new Promise((r) => setTimeout(r, 350));
+await shot(nativePage, 'table_portrait_native');
+await nativePage.close();
+
 await browser.close();
 server.close();

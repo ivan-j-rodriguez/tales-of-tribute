@@ -9,22 +9,41 @@ body.is-native .landscape-tip { display: none !important; }
   grid-template-columns: minmax(0, 1fr) minmax(84px, 12.5%) !important;
 }
 
-/* Felt: tavern + hand take leftover space. Agent rows stay auto/thin. */
+/* Felt: tavern + hand take leftover space. Agent rows stay auto/thin.
+   Hands and tavern span the full felt; piles sit in the corners on top. */
 #match .felt-table {
   align-content: stretch !important;
   align-items: stretch !important;
   justify-items: stretch !important;
   row-gap: 3px !important;
-  column-gap: 6px !important;
-  padding: 6px 6px 8px !important;
+  column-gap: 4px !important;
+  padding: 6px 4px 8px !important;
+  grid-template-columns: minmax(44px, 8%) minmax(0, 1fr) minmax(44px, 8%) !important;
   grid-template-rows:
-    minmax(44px, 0.72fr)
+    minmax(44px, 0.7fr)
     auto
     auto
-    minmax(150px, 1.85fr)
+    minmax(168px, 2fr)
     auto
     auto
-    minmax(108px, 1.28fr) !important;
+    minmax(118px, 1.32fr) !important;
+}
+
+#match .felt-opp-hand,
+#match .felt-tavern,
+#match .felt-you-hand,
+#match #opp-res,
+#match #you-res,
+#match .felt-opp-agents,
+#match .felt-you-agents {
+  grid-column: 1 / -1 !important;
+}
+#match .felt-opp-hand { padding: 0 36px; z-index: 3; }
+#match .felt-you-hand { padding: 0 36px; z-index: 3; }
+#match .felt-tavern { padding: 0 34px; z-index: 3; }
+#match .hex-pile,
+#match .pile-btn {
+  z-index: 10 !important;
 }
 
 #match .felt-tavern {
@@ -48,11 +67,12 @@ body.is-native .landscape-tip { display: none !important; }
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
+  gap: 0.12rem !important;
 }
 
 #match .tavern-zone .card {
-  width: min(118px, 14.2vw, calc((100% - 0.8rem) / 5.08)) !important;
-  height: min(176px, calc(min(118px, 14.2vw) * 1.52), 96%) !important;
+  width: min(124px, 15vw, calc((100% - 0.6rem) / 5.05)) !important;
+  height: min(188px, calc(min(124px, 15vw) * 1.52), 98%) !important;
   max-height: 100% !important;
 }
 
@@ -110,10 +130,10 @@ body.is-native .landscape-tip { display: none !important; }
   gap: 10px !important;
 }
 #match .agent-slot.empty {
-  width: 20px !important;
-  height: 26px !important;
-  border: 1px solid rgba(212, 175, 55, 0.42);
-  background: transparent !important;
+  width: 22px !important;
+  height: 28px !important;
+  border: 1px solid rgba(212, 175, 55, 0.55);
+  background: rgba(212, 175, 55, 0.05) !important;
   box-shadow: none !important;
   border-radius: 0 !important;
   clip-path: polygon(50% 0%, 100% 15%, 100% 85%, 50% 100%, 0% 85%, 0% 15%);
@@ -207,39 +227,39 @@ body.is-native .landscape-tip { display: none !important; }
 #match .patron-coin .token-dial {
   display: block !important;
   position: relative;
-  width: 50px !important;
-  height: 62px !important;
+  width: 56px !important;
+  height: 56px !important;
   margin: 0 auto;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
-  transform-origin: 50% 64%;
-  transition: transform 0.65s cubic-bezier(.4, .12, .2, 1);
+  overflow: visible !important;
 }
 #match .patron-coin .token-point {
   display: block !important;
   position: absolute;
   left: 50%;
   top: 0;
-  width: 13px;
-  height: 15px;
+  width: 15px;
+  height: 17px;
   transform: translateX(-50%);
   background:
-    linear-gradient(180deg, #f7f2e8, #c9c0b0 42%, #8a8276 78%, #4a453c);
+    linear-gradient(180deg, #fff8ee, #d8d0c4 42%, #9a9286 78%, #4a453c);
   clip-path: polygon(50% 0, 100% 100%, 0 100%);
-  filter: drop-shadow(0 1px 1px #0008);
-  z-index: 2;
+  filter: drop-shadow(0 0 1px #f3eee4) drop-shadow(0 1px 2px #000a);
+  z-index: 3;
 }
 #match .patron-coin .coin-ring {
   position: absolute !important;
   left: 50% !important;
-  bottom: 0 !important;
+  top: 50% !important;
+  bottom: auto !important;
   right: auto !important;
-  top: auto !important;
-  width: 50px !important;
-  height: 50px !important;
+  width: 54px !important;
+  height: 54px !important;
   padding: 3px !important;
+  transform: translate(-50%, -50%) !important;
   border-radius: 50%;
   flex: none !important;
   overflow: hidden;
@@ -281,32 +301,45 @@ body.is-native .landscape-tip { display: none !important; }
   text-align: center;
 }
 
-/* Point = favor. Neutral: left. You: down. Rival: up. Face stays upright. */
-#match .patron-coin.neutral .token-dial { transform: rotate(-90deg) !important; }
-#match .patron-coin.fav-you .token-dial { transform: rotate(180deg) !important; }
-#match .patron-coin.fav-opp .token-dial { transform: rotate(0deg) !important; }
-#match .patron-coin.neutral img { transform: rotate(90deg) !important; }
-#match .patron-coin.fav-you img { transform: rotate(-180deg) !important; }
-#match .patron-coin.fav-opp img { transform: rotate(0deg) !important; }
-
-/* Mora + Treasury never turn */
+/* Coin face stays upright. Only the favor point travels around the rim. */
+#match .patron-coin .token-dial,
+#match .patron-coin.neutral .token-dial,
+#match .patron-coin.fav-you .token-dial,
+#match .patron-coin.fav-opp .token-dial,
 #match .patron-coin.treasury .token-dial,
-#match .patron-coin.treasury.neutral .token-dial,
-#match .patron-coin.treasury.fav-you .token-dial,
-#match .patron-coin.treasury.fav-opp .token-dial,
-#match .patron-coin[data-pid="treasury"] .token-dial,
 #match .patron-coin.mora .token-dial,
 #match .patron-coin[data-pid="mora"] .token-dial,
-#match .patron-coin.mora.fav-you .token-dial,
-#match .patron-coin.mora.fav-opp .token-dial,
-#match .patron-coin.mora.neutral .token-dial {
+#match .patron-coin[data-pid="treasury"] .token-dial {
   transform: none !important;
 }
+#match .patron-coin img,
+#match .patron-coin.neutral img,
+#match .patron-coin.fav-you img,
+#match .patron-coin.fav-opp img,
 #match .patron-coin.treasury img,
-#match .patron-coin[data-pid="treasury"] img,
 #match .patron-coin.mora img,
-#match .patron-coin[data-pid="mora"] img {
+#match .patron-coin[data-pid="mora"] img,
+#match .patron-coin[data-pid="treasury"] img {
   transform: none !important;
+}
+#match .patron-coin .token-point {
+  z-index: 3;
+}
+#match .patron-coin.neutral .token-point {
+  left: 1px;
+  top: 50%;
+  transform: translate(-70%, -50%) rotate(-90deg);
+}
+#match .patron-coin.fav-you .token-point {
+  left: 50%;
+  top: auto;
+  bottom: -1px;
+  transform: translate(-50%, 35%) rotate(180deg);
+}
+#match .patron-coin.fav-opp .token-point {
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -20%) rotate(0deg);
 }
 #match .patron-coin.treasury .coin-ring {
   background:
@@ -352,31 +385,42 @@ body.is-native .landscape-tip { display: none !important; }
 
 /* Portrait — packed felt, coins stay coins */
 body.is-portrait #match .board {
-  grid-template-columns: minmax(0, 1fr) minmax(72px, 20%) !important;
+  grid-template-columns: minmax(0, 1fr) minmax(64px, 17%) !important;
 }
 body.is-portrait #match .felt-table {
   align-content: stretch !important;
-  padding: 10px 4px 6px !important;
+  padding: 10px 2px 6px !important;
   row-gap: 3px !important;
+  grid-template-columns: minmax(40px, 9%) minmax(0, 1fr) minmax(40px, 9%) !important;
   grid-template-rows:
-    minmax(40px, 0.62fr)
+    minmax(40px, 0.58fr)
     auto
     auto
-    minmax(132px, 1.75fr)
+    minmax(168px, 2fr)
     auto
     auto
-    minmax(112px, 1.22fr) !important;
+    minmax(124px, 1.28fr) !important;
+}
+body.is-portrait #match .felt-opp-hand,
+body.is-portrait #match .felt-you-hand,
+body.is-portrait #match .felt-tavern {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+body.is-portrait #match .felt-tavern {
+  overflow: hidden !important;
 }
 body.is-portrait #match .tavern-zone .card {
-  width: min(92px, calc((100% - 0.4rem) / 5.05)) !important;
-  height: min(140px, calc(min(92px, 22vw) * 1.52), 96%) !important;
+  width: min(100px, calc((100% - 0.35rem) / 5.08)) !important;
+  height: min(152px, calc(min(100px, 24vw) * 1.52), 98%) !important;
+  margin: 0 1px !important;
 }
 body.is-portrait #match #hand-zone .card,
 body.is-portrait #match #hand-zone button.card,
 body.is-portrait #match .you-fan .card {
-  width: min(86px, calc((100% + 1.8rem) / 5.1)) !important;
-  height: min(128px, calc(min(86px, 20vw) * 1.52), 94%) !important;
-  margin: 0 -12px !important;
+  width: min(102px, calc((100% + 2.4rem) / 5.05)) !important;
+  height: min(154px, calc(min(102px, 26vw) * 1.52), 96%) !important;
+  margin: 0 -16px !important;
 }
 body.is-portrait #match .agent-slot.empty {
   width: 16px !important;
@@ -388,14 +432,14 @@ body.is-portrait #match .patron-rail {
   align-content: center !important;
   justify-items: center !important;
 }
-body.is-portrait #match .patron-coin { width: 52px !important; }
+body.is-portrait #match .patron-coin { width: 54px !important; }
 body.is-portrait #match .patron-coin .token-dial {
-  width: 44px !important;
-  height: 54px !important;
+  width: 48px !important;
+  height: 48px !important;
 }
 body.is-portrait #match .patron-coin .coin-ring {
-  width: 44px !important;
-  height: 44px !important;
+  width: 48px !important;
+  height: 48px !important;
 }
 body.is-portrait #match .patron-coin .plabel { font-size: 0.4rem; }
 body.is-portrait #match .eso-hourglass-end .hg-svg {
