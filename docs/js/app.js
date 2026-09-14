@@ -20,7 +20,7 @@ import {
   DECK_COLORS, FALLBACK_PATRONS, canonPatron, groupCardsByDeck,
   currentSeason, nextSeason, msUntilShopRefresh, msUntilWeeklyReset,
   loginMonthGrid, clueCountOf, countClues, deckCardSet, weeklyKey,
-  isOfferSoldOut, crateVariantForDay, CRATES_PER_MONTH,
+  isOfferSoldOut, crateVariantForDay, CRATES_PER_MONTH, resolveCrateVariant,
 } from './economy.js';
 import { hostRoom, joinRoom } from './netplay.js';
 import { setMusicEnabled, preferMusicFromStorage, warmMuted, playSfx, setMusicCue, setSfxStyle, getSfxStyle, setSfxEnabled, preferSfxFromStorage, isSfxOn } from './music.js';
@@ -43,6 +43,7 @@ let matchMode = 'ai'; // ai | hotseat | remote-host | remote-guest
 let rankedPeerPicks = [];
 let storeReturnScreen = '#splash';
 let pendingWinLeave = null;
+let pendingCrate = null;
 let isRandomMatch = false;
 let isRankedMatch = false;
 let hourglassOn = false;
@@ -254,12 +255,13 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 37';
+  if (stamp) stamp.textContent = 'build 38';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
   show('#splash');
   if (canClaimDailyLogin(profile)) openLoginGreet();
+  else if (profile.pendingCrate) openCrateCeremony(profile.pendingCrate);
 }
 
 function botRevealAllowed() {
@@ -2746,11 +2748,14 @@ function claimLoginStamp() {
 function openCrateCeremony(variant) {
   const overlay = $('#crate-overlay');
   if (!overlay) return;
+  const crate = resolveCrateVariant(variant);
+  if (!crate) return;
+  pendingCrate = crate;
   const stage = $('#crate-stage');
   stage?.classList.remove('crate-open');
   stage?.classList.remove('crate-iron', 'crate-orichalcum', 'crate-ebony', 'crate-voidsteel');
-  stage?.classList.add(`crate-${variant.id}`);
-  $('#crate-rarity').textContent = variant.name;
+  stage?.classList.add(`crate-${crate.id}`);
+  $('#crate-rarity').textContent = crate.name;
   $('#crate-reward').innerHTML = '';
   $('#btn-crate-open').hidden = false;
   $('#btn-crate-close').hidden = true;
@@ -2759,10 +2764,11 @@ function openCrateCeremony(variant) {
 
 function doOpenCrate() {
   profile = loadProfile();
-  const name = $('#crate-rarity')?.textContent || '';
-  const variant = { id: 'iron', name, rarity: 'fine' };
+  const variant = pendingCrate || resolveCrateVariant(profile.pendingCrate);
+  if (!variant) { toast('No Crown Crate waiting.'); return; }
   const res = openCrownCrate(profile, DATA.cards, variant);
   if (res.error) { toast(res.error); return; }
+  pendingCrate = null;
   playSfx('crate');
   $('#crate-stage')?.classList.add('crate-open');
   $('#crate-reward').innerHTML = `${goldCoinHtml()}<div>${res.reward?.label || 'Crate opened'}</div>`;

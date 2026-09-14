@@ -9,7 +9,7 @@ import {
   rarityOf, formatRarity, CLUES_TO_UPGRADE, tomorrowShopSlate,
   shopContextFromProfile, fillMissedLogins, loginMonthGrid,
   clueCountOf, baseCardsForDeck, roadGrandPrize,
-  crateVariantForDay, CRATES_PER_MONTH, CRATE_VARIANTS,
+  crateVariantForDay, CRATES_PER_MONTH, resolveCrateVariant,
 } from './economy.js';
 import { BASE_TO_UPGRADE } from './upgrades.js';
 
@@ -143,6 +143,7 @@ export function defaultProfile() {
     purses: [],
     cratesMonth: null,
     cratesOpened: 0,
+    pendingCrate: null,
     pendingMatchReward: null,
     lastCheckIn: null,
     checkInStreak: 0,
@@ -214,6 +215,7 @@ export function loadProfile() {
     p.shopPurchases = p.shopPurchases && typeof p.shopPurchases === 'object' ? p.shopPurchases : {};
     p.cratesMonth = p.cratesMonth || null;
     p.cratesOpened = Number(p.cratesOpened) || 0;
+    p.pendingCrate = resolveCrateVariant(p.pendingCrate);
     p.pendingMatchReward = p.pendingMatchReward || null;
     if (typeof p.gold !== 'number') p.gold = 60;
     if (!p.unlockedSkins.includes('high-isle')) p.unlockedSkins.push('high-isle');
@@ -442,8 +444,10 @@ function monthKey(dateStr = todayStr()) {
 export function syncCrateMonth(profile, today = todayStr()) {
   const mk = monthKey(today);
   if (profile.cratesMonth !== mk) {
+    const prev = profile.cratesMonth;
     profile.cratesMonth = mk;
     profile.cratesOpened = 0;
+    if (prev) profile.pendingCrate = null;
   }
   return profile;
 }
@@ -476,10 +480,13 @@ export function claimDailyLogin(profile, cards = []) {
     dw.resetDate = today;
   }
   maybeUnlockAchievement(profile, 'check-in-7', profile.checkInStreak >= 7);
-  const crate = crateVariantForDay(today);
-  let crateOffer = null;
-  if (crate && (profile.cratesOpened || 0) < CRATES_PER_MONTH) {
-    crateOffer = { ...crate };
+  let crateOffer = resolveCrateVariant(profile.pendingCrate);
+  if (!crateOffer) {
+    const crate = crateVariantForDay(today);
+    if (crate && (profile.cratesOpened || 0) < CRATES_PER_MONTH) {
+      crateOffer = resolveCrateVariant(crate);
+      profile.pendingCrate = crateOffer;
+    }
   }
   saveProfile(profile);
   return {
@@ -723,13 +730,13 @@ function pick(arr) {
 }
 
 function rarityRollBias(rarity) {
-  // higher rarity → better loot tables
-  const map = { Common: 0, Fine: 1, Superior: 2, Epic: 3, Legendary: 4 };
-  return map[rarity] || 0;
+  const key = String(rarity || '').toLowerCase();
+  const map = { common: 0, fine: 1, superior: 2, epic: 3, legendary: 4 };
+  return map[key] || 0;
 }
 
 /**
- * Open next queued cutpurse / buy one.
+ * Open the next queued cutpurse from a won match.
  */
 export function openPurse(profile, cards, opts = {}) {
   let rarity = 'Common';
@@ -845,12 +852,11 @@ export function openCrownCrate(profile, cards = [], variant = null) {
   if ((profile.cratesOpened || 0) >= CRATES_PER_MONTH) {
     return { error: 'Two Crown Crates a month — the Club is not a crate farm.' };
   }
-  const crate = variant || CRATE_VARIANTS[0];
+  const crate = resolveCrateVariant(variant) || resolveCrateVariant(profile.pendingCrate);
+  if (!crate) return { error: 'No Crown Crate waiting.' };
   profile.cratesOpened = (profile.cratesOpened || 0) + 1;
-  const bias = rarityRollBias(crate.rarity === 'common' ? 'Common'
-    : crate.rarity === 'fine' ? 'Fine'
-    : crate.rarity === 'superior' ? 'Superior'
-    : crate.rarity === 'epic' ? 'Epic' : 'Fine');
+  profile.pendingCrate = null;
+  const bias = rarityRollBias(crate.rarity);
   const roll = Math.random();
   const lockedDecks = LOCKED_DECKS.filter((d) => !profile.unlockedDecks.includes(d));
   const lockedSkins = TABLE_SKINS.filter((s) => s.price > 0 && !profile.unlockedSkins.includes(s.id));

@@ -15,12 +15,14 @@ import {
   CLUES_TO_UPGRADE, MATCH_GOLD, loginMonthGrid, fillMissedLogins, tomorrowShopSlate,
   roadGrandPrize, clueCountOf, DECK_IMPORTANCE, SHOP_FEATURED_SLOTS,
   SHOP_SKIN_SLOTS, SHOP_BACK_SLOTS, SHOP_FRAG_SLOTS, groupCardsByDeck, canonPatron,
-  crateDaysForMonth,
+  crateDaysForMonth, crateVariantForDay, CRATE_VARIANTS, CRATES_PER_MONTH,
+  resolveCrateVariant,
 } from '../web/js/economy.js';
 import {
   defaultProfile, addFragment, addCardClue, tryUnlockDeck, deckReadyToUnlock,
   recordMatchResult, FRAGMENTS_TO_UNLOCK, LOCKED_DECKS, buyFragment,
   recordGauntletResult, ensureGauntletDay, GAUNTLET_STOPS,
+  openCrownCrate,
 } from '../web/js/profile.js';
 
 const cards = JSON.parse(readFileSync(new URL('../data/cards.json', import.meta.url), 'utf8')).cards;
@@ -160,6 +162,51 @@ const moraCards = groups.find((g) => g.id === 'mora').cards;
 assert(moraCards[0]?.starter || moraCards[0]?.id === 'unsealed-glyphic', 'Mora starters first in group');
 const days = crateDaysForMonth(2026, 9);
 assert(days.length === 2 && days[0] !== days[1], `two crate days in Sept (${days})`);
+const firstCrate = crateVariantForDay(`2026-09-${String(days[0]).padStart(2, '0')}`);
+const secondCrate = crateVariantForDay(`2026-09-${String(days[1]).padStart(2, '0')}`);
+assert(['iron', 'orichalcum'].includes(firstCrate?.id), `first crate day is iron/orichalcum (${firstCrate?.id})`);
+assert(['ebony', 'voidsteel'].includes(secondCrate?.id), `second crate day is ebony/voidsteel (${secondCrate?.id})`);
+assert(resolveCrateVariant({ id: 'ebony', rarity: 'fine' })?.rarity === 'superior',
+  'crate id wins over a mismatched rarity field');
+assert(CRATES_PER_MONTH === 2, 'max two crown crates a month');
+
+const origRandom = Math.random;
+Math.random = () => 0;
+try {
+  const iron = openCrownCrate(defaultProfile(), cards, { id: 'iron', name: 'shown as orichalcum', rarity: 'fine' });
+  const orichalcum = openCrownCrate(defaultProfile(), cards, CRATE_VARIANTS[1]);
+  const ebony = openCrownCrate(defaultProfile(), cards, { id: 'ebony' });
+  const voidsteel = openCrownCrate(defaultProfile(), cards, 'voidsteel');
+  assert(iron.crate.id === 'iron' && iron.rarity === 'common', `iron crate loot is common (${iron.rarity})`);
+  assert(orichalcum.crate.id === 'orichalcum' && orichalcum.rarity === 'fine', 'orichalcum crate loot is fine');
+  assert(ebony.crate.id === 'ebony' && ebony.rarity === 'superior', 'ebony crate loot is superior');
+  assert(voidsteel.crate.id === 'voidsteel' && voidsteel.rarity === 'epic', 'voidsteel crate loot is epic');
+  assert(iron.reward.type === 'gold' && ebony.reward.type === 'gold', 'deterministic gold path for loot-bias check');
+  assert(iron.reward.amount < orichalcum.reward.amount, `orichalcum gold > iron (${iron.reward.amount} vs ${orichalcum.reward.amount})`);
+  assert(orichalcum.reward.amount < ebony.reward.amount, `ebony gold > orichalcum (${orichalcum.reward.amount} vs ${ebony.reward.amount})`);
+  assert(ebony.reward.amount < voidsteel.reward.amount, `voidsteel gold > ebony (${ebony.reward.amount} vs ${voidsteel.reward.amount})`);
+} finally {
+  Math.random = origRandom;
+}
+
+const capP = defaultProfile();
+capP.pendingCrate = { id: 'ebony' };
+const fromPending = openCrownCrate(capP, cards, null);
+assert(fromPending.crate?.id === 'ebony', `open uses the pending offered crate (${fromPending.crate?.id || fromPending.error})`);
+assert(!capP.pendingCrate, 'pending crate is consumed on open');
+openCrownCrate(capP, cards, CRATE_VARIANTS[0]);
+const third = openCrownCrate(capP, cards, CRATE_VARIANTS[3]);
+assert(!!third.error, `third crate in a month blocked (${third.error})`);
+assert(capP.cratesOpened === 2, `opened count stays at two (${capP.cratesOpened})`);
+
+const rollP = defaultProfile();
+rollP.cratesMonth = '2026-08';
+rollP.cratesOpened = 2;
+rollP.pendingCrate = { id: 'voidsteel' };
+const expired = openCrownCrate(rollP, cards, null);
+assert(!!expired.error, `last month’s unopened crate expires (${expired.error})`);
+const freshMonth = openCrownCrate(rollP, cards, { id: 'iron' });
+assert(freshMonth.crate?.id === 'iron' && rollP.cratesOpened === 1, 'new month allows a fresh crate');
 
 if (failed) {
   console.error(`\n${failed} failed`);

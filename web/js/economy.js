@@ -197,6 +197,15 @@ export const CRATE_VARIANTS = [
   { id: 'voidsteel', name: 'Voidsteel Crown Crate', rarity: 'epic' },
 ];
 
+/** Canonical crate row by id. Display name is not a loot-table key. */
+export function resolveCrateVariant(variant) {
+  if (!variant) return null;
+  const id = typeof variant === 'string' ? variant : variant.id;
+  if (!id) return null;
+  const row = CRATE_VARIANTS.find((v) => v.id === id);
+  return row ? { ...row } : null;
+}
+
 /**
  * Fan calendar of recurring ESO event *themes* (not an official schedule).
  * Mid-Sep 2026 → Undaunted Celebration. High Seas of Tamriel is Sep 30–Oct 14 2026.
