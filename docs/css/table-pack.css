@@ -1,0 +1,179 @@
+/* Build 30 — packed High Isle table + unclipped inspect.
+   Loaded after phone-eso.css so these rules win the cascade. */
+
+/* ——— Felt: auto rows, cluster in the vertical middle ——— */
+#match .board {
+  /* Events rail is an overlay — felt + patron rail only. */
+  grid-template-columns: minmax(0, 1fr) minmax(128px, 17%) !important;
+}
+
+#match .felt-table {
+  align-content: center !important;
+  align-items: center !important;
+  justify-items: stretch !important;
+  row-gap: 5px !important;
+  column-gap: 6px !important;
+  padding: 6px 6px 8px !important;
+  grid-template-rows:
+    auto
+    auto
+    auto
+    auto
+    auto
+    auto
+    auto !important;
+}
+
+#match .felt-tavern {
+  justify-content: center !important;
+  min-height: 0 !important;
+}
+#match .tavern-band {
+  flex: 0 0 auto !important;
+}
+
+#match .tavern-zone .card {
+  width: min(92px, 11.2vw, calc((100% - 1rem) / 5.15)) !important;
+  height: calc(min(92px, 11.2vw) * 1.52) !important;
+}
+
+#match .felt-you-hand { min-height: 92px !important; }
+#match .felt-opp-hand { min-height: 42px !important; }
+
+#match #hand-zone .card,
+#match #hand-zone button.card,
+#match #hand-zone.you-fan button.card,
+#match .you-fan .card {
+  width: min(86px, 11vw, calc((100% + 1.6rem) / 5.3)) !important;
+  height: calc(min(86px, 11vw) * 1.52) !important;
+}
+
+#match .rival-fan .card,
+#match #opp-hand-zone .card {
+  width: min(46px, 5.4vw, calc((100% + 1rem) / 6.2)) !important;
+  height: calc(min(46px, 5.4vw) * 1.35) !important;
+}
+
+/* Empty agent seats stay thin outlines — not vacant boxes */
+#match .felt-you-agents,
+#match .felt-opp-agents {
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 2px 0 !important;
+}
+#match .agent-slot.empty {
+  width: clamp(28px, 4.4vw, 40px) !important;
+  height: clamp(28px, 4.8vw, 36px) !important;
+  border: 1px dashed rgba(212, 175, 55, 0.45);
+  background: rgba(0, 0, 0, 0.08);
+}
+#match .agent-slot.filled .card {
+  width: clamp(40px, 5.6vw, 56px) !important;
+  height: clamp(56px, 8.4vw, 80px) !important;
+}
+
+#match .token-row { min-height: 0 !important; padding: 1px 0 !important; }
+
+/* Patron rail stays a slim companion, hourglass sits with it */
+#match .patron-rail {
+  grid-template-columns: minmax(0, 1fr) minmax(44px, 56px) !important;
+  padding: 6px 4px 6px 2px !important;
+  align-items: end !important;
+}
+#match .rail-patrons {
+  justify-content: flex-end !important;
+  height: auto !important;
+  align-self: end !important;
+  gap: 8px !important;
+}
+#match .rail-glass {
+  align-self: end !important;
+}
+#match .eso-hourglass-end {
+  width: 44px !important;
+  padding: 4px 0 6px !important;
+  gap: 2px;
+}
+#match .eso-hourglass-end .hg-svg {
+  width: 34px !important;
+  height: 56px !important;
+}
+#match .eso-hourglass-end .eso-end-caption { font-size: 0.5rem; }
+
+#match .patron-coin,
+#match .patron-coin .wood-pendant,
+#match .patron-coin .token-dial {
+  width: 90px !important;
+  height: 38px !important;
+}
+
+/* ——— Inspect: hex + tooltip must fit the viewport with padding ——— */
+.lift-fly {
+  overflow: visible !important;
+}
+.lift-hex-fly {
+  overflow: visible !important;
+  max-width: calc(100vw - 28px);
+  max-height: calc(100dvh - 28px);
+}
+.lift-hex-fly img {
+  overflow: visible !important;
+}
+.lift-text-fly {
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  padding-right: 2px;
+}
+.eso-tip-name {
+  overflow: visible;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+.eso-tip-patron {
+  white-space: normal;
+  max-width: 46%;
+}
+
+body.is-portrait #match .board {
+  grid-template-columns: minmax(0, 1fr) minmax(110px, 28%) !important;
+}
+body.is-portrait #match .felt-table {
+  align-content: center !important;
+  padding: 26px 4px 6px !important;
+  row-gap: 4px !important;
+  grid-template-rows:
+    auto
+    auto
+    auto
+    auto
+    auto
+    auto
+    auto !important;
+}
+body.is-portrait #match .tavern-zone .card {
+  width: min(72px, calc((100% - 0.5rem) / 5.1)) !important;
+  height: calc(min(72px, 18vw) * 1.52) !important;
+}
+body.is-portrait #match #hand-zone .card,
+body.is-portrait #match #hand-zone button.card,
+body.is-portrait #match .you-fan .card {
+  width: min(68px, calc((100% + 1.4rem) / 5.2)) !important;
+  height: calc(min(68px, 17vw) * 1.52) !important;
+}
+body.is-portrait #match .agent-slot.empty {
+  width: clamp(24px, 6vw, 34px) !important;
+  height: clamp(22px, 5.4vw, 30px) !important;
+}
+body.is-portrait #match .patron-rail {
+  grid-template-rows: auto auto !important;
+  align-content: end !important;
+  justify-items: center !important;
+}
+body.is-portrait #match .eso-hourglass-end .hg-svg {
+  width: 30px !important;
+  height: 48px !important;
+}

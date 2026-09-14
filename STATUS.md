@@ -1,6 +1,6 @@
 # Status
 
-**2026-09-14 (Phase A, build 29):** Board authenticity, official copy, patron-uses placement, and targeted abilities.
+**2026-09-14 (Phase A, build 30):** Board authenticity, official copy, patron-uses placement, and targeted abilities. Rebased on main (table pack + inspect).
 
 ## Phase A — shipped (this build)
 
@@ -39,7 +39,7 @@
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=29`.
+`docs/` is a copy of `web/`. Cache-bust `?v=30`.
 
 | Fix | Notes |
 |---|---|
