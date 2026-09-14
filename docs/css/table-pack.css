@@ -77,6 +77,16 @@
 #match .patron-rail {
   grid-template-columns: minmax(0, 1fr) minmax(44px, 56px) !important;
   padding: 6px 4px 6px 2px !important;
+  align-items: end !important;
+}
+#match .rail-patrons {
+  justify-content: flex-end !important;
+  height: auto !important;
+  align-self: end !important;
+  gap: 8px !important;
+}
+#match .rail-glass {
+  align-self: end !important;
 }
 #match .eso-hourglass-end {
   width: 44px !important;
@@ -100,7 +110,11 @@
 .lift-fly {
   overflow: visible !important;
 }
-.lift-hex-fly,
+.lift-hex-fly {
+  overflow: visible !important;
+  max-width: calc(100vw - 28px);
+  max-height: calc(100dvh - 28px);
+}
 .lift-hex-fly img {
   overflow: visible !important;
 }
@@ -152,6 +166,11 @@ body.is-portrait #match .you-fan .card {
 body.is-portrait #match .agent-slot.empty {
   width: clamp(24px, 6vw, 34px) !important;
   height: clamp(22px, 5.4vw, 30px) !important;
+}
+body.is-portrait #match .patron-rail {
+  grid-template-rows: auto auto !important;
+  align-content: end !important;
+  justify-items: center !important;
 }
 body.is-portrait #match .eso-hourglass-end .hg-svg {
   width: 30px !important;

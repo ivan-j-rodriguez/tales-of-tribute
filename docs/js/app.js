@@ -280,6 +280,7 @@ function bindCardGesture(el, { onTap, onHoldRead }) {
   // Pointer-only: a short tap plays/buys. Hold (>=500ms) inspects and never also plays.
   // Do not bind touchstart+pointerdown together — iOS leaks the first timer and inspects after a tap.
   let held = false;
+  let cancelledTap = false;
   let timer = null;
   let t0 = 0;
   let sx = 0;
@@ -291,6 +292,7 @@ function bindCardGesture(el, { onTap, onHoldRead }) {
     if (pid != null) return;
     pid = e.pointerId;
     held = false;
+    cancelledTap = false;
     t0 = Date.now();
     sx = e.clientX;
     sy = e.clientY;
@@ -315,6 +317,7 @@ function bindCardGesture(el, { onTap, onHoldRead }) {
     if (wasHeld) {
       endLift();
       held = false;
+      cancelledTap = false;
       return;
     }
     if (liftActive) endLift(true);
@@ -324,20 +327,35 @@ function bindCardGesture(el, { onTap, onHoldRead }) {
   el.addEventListener('pointerup', finish);
   el.addEventListener('pointercancel', (e) => {
     if (e.pointerId !== pid) return;
+    const wasHeld = held;
     clearHold();
     pid = null;
-    if (held) endLift();
+    t0 = 0;
+    if (wasHeld) {
+      endLift();
+      cancelledTap = false;
+    } else {
+      cancelledTap = true;
+    }
     held = false;
   });
-  el.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); });
+  el.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (cancelledTap && onTap) {
+      cancelledTap = false;
+      onTap(e);
+    }
+  });
   el.addEventListener('contextmenu', (e) => e.preventDefault());
 }
 
 function inspectMetrics(kind) {
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const pad = 12;
-  const gap = 14;
+  const vv = window.visualViewport;
+  const vw = Math.floor(Math.min(window.innerWidth, vv?.width || window.innerWidth));
+  const vh = Math.floor(Math.min(window.innerHeight, vv?.height || window.innerHeight));
+  const pad = 14;
+  const gap = 12;
   const land = vw > vh;
   const isCoin = kind === 'coin';
   const aspect = isCoin ? 1 : 1.54;
@@ -393,18 +411,55 @@ function inspectMetrics(kind) {
 }
 
 function applyInspectBox(hex, text, m) {
+  const vv = window.visualViewport;
+  const vw = Math.floor(Math.min(window.innerWidth, vv?.width || window.innerWidth));
+  const vh = Math.floor(Math.min(window.innerHeight, vv?.height || window.innerHeight));
+  const pad = 8;
+  const aspect = m.hexW ? (m.hexH / m.hexW) : 1.54;
+  let tx = m.tx, ty = m.ty, hexW = m.hexW, hexH = m.hexH;
+  if (hexH > vh - pad * 2) {
+    hexH = Math.max(80, vh - pad * 2);
+    hexW = hexH / aspect;
+  }
+  if (hexW > vw - pad * 2) {
+    hexW = Math.max(72, vw - pad * 2);
+    hexH = hexW * aspect;
+  }
+  if (ty + hexH > vh - pad) ty = Math.max(pad, vh - pad - hexH);
+  if (tx + hexW > vw - pad) tx = Math.max(pad, vw - pad - hexW);
+  if (ty < pad) ty = pad;
+  if (tx < pad) tx = pad;
   if (hex) {
-    hex.style.left = m.tx + 'px';
-    hex.style.top = m.ty + 'px';
-    hex.style.width = m.hexW + 'px';
-    hex.style.height = m.hexH + 'px';
+    hex.style.cssText = [
+      'position:fixed',
+      `left:${tx}px`,
+      `top:${ty}px`,
+      `width:${hexW}px`,
+      `height:${hexH}px`,
+      'max-width:none',
+      'max-height:none',
+      'transform:none',
+      'margin:0',
+      'inset:auto',
+    ].join(';');
   }
   if (text) {
-    text.style.left = m.textL + 'px';
-    text.style.top = m.textT + 'px';
-    text.style.width = m.textW + 'px';
-    text.style.maxWidth = m.textW + 'px';
-    text.style.maxHeight = m.textMaxH + 'px';
+    const land = vw > vh;
+    let textL = land ? tx + hexW + 12 : pad;
+    let textT = land ? Math.max(pad, ty) : ty + hexH + 10;
+    let textW = land ? Math.max(140, vw - textL - pad) : vw - pad * 2;
+    let textMaxH = land ? vh - pad * 2 : Math.max(80, vh - textT - pad);
+    if (textL + 80 > vw) {
+      textL = pad;
+      textT = ty + hexH + 8;
+      textW = vw - pad * 2;
+      textMaxH = Math.max(80, vh - textT - pad);
+    }
+    text.style.left = textL + 'px';
+    text.style.top = textT + 'px';
+    text.style.width = textW + 'px';
+    text.style.maxWidth = textW + 'px';
+    text.style.maxHeight = textMaxH + 'px';
   }
 }
 
@@ -414,16 +469,19 @@ function placeInspectStage(wrap, rect, kind) {
   const m = inspectMetrics(kind);
   wrap._to = { left: m.tx, top: m.ty, width: m.hexW, height: m.hexH };
   wrap._kind = kind;
-  if (!hex) return;
-  hex.style.left = rect.left + 'px';
-  hex.style.top = rect.top + 'px';
-  hex.style.width = rect.width + 'px';
-  hex.style.height = rect.height + 'px';
-  hex.animate([
-    { left: rect.left + 'px', top: rect.top + 'px', width: rect.width + 'px', height: rect.height + 'px' },
-    { left: m.tx + 'px', top: m.ty + 'px', width: m.hexW + 'px', height: m.hexH + 'px' },
-  ], { duration: 340, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
-  applyInspectBox(null, text, m);
+  applyInspectBox(hex, text, m);
+  requestAnimationFrame(() => {
+    applyInspectBox(hex, text, m);
+    if (hex) {
+      const r = hex.getBoundingClientRect();
+      const roomB = window.innerHeight - 6;
+      const roomR = window.innerWidth - 6;
+      if (r.bottom > roomB) hex.style.top = Math.max(6, roomB - r.height) + 'px';
+      if (r.right > roomR) hex.style.left = Math.max(6, roomR - r.width) + 'px';
+      if (r.top < 6) hex.style.top = '6px';
+      if (r.left < 6) hex.style.left = '6px';
+    }
+  });
   if (text) {
     requestAnimationFrame(() => {
       wrap.classList.add('show-veil');
@@ -445,7 +503,7 @@ function startLift(fromEl, def) {
 
   const layer = $('#lift-layer') || document.body;
   const wrap = document.createElement('div');
-  wrap.className = 'lift-clone lift-fly inspect-card';
+  wrap.className = 'lift-clone lift-fly lift-inspect';
   wrap.innerHTML = `
     <div class="lift-veil"></div>
     <div class="lift-hex-fly">
@@ -572,7 +630,7 @@ function startPatronLift(fromEl, pid) {
   fromEl.style.opacity = '0.12';
   const layer = $('#lift-layer') || document.body;
   const wrap = document.createElement('div');
-  wrap.className = 'lift-clone lift-fly inspect-coin';
+  wrap.className = 'lift-clone lift-fly lift-inspect inspect-coin';
   wrap.innerHTML = `
     <div class="lift-veil"></div>
     <div class="lift-hex-fly lift-coin-fly">
@@ -2482,6 +2540,11 @@ function installTestHook() {
         return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom };
       };
       return {
+        vw: window.innerWidth,
+        vh: window.innerHeight,
+        vvw: window.visualViewport?.width || null,
+        vvh: window.visualViewport?.height || null,
+        metrics: liftClone?._kind ? inspectMetrics(liftClone._kind) : null,
         hex: box(hex),
         text: box(text),
         name: box(tip),

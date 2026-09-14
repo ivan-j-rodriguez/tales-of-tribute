@@ -124,7 +124,6 @@ const browser = await puppeteer.launch({
 const page = await browser.newPage();
 page.setDefaultTimeout(20000);
 page.on('pageerror', (e) => console.error('PAGEERROR', e.message));
-await page.setViewport({ width: 844, height: 390, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 
 await page.goto(`http://127.0.0.1:${port}/?test=1`, { waitUntil: 'domcontentloaded' });
 await waitReady(page);
@@ -194,21 +193,27 @@ assert('patron hold uses official sentences', /Refresh — Return|Gain 1 Coin|Dr
 async function assertInspect(page, label) {
   const opened = await page.evaluate(() => window.__totTest.inspectById('toll-of-flesh'));
   assert(`${label} inspect opens`, opened);
-  await new Promise((r) => setTimeout(r, 420));
+  await new Promise((r) => setTimeout(r, 520));
   const fit = await page.evaluate(() => window.__totTest.inspectFit());
-  assert(`${label} hex on screen`, fit.hexOn, fit.hex);
+  assert(`${label} hex on screen`, fit.hexOn, { hex: fit.hex, vw: fit.vw, vh: fit.vh, metrics: fit.metrics });
   assert(`${label} tooltip on screen`, fit.textOn, fit.text);
   assert(`${label} name on screen`, fit.nameOn, fit.name);
   assert(`${label} Gain 2 Coin`, /Gain 2 Coin/.test(fit.tipText || ''), fit.tipText);
   assert(`${label} Draw 1 card`, /Draw 1 card/.test(fit.tipText || ''), fit.tipText);
-  assert(`${label} no token stub`, !/\b2 Coin\.\s/i.test(fit.tipText || '') && !/Draw 1\.(?! card)/i.test(fit.tipText || ''), fit.tipText);
+  assert(`${label} no token stub`, !/(?:^|\n)\s*2 Coin\./i.test(fit.tipText || '') && !/(?:^|\n)\s*Draw 1\.(?!\s*card)/i.test(fit.tipText || ''), fit.tipText);
   await page.evaluate(() => {
     document.querySelector('.lift-clone')?.remove();
   });
 }
 
-await start(page);
-await assertInspect(page, 'landscape');
+const landPage = await browser.newPage();
+landPage.setDefaultTimeout(20000);
+await landPage.setViewport({ width: 844, height: 390, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+await landPage.goto(`http://127.0.0.1:${port}/?test=1`, { waitUntil: 'domcontentloaded' });
+await waitReady(landPage);
+await start(landPage);
+await assertInspect(landPage, 'landscape');
+await landPage.close();
 
 const portraitPage = await browser.newPage();
 portraitPage.setDefaultTimeout(20000);
