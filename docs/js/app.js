@@ -1641,7 +1641,14 @@ function startMatch(opts = {}) {
     if (ev === 'buy') playSfx('buy');
     if (ev === 'writ') playSfx('coinB');
     if (ev === 'patron') playSfx('patron');
-    if (ev === 'knockout') { playSfx('knockout'); flashFx(data?.agent, 'fx-slash'); }
+    if (ev === 'knockout') {
+      playSfx('knockout');
+      flashFx(data?.agent, 'fx-slash');
+      const from = document.querySelector(`#match .card[data-uid="${data?.agent?.uid}"]`)
+        || document.querySelector(`.tray-card[data-uid="${data?.agent?.uid}"]`);
+      const dest = data?.ownerIsActive ? pileEl('you-cooldown') : pileEl('opp-cooldown');
+      if (from && dest) flyCard(from, dest, data.agent, () => {});
+    }
     if (ev === 'sacrifice') flashFx(data?.card, 'fx-sacrifice');
     if (ev === 'confine') flashFx(data?.agent, 'fx-confine');
     if (ev === 'writ') {
@@ -1826,11 +1833,44 @@ function syncSfxToggles() {
   }
 }
 
+function streamPowerToPrestige(n) {
+  return new Promise((resolve) => {
+    const from = document.querySelector('#you-res .tok-power');
+    const to = document.querySelector('#you-res .tok-prestige');
+    if (!from || !to || n <= 0) { resolve(); return; }
+    const fr = from.getBoundingClientRect();
+    const tr = to.getBoundingClientRect();
+    const count = Math.min(14, Math.max(4, n));
+    const dx = (tr.left + tr.width / 2) - (fr.left + fr.width / 2);
+    const dy = (tr.top + tr.height / 2) - (fr.top + fr.height / 2);
+    for (let i = 0; i < count; i++) {
+      const bit = document.createElement('div');
+      bit.className = 'vfx-prestige-bit';
+      bit.style.left = `${fr.left + fr.width / 2}px`;
+      bit.style.top = `${fr.top + fr.height / 2}px`;
+      document.body.appendChild(bit);
+      bit.animate([
+        { transform: 'translate(-50%, -50%) scale(0.55)', opacity: 1 },
+        { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(1.05)`, opacity: 0.15 },
+      ], { duration: 480 + i * 28, easing: 'cubic-bezier(.2,.7,.2,1)', delay: i * 32, fill: 'forwards' });
+      setTimeout(() => bit.remove(), 720 + i * 32);
+    }
+    to.classList.add('tick');
+    setTimeout(resolve, Math.min(720, 360 + count * 28));
+  });
+}
+
 async function doEndTurn() {
   if (!engine || !canControl() || engine.state.winner) return;
   playSfx('end');
   $('#btn-end')?.classList.add('just-ended');
   setTimeout(() => $('#btn-end')?.classList.remove('just-ended'), 600);
+  const seat = localSeat();
+  const you = engine.state.players[seat];
+  const opp = engine.state.players[1 - seat];
+  const bank = you?.power || 0;
+  const blocked = !!(opp?.agents || []).some(a => a.taunt);
+  if (bank > 0 && !blocked) await streamPowerToPrestige(bank);
   // Fly played cards to cooldown
   const playedEls = $$('#you-played .card');
   const dest = pileEl('you-cooldown');

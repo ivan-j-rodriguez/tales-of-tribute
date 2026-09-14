@@ -1065,3 +1065,14 @@ body.targeting-peek .target-veil { background: rgba(6, 10, 12, 0.22); }
   100% { transform: translateY(0); }
 }
 body.targeting #match .you-actions { pointer-events: none; }
+.vfx-prestige-bit {
+  position: fixed;
+  width: 10px;
+  height: 12px;
+  margin: 0;
+  z-index: 12000;
+  pointer-events: none;
+  clip-path: polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0 50%);
+  background: linear-gradient(180deg, #c8e8ff, #3a7fd4 55%, #123a72);
+  box-shadow: 0 0 8px rgba(120, 190, 255, 0.7);
+}

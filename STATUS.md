@@ -15,7 +15,7 @@
 - [x] Card inspect: no full-screen black vignette; official play / combo / type / cost / HP text.
 - [x] Timer + AI difficulty only before a match (splash / lobby / settings-from-menu). Mid-match hourglass toggle removed.
 - [x] Patron-uses bust coin sits on the **hourglass / right rail**, not in the Coin / Prestige / Power triad.
-- [x] Targeted abilities: full-screen pick modal (title, center row, gold select, Confirm, Show Board, Cancel). Treasury sacrifice (hand or played) → Writ of Coin. Acquire stays on the tavern (no modal). Same picks for Destroy, Knock Out, Replace, Toss, Donate/Discard, Refresh, Confine, Heal, Choose A/B. AI still auto-picks.
+- [x] Targeted abilities: full-screen pick modal (title, center row, gold select, Confirm, Show Board, Cancel). Treasury sacrifice (hand or played) → Writ of Coin. Acquire stays on the tavern (no modal). Same picks for Destroy, Knock Out, Replace, Toss, Donate/Discard, Refresh, Confine, Heal, Choose A/B. AI still auto-picks. After confirm: dissolve / KO slash + fly to cooldown / buy arc. End turn streams Power → Prestige.
 - [x] Patron-uses is a smaller gold octagon on the hourglass rail that greys when spent — not a 4th equal resource pip.
 
 ## Phase B — next PR (not in this ship)

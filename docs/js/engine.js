@@ -586,7 +586,7 @@ export class GameEngine {
       this._toCooldown(owner, agent);
     }
     this._log(`Knock out ${def?.name}`);
-    this.emit('knockout', { agent });
+    this.emit('knockout', { agent, ownerIsActive: owner === this.me() });
   }
 
   dealDamageToAgent(agentUid, amount) {
