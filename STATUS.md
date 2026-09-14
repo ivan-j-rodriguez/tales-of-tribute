@@ -1,11 +1,32 @@
 # Status
 
-**2026-09-13 (web phone fix, build 28):** Build 27 letterboxed landscape (1180×640 card with dark side bars) and blocked portrait behind a rotate-gate.
+**2026-09-14 (Phase A, build 29):** Board authenticity, official copy, patron-uses placement, and targeted abilities.
 
-- **Landscape:** board is `100%` of the Safari viewport (`100dvw × 100dvh`, safe-area insets). Fluid CSS grid — no fixed canvas, no scale-to-fit gutters.
-- **Vertical bands:** opponent hand/agents → tokens → tavern dead-center → tokens → player agents → hand. Agent dashed slots stay in their own rows.
-- **Portrait:** playable again (compact full table: tavern, hand, piles, patrons, hourglass). Gentle “Landscape plays better” tip only — never a hard block.
-- Piles stay as card-back stacks. Hourglass End Turn, SFX toggle, tokens, and left-pointing pendants stay.
+## Phase A — shipped (this build)
+
+- [x] Widen the playing field; events/combo strip **floats** (no permanent left column).
+- [x] Hourglass slides **up** beside the patron rail (not jammed bottom-right).
+- [x] Patrons have more vertical spacing; wooden chevrons still point left when Neutral.
+- [x] Pendants **physically rotate** (you / opponent / neutral). Favor-pip light hack removed.
+- [x] Treasury has **no favor tip/pointer** and never rotates.
+- [x] Draw + cooldown piles larger and in their own columns.
+- [x] Portrait + landscape both playable (no rotate-gate).
+- [x] Patron hover / inspect / pick modal show **Favored + Neutral + Unfavored**.
+- [x] Card inspect: no full-screen black vignette; official play / combo / type / cost / HP text.
+- [x] Timer + AI difficulty only before a match (splash / lobby / settings-from-menu). Mid-match hourglass toggle removed.
+- [x] Patron-uses bust coin sits on the **hourglass / right rail**, not in the Coin / Prestige / Power triad.
+- [x] Targeted abilities: humans pick (glow + Cancel + pay-on-confirm). Treasury sacrifice (hand or played) → Writ of Coin. Same flow for Destroy, Knock Out, Replace, Toss, Donate/Discard, Refresh, Acquire, Confine, Heal, Choose A/B. AI still auto-picks.
+
+## Phase B — next PR (not in this ship)
+
+- [ ] Cutpurse only on win; harder gold; rarity-weighted fragments / clues / rare cards
+- [ ] Endgame deck gates (fragments + one of each card)
+- [ ] Rotating daily store, bundles, tomorrow preview, ≥5× cosmetics
+- [ ] Provinces: win advances, lose locks until NY midnight, path-clear grand prize
+- [ ] Daily login calendar with red X on misses
+- [ ] More Club achievements
+- [ ] Rematch + fan-safe tournament bracket
+- [ ] Encyclopedia grouped by deck (caption → pendant → cards)
 
 **Unofficial fan project.** Not affiliated with Bethesda / ZeniMax / ESO. Not for sale.
 
@@ -17,23 +38,19 @@
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=28`.
+`docs/` is a copy of `web/`. Cache-bust `?v=29`.
 
 | Fix | Notes |
 |---|---|
-| Landscape fit | Full-bleed fluid grid (`width/height: 100%`). No 1180×640 letterbox. |
-| Felt | Dark teal + knotwork + candle bloom (not the flat green `#24705c`). |
-| Hourglass | Right of the patron column. Glows when you can end. Replaces the flat brown End Turn bar. |
-| Card glow | Cyan/gold rim on affordable tavern + legal hand cards. On-card combo 2/3/4 as suits stack. No fake combo bar. |
-| Piles | Draw + cooldown visible for both players (counts, card-back art, tap to inspect). |
-| Tokens | Coin gold circle, Prestige **blue hex**, Power **red diamond**, Patron-uses silver coin. Opponent above tavern, you below. |
-| Patrons | Wooden pendants tip **LEFT**. Treasury stays Neutral (no favor pointer). |
-| SFX | Distinct kinds: coinA (Gold/Writ play), coinB (Treasury/Writ create), play, buy, shuffle, knockout, patron, combo, end, win. Mute in Settings + in-match (`tot_sfx_on`). Music mute unchanged. |
-| Shuffle | Cooldown→draw emits `shuffle` + riffle + pile animation. |
+| Field | Events rail overlays the felt. Board is `1fr + slim patron rail`. |
+| Hourglass | Mid-high on the right, with silver/bronze patron-call busts. |
+| Pendants | Rotate −90° toward you / +90° toward rival. Face stays upright. |
+| Copy | `texts.js` official sentences + UESP patron lines. Harvest Season = “Draw 1 card.” |
+| Targeting | `GameEngine.targetingStepsForPlay/Patron` + in-match banner. |
 
 ## iOS (kept aligned)
 
-SwiftUI tokens match the four official shapes/colors. Affordable tavern and playable hand cards glow. Opponent token row sits above the tavern. Wooden pendants + hourglass were already the ESO layout.
+SwiftUI tokens still use the four official shapes/colors. This Phase A pass is web-first (Pages). Engine targeting helpers live in `web/js/engine.js`; iOS `TributeCore` still auto-picks until a follow-up.
 
 ### Engine (iOS vs web)
 
@@ -49,15 +66,12 @@ SwiftUI tokens match the four official shapes/colors. Affordable tavern and play
 
 ## Tests
 
-- Linux: `node scripts/test_ios_engine.mjs` (catalog, seeded path, rarity, web AI vs AI).
-- Mac: `cd ios/TributeCore && swift test` (setup, treasury, taunt, 40/80, curse, AI finish, gauntlet lock, shop).
-
-This Cloud VM has **no Xcode / Simulator / Swift**. The Xcode project is intended to build on a Mac.
+- Linux: `node scripts/test_ios_engine.mjs` and `node scripts/test_phase_a.mjs`.
+- Gestures (Chrome): `cd web/test && node play-gestures.mjs`.
+- Mac: `cd ios/TributeCore && swift test`.
 
 ## How to run
 
 **Web:** `cd web && python3 -m http.server 8080`
 
 **iOS:** Open `ios/TalesOfTribute/TalesOfTribute.xcodeproj` in Xcode 15+, run on iOS 17+.
-
-**Layout preview (browser, no Simulator):** `cd ios/preview && python3 -m http.server 8090` then open `/board.html` and `/map.html`.

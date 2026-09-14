@@ -7,8 +7,8 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta name="theme-color" content="#1e4a48" />
   <title>Tales of Tribute — Fan Table</title>
-  <link rel="stylesheet" href="css/style.css?v=28" />
-  <link rel="stylesheet" href="css/phone-eso.css?v=28" />
+  <link rel="stylesheet" href="css/style.css?v=29" />
+  <link rel="stylesheet" href="css/phone-eso.css?v=29" />
 </head>
 <body>
   <div id="app">
@@ -31,7 +31,7 @@
           <label class="chk"><input type="checkbox" id="chk-hourglass-splash" /> Hourglass (90s)</label>
           <button type="button" id="btn-music" class="music-toggle" title="Music">♪ Music: Off</button>
         </div>
-        <p class="build-stamp" id="build-stamp">build 28</p>
+        <p class="build-stamp" id="build-stamp">build 29</p>
         <p class="disclaimer">Unofficial fan project. Not affiliated with Bethesda Softworks or ZeniMax Online Studios. Not for sale. Card art courtesy of UESP. No real-money purchases — earn gold at the table.</p>
       </div>
     </section>
@@ -254,7 +254,6 @@
           <div class="felt-hud-you">
             <div class="match-actions you-actions">
               <button type="button" id="btn-match-sfx" title="Mute sound effects">SFX</button>
-              <button type="button" id="btn-hg-toggle" title="Hourglass">⌛</button>
               <button type="button" id="btn-match-settings" title="Settings">⚙</button>
               <button type="button" id="btn-concede">Leave</button>
             </div>
@@ -263,6 +262,7 @@
         <aside class="patron-rail" id="patron-rail" aria-label="Patrons">
           <div class="rail-patrons" id="rail-patrons"></div>
           <div class="rail-glass">
+            <div class="patron-use-token opp" id="opp-patron-calls" title="Rival patron calls"></div>
             <button type="button" id="btn-end" class="eso-hourglass-end" title="End turn">
               <div class="hourglass" id="hourglass" data-on="0">
                 <svg viewBox="0 0 48 80" class="hg-svg" aria-hidden="true">
@@ -291,6 +291,7 @@
               </div>
               <span class="eso-end-caption">End Turn</span>
             </button>
+            <div class="patron-use-token you" id="you-patron-calls" title="Your patron calls"></div>
           </div>
         </aside>
       </div>
@@ -335,6 +336,12 @@
         <button id="btn-pile-close">Close</button>
       </div>
     </div>
+    <div class="target-banner" id="target-banner" hidden>
+      <p id="target-prompt">Choose a target</p>
+      <div id="target-choices" class="target-choices"></div>
+      <div id="target-tray" class="target-tray"></div>
+      <button type="button" id="target-cancel" class="pc-cancel">Cancel</button>
+    </div>
     <div class="toast" id="toast"></div>
     <div id="tour-root" class="tour-root" hidden>
       <div class="tour-backdrop" id="tour-backdrop"></div>
@@ -354,7 +361,7 @@
       <div class="patron-confirm" id="patron-confirm">
         <img id="pc-art" alt="" />
         <h3 id="pc-name">Patron</h3>
-        <p id="pc-ability" class="pc-ability"></p>
+        <div id="pc-states" class="pc-states"></div>
         <div class="pc-actions">
           <button class="pc-continue" id="pc-continue">Continue</button>
           <button class="pc-cancel" id="pc-cancel">Cancel</button>
@@ -365,6 +372,6 @@
       <div class="modal-body" id="card-modal-body"></div>
     </div>
   </div>
-  <script type="module" src="js/app.js?v=28"></script>
+  <script type="module" src="js/app.js?v=29"></script>
 </body>
 </html>

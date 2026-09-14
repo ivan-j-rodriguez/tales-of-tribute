@@ -1,4 +1,4 @@
-/* Build 28 — full-bleed fluid table (landscape + portrait).
+/* Build 29 — wide field, floating effects, rotating pendants.
    Loaded after style.css so these rules win the cascade. */
 
 :root {
@@ -73,7 +73,8 @@
   max-height: none !important;
   flex: 1 1 auto;
   display: grid !important;
-  grid-template-columns: minmax(44px, 6%) minmax(0, 1fr) minmax(168px, 23%) !important;
+  position: relative !important;
+  grid-template-columns: minmax(0, 1fr) minmax(132px, 16.5%) !important;
   grid-template-rows: 1fr !important;
   transform: none !important;
   overflow: hidden !important;
@@ -102,15 +103,22 @@
 
 #match .log-dock { display: none !important; }
 
-/* ——— Left played-effects strip ——— */
+/* ——— Played-effects float over the field (no permanent column) ——— */
 #match .events-rail {
-  width: auto !important;
+  position: absolute !important;
+  left: 6px;
+  top: 15%;
+  width: 62px !important;
   min-width: 0 !important;
-  padding: 8px 4px !important;
-  background: linear-gradient(180deg, rgba(8, 12, 10, 0.55), rgba(8, 12, 10, 0.28)) !important;
-  border-right: 1px solid rgba(212, 175, 55, 0.22);
+  max-height: 52%;
+  padding: 6px 3px !important;
+  background: linear-gradient(180deg, rgba(8, 12, 10, 0.22), rgba(8, 12, 10, 0.04)) !important;
+  border: none !important;
   overflow: hidden;
+  z-index: 9;
+  pointer-events: none;
 }
+#match .events-rail .event-hex { pointer-events: auto; }
 #match .events-title {
   font-size: 0.48rem;
   letter-spacing: 0.08em;
@@ -138,15 +146,15 @@
   background: transparent !important;
   align-items: stretch !important;
   justify-items: stretch !important;
-  grid-template-columns: minmax(52px, 9%) minmax(0, 1fr) minmax(52px, 9%) !important;
+  grid-template-columns: minmax(74px, 12%) minmax(0, 1fr) minmax(74px, 12%) !important;
   grid-template-rows:
-    minmax(36px, 0.58fr)
-    minmax(40px, 0.68fr)
-    minmax(22px, 0.32fr)
-    minmax(124px, 2fr)
-    minmax(22px, 0.32fr)
-    minmax(40px, 0.68fr)
-    minmax(68px, 1.2fr) !important;
+    minmax(48px, 0.74fr)
+    minmax(54px, 0.82fr)
+    minmax(32px, 0.4fr)
+    minmax(150px, 1.55fr)
+    minmax(32px, 0.4fr)
+    minmax(58px, 0.88fr)
+    minmax(108px, 1.45fr) !important;
   grid-template-areas:
     "opp-draw opp-hand   opp-cd"
     ".        opp-agents ."
@@ -273,8 +281,8 @@
 #match .pile-stack {
   position: relative;
   display: block;
-  width: 46px;
-  height: 66px;
+  width: 58px;
+  height: 82px;
   margin: 0 auto;
 }
 #match .pile-stack i {
@@ -561,15 +569,16 @@
   filter: drop-shadow(0 0 12px #ffe9a0) drop-shadow(0 0 8px #7fd0ff) !important;
 }
 
-/* Right rail: wooden pendants tip LEFT + glowing hourglass End Turn */
+/* Right rail: wooden pendants that physically rotate; hourglass sits mid-high */
 #match .patron-rail {
   width: auto !important;
   min-width: 0 !important;
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) minmax(56px, 72px) !important;
+  grid-template-columns: minmax(0, 1fr) 64px !important;
   grid-template-rows: 1fr !important;
   align-items: stretch !important;
-  padding: 8px 6px 8px 2px !important;
+  padding: 10px 4px 10px 0 !important;
+  overflow: visible !important;
   background:
     linear-gradient(90deg, rgba(0, 0, 0, 0.2), rgba(24, 16, 8, 0.5)),
     repeating-linear-gradient(180deg, transparent, transparent 7px, rgba(212, 175, 55, 0.04) 7px, rgba(212, 175, 55, 0.04) 8px) !important;
@@ -580,37 +589,44 @@
   grid-row: 1;
   display: flex !important;
   flex-direction: column;
-  justify-content: space-evenly;
+  justify-content: flex-start;
   align-items: stretch;
-  gap: 4px;
-  height: 100%;
+  gap: 16px;
+  height: auto;
+  padding: 8% 0 6%;
 }
-#match .rail-group { gap: 8px !important; align-items: stretch !important; }
+#match .rail-group { gap: 16px !important; align-items: stretch !important; }
 #match .patron-coin {
-  width: 96px !important;
-  height: 42px !important;
+  width: 108px !important;
+  height: 48px !important;
   position: relative;
   overflow: visible !important;
 }
 #match .patron-coin .wood-pendant,
-#match .patron-coin .token-dial,
-#match .patron-coin.neutral .token-dial,
-#match .patron-coin.treasury .token-dial,
-#match .patron-coin.fav-you .token-dial,
-#match .patron-coin.fav-opp .token-dial,
-#match .patron-coin.mora .token-dial,
-#match .patron-coin[data-pid="mora"] .token-dial,
-#match .patron-coin[data-pid="treasury"] .token-dial {
+#match .patron-coin .token-dial {
   display: flex !important;
   align-items: center;
-  width: 96px !important;
-  height: 42px !important;
-  transform: none !important;
+  width: 108px !important;
+  height: 48px !important;
   position: relative;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
+  transform-origin: 78% 50%;
+  transition: transform 0.7s cubic-bezier(.4, .12, .2, 1);
+}
+#match .patron-coin.neutral .wood-pendant,
+#match .patron-coin.neutral .token-dial { transform: rotate(0deg); }
+#match .patron-coin.fav-you .wood-pendant,
+#match .patron-coin.fav-you .token-dial { transform: rotate(-90deg); }
+#match .patron-coin.fav-opp .wood-pendant,
+#match .patron-coin.fav-opp .token-dial { transform: rotate(90deg); }
+#match .patron-coin.treasury .wood-pendant,
+#match .patron-coin.treasury .token-dial,
+#match .patron-coin[data-pid="treasury"] .wood-pendant,
+#match .patron-coin[data-pid="treasury"] .token-dial {
+  transform: none !important;
 }
 #match .patron-coin .wood-tip {
   width: 16px;
@@ -656,7 +672,6 @@
   left: auto !important;
   right: auto !important;
   bottom: auto !important;
-  transform: none !important;
   width: 30px !important;
   height: 30px !important;
   padding: 2px !important;
@@ -665,48 +680,41 @@
   background: #1a1612 !important;
   box-shadow: 0 0 0 1px #e8dcc0, inset 0 0 0 1px #000 !important;
   overflow: hidden;
+  transition: transform 0.7s cubic-bezier(.4, .12, .2, 1);
 }
-#match .patron-coin .coin-ring img,
-#match .patron-coin.neutral img,
-#match .patron-coin.treasury img,
-#match .patron-coin.fav-you img,
-#match .patron-coin.fav-opp img,
-#match .patron-coin.mora img,
-#match .patron-coin[data-pid="mora"] img,
-#match .patron-coin[data-pid="treasury"] img {
+#match .patron-coin .coin-ring img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
-  transform: none !important;
+  transition: transform 0.7s cubic-bezier(.4, .12, .2, 1);
 }
+#match .patron-coin.fav-you .coin-ring,
+#match .patron-coin.fav-you .coin-ring img { transform: rotate(90deg); }
+#match .patron-coin.fav-opp .coin-ring,
+#match .patron-coin.fav-opp .coin-ring img { transform: rotate(-90deg); }
+#match .patron-coin.treasury .coin-ring,
+#match .patron-coin.treasury .coin-ring img,
+#match .patron-coin.neutral .coin-ring,
+#match .patron-coin.neutral .coin-ring img { transform: none; }
 #match .patron-coin.callable .wood-bar {
   box-shadow: 0 0 10px rgba(180, 255, 90, 0.55), 0 2px 4px #0007;
 }
-#match .patron-coin .favor-pip {
-  position: absolute;
-  left: 2px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 6px 9px 6px 0;
-  border-color: transparent #c9c0b0 transparent transparent;
-  z-index: 3;
+#match .patron-coin .favor-pip { display: none !important; }
+#match .patron-coin.treasury .wood-tip { display: none !important; }
+#match .patron-coin.treasury .wood-bar {
+  border-left: 1px solid #e6c878;
+  border-radius: 10px;
 }
-#match .patron-coin.fav-you .favor-pip { border-right-color: #3a7ae0; }
-#match .patron-coin.fav-opp .favor-pip { border-right-color: #c62828; }
-#match .patron-coin.treasury .favor-pip,
-#match .patron-coin.neutral .favor-pip { display: none; }
 
 #match .rail-glass {
   grid-column: 2;
   grid-row: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   padding: 0 !important;
+  margin-top: 20%;
 }
 
 #match .eso-hourglass-end {
@@ -831,17 +839,25 @@ body.is-portrait #match .agent-slot.filled .card {
   height: clamp(36px, 9vw, 52px) !important;
 }
 body.is-portrait #match .patron-rail {
-  grid-template-columns: 1fr !important;
-  grid-template-rows: 1fr auto !important;
-  padding: 6px 3px 6px 2px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  grid-template-columns: none !important;
+  grid-template-rows: none !important;
+  padding: 10% 3px 8px 2px !important;
+  gap: 10px;
 }
 body.is-portrait #match .rail-patrons {
-  grid-column: 1;
-  grid-row: 1;
+  flex: 0 0 auto;
+  height: auto;
+  padding: 0;
+  gap: 12px;
 }
 body.is-portrait #match .rail-glass {
-  grid-column: 1;
-  grid-row: 2;
+  flex: 0 0 auto;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 body.is-portrait #match .patron-coin,
 body.is-portrait #match .patron-coin .wood-pendant,
@@ -868,3 +884,114 @@ body.is-portrait #match .pile-stack {
     transform: none !important;
   }
 }
+
+#match .rail-glass {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.patron-use-token {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 32% 28%, #f4efe4, #c4b49a 48%, #6a5840);
+  border: 1px solid #e8dcc0;
+  box-shadow: 0 2px 4px #0008, inset 0 1px 1px #fff8;
+}
+.patron-use-token .bust {
+  width: 18px;
+  height: 18px;
+  border-radius: 50% 50% 40% 40%;
+  background: radial-gradient(circle at 40% 30%, #3a3228, #1a1612);
+  box-shadow: inset 0 0 0 1px #0008;
+}
+.patron-use-token .num {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: #1a1612;
+  color: #f3e6b0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+  box-shadow: 0 0 0 1px #d4af37;
+}
+.patron-use-token.empty { opacity: 0.38; }
+.patron-use-token.opp { transform: scale(0.88); opacity: 0.9; }
+
+.target-banner {
+  position: fixed;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 11000;
+  width: min(92vw, 520px);
+  padding: 0.7rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid rgba(212,175,55,0.5);
+  background: linear-gradient(180deg, #2a2214, #14100c);
+  box-shadow: 0 10px 28px #000a;
+  color: #efe6d4;
+  text-align: center;
+}
+.target-banner[hidden] { display: none !important; }
+.target-banner p { margin: 0 0 0.45rem; font-family: Cinzel, serif; color: #f0d78a; }
+.target-choices { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; margin-bottom: 0.4rem; }
+.target-opt {
+  padding: 0.35rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid #d4af37;
+  background: #2a2214;
+  color: #efe6d4;
+}
+.target-tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: center;
+  max-height: 28vh;
+  overflow: auto;
+  margin-bottom: 0.4rem;
+}
+.target-tray .tray-card {
+  width: 56px;
+  height: 84px;
+  position: relative;
+}
+#match .card.legal-target,
+.tray-card.legal-target {
+  outline: 2px solid #7fe8ff;
+  box-shadow: 0 0 12px rgba(127, 232, 255, 0.8);
+  animation: tot-legal 1.2s ease-in-out infinite;
+}
+.fx-sacrifice { animation: tot-sac 0.65s ease forwards; }
+.fx-slash { animation: tot-slash 0.55s ease; }
+.fx-confine { animation: tot-confine 0.7s ease; }
+#match .hex-pile.just-writ .pile-stack { animation: tot-shuffle 0.55s ease; }
+@keyframes tot-sac {
+  0% { filter: brightness(1); transform: scale(1); opacity: 1; }
+  100% { filter: brightness(1.8) sepia(0.6); transform: scale(0.2); opacity: 0; }
+}
+@keyframes tot-slash {
+  0% { filter: brightness(1); }
+  40% { filter: brightness(2.2) drop-shadow(0 0 12px #ff6b6b); }
+  100% { filter: brightness(1); }
+}
+@keyframes tot-confine {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(8px) scale(0.92); filter: saturate(0.5); }
+  100% { transform: translateY(0); }
+}
+body.targeting #match .you-actions { pointer-events: none; }

@@ -15,7 +15,7 @@ import {
 import { UPGRADE_TO_BASE, upgradesForPatron } from './upgrades.js';
 import { hostRoom, joinRoom } from './netplay.js';
 import { setMusicEnabled, preferMusicFromStorage, warmMuted, playSfx, setMusicCue, setSfxStyle, getSfxStyle, setSfxEnabled, preferSfxFromStorage, isSfxOn } from './music.js';
-import { applyOfficialPatronText } from './texts.js';
+import { applyOfficialPatronText, cardPlayLines, cardComboLines } from './texts.js';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -45,6 +45,7 @@ let liftActive = false;
 let liftClone = null;
 let liftFromRect = null;
 let pendingPatron = null;
+let targetSession = null;
 let gauntletStopIndex = null;
 let isGauntletMatch = false;
 
@@ -65,6 +66,21 @@ const TOUR_STEPS = [
   { sel: '#turn-ind', text: 'You win at 40 prestige if they cannot pass you on their last chance, at 80 outright, or by favoring all 4 patrons.' },
 ];
 
+function polishCardCopy(card) {
+  const next = { ...card };
+  const play = cardPlayLines(next);
+  if (play.length) next.playText = play.join(' ');
+  for (const n of [2, 3, 4]) {
+    const lines = cardComboLines(next, n);
+    if (lines.length) next[`combo${n}Text`] = lines.join(' ');
+  }
+  return next;
+}
+
+function matchIsLive() {
+  return !!(engine?.state && $('#match')?.classList.contains('active'));
+}
+
 async function loadData() {
   const [c, p, d] = await Promise.all([
     fetch('data/cards.json').then(r => r.json()),
@@ -72,7 +88,7 @@ async function loadData() {
     fetch('data/decks.json').then(r => r.json()),
   ]);
   const norm = normalizeCatalog(c, p, d);
-  DATA.cards = norm.cards;
+  DATA.cards = norm.cards.map(polishCardCopy);
   DATA.patrons = applyOfficialPatronText(norm.patrons);
   DATA.decks = norm.decks;
   cardsById = Object.fromEntries(DATA.cards.map(x => [x.id, x]));
@@ -162,8 +178,6 @@ function syncHourglassUI() {
   if (b) b.checked = hourglassOn;
   const hg = $('#hourglass');
   if (hg) hg.dataset.on = hourglassOn ? '1' : '0';
-  const btn = $('#btn-hg-toggle');
-  if (btn) btn.textContent = hourglassOn ? '⌛ On' : '⌛';
 }
 
 function setHourglass(on) {
@@ -183,7 +197,7 @@ function onSplashEnter() {
   }
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 28';
+  if (stamp) stamp.textContent = 'build 29';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -229,11 +243,16 @@ function dossierHTML(d) {
   const pat = patronsById[d.patron];
   const patronName = pat?.name || d.patron || '';
   const icon = d.patron ? patronArt(d.patron) : '';
-  const combos = [
-    d.combo2Text && ['COMBO 2', d.combo2Text],
-    d.combo3Text && ['COMBO 3', d.combo3Text],
-    d.combo4Text && ['COMBO 4', d.combo4Text],
-  ].filter(Boolean);
+  const playLines = cardPlayLines(d);
+  const play = playLines.length ? playLines.join(' ') : (d.playText || '');
+  const combos = [2, 3, 4].map((n) => {
+    const lines = cardComboLines(d, n);
+    const tx = lines.length ? lines.join(' ') : d[`combo${n}Text`];
+    return tx ? [`COMBO ${n}`, tx] : null;
+  }).filter(Boolean);
+  const extras = [];
+  if (d.hp != null) extras.push(['HEALTH', `${d.hp}${d.taunt ? ' · Taunt' : ''}`]);
+  else if (d.taunt) extras.push(['TAUNT', 'This Agent has Taunt.']);
   return `
     <div class="eso-tip">
       <div class="eso-tip-head">
@@ -250,10 +269,10 @@ function dossierHTML(d) {
       ${d.cost != null ? `<div class="eso-tip-cost">COIN COST <b>${d.cost}</b></div>` : ''}
       <div class="eso-tip-block dossier-block">
         <div class="eso-tip-h dossier-h">PLAY EFFECT</div>
-        <ul>${effectBullets(d.playText)}</ul>
+        <ul>${effectBullets(play)}</ul>
       </div>
       ${combos.map(([h, tx]) => `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">${h}</div><ul>${effectBullets(tx)}</ul></div>`).join('')}
-      ${d.hp != null ? `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">HEALTH</div><ul><li>${d.hp}${d.taunt ? ' · Taunt' : ''}</li></ul></div>` : ''}
+      ${extras.map(([h, tx]) => `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">${h}</div><ul>${effectBullets(tx)}</ul></div>`).join('')}
     </div>`;
 }
 
@@ -293,7 +312,7 @@ function bindCardGesture(el, { onTap, onHoldRead }) {
     if (Math.hypot(e.clientX - sx, e.clientY - sy) > 14) clearHold();
   });
   const finish = (e) => {
-    if (pid != null && e.pointerId !== pid) return;
+    if (pid == null || e.pointerId !== pid) return;
     const wasHeld = held;
     clearHold();
     pid = null;
@@ -310,11 +329,20 @@ function bindCardGesture(el, { onTap, onHoldRead }) {
   };
   el.addEventListener('pointerup', finish);
   el.addEventListener('pointercancel', (e) => {
-    if (e.pointerId !== pid) return;
+    if (pid == null || e.pointerId !== pid) return;
+    const wasHeld = held;
+    const elapsed = t0 ? Date.now() - t0 : 0;
     clearHold();
     pid = null;
-    if (held) endLift();
+    t0 = 0;
+    if (wasHeld) {
+      endLift();
+      held = false;
+      return;
+    }
     held = false;
+    /* iOS: pointercancel then click — treat a short cancel as the tap so play still fires once. */
+    if (elapsed < HOLD_MS && onTap && e.pointerType !== 'mouse') onTap(e);
   });
   el.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); });
   el.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -323,27 +351,36 @@ function bindCardGesture(el, { onTap, onHoldRead }) {
 function placeInspectStage(wrap, rect, kind) {
   const hex = wrap.querySelector('.lift-hex-fly');
   const text = wrap.querySelector('.lift-text-fly');
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
+  const vv = window.visualViewport;
+  const vw = vv?.width || window.innerWidth;
+  const vh = vv?.height || window.innerHeight;
   const land = vw > vh;
   const isCoin = kind === 'coin';
+  const safeL = 14;
+  const safeR = 14;
+  const safeT = 18;
+  const safeB = 22;
+  const innerW = vw - safeL - safeR;
+  const innerH = vh - safeT - safeB;
   const targetW = isCoin
-    ? Math.min(land ? vw * 0.22 : vw * 0.36, 168)
-    : Math.min(land ? vw * 0.30 : vw * 0.50, 260);
+    ? Math.min(land ? innerW * 0.18 : innerW * 0.30, 132)
+    : Math.min(land ? innerW * 0.26 : innerW * 0.42, 210);
   const targetH = isCoin ? targetW : targetW * 1.54;
-  let tx, ty, textL, textT, textW;
+  let tx, ty, textL, textT, textW, textH;
   if (land) {
-    tx = Math.max(22, vw * 0.07);
-    ty = Math.max(18, (vh - targetH) / 2);
-    textL = tx + targetW + 28;
-    textT = Math.max(28, ty + 8);
-    textW = Math.min(440, vw - textL - 24);
+    tx = safeL + 8;
+    ty = Math.max(safeT, (vh - targetH) / 2);
+    textL = tx + targetW + 20;
+    textT = safeT;
+    textW = Math.min(460, vw - textL - safeR);
+    textH = innerH;
   } else {
-    tx = (vw - targetW) / 2;
-    ty = Math.max(10, vh * 0.05);
-    textL = 18;
-    textT = ty + targetH + 14;
-    textW = vw - 36;
+    tx = safeL + Math.max(0, (innerW - targetW) / 2);
+    ty = safeT;
+    textL = safeL;
+    textT = ty + targetH + 10;
+    textW = innerW;
+    textH = Math.max(120, vh - textT - safeB);
   }
   wrap._to = { left: tx, top: ty, width: targetW, height: targetH };
   hex.style.left = rect.left + 'px';
@@ -359,6 +396,7 @@ function placeInspectStage(wrap, rect, kind) {
     text.style.top = textT + 'px';
     text.style.width = textW + 'px';
     text.style.maxWidth = textW + 'px';
+    text.style.maxHeight = textH + 'px';
     requestAnimationFrame(() => {
       wrap.classList.add('show-veil');
       text.classList.add('show');
@@ -718,8 +756,19 @@ function resHTML(pl, label, key) {
     <span class="eso-tok tok-coin" title="Coin">${tick('coin', pl.coin)}</span>
     <span class="eso-tok tok-prestige" title="Prestige">${tick('prestige', pl.prestige)}</span>
     <span class="eso-tok tok-power" title="Power">${tick('power', pl.power)}</span>
-    <span class="eso-tok tok-patron" title="Patron uses">${tick('patron', pl.patronCallsLeft ?? 0)}</span>
   `;
+}
+
+function paintPatronCalls(you, opp) {
+  const paint = (id, n) => {
+    const el = $(id);
+    if (!el) return;
+    el.innerHTML = `<span class="bust" aria-hidden="true"></span><span class="num">${n}</span>`;
+    el.dataset.n = String(n);
+    el.classList.toggle('empty', n <= 0);
+  };
+  paint('#you-patron-calls', you?.patronCallsLeft ?? 0);
+  paint('#opp-patron-calls', opp?.patronCallsLeft ?? 0);
 }
 
 function flyCard(fromEl, toEl, cardInst, onDone) {
@@ -779,6 +828,7 @@ function renderAgentRow(row, agents, { attackable = false, onAttack = null } = {
       slot.appendChild(renderCard(a, {
         extraClass: 'agent-board' + (a.taunt ? ' has-taunt' : ''),
         onTap: (_inst, el) => {
+          if (targetSession) { pickTarget(a.uid); return; }
           if (attackable && onAttack) onAttack(a);
           else startLift(el, cardsById[a.id]);
         },
@@ -832,6 +882,7 @@ function renderMatch() {
   const oppLabel = matchMode === 'hotseat' ? `P${2 - seat}` : 'Rival';
   $('#you-res').innerHTML = resHTML(you, youLabel, 'you');
   $('#opp-res').innerHTML = resHTML(opp, oppLabel, 'opp');
+  paintPatronCalls(you, opp);
 
   const yourTurn = canControl();
   const turn = $('#turn-ind');
@@ -841,8 +892,9 @@ function renderMatch() {
   turn.classList.toggle('your-turn', yourTurn);
   const endBtn = $('#btn-end');
   if (endBtn) {
-    endBtn.classList.toggle('can-end', yourTurn && s.winner == null);
-    endBtn.disabled = !yourTurn || s.winner != null;
+    const busy = !!targetSession;
+    endBtn.classList.toggle('can-end', yourTurn && s.winner == null && !busy);
+    endBtn.disabled = !yourTurn || s.winner != null || busy;
   }
 
   // Pile counts
@@ -880,14 +932,14 @@ function renderMatch() {
     if (yourTurn && engine.canCallPatron(pid)) el.classList.add('callable');
     if (prevFavor[pid] && prevFavor[pid] !== favorWord.toLowerCase()) el.classList.add('just-flipped');
     const short = (pat.short || pat.name || pid).replace(/^The\s+/i, '');
+    const alwaysN = !!(pat.alwaysNeutral || pat.abilities?.alwaysNeutral || pid === 'treasury');
     el.innerHTML = `
       <div class="token-dial wood-pendant" title="${favorWord} — ${pat.name || short}">
-        <span class="wood-tip" aria-hidden="true"></span>
+        ${alwaysN ? '' : '<span class="wood-tip" aria-hidden="true"></span>'}
         <span class="wood-bar">
           <span class="wood-name">${short}</span>
           <span class="coin-ring"><img src="${patronArt(pid)}" alt="${short}" draggable="false" /></span>
         </span>
-        <span class="favor-pip" aria-hidden="true"></span>
       </div>
     `;
     bindCardGesture(el, {
@@ -918,6 +970,7 @@ function renderMatch() {
     tz.appendChild(renderCard(c, {
       affordable: aff,
       onTap: (inst, el) => {
+        if (targetSession) { pickTarget(inst.uid); return; }
         if (!canControl()) return;
         if (engine.canBuy(i)) {
           const dest = pileEl('you-cooldown');
@@ -936,14 +989,26 @@ function renderMatch() {
   // Agent rows — always show dashed/gold Agent slot outlines
   renderAgentRow($('#opp-agents'), opp.agents, {
     attackable: yourTurn,
-    onAttack: (a) => {
-      if (!canControl()) return;
-      if (engine.knockoutWithPower(a.uid)) {
-        syncAction({ op: 'knockout', uid: a.uid });
-        afterPlayerAction();
-      } else {
+    onAttack: () => {
+      if (!canControl() || targetSession) return;
+      const legal = engine.legalTargets({ kind: 'powerAttack' });
+      if (!legal.length) {
         toast('Need enough Power — and Taunt must be hit first');
+        return;
       }
+      beginTargetSession({
+        steps: [{ kind: 'powerAttack', n: 1 }],
+        onDone: (picks) => {
+          const uid = Array.isArray(picks.powerAttack) ? picks.powerAttack[0] : picks.powerAttack;
+          if (uid && engine.knockoutWithPower(uid)) {
+            syncAction({ op: 'knockout', uid });
+            afterPlayerAction();
+          } else {
+            toast('Need enough Power — and Taunt must be hit first');
+            renderMatch();
+          }
+        },
+      });
     },
   });
   renderAgentRow($('#you-agents'), you.agents, { attackable: false });
@@ -960,7 +1025,10 @@ function renderMatch() {
     yp.appendChild(renderCard(c, {
       extraClass: 'played-card',
       comboN: suitTally[suit] || 0,
-      onTap: (_i, el) => startLift(el, cardsById[c.id]),
+      onTap: (_i, el) => {
+        if (targetSession) { pickTarget(c.uid); return; }
+        startLift(el, cardsById[c.id]);
+      },
       onHoldRead: (_i, el) => startLift(el, cardsById[c.id]),
     }));
   });
@@ -974,16 +1042,8 @@ function renderMatch() {
       playable: yourTurn && engine.canPlay(c.uid),
       extraClass: 'hand-card',
       onTap: (inst, el) => {
-        if (!canControl()) return;
-        const isAgent = def?.type === 'agent';
-        const dest = isAgent
-          ? ($('#you-agents') || pileEl('you-cooldown'))
-          : pileEl('you-cooldown');
-        const ok = engine.playCard(c.uid);
-        if (!ok) { toast('Cannot play that now'); return; }
-        flyCard(el, dest, c, () => {});
-        syncAction({ op: 'play', uid: c.uid });
-        afterPlayerAction();
+        if (targetSession) { pickTarget(inst.uid); return; }
+        tryPlayCard(inst, el);
       },
       onHoldRead: (_i, el) => startLift(el, def),
     }));
@@ -1018,6 +1078,14 @@ function renderMatch() {
   else if (isRankedMatch || isGauntletMatch) setMusicCue('boss');
   else if (s.turn >= 3) setMusicCue('fight');
   else setMusicCue('tavern');
+  if (targetSession) {
+    const step = targetSession.steps[targetSession.idx];
+    if (step && step.kind !== 'choose') {
+      for (const t of engine.legalTargets(step)) {
+        document.querySelector(`#match .card[data-uid="${t.uid}"]`)?.classList.add('legal-target');
+      }
+    }
+  }
   syncBoardLayout();
 }
 
@@ -1049,6 +1117,14 @@ function layoutFan(container, rival = false) {
   });
 }
 
+function flashFx(card, kind) {
+  if (!card?.uid) return;
+  const el = document.querySelector(`#match .card[data-uid="${card.uid}"]`);
+  if (!el) return;
+  el.classList.add(kind);
+  setTimeout(() => el.classList.remove(kind), 700);
+}
+
 function flashVfx(fromEl, kind) {
   if (!fromEl) return;
   const r = fromEl.getBoundingClientRect();
@@ -1062,6 +1138,27 @@ function flashVfx(fromEl, kind) {
   setTimeout(() => el.remove(), 600);
 }
 
+function patronThreeStateHTML(pid) {
+  const pat = patronsById[pid];
+  if (!pat) return '';
+  const current = favorKeyForSeat(pid);
+  const alwaysN = !!(pat.alwaysNeutral || pat.abilities?.alwaysNeutral || pid === 'mora' || pid === 'treasury');
+  const rows = alwaysN ? [['neutral', 'NEUTRAL']] : [
+    ['favored', 'FAVORED'],
+    ['neutral', 'NEUTRAL'],
+    ['unfavored', 'UNFAVORED'],
+  ];
+  return rows.map(([key, label]) => {
+    const ab = pat.abilities?.[key];
+    const on = key === current;
+    const desc = ab?.desc || (ab ? '—' : 'Cannot be used.');
+    return `<section class="pc-state${on ? ' current-favor' : ''}" data-state="${key}">
+      <h4>${label}${on ? ' · current' : ''}</h4>
+      <p>${desc}</p>
+    </section>`;
+  }).join('');
+}
+
 function openPatronConfirm(pid, mode = 'call') {
   const pat = patronsById[pid];
   if (!pat) return;
@@ -1071,18 +1168,17 @@ function openPatronConfirm(pid, mode = 'call') {
   pendingPatron = { pid, mode };
   const art = $('#pc-art');
   const name = $('#pc-name');
-  const abil = $('#pc-ability');
+  const states = $('#pc-states');
   if (art) {
     art.src = patronArt(pid);
     art.style.filter = unlocked ? '' : 'grayscale(0.85) brightness(0.65)';
   }
-  const key = favorKeyForSeat(pid);
-  const favorWord = key === 'favored' ? 'Favored' : key === 'unfavored' ? 'Unfavored' : 'Neutral';
-  if (name) name.textContent = unlocked ? `${pat.short || pat.name} · ${favorWord}` : '???';
-  const desc = unlocked
-    ? (pat.abilities?.[key]?.desc || pat.abilities?.neutral?.desc || pat.name || '')
-    : 'This patron has not yet revealed their true name.';
-  if (abil) abil.textContent = desc;
+  if (name) name.textContent = unlocked ? (pat.short || pat.name) : '???';
+  if (states) {
+    states.innerHTML = unlocked
+      ? patronThreeStateHTML(pid)
+      : '<p class="pc-locked">This patron has not yet revealed their true name.</p>';
+  }
   const go = $('#pc-continue');
   if (go) {
     const ok = mode === 'pick' || (engine && canControl() && engine.canCallPatron(pid));
@@ -1106,14 +1202,196 @@ function confirmPatronContinue() {
     return;
   }
   if (!engine || !canControl()) return;
-  if (engine.canCallPatron(pid)) {
-    playSfx('patron');
-    engine.callPatron(pid);
-    syncAction({ op: 'patron', pid });
-    afterPlayerAction();
-  } else {
-    toast('Cannot call that patron now');
+  if (!engine.canCallPatron(pid)) { toast('Cannot call that patron now'); return; }
+  const steps = engine.targetingStepsForPatron(pid);
+  if (!steps.length) {
+    finishPatronCall(pid, {});
+    return;
   }
+  beginTargetSession({
+    steps,
+    onDone: (picks) => finishPatronCall(pid, picks),
+  });
+}
+
+function finishPatronCall(pid, picks) {
+  if (!engine?.canCallPatron(pid)) { toast('Cannot call that patron now'); return; }
+  playSfx('patron');
+  engine.callPatron(pid, picks);
+  syncAction({ op: 'patron', pid, picks });
+  afterPlayerAction();
+}
+
+const TARGET_PROMPTS = {
+  sacrifice: 'Sacrifice a card — pay on confirm.',
+  destroy: 'Destroy a card you own.',
+  knockout: 'Knock Out an enemy Agent (Taunt first).',
+  discard: 'Discard a card.',
+  donate: 'Donate a card from your hand.',
+  toss: 'Toss: send a revealed card to cooldown.',
+  replace: 'Replace a Tavern card.',
+  acquire: 'Acquire a Tavern card.',
+  refreshHand: 'Refresh a card from cooldown to your hand.',
+  refreshDraw: 'Refresh a card from cooldown to your draw pile.',
+  confine: 'Confine a card from their cooldown under your Agent.',
+  heal: 'Heal one of your Agents.',
+  choose: 'Choose one effect.',
+  powerAttack: 'Spend Power to Knock Out an Agent (Taunt first).',
+  lookConfine: 'Choose a revealed card to send to their cooldown.',
+  moraShare: 'Choose a Tavern action both players gain.',
+};
+
+function beginTargetSession({ steps, onDone }) {
+  endLift(true);
+  targetSession = { steps, idx: 0, picks: {}, chosen: [], onDone };
+  document.body.classList.add('targeting');
+  paintTargetStep();
+}
+
+function clearTargetUI() {
+  document.body.classList.remove('targeting');
+  $$('.legal-target').forEach(el => el.classList.remove('legal-target'));
+  const ban = $('#target-banner');
+  if (ban) ban.hidden = true;
+  const tray = $('#target-tray');
+  if (tray) tray.innerHTML = '';
+  const ch = $('#target-choices');
+  if (ch) ch.innerHTML = '';
+}
+
+function cancelTargetSession() {
+  clearTargetUI();
+  targetSession = null;
+  toast('Canceled');
+  renderMatch();
+}
+
+function paintTargetStep() {
+  if (!targetSession || !engine) return;
+  const step = targetSession.steps[targetSession.idx];
+  if (!step) {
+    const picks = targetSession.picks;
+    const done = targetSession.onDone;
+    clearTargetUI();
+    targetSession = null;
+    done && done(picks);
+    return;
+  }
+  const ban = $('#target-banner');
+  const prompt = $('#target-prompt');
+  const choices = $('#target-choices');
+  const tray = $('#target-tray');
+  if (ban) ban.hidden = false;
+  if (prompt) prompt.textContent = TARGET_PROMPTS[step.kind] || 'Choose a target.';
+  if (choices) choices.innerHTML = '';
+  if (tray) tray.innerHTML = '';
+  $$('.legal-target').forEach(el => el.classList.remove('legal-target'));
+
+  if (step.kind === 'choose') {
+    (step.options || []).forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'target-opt';
+      const label = (opt || []).map(e => e.op).join(' / ') || `Option ${i + 1}`;
+      btn.textContent = label.replace(/_/g, ' ');
+      btn.onclick = () => {
+        targetSession.picks.choose = i;
+        const uid = targetSession.sourceUid;
+        if (uid) {
+          const more = engine.targetingStepsForPlay(uid, i);
+          targetSession.steps = more;
+          targetSession.idx = 0;
+        } else {
+          targetSession.idx += 1;
+        }
+        paintTargetStep();
+      };
+      choices.appendChild(btn);
+    });
+    return;
+  }
+
+  const legal = engine.legalTargets(step);
+  targetSession.legal = legal;
+  targetSession.need = step.n || 1;
+  targetSession.picked = [];
+  const hiddenZones = new Set(['cooldown', 'draw', 'opp-cooldown']);
+  for (const t of legal) {
+    const onBoard = document.querySelector(`#match .card[data-uid="${t.uid}"]`);
+    if (onBoard && !hiddenZones.has(t.zone)) {
+      onBoard.classList.add('legal-target');
+    } else if (tray) {
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'card legal-target tray-card';
+      el.dataset.uid = t.uid;
+      const d = cardsById[t.id];
+      el.innerHTML = d
+        ? `<img class="art" src="${artFor(d)}" alt="${d.name}" /><div class="meta"><div class="cname">${d.name}</div></div>`
+        : t.name;
+      el.onclick = () => pickTarget(t.uid);
+      tray.appendChild(el);
+    }
+  }
+  if (!legal.length) {
+    targetSession.idx += 1;
+    paintTargetStep();
+  }
+}
+
+function pickTarget(uid) {
+  if (!targetSession) return;
+  const step = targetSession.steps[targetSession.idx];
+  if (!step || !targetSession.legal?.some(t => t.uid === uid)) return;
+  if (targetSession.picked.includes(uid)) return;
+  targetSession.picked.push(uid);
+  const key = step.kind === 'refreshHand' ? 'refreshHand'
+    : step.kind === 'refreshDraw' ? 'refreshDraw'
+    : step.kind;
+  if (!targetSession.picks[key]) targetSession.picks[key] = [];
+  if (Array.isArray(targetSession.picks[key])) targetSession.picks[key].push(uid);
+  else targetSession.picks[key] = uid;
+  const el = document.querySelector(`.legal-target[data-uid="${uid}"]`);
+  if (el) {
+    el.classList.add('target-picked');
+    if (step.kind === 'sacrifice' || step.kind === 'destroy') el.classList.add('fx-sacrifice');
+    if (step.kind === 'knockout' || step.kind === 'powerAttack') el.classList.add('fx-slash');
+    if (step.kind === 'confine' || step.kind === 'lookConfine') el.classList.add('fx-confine');
+  }
+  if (targetSession.picked.length >= (step.n || 1)) {
+    const delay = step.kind === 'sacrifice' || step.kind === 'destroy' ? 520
+      : step.kind === 'knockout' || step.kind === 'powerAttack' ? 420
+      : step.kind === 'confine' || step.kind === 'lookConfine' ? 450
+      : 90;
+    const sess = targetSession;
+    setTimeout(() => {
+      if (targetSession !== sess) return;
+      targetSession.idx += 1;
+      paintTargetStep();
+    }, delay);
+  }
+}
+
+function tryPlayCard(inst, el) {
+  if (!canControl() || targetSession) return;
+  const def = cardsById[inst.id];
+  const steps = engine.targetingStepsForPlay(inst.uid);
+  const go = (picks) => {
+    const isAgent = def?.type === 'agent';
+    const dest = isAgent ? ($('#you-agents') || pileEl('you-cooldown')) : pileEl('you-cooldown');
+    const ok = engine.playCard(inst.uid, picks?.choose || 0, picks);
+    if (!ok) { toast('Cannot play that now'); return; }
+    flyCard(el, dest, inst, () => {});
+    syncAction({ op: 'play', uid: inst.uid, choice: picks?.choose || 0, picks });
+    afterPlayerAction();
+  };
+  if (!steps.length) { go({}); return; }
+  targetSession = null;
+  beginTargetSession({
+    steps,
+    onDone: (picks) => go(picks),
+  });
+  if (targetSession) targetSession.sourceUid = inst.uid;
 }
 
 function afterPlayerAction() {
@@ -1243,9 +1521,9 @@ function syncAction(msg) {
 
 function applyRemoteAction(msg) {
   if (!engine) return;
-  if (msg.op === 'play') engine.playCard(msg.uid);
+  if (msg.op === 'play') engine.playCard(msg.uid, msg.choice || 0, msg.picks);
   else if (msg.op === 'buy') engine.buy(msg.i);
-  else if (msg.op === 'patron') engine.callPatron(msg.pid);
+  else if (msg.op === 'patron') engine.callPatron(msg.pid, msg.picks);
   else if (msg.op === 'knockout') engine.knockoutWithPower(msg.uid);
   else if (msg.op === 'end') engine.endTurn();
   renderMatch();
@@ -1272,7 +1550,19 @@ function startMatch(opts = {}) {
     if (ev === 'buy') playSfx('buy');
     if (ev === 'writ') playSfx('coinB');
     if (ev === 'patron') playSfx('patron');
-    if (ev === 'knockout') playSfx('knockout');
+    if (ev === 'knockout') { playSfx('knockout'); flashFx(data?.agent, 'fx-slash'); }
+    if (ev === 'sacrifice') flashFx(data?.card, 'fx-sacrifice');
+    if (ev === 'confine') flashFx(data?.agent, 'fx-confine');
+    if (ev === 'writ') {
+      const dest = pileEl('you-cooldown');
+      const from = document.querySelector('.patron-coin.treasury');
+      if (dest) dest.classList.add('just-writ');
+      if (from && dest) {
+        flyCard(from, dest, { id: data?.cardId || 'writ-of-coin' }, () => dest?.classList.remove('just-writ'));
+      } else {
+        setTimeout(() => dest?.classList.remove('just-writ'), 700);
+      }
+    }
     if (ev === 'shuffle') {
       playSfx('shuffle');
       animateShuffle(data.player);
@@ -1557,6 +1847,9 @@ function renderSettings() {
   syncSfxToggles();
   mountDiffSlider('#diff-slider-settings', '#diff-val-settings');
   paintDiffAll();
+  const live = settingsReturnScreen === '#match' && !!engine?.state;
+  hg?.closest('.settings-row')?.classList.toggle('prematch-only-hidden', live);
+  $('#diff-slider-settings')?.closest('.diff-block')?.classList.toggle('prematch-only-hidden', live);
   // Show-bot only meaningful for AI; still listed with note
   const row = $('#row-show-bot');
   if (row) row.classList.toggle('dim', false);
@@ -2026,6 +2319,7 @@ function mountDiffSlider(rootId, valId) {
     return Math.max(1, Math.min(10, Math.round(pct * 9) + 1));
   };
   const apply = (n) => {
+    if (matchIsLive() && rootId === '#diff-slider-settings') return;
     profile = loadProfile();
     setAiDifficulty(profile, n);
     profile = loadProfile();
@@ -2244,7 +2538,6 @@ function bind() {
   };
 
   $('#btn-end').onclick = () => doEndTurn();
-  $('#btn-hg-toggle').onclick = () => setHourglass(!hourglassOn);
   $('#btn-match-sfx')?.addEventListener('click', () => {
     setSfxEnabled(!isSfxOn());
     syncSfxToggles();
@@ -2275,6 +2568,7 @@ function bind() {
   $('#pile-overlay').onclick = (e) => { if (e.target.id === 'pile-overlay') e.target.classList.remove('show'); };
 
   $('#pc-continue')?.addEventListener('click', () => confirmPatronContinue());
+  $('#target-cancel')?.addEventListener('click', () => cancelTargetSession());
   $('#pc-cancel')?.addEventListener('click', () => closePatronConfirm());
   $('#patron-confirm-overlay')?.addEventListener('click', (e) => {
     if (e.target.id === 'patron-confirm-overlay') closePatronConfirm();
@@ -2299,7 +2593,7 @@ function bind() {
     profile = loadProfile();
     profile.hourglassDefault = !!e.target.checked;
     saveProfile(profile);
-    setHourglass(profile.hourglassDefault);
+    if (!matchIsLive()) setHourglass(profile.hourglassDefault);
     const splash = $('#chk-hourglass-splash');
     if (splash) splash.checked = profile.hourglassDefault;
   });
@@ -2344,9 +2638,16 @@ function installTestHook() {
         id: el.dataset.pid,
         side: el.dataset.side,
         favor: el.dataset.favor,
+        tip: !!el.querySelector('.wood-tip'),
+        pip: !!el.querySelector('.favor-pip'),
       }));
       const cluster = $('#rail-patrons')?.getBoundingClientRect();
       const rail = $('#patron-rail')?.getBoundingClientRect();
+      const felt = document.querySelector('#match .felt-table')?.getBoundingClientRect();
+      const events = document.querySelector('#match .events-rail')?.getBoundingClientRect();
+      const hg = document.querySelector('#btn-end')?.getBoundingClientRect();
+      const gold = cardsById.gold;
+      const harvest = cardsById['harvest-season'];
       return {
         hand: p?.hand?.length ?? 0,
         coin: p?.coin ?? 0,
@@ -2356,7 +2657,9 @@ function installTestHook() {
         phase: engine?.state?.phase ?? null,
         toast: lastToast,
         liftActive,
+        liftLayer: !!document.querySelector('.lift-fly'),
         patronConfirm: !!$('#patron-confirm-overlay')?.classList.contains('show'),
+        patronStates: [...document.querySelectorAll('#pc-states .pc-state')].map(el => el.dataset.state),
         patrons: coins,
         clusterH: cluster?.height || 0,
         railH: rail?.height || 0,
@@ -2366,9 +2669,66 @@ function installTestHook() {
           count: el.querySelector('.pile-count')?.textContent,
           vis: el.getBoundingClientRect().width > 20,
         })),
+        pileBack: !!document.querySelector('#pile-you-draw .pile-stack'),
+        pileEmpty: false,
+        comboHexes: document.querySelectorAll('#events-list .event-hex').length,
         endGlow: !!document.querySelector('#btn-end.can-end'),
         scale: document.querySelector('#match .board')?.style.transform || '',
+        goldTip: gold ? cardPlayLines(gold).join(' ') : '',
+        harvestTip: harvest ? cardPlayLines(harvest).join(' ') : '',
+        tavernCenter: !!(felt && document.querySelector('#tavern-zone') && (() => {
+          const t = document.querySelector('#tavern-zone').getBoundingClientRect();
+          return t.top > felt.top + felt.height * 0.18 && t.bottom < felt.bottom - felt.height * 0.18;
+        })()),
+        eventsOverlay: !!(felt && events && events.width < (felt.width || 1) * 0.2),
+        hourglassY: hg ? Math.round(hg.top) : 0,
+        hourglassMid: !!(felt && hg && hg.top < felt.top + felt.height * 0.72),
+        midMatchHgToggle: !!document.querySelector('#btn-hg-toggle'),
+        treasuryHasTip: coins.some(c => c.id === 'treasury' && c.tip),
+        resPatronTok: !!document.querySelector('#you-res .tok-patron'),
+        railPatronTok: !!document.querySelector('#you-patron-calls'),
+        targeting: !!targetSession,
+        targetPrompt: $('#target-prompt')?.textContent || '',
+        targetBanner: !!$('#target-banner') && !$('#target-banner').hidden,
+        legalGlow: document.querySelectorAll('#match .card.legal-target, .tray-card.legal-target').length,
+        youCallsOnRail: !!document.querySelector('#patron-rail #you-patron-calls'),
+        triadCount: document.querySelectorAll('#you-res .eso-tok').length,
       };
+    },
+    startTreasuryTarget() {
+      const p = engine?.state?.players[0];
+      if (!p) return { ok: false };
+      p.coin = 4;
+      p.patronCallsLeft = 1;
+      if (!p.played.length) {
+        const c = p.hand.find(x => x.id === 'gold') || p.hand[0];
+        if (c) {
+          p.hand = p.hand.filter(x => x.uid !== c.uid);
+          p.played.push(c);
+        }
+      }
+      renderMatch();
+      const steps = engine.targetingStepsForPatron('treasury');
+      beginTargetSession({
+        steps,
+        onDone: (picks) => finishPatronCall('treasury', picks),
+      });
+      return {
+        ok: !!targetSession,
+        steps: steps.map(s => s.kind),
+        legal: engine.legalTargets(steps[0] || {}).length,
+      };
+    },
+    clickTavernDeck() {
+      document.querySelector('[data-pile="tavern-draw"]')?.click();
+      return lastToast;
+    },
+    dossierFor(id) {
+      const d = cardsById[id];
+      return d ? dossierHTML(d) : '';
+    },
+    patronStates(pid) {
+      return patronThreeStateHTML(pid);
     },
     clickDraw() {
       document.querySelector('[data-pile="you-draw"]')?.click();

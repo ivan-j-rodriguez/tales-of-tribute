@@ -85,7 +85,7 @@ async function holdPatron(page, pid = 'pelin') {
       || document.querySelector('#rail-patrons .patron-coin[data-side="you"]');
     if (!el) return { ok: false };
     el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', isPrimary: true }));
-    await new Promise(r => setTimeout(r, 920));
+    await new Promise(r => setTimeout(r, 1250));
     const mid = window.__totTest.snapshot();
     const dossier = document.querySelector('.lift-text-fly')?.innerText || '';
     el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch', isPrimary: true }));
@@ -99,7 +99,7 @@ async function holdHand(page) {
     const el = document.querySelector('#hand-zone .card');
     if (!el) return false;
     el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', isPrimary: true }));
-    await new Promise(r => setTimeout(r, 920));
+    await new Promise(r => setTimeout(r, 1250));
     el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch', isPrimary: true }));
     el.click();
     return true;
@@ -141,6 +141,16 @@ let b = await snap(page);
 assert('full tap plays one card', b.hand === hand0 - 1 && b.played >= 1, b);
 assert('full tap does not double-play', b.hand === hand0 - 1, b);
 assert('gold pays a coin', b.golds === golds0 - 1 && b.coin === coin0 + 1, b);
+assert('tap does not lift', b.liftActive === false && b.liftLayer === false, b);
+assert('combo rail shows card art', b.comboHexes >= 1, b);
+assert('draw pile paints a card back', a.pileBack === true && a.pileEmpty === false, a);
+assert('tavern sits near vertical center', a.tavernCenter === true, a);
+assert('gold tip is in-game sentence', /Gain 1 Coin/i.test(a.goldTip || ''), a.goldTip);
+assert('harvest is Draw 1 card', /Draw 1 card/i.test(a.harvestTip || ''), a.harvestTip);
+assert('treasury has no favor tip', a.treasuryHasTip === false, a.patrons);
+assert('no mid-match hourglass toggle', a.midMatchHgToggle === false, a);
+assert('patron uses not in resource triad', a.resPatronTok === false && a.triadCount === 3, a);
+assert('patron uses sit on the rail', a.railPatronTok === true && a.youCallsOnRail === true, a);
 
 // 2. iOS click-only still plays
 await start(page);
@@ -162,6 +172,8 @@ assert('hold does not play', b.hand === a.hand && b.coin === a.coin, { a, b });
 await start(page);
 const toast = await page.evaluate(() => window.__totTest.clickDraw());
 assert('draw pile sealed', /sealed/i.test(toast), toast);
+const tavernToast = await page.evaluate(() => window.__totTest.clickTavernDeck());
+assert('tavern deck sealed', /sealed/i.test(tavernToast), tavernToast);
 
 // 5. patron tap opens confirm, not lift
 await start(page);
@@ -169,11 +181,23 @@ await tapPatron(page, 'full', 'pelin');
 await new Promise(r => setTimeout(r, 80));
 b = await snap(page);
 assert('patron tap opens confirm', b.patronConfirm === true && b.liftActive === false, b);
-assert('patrons clustered', b.clusterH > 0 && b.railH > 0 && b.clusterH < b.railH * 0.72, b);
+assert('patron modal shows three states', (b.patronStates || []).includes('favored') && (b.patronStates || []).includes('neutral') && (b.patronStates || []).includes('unfavored'), b.patronStates);
+assert('patrons clustered', b.clusterH > 0 && b.railH > 0 && b.clusterH < b.railH * 0.92, b);
 const sides = b.patrons.reduce((m, p) => { m[p.side] = (m[p.side] || 0) + 1; return m; }, {});
 assert('yours on your side', (sides.you || 0) === 2 && (sides.opp || 0) === 2 && (sides.mid || 0) === 1, b.patrons);
 assert('favor labels present', b.patrons.every(p => p.favor), b.patrons);
 await page.evaluate(() => document.querySelector('#pc-cancel')?.click());
+
+// 5b. Treasury sacrifice is interactive (no silent 2-coin burn)
+const treas = await page.evaluate(() => window.__totTest.startTreasuryTarget());
+assert('treasury opens targeting', !!(treas && treas.ok && treas.steps.includes('sacrifice')), treas);
+b = await snap(page);
+assert('treasury banner asks to sacrifice', b.targetBanner === true && /Sacrifice/i.test(b.targetPrompt || ''), b);
+assert('treasury glows legal cards', b.legalGlow >= 1, b);
+const coinBefore = b.coin;
+await page.evaluate(() => document.querySelector('#target-cancel')?.click());
+b = await snap(page);
+assert('treasury cancel does not pay', b.coin === coinBefore && b.targeting === false, b);
 
 // 6. patron hold reads dossier, does not call
 const held = await holdPatron(page, 'pelin');
