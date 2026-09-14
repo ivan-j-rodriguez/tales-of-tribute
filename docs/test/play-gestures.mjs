@@ -260,10 +260,14 @@ const tapTray = await page.evaluate(() => {
   return { ok: true, uid, picked: window.__totTest.targetPicked(), selected: el.classList.contains('target-picked') };
 });
 assert('tray short tap picks', tapTray.ok && tapTray.picked.includes(tapTray.uid) && tapTray.selected, tapTray);
-const confirmed = await page.evaluate(() => window.__totTest.confirmTarget());
-const lastPicks = await page.evaluate(() => window.__totTest.lastTargetPicks());
-assert('tray confirm closes targeting', confirmed.targeting === false, confirmed);
-assert('tray confirm keeps the pick', !!(lastPicks && lastPicks.replace && lastPicks.replace.includes(tapTray.uid)), { lastPicks, uid: tapTray.uid });
+await page.evaluate(() => window.__totTest.confirmTarget());
+await new Promise(r => setTimeout(r, 220));
+const afterConfirm = await page.evaluate(() => ({
+  targeting: window.__totTest.snapshot().targeting,
+  last: window.__totTest.lastTargetPicks(),
+}));
+assert('tray confirm closes targeting', afterConfirm.targeting === false, afterConfirm);
+assert('tray confirm keeps the pick', !!(afterConfirm.last && afterConfirm.last.replace && afterConfirm.last.replace.includes(tapTray.uid)), { last: afterConfirm.last, uid: tapTray.uid });
 
 // 5d. Board legal-target hold inspects without auto-confirming acquire
 await start(page);
