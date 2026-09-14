@@ -18,12 +18,13 @@ export const RARITY_WEIGHT = {
   legendary: 0.45,
 };
 
-/** Gold cost by kind × rarity. Fragments + upgrades are the long coin sink. */
+/** Gold cost by kind × rarity. Fragments + cosmetics are the long coin sink. */
 export const RARITY_PRICES = {
-  fragment: { common: 90, fine: 140, superior: 220, epic: 360, legendary: 560 },
-  upgrade: { common: 120, fine: 180, superior: 280, epic: 420, legendary: 640 },
-  skin: { common: 280, fine: 420, superior: 640, epic: 960, legendary: 1400 },
-  back: { common: 220, fine: 340, superior: 520, epic: 780, legendary: 1100 },
+  fragment: { common: 280, fine: 480, superior: 780, epic: 1280, legendary: 2100 },
+  upgrade: { common: 220, fine: 380, superior: 620, epic: 980, legendary: 1600 },
+  clue: { common: 320, fine: 520, superior: 840, epic: 1300, legendary: 2000 },
+  skin: { common: 720, fine: 1100, superior: 1680, epic: 2600, legendary: 3800 },
+  back: { common: 560, fine: 880, superior: 1360, epic: 2100, legendary: 3000 },
 };
 
 /** Locked-patron fragment rarity. Mora sits at the top of the grind. */
@@ -74,11 +75,16 @@ export const BACK_RARITY = {
   witches: 'legendary',
 };
 
-export const SHOP_PERIOD_DAYS = 2;
-export const SHOP_FEATURED_SLOTS = 7;
-export const SHOP_LATER_SLOTS = 4;
+export const SHOP_PERIOD_DAYS = 1;
+export const SHOP_SKIN_SLOTS = 4;
+export const SHOP_BACK_SLOTS = 4;
+export const SHOP_FRAG_SLOTS = 1;
+export const SHOP_FEATURED_SLOTS = 10;
+export const SHOP_LATER_SLOTS = 0;
 export const CLUES_TO_UPGRADE = 3;
-export const BUNDLE_DISCOUNT = 0.9;
+export const BUNDLE_DISCOUNT = 0.88;
+export const BUNDLE_CHANCE = 0.12;
+export const CRATES_PER_MONTH = 2;
 
 /** Starters first, then harder locked decks. Used by Collection → Card Clues. */
 export const DECK_IMPORTANCE = [
@@ -87,6 +93,75 @@ export const DECK_IMPORTANCE = [
   'druid', 'almalexia', 'alessia', 'mora',
   'treasury',
 ];
+
+export const DECK_COLORS = {
+  pelin: '#8b4513',
+  crows: '#2f2f2f',
+  hlaalu: '#c9a227',
+  celarus: '#5b7c99',
+  hunding: '#b87333',
+  redeagle: '#8b1a1a',
+  orgnum: '#1a6a6a',
+  rajhin: '#7a4a8a',
+  druid: '#3a7a3a',
+  almalexia: '#b8860b',
+  alessia: '#b8860b',
+  mora: '#556b2f',
+  treasury: '#c9a227',
+};
+
+export const FALLBACK_PATRONS = {
+  mora: { id: 'mora', name: 'Hermaeus Mora', short: 'Mora', color: '#556b2f' },
+  treasury: { id: 'treasury', name: 'The Treasury', short: 'Treasury', color: '#c9a227' },
+};
+
+const PATRON_CANON = {
+  hermaeus_mora: 'mora', hermaeusmora: 'mora', mora: 'mora',
+  saint_pelin: 'pelin', pelin: 'pelin',
+  duke_of_crows: 'crows', crows: 'crows', blackfeather: 'crows',
+  house_hlaalu: 'hlaalu', hlaalu: 'hlaalu',
+  celarus: 'celarus', psijic: 'celarus',
+  hunding: 'hunding',
+  red_eagle: 'redeagle', redeagle: 'redeagle',
+  orgnum: 'orgnum',
+  rajhin: 'rajhin',
+  druid_king: 'druid', druid: 'druid',
+  almalexia: 'almalexia',
+  saint_alessia: 'alessia', alessia: 'alessia',
+  treasury: 'treasury', neutral: 'treasury',
+};
+
+export function canonPatron(id) {
+  if (!id) return 'treasury';
+  const k = String(id).toLowerCase().replace(/-/g, '_');
+  return PATRON_CANON[k] || k;
+}
+
+export function sortCardsInDeck(cards = []) {
+  return [...cards].sort((a, b) => {
+    const as = a.starter ? 0 : 1;
+    const bs = b.starter ? 0 : 1;
+    if (as !== bs) return as - bs;
+    if (!!a.contract !== !!b.contract) return a.contract ? 1 : -1;
+    if (!!a.upgraded !== !!b.upgraded) return a.upgraded ? 1 : -1;
+    return (a.cost || 0) - (b.cost || 0) || String(a.name).localeCompare(String(b.name));
+  });
+}
+
+/** One scroll of All cards: groups in DECK_IMPORTANCE order. Mora + Treasury always listed. */
+export function groupCardsByDeck(cards = []) {
+  const buckets = Object.fromEntries(DECK_IMPORTANCE.map((id) => [id, []]));
+  const other = [];
+  for (const c of cards || []) {
+    const id = canonPatron(c.patron);
+    if (buckets[id]) buckets[id].push(c);
+    else other.push(c);
+  }
+  return DECK_IMPORTANCE.map((id) => ({
+    id,
+    cards: sortCardsInDeck(buckets[id] || []),
+  })).concat(other.length ? [{ id: 'other', cards: sortCardsInDeck(other) }] : []);
+}
 
 export const DECK_CAPTIONS = {
   pelin: 'The knight-errant banner — an initiate’s first table.',
@@ -111,9 +186,16 @@ export const MATCH_GOLD = {
   rankedLoss: 2,
 };
 
-export const CHECKIN_GOLD = 8;
-export const CHECKIN_STREAK7_GOLD = 12;
-export const PURSE_BUY_COST = 90;
+export const CHECKIN_GOLD = 10;
+export const CHECKIN_STREAK7_GOLD = 14;
+export const PURSE_BUY_COST = 99999;
+
+export const CRATE_VARIANTS = [
+  { id: 'iron', name: 'Iron Crown Crate', rarity: 'common' },
+  { id: 'orichalcum', name: 'Orichalcum Crown Crate', rarity: 'fine' },
+  { id: 'ebony', name: 'Ebony Crown Crate', rarity: 'superior' },
+  { id: 'voidsteel', name: 'Voidsteel Crown Crate', rarity: 'epic' },
+];
 
 /**
  * Fan calendar of recurring ESO event *themes* (not an official schedule).
@@ -343,9 +425,9 @@ export function rarityOf(kind, id, cards = []) {
   if (kind === 'fragment') return DECK_RARITY[id] || 'fine';
   if (kind === 'skin') return SKIN_RARITY[id] || 'fine';
   if (kind === 'back') return BACK_RARITY[id] || 'fine';
-  if (kind === 'upgrade') {
+  if (kind === 'upgrade' || kind === 'clue') {
     const card = cards.find((c) => c.id === id);
-    return DECK_RARITY[card?.patron] || 'fine';
+    return DECK_RARITY[card?.patron] || (STARTER_CLUE_DECKS.includes(card?.patron) ? 'common' : 'fine');
   }
   return 'fine';
 }
@@ -399,7 +481,8 @@ function makeOffer(kind, target, cards) {
 }
 
 /**
- * Deterministic 2-day featured slate. Most of the catalog stays off the table.
+ * Daily sparse slate: ~4 skins, ~4 backs, 1 fragment (the fragment is the prize),
+ * and rarely one expensive clue. Most of the catalog stays off the table.
  */
 export function buildShopSlate({
   periodKey,
@@ -410,6 +493,7 @@ export function buildShopSlate({
   ownedUpgrades = [],
   ownedSkins = [],
   ownedBacks = [],
+  ownedClues = {},
   cards = [],
   seasonId = null,
 }) {
@@ -418,11 +502,6 @@ export function buildShopSlate({
 
   for (const deck of lockedDecks) {
     catalog.push(makeOffer('fragment', deck, cards));
-  }
-  for (const deck of unlockedDecks) {
-    for (const uid of upgradesForPatron(cards, deck)) {
-      if (!ownedUpgrades.includes(uid)) catalog.push(makeOffer('upgrade', uid, cards));
-    }
   }
   for (const s of skins) {
     if (s.price <= 0) continue;
@@ -435,6 +514,12 @@ export function buildShopSlate({
     if (b.seasonal && b.seasonal !== seasonId) continue;
     if (ownedBacks.includes(b.id)) continue;
     catalog.push(makeOffer('back', b.id, cards));
+  }
+  const cluePool = (cards || []).filter((c) =>
+    c && c.id && !c.token && !c.curse && (ownedClues?.[c.id] || 0) < 1
+  );
+  for (const c of cluePool) {
+    catalog.push(makeOffer('clue', c.id, cards));
   }
 
   const w = (o) => RARITY_WEIGHT[o.rarity] || 1;
@@ -449,46 +534,36 @@ export function buildShopSlate({
     }
   };
 
-  const lockedFrag = catalog.filter((o) => o.kind === 'fragment');
-  take((o) => o.kind === 'fragment', Math.min(3, lockedFrag.length || 0));
-  if (seasonId) {
-    take((o) => (o.kind === 'skin' || o.kind === 'back') && (
-      (skins.find((s) => s.id === o.target)?.seasonal === seasonId) ||
-      (backs.find((b) => b.id === o.target)?.seasonal === seasonId)
-    ), 1);
-  }
-  take((o) => o.kind === 'upgrade', 2);
-  take((o) => o.kind === 'skin' || o.kind === 'back', 2);
-  if (featured.length < SHOP_FEATURED_SLOTS) {
-    take(() => true, SHOP_FEATURED_SLOTS - featured.length);
-  }
+  take((o) => o.kind === 'skin', SHOP_SKIN_SLOTS);
+  take((o) => o.kind === 'back', SHOP_BACK_SLOTS);
+  take((o) => o.kind === 'fragment', SHOP_FRAG_SLOTS);
+  if (rng() < 0.32) take((o) => o.kind === 'clue', 1);
 
-  const laterPool = catalog.filter((o) => !used.has(o.id));
-  const later = pickN(laterPool, SHOP_LATER_SLOTS, rng, (o) => (RARITY_ORDER.indexOf(o.rarity) + 1) * 2);
-
-  const slateFeatured = featured.slice(0, SHOP_FEATURED_SLOTS);
-  const bundleParts = pickN(
-    slateFeatured.filter((o) => o.kind === 'fragment' || o.kind === 'upgrade'),
-    2,
-    rng,
-    w,
-  );
+  const later = [];
   let bundle = null;
-  if (bundleParts.length === 2) {
-    const raw = bundleParts.reduce((s, o) => s + o.price, 0);
-    bundle = {
-      id: `bundle:${periodKey}:${bundleParts.map((o) => o.target).join('+')}`,
-      kind: 'bundle',
-      parts: bundleParts,
-      rarity: bundleParts.some((o) => o.rarity === 'legendary' || o.rarity === 'epic') ? 'epic' : 'superior',
-      price: Math.max(80, Math.round(raw * BUNDLE_DISCOUNT)),
-      stock: 1,
-    };
+  if (rng() < BUNDLE_CHANCE) {
+    const parts = pickN(
+      featured.filter((o) => o.kind === 'skin' || o.kind === 'back' || o.kind === 'fragment'),
+      2,
+      rng,
+      w,
+    );
+    if (parts.length === 2) {
+      const raw = parts.reduce((s, o) => s + o.price, 0);
+      bundle = {
+        id: `bundle:${periodKey}:${parts.map((o) => o.target).join('+')}`,
+        kind: 'bundle',
+        parts,
+        rarity: parts.some((o) => o.rarity === 'legendary' || o.rarity === 'epic') ? 'epic' : 'superior',
+        price: Math.max(900, Math.round(raw * BUNDLE_DISCOUNT)),
+        stock: 1,
+      };
+    }
   }
 
   return {
     periodKey,
-    featured: slateFeatured,
+    featured,
     later,
     bundle,
     catalogSize: catalog.length,
@@ -505,6 +580,7 @@ export function shopContextFromProfile(profile, cards, skins, backs, lockedDecks
     ownedUpgrades: profile.ownedUpgrades,
     ownedSkins: profile.unlockedSkins,
     ownedBacks: profile.unlockedBacks,
+    ownedClues: profile.cardClues || {},
     cards,
     seasonId: season?.id || null,
   };
@@ -539,9 +615,37 @@ export function loginMonthGrid(loginDays = {}, d = new Date()) {
     else if (date < today && date >= firstOk) state = 'miss';
     else if (date < today) state = 'empty';
     else state = loginDays[date] ? 'ok' : 'today';
-    cells.push({ date, day, state });
+    const crate = crateDaysForMonth(y, m).includes(day);
+    cells.push({ date, day, state, crate });
   }
   return { year: y, month: m, today, cells };
+}
+
+export function crateDaysForMonth(y, m) {
+  const rng = mulberry32(hashStr(`tot-crate:${y}-${String(m).padStart(2, '0')}`));
+  const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const pool = [];
+  for (let d = 5; d <= Math.max(6, daysInMonth - 2); d++) pool.push(d);
+  if (pool.length < 2) return [7, 21];
+  const a = pool[Math.floor(rng() * pool.length)];
+  let b = pool[Math.floor(rng() * pool.length)];
+  let guard = 0;
+  while (b === a && guard++ < 20) b = pool[Math.floor(rng() * pool.length)];
+  return [a, b].sort((x, z) => x - z);
+}
+
+export function crateVariantForDay(dateStr) {
+  const [y, mo, d] = String(dateStr).split('-').map(Number);
+  const days = crateDaysForMonth(y, mo);
+  const idx = days.indexOf(d);
+  if (idx < 0) return null;
+  const rng = mulberry32(hashStr(`tot-crate-var:${dateStr}`));
+  if (idx === 0) return CRATE_VARIANTS[rng() < 0.65 ? 0 : 1];
+  return CRATE_VARIANTS[rng() < 0.7 ? 2 : 3];
+}
+
+export function isCrateDay(dateStr) {
+  return !!crateVariantForDay(dateStr);
 }
 
 export function fillMissedLogins(loginDays, today) {
@@ -567,8 +671,9 @@ export function baseCardsForDeck(cards, deckId) {
 }
 
 export function deckCardSet(cards, deckId) {
+  const want = canonPatron(deckId);
   return (cards || []).filter((c) =>
-    c.patron === deckId && !c.token && !c.curse
+    canonPatron(c.patron) === want && !c.token && !c.curse
   ).sort((a, b) => {
     const as = a.starter ? 0 : 1;
     const bs = b.starter ? 0 : 1;

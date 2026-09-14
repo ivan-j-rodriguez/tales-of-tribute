@@ -2,10 +2,10 @@ import { GameEngine } from './engine.js';
 import { TributeAI } from './ai.js';
 import { normalizeCatalog, nameSlug } from './normalize.js';
 import {
-  loadProfile, saveProfile, doDailyCheckIn, ensureDailyChallengeReset,
-  recordMatchResult, openPurse, buySack, claimAchievement, claimDailyChallenge,
+  loadProfile, saveProfile, canClaimDailyLogin, claimDailyLogin, ensureDailyChallengeReset,
+  recordMatchResult, claimMatchReward, openCrownCrate, claimAchievement, claimDailyChallenge,
   isDeckUnlocked, fragmentProgress, ACHIEVEMENTS, STARTER_DECKS, LOCKED_DECKS,
-  ALL_DECKS, FRAGMENTS_TO_UNLOCK, SACK_BUY_COST, purseCount,
+  ALL_DECKS, FRAGMENTS_TO_UNLOCK, purseCount,
   TABLE_SKINS, CARD_BACKS, CARD_BACK_PALETTE,
   buyShopOffer, equipSkin, equipBack, RANK_TIERS,
   GAUNTLET_STOPS, ensureGauntletDay, recordGauntletResult, setAiDifficulty,
@@ -17,9 +17,10 @@ import {
 import { UPGRADE_TO_BASE, upgradesForPatron } from './upgrades.js';
 import {
   formatRarity, rarityOf, priceOf, CLUES_TO_UPGRADE, DECK_IMPORTANCE, DECK_CAPTIONS,
+  DECK_COLORS, FALLBACK_PATRONS, canonPatron, groupCardsByDeck,
   currentSeason, nextSeason, msUntilShopRefresh, msUntilWeeklyReset,
   loginMonthGrid, clueCountOf, countClues, deckCardSet, weeklyKey,
-  isOfferSoldOut,
+  isOfferSoldOut, crateVariantForDay, CRATES_PER_MONTH,
 } from './economy.js';
 import { hostRoom, joinRoom } from './netplay.js';
 import { setMusicEnabled, preferMusicFromStorage, warmMuted, playSfx, setMusicCue, setSfxStyle, getSfxStyle, setSfxEnabled, preferSfxFromStorage, isSfxOn } from './music.js';
@@ -38,7 +39,10 @@ let profile = null;
 let pickYou = [];
 let pickOpp = [];
 let pickPhase = 'you';
-let matchMode = 'ai'; // ai | ranked | hotseat | remote-host | remote-guest
+let matchMode = 'ai'; // ai | hotseat | remote-host | remote-guest
+let rankedPeerPicks = [];
+let storeReturnScreen = '#splash';
+let pendingWinLeave = null;
 let isRandomMatch = false;
 let isRankedMatch = false;
 let hourglassOn = false;
@@ -107,11 +111,18 @@ async function loadData() {
     if (cu) overlayOfficialCardText(norm.cards, cu);
     if (pu) overlayOfficialPatronText(norm.patrons, pu);
   } catch { /* optional local UESP dump */ }
-  DATA.cards = norm.cards.map(polishCardCopy);
-  DATA.patrons = norm.patrons;
-  DATA.decks = norm.decks;
-  cardsById = Object.fromEntries(DATA.cards.map(x => [x.id, x]));
+  DATA.cards = norm.cards.map((c) => polishCardCopy({ ...c, patron: canonPatron(c.patron) }));
+  DATA.patrons = (norm.patrons || []).map((p) => ({ ...p, id: canonPatron(p.id) }));
+  DATA.decks = (norm.decks || []).map((d) => ({ ...d, id: canonPatron(d.id) }));
   patronsById = Object.fromEntries(DATA.patrons.map(x => [x.id, x]));
+  for (const id of DECK_IMPORTANCE) {
+    if (!patronsById[id]) {
+      const fb = FALLBACK_PATRONS[id] || { id, name: id, short: id, color: DECK_COLORS[id] || '#c9a227' };
+      DATA.patrons.push(fb);
+      patronsById[id] = fb;
+    }
+  }
+  cardsById = Object.fromEntries(DATA.cards.map(x => [x.id, x]));
 }
 
 function show(id) {
@@ -177,7 +188,18 @@ function artFor(card) {
   return `assets/cards/${slug}.png`;
 }
 function patronArt(id) {
-  return `assets/patrons/${id}.png`;
+  const pid = canonPatron(id);
+  return `assets/patrons/${pid}.png`;
+}
+
+function patronRecord(id) {
+  const pid = canonPatron(id);
+  return patronsById[pid] || FALLBACK_PATRONS[pid] || {
+    id: pid,
+    name: pid === 'mora' ? 'Hermaeus Mora' : pid,
+    short: pid === 'mora' ? 'Mora' : pid,
+    color: DECK_COLORS[pid] || '#c9a227',
+  };
 }
 
 function applyTableSkin() {
@@ -195,13 +217,16 @@ function applyTableSkin() {
   document.documentElement.style.setProperty('--back-accent', pal[1]);
 }
 
+function goldCoinHtml(extra = '') {
+  return `<span class="gold-coin" title="Gold" ${extra}></span>`;
+}
+
 function refreshSplashPurse() {
   const el = $('#splash-purse');
   if (!el || !profile) return;
   const r = profile.ranked || {};
   el.innerHTML = `
-    <span>🪙 ${profile.gold}g</span>
-    <span>👜 ${purseCount(profile)}</span>
+    <span>${goldCoinHtml()} ${profile.gold}g</span>
     <span>🏅 ${r.tier || 'Unranked'}</span>
     <span>Wins ${profile.stats.wins}</span>
   `;
@@ -227,18 +252,14 @@ function onSplashEnter() {
   profile = loadProfile();
   ensureClubMeta(profile, DATA.cards || []);
   ensureDailyChallengeReset(profile);
-  const daily = doDailyCheckIn(profile);
-  if (daily) {
-    profile = daily.profile;
-    toast(daily.toast);
-  }
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 34';
+  if (stamp) stamp.textContent = 'build 37';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
   show('#splash');
+  if (canClaimDailyLogin(profile)) openLoginGreet();
 }
 
 function botRevealAllowed() {
@@ -784,12 +805,13 @@ function onPatronTap(p) {
   if (pickYou.includes(p.id)) {
     pickYou = pickYou.filter(id => id !== p.id);
     pickPhase = pickYou.length < 2 ? 'you' : 'opp';
+    if (isRankedMatch && net?.ok) net.send({ type: 'ranked-picks', patrons: [...pickYou] });
     updatePickStatus();
     renderDeckPick();
     return;
   }
-  // Deselect if already rival's
-  if (pickOpp.includes(p.id)) {
+  // Deselect if already rival's — not in ranked PvP (rival picks their own)
+  if (!isRankedMatch && pickOpp.includes(p.id)) {
     pickOpp = pickOpp.filter(id => id !== p.id);
     pickPhase = pickYou.length < 2 ? 'you' : 'opp';
     updatePickStatus();
@@ -803,7 +825,8 @@ function onPatronTap(p) {
   if (pickYou.length < 2) {
     pickYou.push(p.id);
     if (pickYou.length === 2) pickPhase = 'opp';
-  } else if (pickOpp.length < 2) {
+    if (isRankedMatch && net?.ok) net.send({ type: 'ranked-picks', patrons: [...pickYou] });
+  } else if (!isRankedMatch && pickOpp.length < 2) {
     pickOpp.push(p.id);
     pickPhase = 'opp';
   } else {
@@ -815,6 +838,7 @@ function onPatronTap(p) {
 }
 
 function updatePickStatus() {
+  if (isRankedMatch) pickOpp = [...(rankedPeerPicks || [])];
   $('#pick-status').textContent = `You ${pickYou.length}/2  ·  Rival ${pickOpp.length}/2`;
   $('#pick-you-count').textContent = `${pickYou.length} / 2`;
   $('#pick-opp-count').textContent = `${pickOpp.length} / 2`;
@@ -832,9 +856,14 @@ function updatePickStatus() {
   fillSlots('#pick-you-slots', pickYou);
   fillSlots('#pick-opp-slots', pickOpp);
   $('#btn-start').disabled = !(pickYou.length === 2 && pickOpp.length === 2);
+  if (isRankedMatch && matchMode === 'remote-guest') $('#btn-start').disabled = true;
   const hint = $('#deckpick-hint');
   if (hint) {
-    if (pickYou.length < 2) hint.innerHTML = 'Tap to select, tap again to <strong>deselect</strong>. Choose <strong>two</strong> patrons for you.';
+    if (isRankedMatch) {
+      if (pickYou.length < 2) hint.innerHTML = 'Ranked — choose <strong>your</strong> two patrons. No AI.';
+      else if (pickOpp.length < 2) hint.innerHTML = 'Waiting for your rival’s pair.';
+      else hint.innerHTML = matchMode === 'remote-guest' ? 'Host will begin the match.' : 'Both ready. Begin Ranked.';
+    } else if (pickYou.length < 2) hint.innerHTML = 'Tap to select, tap again to <strong>deselect</strong>. Choose <strong>two</strong> patrons for you.';
     else if (pickOpp.length < 2) hint.innerHTML = 'Now pick rival\'s pair — or tap <strong>AI takes the rest</strong>.';
     else hint.innerHTML = 'Ready. Begin Match, or deselect to change.';
   }
@@ -867,7 +896,7 @@ function localSeat() {
 
 function canControl() {
   if (!engine?.state || engine.state.winner != null) return false;
-  if (matchMode === 'ai' || matchMode === 'ranked') return engine.state.active === 0;
+  if (matchMode === 'ai') return engine.state.active === 0;
   if (matchMode === 'hotseat') return true;
   if (matchMode === 'remote-host') return engine.state.active === 0;
   if (matchMode === 'remote-guest') return engine.state.active === 1;
@@ -1017,7 +1046,7 @@ function renderMatch() {
   const turn = $('#turn-ind');
   turn.textContent = s.winner != null
     ? (s.winner === seat ? 'Victory' : 'Defeat')
-    : (yourTurn ? (matchMode === 'hotseat' ? `Player ${seat + 1}` : 'Your turn') : (matchMode === 'ranked' || matchMode === 'ai' ? 'Rival thinking…' : 'Waiting…'));
+    : (yourTurn ? (matchMode === 'hotseat' ? `Player ${seat + 1}` : 'Your turn') : (matchMode === 'ai' && !isRankedMatch ? 'Rival thinking…' : 'Waiting…'));
   turn.classList.toggle('your-turn', yourTurn);
   const endBtn = $('#btn-end');
   if (endBtn) {
@@ -1615,7 +1644,7 @@ function tryPlayCard(inst, el) {
 function afterPlayerAction() {
   renderMatch();
   if (engine.state.winner != null) { stopHourglass(); return; }
-  if ((matchMode === 'ai' || matchMode === 'ranked') && engine.state.active === 1) {
+  if (matchMode === 'ai' && !isRankedMatch && engine.state.active === 1) {
     stopHourglass();
     maybeAI();
   } else if (canControl()) {
@@ -1752,8 +1781,8 @@ function startMatch(opts = {}) {
   const diff = opts.difficulty != null ? opts.difficulty
     : (isGauntletMatch && gauntletStopIndex != null ? GAUNTLET_STOPS[gauntletStopIndex].difficulty
     : (profile?.aiDifficulty || 5));
-  ai = (matchMode === 'ai' || matchMode === 'ranked' || isGauntletMatch)
-    ? new TributeAI(engine, isRankedMatch ? Math.max(diff, 7) : diff)
+  ai = (matchMode === 'ai' || isGauntletMatch) && !isRankedMatch
+    ? new TributeAI(engine, diff)
     : null;
   engine.on((ev, data) => {
     if (ev === 'combo') { flashCombo(data.n); playSfx('combo'); }
@@ -1806,7 +1835,7 @@ function startMatch(opts = {}) {
     if (ev === 'agentEnter') { playSfx('agent'); }
     if (ev === 'aiAction') handleAiActionAnim(data);
     if (ev === 'state' && !liftActive && engine?.state?.active === 1 &&
-        (matchMode === 'ai' || matchMode === 'ranked' || isGauntletMatch)) {
+        ((matchMode === 'ai' && !isRankedMatch) || isGauntletMatch)) {
       // Refresh board between AI moves so flies remain readable
       renderMatch();
     }
@@ -1826,7 +1855,7 @@ function startMatch(opts = {}) {
 
   if (hourglassOn && canControl()) startHourglass();
   else syncHourglassUI();
-  if ((matchMode === 'ai' || matchMode === 'ranked') && engine.state.active === 1) maybeAI();
+  if (matchMode === 'ai' && !isRankedMatch && engine.state.active === 1) maybeAI();
 }
 
 function flashCombo(n) {
@@ -1894,35 +1923,81 @@ function showWin(data) {
     ? `Player ${engine.state.winner + 1} wins`
     : (engine.state.winner === (matchMode === 'remote-guest' ? 1 : 0) ? 'Victory' : 'Defeat');
 
+  pendingWinLeave = {
+    rematch: false,
+    wasGauntlet: isGauntletMatch,
+  };
   $('#win-banner').innerHTML = `
     ${title}<br>
     <span style="font-size:.45em;color:#c4b39a">${reasonText(data.reason)}</span><br>
-    <span style="font-size:.4em;color:#d4af37">${rewardLine}${purseNote}</span><br>
     <button class="primary" id="btn-again">Continue</button>
-    ${canRematch() ? '<button id="btn-rematch">Rematch</button>' : ''}
-    ${purseCount(profile) > 0 ? '<button id="btn-win-purse">Open Cutpurse</button>' : ''}`;
+    ${canRematch() ? '<button id="btn-rematch">Rematch</button>' : ''}`;
   $('#win-overlay').classList.add('show');
   setTimeout(() => {
-    $('#btn-again')?.addEventListener('click', () => {
-      $('#win-overlay').classList.remove('show');
-      const wasGauntlet = isGauntletMatch;
-      isRandomMatch = false;
-      isRankedMatch = false;
-      isGauntletMatch = false;
-      gauntletStopIndex = null;
-      if (net) { try { net.destroy(); } catch {} net = null; }
-      if (wasGauntlet) openGauntlet();
-      else onSplashEnter();
-    });
-    $('#btn-rematch')?.addEventListener('click', () => {
-      $('#win-overlay').classList.remove('show');
-      beginRematch();
-    });
-    $('#btn-win-purse')?.addEventListener('click', () => {
-      $('#win-overlay').classList.remove('show');
-      doOpenPurse(false);
-    });
+    $('#btn-again')?.addEventListener('click', () => finishWinOverlay(false));
+    $('#btn-rematch')?.addEventListener('click', () => finishWinOverlay(true));
   }, 50);
+}
+
+function finishWinOverlay(rematch) {
+  $('#win-overlay').classList.remove('show');
+  const wasGauntlet = isGauntletMatch;
+  openMatchPurseCeremony(() => {
+    isRandomMatch = false;
+    isRankedMatch = false;
+    isGauntletMatch = false;
+    gauntletStopIndex = null;
+    rankedPeerPicks = [];
+    document.body.classList.remove('ranked-pvp-pick');
+    if (rematch) {
+      beginRematch();
+      return;
+    }
+    if (net) { try { net.destroy(); } catch {} net = null; }
+    if (wasGauntlet) openGauntlet();
+    else onSplashEnter();
+  });
+}
+
+function openMatchPurseCeremony(after) {
+  profile = loadProfile();
+  const claimed = claimMatchReward(profile, DATA.cards);
+  profile = loadProfile();
+  const overlay = $('#sack-overlay');
+  const anim = $('#sack-anim');
+  const box = $('#sack-reward');
+  const rarityEl = $('#sack-rarity');
+  anim.classList.remove('sack-anim', 'purse-open', 'purse-empty');
+  void anim.offsetWidth;
+  if (claimed.empty || !claimed.won) {
+    anim.classList.add('purse-empty');
+    if (rarityEl) rarityEl.textContent = 'Empty purse';
+    if (box) box.innerHTML = claimed.gold
+      ? `<div>${goldCoinHtml()} A meager ${claimed.gold}g</div>`
+      : `<div>The purse is empty.</div>`;
+    playSfx('purse');
+  } else {
+    anim.classList.add('purse-open', 'sack-anim');
+    if (rarityEl) rarityEl.textContent = claimed.rarity || 'Cutpurse';
+    const bits = (claimed.rewards || []).map((r) => r.label).join(' · ') || `${claimed.gold}g`;
+    let img = goldCoinHtml();
+    const frag = (claimed.rewards || []).find((r) => r.deck);
+    const cardRew = (claimed.rewards || []).find((r) => r.id && cardsById[r.id]);
+    if (cardRew) img = `<img src="${artFor(cardsById[cardRew.id])}" alt="" />`;
+    else if (frag && patronsById[frag.deck]) img = `<img src="${patronArt(frag.deck)}" alt="" style="width:80px;border-radius:50%" />`;
+    if (box) box.innerHTML = `${img}<div>${bits}</div>`;
+    playSfx('celebrate');
+    playSfx('purse');
+  }
+  overlay.classList.add('show');
+  const close = $('#btn-sack-close');
+  const done = () => {
+    overlay.classList.remove('show');
+    close?.removeEventListener('click', done);
+    refreshSplashPurse();
+    if (after) after();
+  };
+  close?.addEventListener('click', done);
 }
 
 function canRematch() {
@@ -2048,7 +2123,7 @@ async function doEndTurn() {
   if (matchMode === 'hotseat' && engine.state.winner == null) {
     $('#hand-device-overlay').classList.add('show');
   }
-  if (matchMode === 'ai' || matchMode === 'ranked') {
+  if (matchMode === 'ai' && !isRankedMatch) {
     await maybeAI();
     renderMatch();
   }
@@ -2144,59 +2219,6 @@ function renderSettings() {
   const live = settingsReturnScreen === '#match' && !!engine?.state;
   hg?.closest('.settings-row')?.classList.toggle('prematch-only-hidden', live);
   $('#diff-slider-settings')?.closest('.diff-block')?.classList.toggle('prematch-only-hidden', live);
-  // Show-bot only meaningful for AI; still listed with note
-  const row = $('#row-show-bot');
-  if (row) row.classList.toggle('dim', false);
-
-  const skins = $('#settings-skins');
-  if (skins) {
-    skins.innerHTML = '';
-    for (const s of TABLE_SKINS) {
-      const owned = profile.unlockedSkins.includes(s.id);
-      const eq = profile.tableSkin === s.id;
-      const el = document.createElement('div');
-      el.className = 'store-item' + (owned ? ' owned' : ' locked') + (eq ? ' equipped' : '');
-      el.innerHTML = `
-        <div class="skin-swatch ${s.id}"></div>
-        <h4>${s.name}</h4>
-        <p>${s.tag ? s.tag + ' · ' : ''}${s.desc}</p>
-        <div class="price">${owned ? (eq ? 'Equipped' : 'Owned') : `🔒 ${formatRarity(s.rarity || 'fine')} · Club Store`}</div>
-        <button type="button">${owned ? (eq ? 'Equipped' : 'Equip') : 'Find in Store'}</button>
-      `;
-      el.querySelector('button').onclick = () => {
-        if (!owned) { toast('Rotating Club Store — not always in stock.'); return; }
-        const res = equipSkin(profile, s.id);
-        if (res.error) toast(res.error);
-        else { toast(`Equipped ${s.name}`); applyTableSkin(); renderSettings(); refreshSplashPurse(); }
-      };
-      skins.appendChild(el);
-    }
-  }
-
-  const backs = $('#settings-backs');
-  if (backs) {
-    backs.innerHTML = '';
-    for (const b of CARD_BACKS) {
-      const owned = profile.unlockedBacks.includes(b.id);
-      const eq = profile.cardBack === b.id;
-      const el = document.createElement('div');
-      el.className = 'store-item' + (owned ? ' owned' : ' locked') + (eq ? ' equipped' : '');
-      el.innerHTML = `
-        <div class="back-swatch back-${b.id}"></div>
-        <h4>${b.name}</h4>
-        <p>${b.desc}</p>
-        <div class="price">${owned ? (eq ? 'Equipped' : 'Owned') : `🔒 ${formatRarity(b.rarity || 'fine')} · Club Store`}</div>
-        <button type="button">${owned ? (eq ? 'Equipped' : 'Equip') : 'Find in Store'}</button>
-      `;
-      el.querySelector('button').onclick = () => {
-        if (!owned) { toast('Rotating Club Store — not always in stock.'); return; }
-        const res = equipBack(profile, b.id);
-        if (res.error) toast(res.error);
-        else { toast(`Equipped ${b.name}`); applyTableSkin(); renderSettings(); refreshSplashPurse(); }
-      };
-      backs.appendChild(el);
-    }
-  }
 }
 
 function leaveSettings() {
@@ -2247,8 +2269,7 @@ function renderClub() {
   const r = profile.ranked || {};
   const clues = countClues(profile, DATA.cards);
   $('#club-stats').innerHTML = `
-    <div class="club-stat"><div class="label">Purse gold</div><div class="val">${profile.gold}</div></div>
-    <div class="club-stat"><div class="label">Cutpurses</div><div class="val">${purseCount(profile)}</div></div>
+    <div class="club-stat"><div class="label">Gold</div><div class="val">${goldCoinHtml()} ${profile.gold}</div></div>
     <div class="club-stat"><div class="label">Check-in</div><div class="val">${profile.checkInStreak || 0}d</div></div>
     <div class="club-stat"><div class="label">Win streak</div><div class="val">${profile.winStreak || 0}</div></div>
     <div class="club-stat"><div class="label">Record</div><div class="val">${profile.stats.wins}–${profile.stats.losses}</div></div>
@@ -2264,7 +2285,7 @@ function renderClub() {
       grid.cells.map((c) => {
         if (c.state === 'pad') return `<div class="cal-day pad"></div>`;
         const mark = c.state === 'miss' ? '✕' : (c.state === 'ok' ? '✓' : c.day);
-        return `<div class="cal-day ${c.state}" title="${c.date}">${mark}</div>`;
+        return `<div class="cal-day ${c.state}${c.crate ? ' crate' : ''}" title="${c.date}">${mark}</div>`;
       }).join('');
   }
 
@@ -2413,6 +2434,12 @@ function offerVisual(offer) {
     const b = CARD_BACKS.find((x) => x.id === offer.target);
     return `<div class="back-swatch back-${offer.target}"></div><h4>${b?.name || offer.target}</h4><p>Back · ${formatRarity(offer.rarity)}</p>`;
   }
+  if (offer.kind === 'clue') {
+    const c = cardsById[offer.target];
+    return `<img src="${c ? artFor(c) : ''}" alt="" style="width:64px;height:90px;object-fit:cover;border-radius:4px;border:1px solid var(--gold-dim)" />
+      <h4>${c?.name || 'Card clue'}</h4>
+      <p>Clue · ${formatRarity(offer.rarity)}</p>`;
+  }
   return `<h4>${offer.id}</h4>`;
 }
 
@@ -2451,7 +2478,7 @@ function renderStore() {
   $('#store-gold').textContent = `${profile.gold}g`;
   const slate = currentShop(profile, DATA.cards);
   const timer = $('#store-timer');
-  if (timer) timer.textContent = `Slate refreshes in ${fmtCountdown(msUntilShopRefresh())} (2-day window, NY midnight).`;
+  if (timer) timer.textContent = `Slate refreshes in ${fmtCountdown(msUntilShopRefresh())} (daily NY midnight).`;
 
   const bundleBox = $('#store-bundle');
   if (bundleBox) {
@@ -2527,18 +2554,20 @@ function renderCollection() {
     grid.innerHTML = '';
     $('#collection-detail')?.classList.add('hidden');
     for (const id of ALL_DECKS) {
-      const p = patronsById[id];
+      const p = patronRecord(id);
       if (!p) continue;
       const unlocked = isDeckUnlocked(profile, id);
       const el = document.createElement('div');
       el.className = 'patron-card' + (unlocked ? '' : ' locked');
+      el.dataset.deck = id;
       const frag = fragmentProgress(profile, id);
       const ups = upgradesForPatron(DATA.cards, id);
       const owned = ups.filter((u) => profile.ownedUpgrades.includes(u)).length;
       const ready = !unlocked && deckReadyToUnlock(profile, id, DATA.cards);
+      const title = id === 'mora' ? 'Hermaeus Mora' : (p.short || p.name || id);
       el.innerHTML = `
-        <img src="${patronArt(id)}" alt="${p.short}" />
-        <div class="name">${p.short}</div>
+        <img src="${patronArt(id)}" alt="${unlocked ? title : 'Locked patron'}" />
+        <div class="name">${unlocked ? title : '???'}</div>
         <div class="desc">${unlocked ? `Upgrades ${owned}/${ups.length}` : `Fragments ${frag}/${FRAGMENTS_TO_UNLOCK}${ready ? ' · ready' : ' · need cards'}`} · ${formatRarity(rarityOf('fragment', id))}</div>
       `;
       el.addEventListener('click', () => showCollectionDeck(id));
@@ -2555,24 +2584,20 @@ function renderClueEncyclopedia() {
   if (!host) return;
   host.innerHTML = '';
   for (const deckId of DECK_IMPORTANCE) {
-    const p = patronsById[deckId];
-    if (!p && deckId !== 'treasury') continue;
+    const p = patronRecord(deckId);
     const cards = deckCardSet(DATA.cards, deckId);
-    if (!cards.length) continue;
+    if (!cards.length && deckId !== 'mora' && deckId !== 'treasury') continue;
     const wrap = document.createElement('div');
-    wrap.className = 'clue-deck';
+    wrap.className = `clue-deck deck-${deckId}`;
+    wrap.style.setProperty('--ency-color', p.color || DECK_COLORS[deckId] || '#c9a227');
+    wrap.appendChild(encyPatronHead(deckId));
     const found = cards.filter((c) => clueCountOf(profile, c.id) >= 1).length;
-    wrap.innerHTML = `
-      <div class="clue-deck-head">
-        <img src="${patronArt(deckId)}" alt="" />
-        <div>
-          <h3>${p?.name || deckId}</h3>
-          <p class="hint">${DECK_CAPTIONS[deckId] || ''} · ${found}/${cards.length} clues</p>
-        </div>
-      </div>
-      <div class="collection-cards"></div>
-    `;
-    const box = wrap.querySelector('.collection-cards');
+    const count = document.createElement('p');
+    count.className = 'hint clue-deck-count';
+    count.textContent = `${found}/${cards.length} clues`;
+    wrap.appendChild(count);
+    const box = document.createElement('div');
+    box.className = 'collection-cards';
     for (const c of cards) {
       const n = clueCountOf(profile, c.id);
       const known = n >= 1;
@@ -2584,14 +2609,32 @@ function renderClueEncyclopedia() {
       if (known) el.addEventListener('click', () => showCardModal(c));
       box.appendChild(el);
     }
+    wrap.appendChild(box);
     host.appendChild(wrap);
   }
 }
 
 function renderCollectionUpgrades() {
+  const frags = $('#coll-frags');
   const skins = $('#coll-skins');
   const backs = $('#coll-backs');
   const ups = $('#coll-upgrades');
+  if (frags) {
+    frags.innerHTML = '';
+    for (const id of LOCKED_DECKS) {
+      const p = patronRecord(id);
+      const n = fragmentProgress(profile, id);
+      const el = document.createElement('div');
+      el.className = 'store-item' + (isDeckUnlocked(profile, id) ? ' owned' : '');
+      el.innerHTML = `
+        <div class="rarity-pip rarity-${rarityOf('fragment', id)}">${formatRarity(rarityOf('fragment', id))}</div>
+        <img src="${patronArt(id)}" alt="" style="width:56px;height:56px;border-radius:50%;border:2px solid var(--gold-dim)" />
+        <h4>${id === 'mora' ? 'Hermaeus Mora' : p.short}</h4>
+        <p>Fragments ${n}/${FRAGMENTS_TO_UNLOCK}${isDeckUnlocked(profile, id) ? ' · unlocked' : ''}</p>
+      `;
+      frags.appendChild(el);
+    }
+  }
   if (skins) {
     skins.innerHTML = '';
     for (const s of TABLE_SKINS) {
@@ -2642,7 +2685,7 @@ function renderCollectionUpgrades() {
 }
 
 function showCollectionDeck(deckId) {
-  const p = patronsById[deckId];
+  const p = patronRecord(deckId);
   const detail = $('#collection-detail');
   detail.classList.remove('hidden');
   const unlocked = isDeckUnlocked(profile, deckId);
@@ -2663,16 +2706,69 @@ function showCollectionDeck(deckId) {
   detail.innerHTML = html;
 }
 
-function doOpenPurse(buy) {
+function openLoginGreet() {
+  const overlay = $('#login-overlay');
+  if (!overlay) return;
   profile = loadProfile();
-  let result = openPurse(profile, DATA.cards, { buy: !!buy && profile.purses.length <= 0 });
-  if (result.error) {
-    if (profile.purses.length <= 0 && profile.gold >= SACK_BUY_COST) {
-      result = openPurse(profile, DATA.cards, { buy: true });
-      if (result.error) { toast(result.error); return; }
-    } else { toast(result.error); return; }
+  const cal = $('#login-cal');
+  const grid = loginMonthGrid(profile.loginDays);
+  const dow = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+  if (cal) {
+    cal.innerHTML = dow.map((d) => `<div class="cal-dow">${d}</div>`).join('') +
+      grid.cells.map((c) => {
+        if (c.state === 'pad') return `<div class="cal-day pad"></div>`;
+        const mark = c.state === 'miss' ? '✕' : (c.state === 'ok' ? '✓' : c.day);
+        const claim = c.state === 'today' ? ' claimable' : '';
+        return `<div class="cal-day ${c.state}${c.crate ? ' crate' : ''}${claim}" data-date="${c.date || ''}">${mark}</div>`;
+      }).join('');
   }
-  showPurseReward(result.reward, result.rarity);
+  const crate = crateVariantForDay(grid.today);
+  const hint = $('#login-prize-hint');
+  if (hint) {
+    hint.textContent = crate && (profile.cratesOpened || 0) < CRATES_PER_MONTH
+      ? `Today holds a ${crate.name}. Two Crown Crates a month.`
+      : 'Stamp today for a modest Club purse of gold.';
+  }
+  overlay.classList.add('show');
+}
+
+function claimLoginStamp() {
+  profile = loadProfile();
+  const res = claimDailyLogin(profile, DATA.cards);
+  if (res.error) { toast(res.error); $('#login-overlay')?.classList.remove('show'); return; }
+  profile = res.profile;
+  toast(res.toast);
+  $('#login-overlay')?.classList.remove('show');
+  refreshSplashPurse();
+  if (res.crate) openCrateCeremony(res.crate);
+}
+
+function openCrateCeremony(variant) {
+  const overlay = $('#crate-overlay');
+  if (!overlay) return;
+  const stage = $('#crate-stage');
+  stage?.classList.remove('crate-open');
+  stage?.classList.remove('crate-iron', 'crate-orichalcum', 'crate-ebony', 'crate-voidsteel');
+  stage?.classList.add(`crate-${variant.id}`);
+  $('#crate-rarity').textContent = variant.name;
+  $('#crate-reward').innerHTML = '';
+  $('#btn-crate-open').hidden = false;
+  $('#btn-crate-close').hidden = true;
+  overlay.classList.add('show');
+}
+
+function doOpenCrate() {
+  profile = loadProfile();
+  const name = $('#crate-rarity')?.textContent || '';
+  const variant = { id: 'iron', name, rarity: 'fine' };
+  const res = openCrownCrate(profile, DATA.cards, variant);
+  if (res.error) { toast(res.error); return; }
+  playSfx('crate');
+  $('#crate-stage')?.classList.add('crate-open');
+  $('#crate-reward').innerHTML = `${goldCoinHtml()}<div>${res.reward?.label || 'Crate opened'}</div>`;
+  $('#btn-crate-open').hidden = true;
+  $('#btn-crate-close').hidden = false;
+  refreshSplashPurse();
 }
 
 function showPurseReward(reward, rarity) {
@@ -2692,28 +2788,78 @@ function showPurseReward(reward, rarity) {
   overlay.classList.add('show');
 }
 
+function encyPatronHead(deckId) {
+  const p = patronRecord(deckId);
+  const unlocked = deckId === 'treasury' || isDeckUnlocked(profile, deckId);
+  const title = deckId === 'mora' ? 'Hermaeus Mora' : (p.name || p.short || deckId);
+  const cap = DECK_CAPTIONS[deckId] || '';
+  const el = document.createElement('div');
+  el.className = `ency-patron-head deck-${deckId}` + (unlocked ? '' : ' locked');
+  el.dataset.deck = deckId;
+  el.style.setProperty('--ency-color', p.color || DECK_COLORS[deckId] || '#c9a227');
+  el.innerHTML = `
+    <img class="ency-patron-token" src="${patronArt(deckId)}" alt="${unlocked ? title : 'Locked patron'}" />
+    <div class="ency-patron-meta">
+      <strong class="ency-div-name">${unlocked ? title : '???'}</strong>
+      <span class="ency-div-cap">${unlocked ? cap : 'Locked'}</span>
+    </div>
+  `;
+  return el;
+}
+
 function renderEncy() {
   const sel = $('#ency-patron');
-  if (!sel.options.length) {
+  if (sel) {
+    const cur = sel.value;
     sel.innerHTML = `<option value="">All patrons</option>` +
-      DATA.patrons.map(p => `<option value="${p.id}">${p.short}</option>`).join('');
+      DECK_IMPORTANCE.map((id) => {
+        const p = patronRecord(id);
+        const label = id === 'mora' ? 'Hermaeus Mora' : (p.name || p.short || id);
+        return `<option value="${id}">${label}</option>`;
+      }).join('');
+    if ([...sel.options].some((o) => o.value === cur)) sel.value = cur;
   }
   const q = ($('#ency-search').value || '').toLowerCase();
-  const pid = sel.value;
-  const grid = $('#ency-grid');
-  grid.innerHTML = '';
-  const list = DATA.cards.filter(c => {
-    if (pid && c.patron !== pid) return false;
-    if (q && !c.name.toLowerCase().includes(q) && !(c.playText || '').toLowerCase().includes(q)) return false;
+  const rawPid = sel?.value || '';
+  const pid = rawPid ? canonPatron(rawPid) : '';
+  const filtered = DATA.cards.filter((c) => {
+    const deck = canonPatron(c.patron);
+    if (rawPid && deck !== pid) return false;
+    if (q) {
+      const p = patronRecord(deck);
+      const hay = [c.name, c.playText, p.name, p.short, deck].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
     return true;
   });
-  for (const c of list) {
-    const deckLocked = c.patron !== 'treasury' && !isDeckUnlocked(profile, c.patron);
-    const el = document.createElement('div');
-    el.className = 'ency-card' + (deckLocked ? ' deck-locked' : '');
-    el.innerHTML = `<img src="${artFor(c)}" alt="${c.name}" /><div class="info"><strong>${c.name}</strong>${c.cost} · ${c.type}${c.upgraded ? ' · ▲' : ''}</div>`;
-    el.addEventListener('click', () => showCardModal(c));
-    grid.appendChild(el);
+  const grid = $('#ency-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const chrome = $('#encyclopedia header');
+  const ency = $('#encyclopedia');
+  if (ency && chrome) ency.style.setProperty('--ency-chrome', `${Math.round(chrome.getBoundingClientRect().height)}px`);
+  const viewingAll = !rawPid;
+  const groups = groupCardsByDeck(filtered);
+  for (const g of groups) {
+    if (!g.cards.length && !(viewingAll && g.id !== 'other')) continue;
+    const section = document.createElement('section');
+    section.className = `ency-deck deck-${g.id}`;
+    section.dataset.deck = g.id;
+    section.appendChild(encyPatronHead(g.id));
+    const box = document.createElement('div');
+    box.className = 'ency-deck-cards';
+    for (const c of g.cards) {
+      const deckLocked = canonPatron(c.patron) !== 'treasury' && !isDeckUnlocked(profile, c.patron);
+      const el = document.createElement('div');
+      el.className = 'ency-card' + (deckLocked ? ' deck-locked' : '');
+      el.innerHTML = deckLocked
+        ? `<div class="clue-unknown">?</div><div class="info"><strong>???</strong></div>`
+        : `<img src="${artFor(c)}" alt="${c.name}" /><div class="info"><strong>${c.name}</strong>${c.cost} · ${c.type}${c.upgraded ? ' · ▲' : ''}</div>`;
+      if (!deckLocked) el.addEventListener('click', () => showCardModal(c));
+      box.appendChild(el);
+    }
+    section.appendChild(box);
+    grid.appendChild(section);
   }
 }
 
@@ -2722,22 +2868,103 @@ function beginDeckPick(mode) {
   matchMode = mode;
   pickYou = []; pickOpp = []; pickPhase = 'you';
   isRandomMatch = false;
-  isRankedMatch = mode === 'ranked';
+  isRankedMatch = mode === 'ranked' || isRankedMatch;
   isGauntletMatch = false;
   gauntletStopIndex = null;
-  if (mode === 'ranked') setHourglass(true);
+  if (isRankedMatch) setHourglass(true);
   if ($('#chk-random-match')) $('#chk-random-match').checked = false;
   renderDeckPick();
   mountDiffSlider('#diff-slider-pick', '#diff-val-pick');
   paintDiffAll();
   const wrap = $('#diff-pick-wrap');
-  if (wrap) wrap.style.display = (mode === 'ai' || mode === 'ranked') ? '' : 'none';
+  const rankedPvp = isRankedMatch || mode === 'remote-host' || mode === 'remote-guest';
+  if (wrap) wrap.style.display = mode === 'ai' && !isRankedMatch ? '' : 'none';
+  document.body.classList.toggle('ranked-pvp-pick', !!isRankedMatch);
   show('#deckpick');
 }
 
+function renderRankedLobby() {
+  profile = loadProfile();
+  const r = profile.ranked || {};
+  const crest = $('#ranked-crest');
+  if (crest) crest.textContent = `${r.tier || 'Unranked'} · ${r.points || 0} pts`;
+  const st = $('#ranked-status');
+  if (st) {
+    st.innerHTML = `<strong>${r.tier || 'Unranked'}</strong><p>${r.points || 0} points · placement left ${r.placementLeft ?? 5} · streak ${r.winStreak || 0}. Ranked is never vs AI.</p>`;
+  }
+}
+
 function beginRanked() {
-  beginDeckPick('ranked');
-  toast('Ranked — 90s hourglass on. Stronger pace. Win streak raises cutpurse rarity.');
+  isRankedMatch = true;
+  setHourglass(true);
+  rankedPeerPicks = [];
+  renderRankedLobby();
+  show('#ranked');
+}
+
+async function beginRankedHost() {
+  const status = $('#ranked-lobby-status');
+  if (status) status.textContent = 'Opening a ranked room…';
+  net = await hostRoom();
+  if (!net.ok) {
+    if (status) status.textContent = `Remote unavailable: ${net.error}. Ranked does not fall back to AI.`;
+    toast(net.error);
+    return;
+  }
+  isRankedMatch = true;
+  matchMode = 'remote-host';
+  if (status) status.innerHTML = `Room <strong>${net.code}</strong> — waiting for a Roister.`;
+  net.onMessage((msg) => {
+    if (msg.type === 'peer-ready' || msg.type === 'hello') {
+      if (status) status.textContent = `Guest joined ${net.code}. Choose your two patrons.`;
+      beginRankedDeckPick();
+    }
+    if (msg.type === 'ranked-picks') {
+      rankedPeerPicks = msg.patrons || [];
+      updatePickStatus();
+    }
+    if (msg.type === 'action') applyRemoteAction(msg);
+  });
+}
+
+async function beginRankedJoin() {
+  const code = ($('#ranked-join-code').value || '').trim().toUpperCase();
+  if (code.length < 4) { toast('Enter a 4-letter room code'); return; }
+  const status = $('#ranked-lobby-status');
+  if (status) status.textContent = `Joining ${code}…`;
+  net = await joinRoom(code);
+  if (!net.ok) {
+    if (status) status.textContent = `Join failed: ${net.error}. Ranked does not fall back to AI.`;
+    toast(net.error);
+    return;
+  }
+  isRankedMatch = true;
+  matchMode = 'remote-guest';
+  net.send({ type: 'hello' });
+  net.onMessage((msg) => {
+    if (msg.type === 'ranked-picks') {
+      rankedPeerPicks = msg.patrons || [];
+      updatePickStatus();
+    }
+    if (msg.type === 'match-start') {
+      pickYou = msg.pickYou;
+      pickOpp = msg.pickOpp;
+      startMatch();
+    }
+    if (msg.type === 'action') applyRemoteAction(msg);
+  });
+  beginRankedDeckPick();
+}
+
+function beginRankedDeckPick() {
+  pickYou = [];
+  pickOpp = [];
+  rankedPeerPicks = rankedPeerPicks || [];
+  beginDeckPick(matchMode === 'remote-guest' ? 'remote-guest' : 'remote-host');
+  isRankedMatch = true;
+  document.body.classList.add('ranked-pvp-pick');
+  const hint = $('#deckpick-hint');
+  if (hint) hint.innerHTML = 'Ranked — choose <strong>your</strong> two patrons. Your rival chooses theirs. No AI.';
 }
 
 function beginHotseatPick() {
@@ -2994,6 +3221,9 @@ function bind() {
     startGauntletStop(todaysFeatured(profile));
   });
   $('#btn-ranked').onclick = beginRanked;
+  $('#btn-ranked-back')?.addEventListener('click', () => onSplashEnter());
+  $('#btn-ranked-host')?.addEventListener('click', () => beginRankedHost());
+  $('#btn-ranked-join')?.addEventListener('click', () => beginRankedJoin());
   $('#btn-friend').onclick = () => { $('#friend-status').textContent = ''; show('#friend-lobby'); };
   $('#btn-club').onclick = () => { renderClub(); show('#club'); };
   $('#btn-ency').onclick = () => { renderEncy(); show('#encyclopedia'); };
@@ -3004,18 +3234,31 @@ function bind() {
   $('#btn-back-splash').onclick = () => onSplashEnter();
   $('#btn-club-back').onclick = () => onSplashEnter();
   $('#btn-friend-back').onclick = () => onSplashEnter();
-  $('#btn-collection').onclick = () => { renderCollection(); show('#collection'); };
-  $('#btn-collection-back').onclick = () => { renderClub(); show('#club'); };
+  $('#btn-collection')?.addEventListener('click', () => { storeReturnScreen = '#club'; renderCollection(); show('#collection'); });
+  $('#btn-splash-collection')?.addEventListener('click', () => { storeReturnScreen = '#splash'; renderCollection(); show('#collection'); });
+  $('#btn-collection-back')?.addEventListener('click', () => {
+    if (storeReturnScreen === '#club') { renderClub(); show('#club'); }
+    else onSplashEnter();
+  });
   $$('.coll-tab').forEach((btn) => {
     btn.addEventListener('click', () => {
       setCollectionTab(btn.dataset.tab);
       renderCollection();
     });
   });
-  $('#btn-store').onclick = () => { renderStore(); show('#store'); };
-  $('#btn-store-back').onclick = () => { renderClub(); show('#club'); };
+  const openStore = (from) => { storeReturnScreen = from; renderStore(); show('#store'); };
+  $('#btn-store')?.addEventListener('click', () => openStore('#club'));
+  $('#btn-splash-store')?.addEventListener('click', () => openStore('#splash'));
+  $('#btn-store-back')?.addEventListener('click', () => {
+    if (storeReturnScreen === '#club') { renderClub(); show('#club'); }
+    else onSplashEnter();
+  });
   $('#ency-patron').onchange = renderEncy;
   $('#ency-search').oninput = renderEncy;
+  $('#btn-login-claim')?.addEventListener('click', () => claimLoginStamp());
+  $('#btn-login-later')?.addEventListener('click', () => $('#login-overlay')?.classList.remove('show'));
+  $('#btn-crate-open')?.addEventListener('click', () => doOpenCrate());
+  $('#btn-crate-close')?.addEventListener('click', () => $('#crate-overlay')?.classList.remove('show'));
 
   $('#chk-hourglass-splash')?.addEventListener('change', (e) => setHourglass(e.target.checked));
   $('#chk-hourglass-pick')?.addEventListener('change', (e) => setHourglass(e.target.checked));
@@ -3031,20 +3274,10 @@ function bind() {
   $('#btn-host-room').onclick = beginHostRoom;
   $('#btn-join-room').onclick = beginJoinRoom;
 
-  $('#btn-open-sack').onclick = () => doOpenPurse(false);
-  $('#btn-buy-sack').onclick = () => {
-    profile = loadProfile();
-    if (profile.purses.length > 0) { doOpenPurse(false); return; }
-    const r = buySack(profile);
-    if (r.error) { toast(r.error); return; }
-    toast('Purse purchased');
-    doOpenPurse(false);
-  };
-  $('#btn-sack-close').onclick = () => {
-    $('#sack-overlay').classList.remove('show');
-    if ($('#club').classList.contains('active')) renderClub();
+  $('#btn-sack-close')?.addEventListener('click', () => {
+    $('#sack-overlay')?.classList.remove('show');
     refreshSplashPurse();
-  };
+  });
 
   $('#btn-ai-rest').onclick = () => {
     while (pickYou.length < 2) {
@@ -3063,7 +3296,8 @@ function bind() {
   };
 
   $('#btn-random-match').onclick = () => {
-    matchMode = isRankedMatch ? 'ranked' : 'ai';
+    if (isRankedMatch) { toast('Ranked is player vs player — no random AI match.'); return; }
+    matchMode = 'ai';
     startRandomMatch();
   };
 
@@ -3108,7 +3342,7 @@ function bind() {
 
   $('#btn-concede').onclick = () => {
     if (!engine) return;
-    if (matchMode === 'ai' || matchMode === 'ranked') engine.state.winner = 1;
+    if (matchMode === 'ai' && !isRankedMatch) engine.state.winner = 1;
     else if (matchMode === 'hotseat') engine.state.winner = 1 - engine.state.active;
     else if (matchMode === 'remote-host') engine.state.winner = 1;
     else if (matchMode === 'remote-guest') engine.state.winner = 0;

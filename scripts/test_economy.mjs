@@ -14,6 +14,8 @@ import {
   buildSeasonalGoals, applyChallengeEvent, bumpGoal, RARITY_PRICES, DECK_RARITY,
   CLUES_TO_UPGRADE, MATCH_GOLD, loginMonthGrid, fillMissedLogins, tomorrowShopSlate,
   roadGrandPrize, clueCountOf, DECK_IMPORTANCE, SHOP_FEATURED_SLOTS,
+  SHOP_SKIN_SLOTS, SHOP_BACK_SLOTS, SHOP_FRAG_SLOTS, groupCardsByDeck, canonPatron,
+  crateDaysForMonth,
 } from '../web/js/economy.js';
 import {
   defaultProfile, addFragment, addCardClue, tryUnlockDeck, deckReadyToUnlock,
@@ -53,7 +55,11 @@ const slateA = buildShopSlate({
 });
 assert(slateA.featured.length <= SHOP_FEATURED_SLOTS, `featured slate small (${slateA.featured.length})`);
 assert(slateA.catalogSize > slateA.featured.length, 'most catalog stays off the slate');
+assert(slateA.featured.filter((o) => o.kind === 'fragment').length <= SHOP_FRAG_SLOTS, 'at most one fragment on the slate');
+assert(slateA.featured.filter((o) => o.kind === 'skin').length <= SHOP_SKIN_SLOTS, 'at most four table skins');
+assert(slateA.featured.filter((o) => o.kind === 'back').length <= SHOP_BACK_SLOTS, 'at most four card backs');
 assert(slateA.featured.some((o) => o.kind === 'fragment'), 'slate lists fragments');
+assert(slateA.featured.find((o) => o.kind === 'fragment')?.price >= 280, 'fragment is a prize, not pocket gold');
 const slateB = buildShopSlate({ ...slateA, periodKey: 1000, skins: [{ id: 'auridon', price: 280 }], backs: [{ id: 'warden', price: 220 }], lockedDecks: LOCKED_DECKS, unlockedDecks: p0.unlockedDecks, ownedUpgrades: [], ownedSkins: ['high-isle'], ownedBacks: ['default'], cards, seasonId: 'undaunted' });
 assert(slateA.featured.map((o) => o.id).join() === buildShopSlate({
   periodKey: 1000,
@@ -141,6 +147,19 @@ const prize = roadGrandPrize('2026-09-14');
 assert(prize && prize.label, `grand prize rotates (${prize.label})`);
 
 assert(DECK_IMPORTANCE[0] === 'pelin' && DECK_IMPORTANCE.includes('mora'), 'deck order starters first, Mora late');
+assert(DECK_IMPORTANCE.includes('treasury'), 'Treasury/Neutral is its own group');
+assert(canonPatron('hermaeus_mora') === 'mora', 'hermaeus_mora joins as mora');
+const groups = groupCardsByDeck(cards);
+assert(groups.some((g) => g.id === 'mora' && g.cards.length >= 12), `Mora group present (${groups.find((g) => g.id === 'mora')?.cards.length})`);
+assert(groups.some((g) => g.id === 'pelin' && g.cards.length), 'Pelin group present');
+assert(groups.some((g) => g.id === 'treasury' && g.cards.length), 'Treasury group present');
+const moraIdx = groups.findIndex((g) => g.id === 'mora');
+const pelinIdx = groups.findIndex((g) => g.id === 'pelin');
+assert(pelinIdx < moraIdx, 'Pelin header comes before Mora in All-cards scroll');
+const moraCards = groups.find((g) => g.id === 'mora').cards;
+assert(moraCards[0]?.starter || moraCards[0]?.id === 'unsealed-glyphic', 'Mora starters first in group');
+const days = crateDaysForMonth(2026, 9);
+assert(days.length === 2 && days[0] !== days[1], `two crate days in Sept (${days})`);
 
 if (failed) {
   console.error(`\n${failed} failed`);
