@@ -1,0 +1,14 @@
+Build 50 layout-fb (after)
+portrait 390x844: tavern 386px = 99% vw
+  DRAW left 6px  CD right-gap 4px
+  hud strip true  hudTop 168.8  endTurn BL true
+  hand n=5 midX 195 dx 0  oppDx 0
+  tavern midX 195.01 dx 0.01  pendants Δx 0
+  labels DRAW true CD true  orbGone true
+  hits {"tavernVsOppDraw":false,"tavernVsDeck":false,"tavernVsYouDraw":false,"turnVsOppRes":false,"turnVsYouRes":false,"youResVsAgents":false,"oppResVsAgents":false,"endTurnVsPatrons":false,"effectsVsDeck":false,"effectsVsDeckLabel":false,"leaveVsCooldown":false,"sfxVsCooldown":false,"hudVsDeck":false,"hudVsYouDraw":false,"endTurnVsYouDraw":false,"endTurnVsHud":false,"handVsYouDraw":false,"handVsYouCd":false}
+landscape 844x390: tavern 844px = 100% vw
+  gutters L/R 0.5% / 0.5%
+  DRAW left 6px  CD right-gap 118px
+  hud strip true  hand dx -0.01  tavern dx 0
+  pendants Δx 0.01  orbGone true
+  hits {"tavernVsOppDraw":false,"tavernVsDeck":false,"tavernVsYouDraw":false,"turnVsOppRes":false,"turnVsYouRes":false,"youResVsAgents":false,"oppResVsAgents":false,"endTurnVsPatrons":false,"effectsVsDeck":false,"effectsVsDeckLabel":false,"leaveVsCooldown":false,"sfxVsCooldown":false,"hudVsDeck":false,"hudVsYouDraw":false,"endTurnVsYouDraw":false,"endTurnVsHud":false,"handVsYouDraw":false,"handVsYouCd":false}

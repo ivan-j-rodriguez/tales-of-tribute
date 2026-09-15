@@ -7,11 +7,11 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta name="theme-color" content="#06141c" />
   <title>Tales of Tribute — Fan Table</title>
-  <link rel="stylesheet" href="css/style.css?v=50" />
-  <link rel="stylesheet" href="css/phone-eso.css?v=50" />
-  <link rel="stylesheet" href="css/table-pack.css?v=50" />
-  <link rel="stylesheet" href="css/board-pass.css?v=50" />
-  <link rel="stylesheet" href="css/club-chrome.css?v=50" />
+  <link rel="stylesheet" href="css/style.css?v=51" />
+  <link rel="stylesheet" href="css/phone-eso.css?v=51" />
+  <link rel="stylesheet" href="css/table-pack.css?v=51" />
+  <link rel="stylesheet" href="css/board-pass.css?v=51" />
+  <link rel="stylesheet" href="css/club-chrome.css?v=51" />
 </head>
 <body>
   <div id="app">
@@ -322,12 +322,12 @@
         <div class="board-main felt-table">
           <div class="felt-hud-opp" aria-hidden="true"></div>
           <button type="button" class="pile-btn hex-pile pile-opp-draw" id="pile-opp-draw" data-pile="opp-draw" title="Rival draw">
-            <span class="pile-stack" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="pile-stack" aria-hidden="true"><i class="card-back-face"></i><i class="card-back-face"></i><i class="card-back-face"></i></span>
             <span class="pile-count" id="cnt-opp-draw">0</span>
             <span class="pile-label">Draw</span>
           </button>
           <button type="button" class="pile-btn hex-pile pile-opp-cd" id="pile-opp-cd" data-pile="opp-cooldown" title="Rival cooldown">
-            <span class="pile-stack pile-stack-cd" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="pile-stack pile-stack-cd" aria-hidden="true"><i class="card-back-face"></i><i class="card-back-face"></i><i class="card-back-face"></i></span>
             <span class="pile-count" id="cnt-opp-cd">0</span>
             <span class="pile-label">Cooldown</span>
           </button>
@@ -341,14 +341,14 @@
           </div>
           <div class="agents-row felt-opp-agents" id="opp-agents"></div>
 
-          <button type="button" class="pile-btn hex-pile pile-tavern-draw" id="pile-tavern-draw" data-pile="tavern-draw" title="Tavern deck">
-            <span class="pile-stack" aria-hidden="true"><i></i><i></i><i></i></span>
-            <span class="pile-count" id="cnt-tavern-draw">0</span>
-            <span class="pile-label">Deck</span>
-          </button>
           <div class="token-row rival-res res-hud" id="opp-res"></div>
           <div class="turn-chip" id="turn-ind">Your turn</div>
           <div class="felt-tavern">
+            <button type="button" class="pile-btn hex-pile pile-tavern-draw" id="pile-tavern-draw" data-pile="tavern-draw" title="Tavern deck">
+              <span class="pile-stack" aria-hidden="true"><i class="card-back-face"></i><i class="card-back-face"></i><i class="card-back-face"></i></span>
+              <span class="pile-count" id="cnt-tavern-draw">0</span>
+              <span class="pile-label">Deck</span>
+            </button>
             <div class="tavern-band">
               <div class="tavern-zone" id="tavern-zone"></div>
             </div>
@@ -360,12 +360,12 @@
           <div class="agents-row felt-you-agents" id="you-agents"></div>
 
           <button type="button" class="pile-btn hex-pile pile-you-draw" id="pile-you-draw" data-pile="you-draw" title="Your draw">
-            <span class="pile-stack" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="pile-stack" aria-hidden="true"><i class="card-back-face"></i><i class="card-back-face"></i><i class="card-back-face"></i></span>
             <span class="pile-count" id="cnt-you-draw">0</span>
             <span class="pile-label">Draw</span>
           </button>
           <button type="button" class="pile-btn hex-pile pile-you-cd" id="pile-you-cd" data-pile="you-cooldown" title="Your cooldown">
-            <span class="pile-stack pile-stack-cd" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="pile-stack pile-stack-cd" aria-hidden="true"><i class="card-back-face"></i><i class="card-back-face"></i><i class="card-back-face"></i></span>
             <span class="pile-count" id="cnt-you-cd">0</span>
             <span class="pile-label">Cooldown</span>
           </button>
@@ -570,6 +570,6 @@
       </div>
     </div>
   </div>
-  <script type="module" src="js/app.js?v=50"></script>
+  <script type="module" src="js/app.js?v=51"></script>
 </body>
 </html>

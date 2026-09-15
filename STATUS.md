@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-14 (build 51):** Board/felt only — Ivan follow-up on 50. Patron column shifts a bit left; vertical gaps so the middle pendant reads as a full circle (centers stay colinear; pewter seated; Treasury/Mora tipless **1:1 circle**, not a horizontal oval). Tavern DECK sits to the left of the tavern cards at the tavern band’s vertical center — opp DRAW stays top-left, you DRAW bottom-left, COOLDOWNs right corners. Deck / draw / cooldown piles show `assets/ui/card-back.svg` again. Stray top-of-felt gold orbs stay gone; playable-card / End Turn / hand / combo gold glow is kept. Layout-fb overlap gates from board #15/#18/#19/#23/#24 stay green. Club hub / store / collection / economy / music / auth / voice / club-chrome untouched. `?v=51`.
+
 **2026-09-14 (build 50):** Board/felt only — Ivan portrait mark-up. SFX / settings / Leave strip lifts further toward the top-left. Tavern DECK pile moves to the top-left under opp DRAW. End Turn / hourglass sits in the bottom-left corner above you-DRAW (portrait). Five patron pendant circle-centers share one vertical X. Middle tavern card top-center = vw/2 (hand-center from #24 kept). Four corner piles show DRAW / COOLDOWN graphics with the word aligned under each stack. Stray `#match .board::before/::after` gold orbs removed (playable-card glow kept). Layout-fb overlap gates from board #15/#18/#19/#23/#24 stay green. Club hub / store / collection / economy / music / auth / voice / club-chrome untouched. `?v=50`.
 
 **2026-09-14 (build 49):** Board/felt only. Opening 5-card hand is centered on the true vertical midline — middle-card top centerX ≈ vw/2 (portrait + landscape). SFX / settings / Leave strip shifts up from the build 48 56% seat; End Turn stays under that strip (portrait). DRAW left / COOLDOWN right unchanged. Treasury pewter ring stays seated on the stretched right rail. Layout-fb overlap gates from board #15/#18/#19/#23 stay green. Club hub / store / collection / economy / music / auth / voice / club-chrome untouched. `?v=49`.
@@ -83,7 +85,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=50`. Board/felt Ivan portrait mark-up (corners, strip, End Turn, tavern center, pendant line, orb) on Club 47 / board 49.
+`docs/` is a copy of `web/`. Cache-bust `?v=51`. Board/felt Ivan follow-up (patron column + gaps, DECK beside tavern, card-back piles, gold glow kept) on Club 47 / board 50.
 
 | Fix | Notes |
 |---|---|
