@@ -1359,18 +1359,18 @@ body.is-landscape #match .patron-coin.mora .medallion-svg {
    =================================================================== */
 
 body.is-landscape #match .felt-table {
-  padding: 6px 0 16px !important;
+  padding: 6px 0 28px !important;
   row-gap: 2px !important;
   gap: 2px 0 !important;
   grid-template-rows:
-    20px
+    16px
     24px
     44px
     16px
-    minmax(118px, 1.85fr)
+    118px
     44px
     24px
-    minmax(76px, 1.12fr) !important;
+    56px !important;
 }
 
 body.is-landscape #match .felt-tavern,
@@ -1382,7 +1382,7 @@ body.is-landscape #match .felt-you-hand {
 }
 
 body.is-landscape #match .tavern-zone {
-  padding: 4px 128px !important;
+  padding: 2px 128px !important;
   overflow: visible !important;
   align-items: center !important;
 }
@@ -1408,7 +1408,7 @@ body.is-landscape #match .tavern-zone .card {
 body.is-landscape #match #hand-zone .card,
 body.is-landscape #match #hand-zone button.card,
 body.is-landscape #match .you-fan .card {
-  width: min(36px, 4.3vw, calc((100% + 1rem) / 6.4)) !important;
+  width: min(30px, 3.6vw, calc((100% + 1rem) / 6.6)) !important;
   height: auto !important;
   aspect-ratio: 1 / 1.52 !important;
   min-height: 0 !important;
@@ -1417,21 +1417,40 @@ body.is-landscape #match .you-fan .card {
 
 body.is-landscape #match .rival-fan .card,
 body.is-landscape #match #opp-hand-zone .card {
-  width: min(30px, 3.6vw, calc((100% + 0.8rem) / 6.8)) !important;
+  width: min(26px, 3.1vw, calc((100% + 0.8rem) / 7)) !important;
   min-height: 0 !important;
   max-height: 86% !important;
 }
 
-/* Left piles: real felt gutter, not flush. Rotated backs + labels
-   must sit inside a visible margin (safe-area on notched phones). */
+/* Same clear left gutter on opp DRAW, DECK, and you DRAW. */
 body.is-landscape #match #pile-opp-draw,
 body.is-landscape #match #pile-you-draw,
 body.is-landscape #match #pile-tavern-draw {
-  left: max(36px, calc(env(safe-area-inset-left, 0px) + 22px)) !important;
+  left: max(48px, calc(env(safe-area-inset-left, 0px) + 28px)) !important;
+}
+
+/* Keep the fanned backs from eating the gutter. */
+body.is-landscape #match .hex-pile .pile-stack i:nth-child(1),
+body.is-landscape #match .pile-stack i:nth-child(1) {
+  transform: translate(-2px, 2px) rotate(-6deg) !important;
 }
 
 body.is-landscape #match .felt-hud-you {
-  left: max(28px, calc(env(safe-area-inset-left, 0px) + 16px)) !important;
+  left: max(48px, calc(env(safe-area-inset-left, 0px) + 28px)) !important;
+  top: 86px !important;
+  bottom: auto !important;
+}
+
+body.is-landscape #match .you-actions {
+  gap: 1px !important;
+  padding: 1px !important;
+}
+
+/* PLAYED EFFECTS must not sit on the top DRAW stack/label. */
+body.is-landscape #match .events-rail {
+  left: max(48px, calc(env(safe-area-inset-left, 0px) + 28px)) !important;
+  top: 38% !important;
+  width: 44px !important;
 }
 
 /* Right COOLDOWNs stay on the right, fully visible (rail + safe-area). */
@@ -1450,8 +1469,8 @@ body.is-landscape #match #pile-you-cd .pile-stack {
   margin: 0 auto !important;
 }
 
-body.is-landscape #match #pile-opp-draw { top: 8px !important; }
-body.is-landscape #match #pile-you-draw { bottom: 12px !important; }
-body.is-landscape #match #pile-opp-cd { top: 8px !important; }
-body.is-landscape #match #pile-you-cd { bottom: 12px !important; }
+body.is-landscape #match #pile-opp-draw { top: 14px !important; }
+body.is-landscape #match #pile-you-draw { bottom: 16px !important; }
+body.is-landscape #match #pile-opp-cd { top: 14px !important; }
+body.is-landscape #match #pile-you-cd { bottom: 16px !important; }
 

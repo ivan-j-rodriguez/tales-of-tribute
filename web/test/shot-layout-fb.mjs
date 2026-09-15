@@ -290,16 +290,16 @@ async function measure(page, fileStem, { w, h }) {
       if (!m.playableGlowOn) fail(`${fileStem} landscape playable-card gold glow missing`, notes);
       if (!m.endTurnGlowOn) fail(`${fileStem} landscape End Turn gold glow missing`, notes);
       if (!m.treasuryCircle) fail(`${fileStem} landscape Treasury not a 1:1 circle (dial ${JSON.stringify(m.treasuryDialBox)} face ${JSON.stringify(m.treasuryFaceBox)} svg ${JSON.stringify(m.treasurySvgBox)})`, notes);
-      if ((m.drawLeftEdge ?? 0) < 24) fail(`${fileStem} landscape DRAW still flush to the left (${m.drawLeftEdge}, need ≥24px felt gutter)`, notes);
-      if ((m.drawLeftEdge ?? 99) > 56) fail(`${fileStem} landscape DRAW shifted too far inward (${m.drawLeftEdge})`, notes);
-      if ((m.leftPileMinX ?? -1) < 18) fail(`${fileStem} landscape left pile art/label still flush (minX ${m.leftPileMinX}, need ≥18)`, notes);
+      if ((m.drawLeftEdge ?? 0) < 36) fail(`${fileStem} landscape DRAW still flush to the left (${m.drawLeftEdge}, need ≥36px felt gutter)`, notes);
+      if ((m.drawLeftEdge ?? 99) > 64) fail(`${fileStem} landscape DRAW shifted too far inward (${m.drawLeftEdge})`, notes);
+      if ((m.leftPileMinX ?? -1) < 28) fail(`${fileStem} landscape left pile art/label still flush (minX ${m.leftPileMinX}, need ≥28)`, notes);
       if ((m.rightPileMaxRight ?? 999) > w + 0.5) fail(`${fileStem} landscape right COOLDOWN clipped (maxRight ${m.rightPileMaxRight} vw ${w})`, notes);
       if (!m.leftPilesOnCanvas) fail(`${fileStem} landscape left DRAW/DECK/DRAW art+labels not fully on-canvas (minX ${m.leftPileMinX})`, notes);
       if (!m.rightPilesOnCanvas) fail(`${fileStem} landscape right COOLDOWN art+labels not fully on-canvas (maxRight ${m.rightPileMaxRight})`, notes);
       if (!m.tavernCardsOnCanvas) fail(`${fileStem} landscape tavern cards clipped (${JSON.stringify(m.tavernCardClip)} vh 390 vw ${w})`, notes);
       if (!m.handCardsOnCanvas) fail(`${fileStem} landscape hand hexes clipped (${JSON.stringify(m.handCardClip)} vh 390 vw ${w})`, notes);
-      if ((m.handCardClip?.maxBottom ?? 999) > 390 - 12) {
-        fail(`${fileStem} landscape hand hex tips still tight to the bottom (${JSON.stringify(m.handCardClip)} need ≤378)`, notes);
+      if ((m.handCardClip?.maxBottom ?? 999) > 390 - 26) {
+        fail(`${fileStem} landscape hand hex tips still tight to the bottom (${JSON.stringify(m.handCardClip)} need ≤364, want visible felt under tips)`, notes);
       }
       if ((m.youResToCards ?? 0) < 12) {
         fail(`${fileStem} landscape tavern hexes tight to you-res (${m.youResToCards}px, need ≥12)`, notes);
