@@ -34,7 +34,7 @@ import {
   handleVoiceMessage, voiceStatusLine, canUseVoice, voiceMicVisible,
 } from './voice.js';
 import { setMusicEnabled, preferMusicFromStorage, warmMuted, playSfx, setMusicCue, setSfxStyle, getSfxStyle, setSfxEnabled, preferSfxFromStorage, isSfxOn } from './music.js';
-import { applyOfficialPatronText, applyOfficialCardText, cardPlayLines, cardComboLines } from './texts.js';
+import { applyOfficialPatronText, applyOfficialCardText, cardPlayLines, cardComboLines, formatEffects } from './texts.js';
 import { overlayOfficialCardText, overlayOfficialPatronText } from './officialText.js';
 
 const $ = (s) => document.querySelector(s);
@@ -428,19 +428,27 @@ function effectBullets(src) {
   }).join('');
 }
 
-/** Full official tooltip string. Do not split into stub fragments.
- *  TODO(ToTs): Club-side officialText.js / texts.js pass owns the copy.
- *  This board PR only prints playText / comboNText after applyOfficialCardText
- *  (and overlayOfficialCardText when a UESP dump is present). */
+/** Catalog stubs like "Acquire 5" / "1 Coin" are not in-game sentences.
+ *  TODO(ToTs): texts.js isOfficialProse treats /^Acquire / as official, so
+ *  applyOfficialCardText leaves "Acquire 5" unexpanded. Prefer not to
+ *  double-edit that file. Dossier expands stubs via formatEffects(ops). */
+function looksLikeEffectStub(t) {
+  const s = String(t || '').trim().replace(/\.+$/, '');
+  if (!s) return true;
+  if (/^\d+\s+(Coin|Power|Prestige)$/i.test(s)) return true;
+  if (/^(Draw|Donate|Toss|Acquire|Refresh|Replace|Destroy|Knock Out)\s+\d+$/i.test(s)) return true;
+  if (/^Knock Out All$/i.test(s)) return true;
+  if (/^Taunt$/i.test(s)) return true;
+  return false;
+}
+
 function officialCardCopy(d, field = 'play') {
-  if (field === 'play') {
-    const stored = String(d.playText || '').trim();
-    if (stored) return stored;
-    return cardPlayLines(d).join(' ');
-  }
-  const stored = String(d[`combo${field}Text`] || '').trim();
-  if (stored) return stored;
-  return cardComboLines(d, field).join(' ');
+  const effects = field === 'play' ? d.play : d[`combo${field}`];
+  const stored = String(field === 'play' ? (d.playText || '') : (d[`combo${field}Text`] || '')).trim();
+  if (stored && !looksLikeEffectStub(stored)) return stored;
+  const expanded = formatEffects(effects, stored).join(' ');
+  if (expanded) return expanded;
+  return field === 'play' ? cardPlayLines(d).join(' ') : cardComboLines(d, field).join(' ');
 }
 
 function dossierProse(text) {

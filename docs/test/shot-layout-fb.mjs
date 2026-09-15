@@ -304,8 +304,9 @@ async function measure(page, fileStem, { w, h }) {
       if ((m.handCardClip?.maxBottom ?? 999) > 390 - 10) {
         fail(`${fileStem} landscape hand hex tips still tight to the bottom (${JSON.stringify(m.handCardClip)} need felt air under tips)`, notes);
       }
-      if ((m.handCardClip?.h ?? 0) < 54) {
-        fail(`${fileStem} landscape hand still tiny (${JSON.stringify(m.handCardClip)} need hex h ≥54)`, notes);
+      const handHexH = (m.handCardClip?.maxBottom ?? 0) - (m.handCardClip?.minTop ?? 0);
+      if (handHexH < 54) {
+        fail(`${fileStem} landscape hand still tiny (${JSON.stringify(m.handCardClip)} h ${handHexH} need ≥54)`, notes);
       }
       if ((m.youResToCards ?? 0) < 12) {
         fail(`${fileStem} landscape tavern hexes tight to you-res (${m.youResToCards}px, need ≥12)`, notes);
