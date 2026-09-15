@@ -377,7 +377,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 51';
+  if (stamp) stamp.textContent = 'build 52';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -1392,7 +1392,7 @@ function layoutFan(container, rival = false) {
   const landscape = document.body.classList.contains('is-landscape');
   const first = cards[0].getBoundingClientRect();
   const last = cards[n - 1].getBoundingClientRect();
-  const leftLimit = landscape ? 40 : 52;
+  const leftLimit = landscape ? 58 : 52;
   const rightLimit = landscape ? vw - 124 : vw - 76;
   if (first.left + dx < leftLimit) dx = leftLimit - first.left;
   if (last.right + dx > rightLimit) dx = Math.min(dx, rightLimit - last.right);
@@ -1412,7 +1412,7 @@ function layoutTavern() {
   const first = cards[0].getBoundingClientRect();
   const last = cards[cards.length - 1].getBoundingClientRect();
   const landscape = document.body.classList.contains('is-landscape');
-  const leftLimit = landscape ? 56 : 50;
+  const leftLimit = landscape ? 72 : 50;
   const rightLimit = landscape ? vw - 124 : vw - 82;
   if (first.left + dx < leftLimit) dx = leftLimit - first.left;
   if (last.right + dx > rightLimit) dx = Math.min(dx, rightLimit - last.right);
@@ -4344,6 +4344,78 @@ function layoutMetrics() {
   };
   const drawLabelUnder = labelUnderPile('#pile-opp-draw', 'DRAW') && labelUnderPile('#pile-you-draw', 'DRAW');
   const cdLabelUnder = labelUnderPile('#pile-opp-cd', 'COOLDOWN') && labelUnderPile('#pile-you-cd', 'COOLDOWN');
+  const deckLabelUnder = labelUnderPile('#pile-tavern-draw', 'DECK');
+  const onCanvasRect = (r, pad = 0.5) => !!(r
+    && r.width >= 1 && r.height >= 1
+    && r.left >= -pad && r.top >= -pad
+    && r.right <= vw + pad && r.bottom <= vh + pad);
+  const pileFullyOnCanvas = (sel) => {
+    const root = document.querySelector(sel);
+    if (!root) return false;
+    const els = [root, ...root.querySelectorAll('.pile-stack, .pile-stack i, .pile-label, .pile-count')];
+    return els.every((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.width < 1 || r.height < 1) return true;
+      return onCanvasRect(r, 0.5);
+    });
+  };
+  const cardsFullyOnCanvas = (nodeList) => nodeList.length > 0 && nodeList.every((el) => {
+    const r = el.getBoundingClientRect();
+    return onCanvasRect(r, 0.5);
+  });
+  const leftPilesOnCanvas = pileFullyOnCanvas('#pile-opp-draw')
+    && pileFullyOnCanvas('#pile-you-draw')
+    && pileFullyOnCanvas('#pile-tavern-draw');
+  const rightPilesOnCanvas = pileFullyOnCanvas('#pile-opp-cd')
+    && pileFullyOnCanvas('#pile-you-cd');
+  const tavernCardsOnCanvas = cardsFullyOnCanvas(tavernCardEls);
+  const handCardsOnCanvas = cardsFullyOnCanvas(youHandEls);
+  const leftPileMinX = (() => {
+    const sels = ['#pile-opp-draw', '#pile-you-draw', '#pile-tavern-draw'];
+    let min = 99;
+    for (const sel of sels) {
+      const root = document.querySelector(sel);
+      if (!root) continue;
+      for (const el of [root, ...root.querySelectorAll('.pile-stack, .pile-stack i, .pile-label')]) {
+        const r = el.getBoundingClientRect();
+        if (r.width >= 1 && r.height >= 1) min = Math.min(min, r.left);
+      }
+    }
+    return +min.toFixed(2);
+  })();
+  const rightPileMaxRight = (() => {
+    const sels = ['#pile-opp-cd', '#pile-you-cd'];
+    let max = 0;
+    for (const sel of sels) {
+      const root = document.querySelector(sel);
+      if (!root) continue;
+      for (const el of [root, ...root.querySelectorAll('.pile-stack, .pile-stack i, .pile-label')]) {
+        const r = el.getBoundingClientRect();
+        if (r.width >= 1 && r.height >= 1) max = Math.max(max, r.right);
+      }
+    }
+    return +max.toFixed(2);
+  })();
+  const tavernCardClip = (() => {
+    if (!tavernCardEls.length) return null;
+    const rs = tavernCardEls.map((el) => el.getBoundingClientRect());
+    return {
+      minTop: +Math.min(...rs.map((r) => r.top)).toFixed(2),
+      maxBottom: +Math.max(...rs.map((r) => r.bottom)).toFixed(2),
+      minLeft: +Math.min(...rs.map((r) => r.left)).toFixed(2),
+      maxRight: +Math.max(...rs.map((r) => r.right)).toFixed(2),
+    };
+  })();
+  const handCardClip = (() => {
+    if (!youHandEls.length) return null;
+    const rs = youHandEls.map((el) => el.getBoundingClientRect());
+    return {
+      minTop: +Math.min(...rs.map((r) => r.top)).toFixed(2),
+      maxBottom: +Math.max(...rs.map((r) => r.bottom)).toFixed(2),
+      minLeft: +Math.min(...rs.map((r) => r.left)).toFixed(2),
+      maxRight: +Math.max(...rs.map((r) => r.right)).toFixed(2),
+    };
+  })();
   const boardBefore = document.querySelector('#match .board')
     ? getComputedStyle(document.querySelector('#match .board'), '::before')
     : null;
@@ -4510,6 +4582,15 @@ function layoutMetrics() {
     pendantCenterSpread,
     drawLabelUnder,
     cdLabelUnder,
+    deckLabelUnder,
+    leftPilesOnCanvas,
+    rightPilesOnCanvas,
+    tavernCardsOnCanvas,
+    handCardsOnCanvas,
+    leftPileMinX,
+    rightPileMaxRight,
+    tavernCardClip,
+    handCardClip,
     yellowOrbGone,
     patronColX,
     patronColLeftOf50,

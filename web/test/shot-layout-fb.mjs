@@ -1,6 +1,8 @@
 /**
- * Build 51 layout-fb gate + before/after artifacts.
- * Portrait 390×844 / landscape 844×390.
+ * Build 52 layout-fb gate + before/after artifacts.
+ * Portrait 390×844 locked to build 51 packing.
+ * Landscape 844×390: modest zoom-out so tavern + you-hand hexes are fully
+ * on-canvas; left DRAW/DECK/DRAW art+labels fully on-canvas (left > 0).
  * Zero getBoundingClientRect intersection for Ivan's overlap pairs.
  * Also: tavern mid on vw/2, hand mid on vw/2, pendant colinear X,
  * DRAW/CD labels under four corner piles, left strip high, End Turn
@@ -154,6 +156,15 @@ async function measure(page, fileStem, { w, h }) {
     pendantCenterSpread: m.pendantCenterSpread,
     drawLabelUnder: m.drawLabelUnder,
     cdLabelUnder: m.cdLabelUnder,
+    deckLabelUnder: m.deckLabelUnder,
+    leftPilesOnCanvas: m.leftPilesOnCanvas,
+    rightPilesOnCanvas: m.rightPilesOnCanvas,
+    tavernCardsOnCanvas: m.tavernCardsOnCanvas,
+    handCardsOnCanvas: m.handCardsOnCanvas,
+    leftPileMinX: m.leftPileMinX,
+    rightPileMaxRight: m.rightPileMaxRight,
+    tavernCardClip: m.tavernCardClip,
+    handCardClip: m.handCardClip,
     yellowOrbGone: m.yellowOrbGone,
     patronColX: m.patronColX,
     patronColLeftOf50: m.patronColLeftOf50,
@@ -208,8 +219,8 @@ async function measure(page, fileStem, { w, h }) {
   if (!m.usesNearHourglass) fail(`${fileStem} patron-use octagons not on the right rail`, notes);
 
   if (TAG !== 'before') {
-    if ((m.drawLeftEdge ?? 99) > 8) fail(`${fileStem} DRAW not at left edge (${m.drawLeftEdge}px)`, notes);
     if (w < h) {
+      if ((m.drawLeftEdge ?? 99) > 8) fail(`${fileStem} DRAW not at left edge (${m.drawLeftEdge}px)`, notes);
       if ((m.cdRightGap ?? 99) > 12) fail(`${fileStem} COOLDOWN not at right edge (gap ${m.cdRightGap}px)`, notes);
       if ((m.cdRightGap ?? 0) < -2) fail(`${fileStem} COOLDOWN clipped past the right edge (gap ${m.cdRightGap}px)`, notes);
       if (!m.hudIsLeftStrip) fail(`${fileStem} match-actions not a mid-left vertical strip`, notes);
@@ -241,8 +252,24 @@ async function measure(page, fileStem, { w, h }) {
       }
       /* Build 49 portrait strip sat at top:44% ≈ 371px. Need a further lift toward top-left. */
       if ((m.hudTop ?? 99) > 260) fail(`${fileStem} left strip not shifted up (hudTop ${m.hudTop}, build49 was ~371)`, notes);
+      /* Build 51 portrait lock — packing must not drift. */
+      const B51 = { patronColX: 328, drawLeftEdge: 6, hudTop: 168.8, treasuryFace: 24.63 };
+      if (m.patronColX == null || Math.abs(m.patronColX - B51.patronColX) > 2) {
+        fail(`${fileStem} portrait patron col drifted from build 51 (x ${m.patronColX}, need ~${B51.patronColX})`, notes);
+      }
+      if (m.drawLeftEdge == null || Math.abs(m.drawLeftEdge - B51.drawLeftEdge) > 1) {
+        fail(`${fileStem} portrait DRAW left drifted from build 51 (${m.drawLeftEdge})`, notes);
+      }
+      if (m.hudTop == null || Math.abs(m.hudTop - B51.hudTop) > 2) {
+        fail(`${fileStem} portrait hudTop drifted from build 51 (${m.hudTop})`, notes);
+      }
+      const faceW = m.treasuryFaceBox?.w;
+      if (faceW == null || Math.abs(faceW - B51.treasuryFace) > 0.6) {
+        fail(`${fileStem} portrait Treasury face drifted from build 51 (${JSON.stringify(m.treasuryFaceBox)})`, notes);
+      }
     } else {
       if ((m.cdRightGap ?? 99) > 130) fail(`${fileStem} landscape COOLDOWN still far from right (gap ${m.cdRightGap}px)`, notes);
+      if ((m.cdRightGap ?? 0) < -2) fail(`${fileStem} landscape COOLDOWN clipped past the right edge (gap ${m.cdRightGap}px)`, notes);
       if (!m.hudIsLeftStrip) fail(`${fileStem} landscape match-actions not on the left strip`, notes);
       if (m.youHandCount !== 5) fail(`${fileStem} expected opening 5-card hand (got ${m.youHandCount})`, notes);
       if (m.youHandMidDx == null || Math.abs(m.youHandMidDx) > 4) {
@@ -263,6 +290,17 @@ async function measure(page, fileStem, { w, h }) {
       if (!m.playableGlowOn) fail(`${fileStem} landscape playable-card gold glow missing`, notes);
       if (!m.endTurnGlowOn) fail(`${fileStem} landscape End Turn gold glow missing`, notes);
       if (!m.treasuryCircle) fail(`${fileStem} landscape Treasury not a 1:1 circle (dial ${JSON.stringify(m.treasuryDialBox)} face ${JSON.stringify(m.treasuryFaceBox)} svg ${JSON.stringify(m.treasurySvgBox)})`, notes);
+      if ((m.drawLeftEdge ?? 0) < 1) fail(`${fileStem} landscape DRAW clipped past the left edge (${m.drawLeftEdge})`, notes);
+      if ((m.drawLeftEdge ?? 99) > 40) fail(`${fileStem} landscape DRAW shifted too far inward (${m.drawLeftEdge})`, notes);
+      if ((m.leftPileMinX ?? -1) < 0.5) fail(`${fileStem} landscape left pile art/label clipped (minX ${m.leftPileMinX})`, notes);
+      if ((m.rightPileMaxRight ?? 999) > vw + 0.5) fail(`${fileStem} landscape right COOLDOWN clipped (maxRight ${m.rightPileMaxRight} vw ${vw})`, notes);
+      if (!m.leftPilesOnCanvas) fail(`${fileStem} landscape left DRAW/DECK/DRAW art+labels not fully on-canvas (minX ${m.leftPileMinX})`, notes);
+      if (!m.rightPilesOnCanvas) fail(`${fileStem} landscape right COOLDOWN art+labels not fully on-canvas (maxRight ${m.rightPileMaxRight})`, notes);
+      if (!m.tavernCardsOnCanvas) fail(`${fileStem} landscape tavern cards clipped (${JSON.stringify(m.tavernCardClip)} vh ${vh} vw ${vw})`, notes);
+      if (!m.handCardsOnCanvas) fail(`${fileStem} landscape hand hexes clipped (${JSON.stringify(m.handCardClip)} vh ${vh} vw ${vw})`, notes);
+      if (!m.drawLabelUnder) fail(`${fileStem} landscape DRAW labels not under the pile graphics`, notes);
+      if (!m.cdLabelUnder) fail(`${fileStem} landscape COOLDOWN labels not under the pile graphics`, notes);
+      if (!m.deckLabelUnder) fail(`${fileStem} landscape DECK label not under the pile graphic`, notes);
     }
   }
 
@@ -371,6 +409,20 @@ await landPage.screenshot({ path: path.join(ART, `${TAG}-landscape-hand-center.p
 await paintMidline(landPage, true, 'tavern');
 await landPage.screenshot({ path: path.join(ART, `${TAG}-landscape-tavern-center.png`), fullPage: false });
 await paintMidline(landPage, false);
+await closeUp(landPage, `${TAG}-landscape-left-piles`, [lBoxes.oppDraw, lBoxes.deck, lBoxes.youDraw], 844, 390);
+await closeUp(landPage, `${TAG}-landscape-right-cds`, [lBoxes.oppCd, lBoxes.youCd], 844, 390);
+const landHandBox = await landPage.evaluate(() => {
+  const cards = [...document.querySelectorAll('#hand-zone > .card, #hand-zone > button.card')];
+  if (!cards.length) return null;
+  const rs = cards.map((el) => el.getBoundingClientRect());
+  return {
+    x: Math.min(...rs.map((r) => r.x)),
+    y: Math.min(...rs.map((r) => r.y)),
+    w: Math.max(...rs.map((r) => r.right)) - Math.min(...rs.map((r) => r.x)),
+    h: Math.max(...rs.map((r) => r.bottom)) - Math.min(...rs.map((r) => r.y)),
+  };
+});
+await closeUp(landPage, `${TAG}-landscape-hand-hexes`, [landHandBox], 844, 390);
 
 await landPage.evaluate(() => window.__totTest.inspectById('customs-seizure') || window.__totTest.inspectById('toll-of-flesh'));
 await new Promise(r => setTimeout(r, 420));
@@ -384,7 +436,7 @@ if (lFit.titleClipped) fail('landscape inspect title clipped', lFit);
 await landPage.close();
 
 const note = [
-  `Build 51 layout-fb (${TAG})`,
+  `Build 52 layout-fb (${TAG})`,
   `portrait 390x844: tavern ${results.portrait.notes.tavernW}px = ${results.portrait.notes.viewportTavernPct}% vw`,
   `  DRAW left ${results.portrait.notes.drawLeftEdge}px  CD right-gap ${results.portrait.notes.cdRightGap}px`,
   `  hud strip ${results.portrait.notes.hudIsLeftStrip}  hudTop ${results.portrait.notes.hudTop}  endTurn BL ${results.portrait.notes.endTurnBottomLeft}`,
@@ -405,6 +457,10 @@ const note = [
   `  DECK left ${results.landscape.notes.deckLeftOfTavern} dy ${results.landscape.notes.deckTavernMidDy} beside ${results.landscape.notes.deckBesideTavern}`,
   `  pileBack ${results.landscape.notes.pileUsesCardBack}  playableGlow ${results.landscape.notes.playableGlowOn}  endGlow ${results.landscape.notes.endTurnGlowOn}`,
   `  treasury circle ${results.landscape.notes.treasuryCircle} dial ${JSON.stringify(results.landscape.notes.treasuryDialBox)} face ${JSON.stringify(results.landscape.notes.treasuryFaceBox)}`,
+  `  leftPilesOnCanvas ${results.landscape.notes.leftPilesOnCanvas} minX ${results.landscape.notes.leftPileMinX}  rightPilesOnCanvas ${results.landscape.notes.rightPilesOnCanvas} maxRight ${results.landscape.notes.rightPileMaxRight}`,
+  `  tavernOnCanvas ${results.landscape.notes.tavernCardsOnCanvas} ${JSON.stringify(results.landscape.notes.tavernCardClip)}`,
+  `  handOnCanvas ${results.landscape.notes.handCardsOnCanvas} ${JSON.stringify(results.landscape.notes.handCardClip)}`,
+  `  labels DRAW ${results.landscape.notes.drawLabelUnder} DECK ${results.landscape.notes.deckLabelUnder} CD ${results.landscape.notes.cdLabelUnder}`,
   `  hits ${JSON.stringify(results.landscape.notes.hits)}`,
 ].join('\n');
 fs.writeFileSync(path.join(ART, `${TAG}-layout-fb-measurements.txt`), note + '\n');
