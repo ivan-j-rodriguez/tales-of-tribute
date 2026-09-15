@@ -293,11 +293,11 @@ async function measure(page, fileStem, { w, h }) {
       if ((m.drawLeftEdge ?? 0) < 1) fail(`${fileStem} landscape DRAW clipped past the left edge (${m.drawLeftEdge})`, notes);
       if ((m.drawLeftEdge ?? 99) > 40) fail(`${fileStem} landscape DRAW shifted too far inward (${m.drawLeftEdge})`, notes);
       if ((m.leftPileMinX ?? -1) < 0.5) fail(`${fileStem} landscape left pile art/label clipped (minX ${m.leftPileMinX})`, notes);
-      if ((m.rightPileMaxRight ?? 999) > vw + 0.5) fail(`${fileStem} landscape right COOLDOWN clipped (maxRight ${m.rightPileMaxRight} vw ${vw})`, notes);
+      if ((m.rightPileMaxRight ?? 999) > w + 0.5) fail(`${fileStem} landscape right COOLDOWN clipped (maxRight ${m.rightPileMaxRight} vw ${w})`, notes);
       if (!m.leftPilesOnCanvas) fail(`${fileStem} landscape left DRAW/DECK/DRAW art+labels not fully on-canvas (minX ${m.leftPileMinX})`, notes);
       if (!m.rightPilesOnCanvas) fail(`${fileStem} landscape right COOLDOWN art+labels not fully on-canvas (maxRight ${m.rightPileMaxRight})`, notes);
-      if (!m.tavernCardsOnCanvas) fail(`${fileStem} landscape tavern cards clipped (${JSON.stringify(m.tavernCardClip)} vh ${vh} vw ${vw})`, notes);
-      if (!m.handCardsOnCanvas) fail(`${fileStem} landscape hand hexes clipped (${JSON.stringify(m.handCardClip)} vh ${vh} vw ${vw})`, notes);
+      if (!m.tavernCardsOnCanvas) fail(`${fileStem} landscape tavern cards clipped (${JSON.stringify(m.tavernCardClip)} vh 390 vw ${w})`, notes);
+      if (!m.handCardsOnCanvas) fail(`${fileStem} landscape hand hexes clipped (${JSON.stringify(m.handCardClip)} vh 390 vw ${w})`, notes);
       if (!m.drawLabelUnder) fail(`${fileStem} landscape DRAW labels not under the pile graphics`, notes);
       if (!m.cdLabelUnder) fail(`${fileStem} landscape COOLDOWN labels not under the pile graphics`, notes);
       if (!m.deckLabelUnder) fail(`${fileStem} landscape DECK label not under the pile graphic`, notes);

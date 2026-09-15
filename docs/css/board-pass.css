@@ -1359,31 +1359,18 @@ body.is-landscape #match .patron-coin.mora .medallion-svg {
    =================================================================== */
 
 body.is-landscape #match .felt-table {
-  padding: 4px 0 6px !important;
+  padding: 2px 0 4px !important;
   row-gap: 2px !important;
   gap: 2px 0 !important;
   grid-template-rows:
-    minmax(26px, 0.38fr)
+    minmax(22px, 0.28fr)
+    24px
+    44px
     16px
-    36px
-    12px
-    minmax(96px, 1.82fr)
-    36px
-    16px
-    minmax(80px, 1.22fr) !important;
-}
-
-body.is-landscape #match .felt-opp-agents,
-body.is-landscape #match .felt-you-agents {
-  min-height: 16px !important;
-  height: 16px !important;
-}
-
-body.is-landscape #match .token-row,
-body.is-landscape #match #opp-res,
-body.is-landscape #match #you-res {
-  min-height: 36px !important;
-  height: 36px !important;
+    minmax(96px, 1.55fr)
+    44px
+    24px
+    minmax(78px, 1.18fr) !important;
 }
 
 body.is-landscape #match .felt-you-hand {
