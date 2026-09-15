@@ -1,4 +1,4 @@
-/* Build 51 — board/felt Ivan follow-up on 50 (Club 47 / board 50).
+/* Build 52 — landscape fit on build 51 portrait packing (Club 47 / board 51).
    TWO compositions. Same engine/state. Different positions and sizes.
    Pewter bezel seated on the portrait coin (CSS face = SVG window).
    Round pewter coin + short gothic peak (~10% of diameter).
@@ -6,9 +6,10 @@
    tavern DECK pile LEFT of the tavern row at the band's vertical center;
    SFX/Leave strip high on the left; End Turn bottom-left above you-DRAW;
    5 tavern cards + 5-card hand both center on vw/2; patron circles share one X,
-   column shifted a bit left with air between coins.
-   Landscape: piles to the edges, DECK beside the tavern, compact left chrome;
-   End Turn stays on the rail; tavern + hand still center on vw/2.
+   column shifted a bit left with air between coins. PORTRAIT PACKING IS LOCKED.
+   Landscape: modest zoom-out so tavern + you-hand hexes sit fully on the felt;
+   left DRAW / DECK / DRAW (art + labels) inset so they are not clipped;
+   DECK still left of the tavern at band mid; End Turn stays on the rail.
    Pile stacks show authentic card-back art. Stray top orbs stay gone;
    playable / End Turn / hand / combo gold glow is kept. */
 
@@ -1348,4 +1349,128 @@ body.is-landscape #match .patron-coin.mora .medallion-svg {
   height: 100% !important;
   aspect-ratio: 1 / 1 !important;
 }
+
+/* ===================================================================
+   Build 52 — LANDSCAPE ONLY. Do not copy these onto portrait.
+   Stronger zoom-out so 844×390 review shots read as unclipped to a
+   human: clear left felt margin beside DRAW/DECK/DRAW, tavern hex
+   top/bottom tips inside the band, you-hand hex bottom tips above
+   the felt edge (room for gold glow). Right COOLDOWNs stay right.
+   =================================================================== */
+
+body.is-landscape #match .felt-table {
+  padding: 6px 0 28px !important;
+  row-gap: 2px !important;
+  gap: 2px 0 !important;
+  grid-template-rows:
+    16px
+    24px
+    44px
+    16px
+    118px
+    44px
+    24px
+    56px !important;
+}
+
+body.is-landscape #match .felt-tavern,
+body.is-landscape #match .felt-you-hand {
+  min-height: 0 !important;
+  height: auto !important;
+  align-self: stretch !important;
+  overflow: visible !important;
+}
+
+body.is-landscape #match .tavern-zone {
+  padding: 2px 128px !important;
+  overflow: visible !important;
+  align-items: center !important;
+}
+
+body.is-landscape #match #hand-zone,
+body.is-landscape #match .you-fan {
+  height: 100% !important;
+  min-height: 0 !important;
+  align-items: center !important;
+  padding-bottom: 0 !important;
+  padding-top: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body.is-landscape #match .tavern-zone .card {
+  width: min(58px, 6.8vw, calc((100% - 1.2rem) / 5.4)) !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1.52 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+body.is-landscape #match #hand-zone .card,
+body.is-landscape #match #hand-zone button.card,
+body.is-landscape #match .you-fan .card {
+  width: min(30px, 3.6vw, calc((100% + 1rem) / 6.6)) !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1.52 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+body.is-landscape #match .rival-fan .card,
+body.is-landscape #match #opp-hand-zone .card {
+  width: min(26px, 3.1vw, calc((100% + 0.8rem) / 7)) !important;
+  min-height: 0 !important;
+  max-height: 86% !important;
+}
+
+/* Same clear left gutter on opp DRAW, DECK, and you DRAW. */
+body.is-landscape #match #pile-opp-draw,
+body.is-landscape #match #pile-you-draw,
+body.is-landscape #match #pile-tavern-draw {
+  left: max(48px, calc(env(safe-area-inset-left, 0px) + 28px)) !important;
+}
+
+/* Keep the fanned backs from eating the gutter. */
+body.is-landscape #match .hex-pile .pile-stack i:nth-child(1),
+body.is-landscape #match .pile-stack i:nth-child(1) {
+  transform: translate(-2px, 2px) rotate(-6deg) !important;
+}
+
+body.is-landscape #match .felt-hud-you {
+  left: max(48px, calc(env(safe-area-inset-left, 0px) + 28px)) !important;
+  top: 86px !important;
+  bottom: auto !important;
+}
+
+body.is-landscape #match .you-actions {
+  gap: 1px !important;
+  padding: 1px !important;
+}
+
+/* PLAYED EFFECTS must not sit on the top DRAW stack/label. */
+body.is-landscape #match .events-rail {
+  left: max(48px, calc(env(safe-area-inset-left, 0px) + 28px)) !important;
+  top: 38% !important;
+  width: 44px !important;
+}
+
+/* Right COOLDOWNs stay on the right, fully visible (rail + safe-area). */
+body.is-landscape #match #pile-opp-cd,
+body.is-landscape #match #pile-you-cd {
+  right: max(128px, calc(env(safe-area-inset-right, 0px) + 128px)) !important;
+  width: 72px !important;
+  min-width: 72px !important;
+  align-items: center !important;
+  overflow: visible !important;
+}
+
+body.is-landscape #match #pile-opp-cd .pile-stack,
+body.is-landscape #match #pile-you-cd .pile-stack {
+  width: 32px !important;
+  margin: 0 auto !important;
+}
+
+body.is-landscape #match #pile-opp-draw { top: 14px !important; }
+body.is-landscape #match #pile-you-draw { bottom: 16px !important; }
+body.is-landscape #match #pile-opp-cd { top: 14px !important; }
+body.is-landscape #match #pile-you-cd { bottom: 16px !important; }
 

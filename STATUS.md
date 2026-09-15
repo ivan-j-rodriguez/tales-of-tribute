@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-15 (build 52):** Board/felt **landscape only**. Stronger zoom-out so 844×390 review shots read unclipped: left DRAW / DECK / DRAW share a clear felt gutter (not flush, including the top DRAW stack+label); tavern hex top/bottom tips sit inside the band; you-hand hex bottom tips sit well above the felt edge (~33px air, glow intact). DECK still left of the tavern at band mid. Right COOLDOWNs stay right. Portrait packing from build 51 is locked. Card backs, Treasury 1:1 circle, gold glow, hold-inspect, and layout-fb overlap gates stay. Club hub / store / collection / economy / music / auth / voice / club-chrome untouched. `?v=52`.
+
 **2026-09-14 (build 51):** Board/felt only — Ivan follow-up on 50. Patron column shifts a bit left; vertical gaps so the middle pendant reads as a full circle (centers stay colinear; pewter seated; Treasury/Mora tipless **1:1 circle**, not a horizontal oval). Tavern DECK sits to the left of the tavern cards at the tavern band’s vertical center — opp DRAW stays top-left, you DRAW bottom-left, COOLDOWNs right corners. Deck / draw / cooldown piles show `assets/ui/card-back.svg` again. Stray top-of-felt gold orbs stay gone; playable-card / End Turn / hand / combo gold glow is kept. Layout-fb overlap gates from board #15/#18/#19/#23/#24 stay green. Club hub / store / collection / economy / music / auth / voice / club-chrome untouched. `?v=51`.
 
 **2026-09-14 (build 50):** Board/felt only — Ivan portrait mark-up. SFX / settings / Leave strip lifts further toward the top-left. Tavern DECK pile moves to the top-left under opp DRAW. End Turn / hourglass sits in the bottom-left corner above you-DRAW (portrait). Five patron pendant circle-centers share one vertical X. Middle tavern card top-center = vw/2 (hand-center from #24 kept). Four corner piles show DRAW / COOLDOWN graphics with the word aligned under each stack. Stray `#match .board::before/::after` gold orbs removed (playable-card glow kept). Layout-fb overlap gates from board #15/#18/#19/#23/#24 stay green. Club hub / store / collection / economy / music / auth / voice / club-chrome untouched. `?v=50`.
@@ -85,7 +87,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=51`. Board/felt Ivan follow-up (patron column + gaps, DECK beside tavern, card-back piles, gold glow kept) on Club 47 / board 50.
+`docs/` is a copy of `web/`. Cache-bust `?v=52`. Board/felt landscape fit (zoom-out + left piles on-canvas) on Club 47 / board 51. Portrait packing unchanged.
 
 | Fix | Notes |
 |---|---|
