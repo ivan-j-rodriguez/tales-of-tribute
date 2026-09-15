@@ -4,6 +4,13 @@
  * and UESP patron raw ability lines.
  */
 
+import {
+  donateSentence, tossSentence, refreshSentence, knockoutSentence, knockoutAllSentence,
+  destroySentence, replaceSentence, acquireSentence, confineSentence, discardSentence,
+  healSentence, patronCallSentence, tauntSentence, createSentence, losePrestigeSentence,
+  expandToken,
+} from './officialText.js';
+
 const RES = { coin: 'Coin', power: 'Power', prestige: 'Prestige' };
 
 function nOf(n, word) {
@@ -19,35 +26,25 @@ export function effectSentence(e) {
     case 'power': return `Gain ${nOf(n, 'Power')}.`;
     case 'prestige': return `Gain ${nOf(n, 'Prestige')}.`;
     case 'draw': return n === 1 ? 'Draw 1 card.' : `Draw ${n} cards.`;
-    case 'donate': return n === 1 ? 'Donate 1.' : `Donate ${n}.`;
-    case 'toss': return `Toss ${n}.`;
-    case 'discard': return n === 1 ? 'Discard 1 card.' : `Discard ${n} cards.`;
-    case 'destroy': return n === 1 ? 'Destroy a card in the Tavern.' : `Destroy up to ${n} cards from the Tavern.`;
-    case 'replace': return n === 1 ? 'Replace a card in the Tavern.' : `Replace up to ${n} cards in the Tavern.`;
-    case 'acquire': return `Acquire a card from the Tavern that costs up to ${n} Coin.`;
-    case 'knockout': return n === 1
-      ? 'Knock Out an enemy Agent.'
-      : `Knock Out up to ${n} enemy Agents.`;
-    case 'knockout_all': return 'Knock Out all enemy Agents.';
-    case 'confine': return `Reprieve ${n}.`;
-    case 'patron_extra': return 'Call on 1 additional Patron this turn.';
-    case 'hand_refresh': {
-      const what = n === 1 ? '1 card' : `${n} cards`;
-      return `Refresh — Return up to ${what} from your cooldown pile to the top of your draw pile.`;
-    }
+    case 'donate': return donateSentence(n);
+    case 'toss': return tossSentence(n);
+    case 'discard': return discardSentence(n);
+    case 'destroy': return destroySentence(n);
+    case 'replace': return replaceSentence(n);
+    case 'acquire': return acquireSentence(n);
+    case 'knockout': return knockoutSentence(n);
+    case 'knockout_all': return knockoutAllSentence();
+    case 'confine': return confineSentence(n);
+    case 'patron_extra': return patronCallSentence();
+    case 'hand_refresh': return refreshSentence(n, false);
     case 'draw_refresh': return n === 1
       ? 'Look at the next 1 card of your draw. You may move it to your cooldown.'
       : `Look at the next ${n} cards of your draw. Choose up to ${n} of those cards to move to your cooldown.`;
     case 'draw_refresh_agents': return `Look at the next ${n} cards of your draw. You may move Agents among them to your cooldown.`;
-    case 'heal': return `Heal an Agent for ${n}.`;
-    case 'create': return e.card ? `Create ${e.card}.` : 'Create a card.';
-    case 'sacking': return 'Create Summerset Sacking.';
-    case 'opp_prestige': {
-      const amt = Math.abs(n);
-      return amt === 1
-        ? 'Your opponent loses 1 Prestige.'
-        : `Your opponent loses ${amt} Prestige.`;
-    }
+    case 'heal': return healSentence(n);
+    case 'create': return createSentence(e.card || 'a card', /bewilderment/i.test(e.card || ''));
+    case 'sacking': return createSentence('Summerset Sacking');
+    case 'opp_prestige': return losePrestigeSentence(n);
     case 'setback_coin': return `Setback — Opponent gains ${nOf(n, 'Coin')}.`;
     case 'setback_power': return `Setback — Opponent gains ${nOf(n, 'Power')}.`;
     case 'setback_draw': return n === 1
@@ -67,8 +64,8 @@ export function effectSentence(e) {
         const inner = (Array.isArray(opt) ? opt : [opt]).map(effectSentence).filter(Boolean);
         return inner.join(' ') || '—';
       });
-      if (!opts.length) return 'Choose one.';
-      return `Choose one: ${opts.map((o) => o.replace(/\.$/, '')).join(' or ')}.`;
+      if (!opts.length) return 'Choose 1 of the following:';
+      return `Choose 1 of the following: ${opts.map((o) => o.replace(/\.$/, '')).join('. Or ')}.`;
     }
     default:
       return '';
@@ -95,7 +92,12 @@ export function isOfficialProse(t) {
   if (!s) return false;
   if (/^\d+\s+(Coin|Power|Prestige)\b/i.test(s)) return false;
   if (/^Draw\s+\d+$/i.test(s)) return false;
-  return /^(Gain |Draw |Donate |Toss |Acquire |Refresh |Knock Out |Taunt|Replace |Destroy |Confine |Opponent |Setback |When |Choose |Create |Heal |Discard |This |Place |Pay |Call |Look |While |Cannot |If |Curse )/i.test(s);
+  if (/^(Donate|Toss|Refresh|Knock Out|Acquire|Replace|Destroy|Confine|Patron)\s*\d*\.?$/i.test(s)) return false;
+  if (/^Knock Out an enemy Agent\.?$/i.test(s)) return false;
+  if (/^This Agent has Taunt\.?$/i.test(s)) return false;
+  if (/^Taunt\.?$/i.test(s)) return false;
+  if (/^Choose one\.?$/i.test(s)) return false;
+  return /^(Gain |Draw |Donate |Toss |Acquire |Refresh |Knock Out |Taunt|Replace |Destroy |Confine |Opponent |Setback |When |Choose |Create |Heal |Discard |This |Place |Pay |Call |Look |While |Cannot |If |Curse |Reprieve |Passive |Sacrifice )/i.test(s);
 }
 
 function polishFallback(fb) {
@@ -117,24 +119,21 @@ function polishFallback(fb) {
     const n = Number(m[1]);
     return [n === 1 ? 'Draw 1 card.' : `Draw ${n} cards.`];
   }
-  if ((m = s.match(/^Donate\s+(\d+)$/i))) return [`Donate ${m[1]}.`];
-  if ((m = s.match(/^Toss\s+(\d+)$/i))) return [`Toss ${m[1]}.`];
-  if ((m = s.match(/^Acquire\s+(\d+)$/i))) {
-    return [`Acquire a card from the Tavern that costs up to ${m[1]} Coin.`];
+  if ((m = s.match(/^Donate\s+(\d+)$/i))) return [donateSentence(Number(m[1]))];
+  if ((m = s.match(/^Toss\s+(\d+)$/i))) return [tossSentence(Number(m[1]))];
+  if ((m = s.match(/^Acquire\s+(\d+)$/i))) return [acquireSentence(Number(m[1]))];
+  if ((m = s.match(/^(?:Hand |Draw )?Refresh\s+(\d+)$/i))) {
+    return [refreshSentence(Number(m[1]), /agent/i.test(s))];
   }
-  if ((m = s.match(/^Refresh\s+(\d+)$/i))) {
-    const n = Number(m[1]);
-    const what = n === 1 ? '1 card' : `${n} cards`;
-    return [`Refresh — Return up to ${what} from your cooldown pile to the top of your draw pile.`];
-  }
-  if (/^Knock Out All$/i.test(s)) return ['Knock Out all enemy Agents.'];
-  if ((m = s.match(/^Knock Out\s+(\d+)$/i))) {
-    return [Number(m[1]) === 1 ? 'Knock Out an enemy Agent.' : `Knock Out up to ${m[1]} enemy Agents.`];
-  }
-  if (/^Taunt$/i.test(s)) return ['This Agent has Taunt.'];
-  if ((m = s.match(/^Replace\s+(\d+)$/i))) {
-    return [Number(m[1]) === 1 ? 'Replace a card in the Tavern.' : `Replace up to ${m[1]} cards in the Tavern.`];
-  }
+  if (/^Knock Out All$/i.test(s)) return [knockoutAllSentence()];
+  if ((m = s.match(/^Knock Out\s+(\d+)$/i))) return [knockoutSentence(Number(m[1]))];
+  if (/^Taunt$/i.test(s) || /^This Agent has Taunt\.?$/i.test(s)) return [tauntSentence()];
+  if ((m = s.match(/^Replace\s+(\d+)$/i))) return [replaceSentence(Number(m[1]))];
+  if ((m = s.match(/^Destroy\s+(\d+)$/i))) return [destroySentence(Number(m[1]))];
+  if ((m = s.match(/^Confine\s+(\d+)$/i))) return [confineSentence(Number(m[1]))];
+  if (/^Patron$/i.test(s)) return [patronCallSentence()];
+  const expanded = expandToken(s);
+  if (expanded && expanded !== (s.endsWith('.') ? s : s + '.')) return [expanded];
   return s.split(/[;\n]|(?<=\.)\s+/).map((x) => x.trim()).filter(Boolean).map(ensureDot);
 }
 
@@ -153,8 +152,8 @@ export function inspectLines(effects, text) {
 
 export function cardPlayLines(d) {
   const lines = inspectLines(d.play, d.playText);
-  if (d.taunt && !lines.some((l) => /taunt/i.test(l))) lines.push('This Agent has Taunt.');
-  if (d.curse && !lines.length) lines.push('This card has no effect.');
+  if (d.taunt && !lines.some((l) => /taunt/i.test(l))) lines.push(tauntSentence());
+  if (d.curse && !lines.length) lines.push('This card has no play effect.');
   return lines;
 }
 
@@ -182,7 +181,7 @@ export function applyOfficialCardText(cards) {
 export const OFFICIAL_PATRON_TEXT = {
   treasury: {
     favored: null,
-    neutral: 'Pay 2 Coin and sacrifice 1 card from your hand or played cards: Create Writ of Coin in your cooldown pile.',
+    neutral: 'Pay 2 Coin, Sacrifice 1 card from your hand or your played cards: Create 1 Writ of Coin card and place it in your cooldown pile.',
     unfavored: null,
   },
   pelin: {
@@ -201,9 +200,9 @@ export const OFFICIAL_PATRON_TEXT = {
     unfavored: 'Pay all Coin: Gain Power equal to Coin paid minus 1. This Patron is now NEUTRAL.',
   },
   celarus: {
-    favored: 'If opponent has an active Agent, pay 4 Coin: Knock Out that Agent.',
-    neutral: 'If opponent has an active Agent, pay 4 Coin: Knock Out that Agent. This Patron now FAVORS you.',
-    unfavored: 'If opponent has an active Agent, pay 4 Coin: Knock Out that Agent. This Patron is now NEUTRAL.',
+    favored: 'If opponent has an active Agent, pay 4 Coin: Knock Out — Place 1 of your opponent\'s active agents into their cooldown pile.',
+    neutral: 'If opponent has an active Agent, pay 4 Coin: Knock Out — Place 1 of your opponent\'s active agents into their cooldown pile. This Patron now FAVORS you.',
+    unfavored: 'If opponent has an active Agent, pay 4 Coin: Knock Out — Place 1 of your opponent\'s active agents into their cooldown pile. This Patron is now NEUTRAL.',
   },
   hunding: {
     favored: 'If you hold this favor until the start of your turn, Gain 1 Coin.',
@@ -216,24 +215,24 @@ export const OFFICIAL_PATRON_TEXT = {
     unfavored: 'Pay 2 Power: Draw 1 card. This Patron is now NEUTRAL.',
   },
   orgnum: {
-    favored: 'Pay 3 Coin: Gain 1 Power per 4 owned cards. Create Summerset Sacking.',
+    favored: 'Pay 3 Coin: Gain 1 Power per 4 owned cards. Create 1 Summerset Sacking card and place it in your cooldown pile.',
     neutral: 'Pay 2 Coin: Gain 1 Power per 6 owned cards. This Patron now FAVORS you.',
     unfavored: 'Pay 1 Coin: Gain 2 Power. This Patron is now NEUTRAL.',
   },
   rajhin: {
-    favored: 'Pay 3 Coin: Create Bewilderment in the opponent cooldown pile.',
-    neutral: 'Pay 3 Coin: Create Bewilderment in the opponent cooldown pile. This Patron now FAVORS you.',
-    unfavored: 'Pay 3 Coin: Create Bewilderment in the opponent cooldown pile. This Patron is now NEUTRAL.',
+    favored: 'Pay 3 Coin: Create 1 Bewilderment card and place it in your opponent\'s cooldown pile.',
+    neutral: 'Pay 3 Coin: Create 1 Bewilderment card and place it in your opponent\'s cooldown pile. This Patron now FAVORS you.',
+    unfavored: 'Pay 3 Coin: Create 1 Bewilderment card and place it in your opponent\'s cooldown pile. This Patron is now NEUTRAL.',
   },
   druid: {
-    favored: 'Passive Combo 4: add The Chimera to your cooldown. Also pay 2 Power to Replace up to 2 Tavern cards.',
-    neutral: 'Passive Combo 5: add The Chimera to your cooldown. Also pay 2 Power to Replace up to 2 Tavern cards. This Patron now FAVORS you.',
-    unfavored: 'Pay 2 Power: Replace up to 2 Tavern cards. This Patron is now NEUTRAL.',
+    favored: 'Passive Combo 4: add The Chimera to your cooldown. Also pay 2 Power to Replace up to 2 cards from the Tavern.',
+    neutral: 'Passive Combo 5: add The Chimera to your cooldown. Also pay 2 Power to Replace up to 2 cards from the Tavern. This Patron now FAVORS you.',
+    unfavored: 'Pay 2 Power: Replace up to 2 cards from the Tavern. This Patron is now NEUTRAL.',
   },
   almalexia: {
-    favored: 'Pay 1 Coin and discard a card: Reprieve 5.',
-    neutral: 'Discard a card: Reprieve 4. This Patron now FAVORS you.',
-    unfavored: 'Pay 1 Coin: Reprieve 3. This Patron is now NEUTRAL.',
+    favored: 'Pay 1 Coin and discard a card: Reprieve — Look at the top 5 cards of your opponent\'s draw pile. Select 1 to place in their cooldown pile.',
+    neutral: 'Discard a card: Reprieve — Look at the top 4 cards of your opponent\'s draw pile. Select 1 to place in their cooldown pile. This Patron now FAVORS you.',
+    unfavored: 'Pay 1 Coin: Reprieve — Look at the top 3 cards of your opponent\'s draw pile. Select 1 to place in their cooldown pile. This Patron is now NEUTRAL.',
   },
   mora: {
     favored: 'Pay 3 Power: Bargain.',
@@ -241,8 +240,8 @@ export const OFFICIAL_PATRON_TEXT = {
     unfavored: 'Pay 2 Power: Bargain. This Patron is now NEUTRAL.',
   },
   alessia: {
-    favored: 'Pay 4 Coin: Create Chainbreaker Sergeant in your cooldown pile.',
-    neutral: 'Pay 4 Coin: Create Soldier of the Empire in your cooldown pile. This Patron now FAVORS you.',
+    favored: 'Pay 4 Coin: Create 1 Chainbreaker Sergeant card and place it in your cooldown pile.',
+    neutral: 'Pay 4 Coin: Create 1 Soldier of the Empire card and place it in your cooldown pile. This Patron now FAVORS you.',
     unfavored: 'Pay 3 Coin: Gain 2 Power. This Patron is now NEUTRAL.',
   },
 };
@@ -252,7 +251,8 @@ function polishPatronLine(s) {
   let t = String(s).trim();
   t = t.replace(/\bunusable; no benefit\.?/i, 'Cannot be used.');
   t = t.replace(/\bdraw 1\b/gi, 'Draw 1 card');
-  t = t.replace(/\bknock it out\b/gi, 'Knock Out that Agent');
+  t = t.replace(/\bReprieve\s+(\d+)\b/gi, (_, n) => `Reprieve — Look at the top ${n} cards of your opponent's draw pile. Select 1 to place in their cooldown pile`);
+  t = t.replace(/\bknock it out\b/gi, 'Knock Out — Place 1 of your opponent\'s active agents into their cooldown pile');
   t = t.replace(
     /\brefresh up to 1 agent\.?/i,
     'Refresh — Return up to 1 Agent card from your cooldown pile to the top of your draw pile.'

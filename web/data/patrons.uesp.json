@@ -1,0 +1,948 @@
+{
+  "patrons": [
+    {
+      "id": "almalexia",
+      "name": "Almalexia",
+      "deckId": "almalexia",
+      "favorLevels": {
+        "unaligned": {
+          "raw": "Discard a card: Reprieve 4; this patron favors you.",
+          "costs": [
+            {
+              "op": "discardCard",
+              "amount": 1
+            }
+          ],
+          "effects": [
+            {
+              "op": "reprieve",
+              "lookAt": 4,
+              "select": 1,
+              "destination": "opponentCooldown"
+            }
+          ],
+          "activation": "active",
+          "stateChange": "player1"
+        },
+        "player1": {
+          "raw": "Pay 1 Coin and discard a card: Reprieve 5.",
+          "costs": [
+            {
+              "resource": "coin",
+              "amount": 1
+            },
+            {
+              "op": "discardCard",
+              "amount": 1
+            }
+          ],
+          "effects": [
+            {
+              "op": "reprieve",
+              "lookAt": 5,
+              "select": 1,
+              "destination": "opponentCooldown"
+            }
+          ],
+          "activation": "active"
+        },
+        "player2": {
+          "raw": "Pay 1 Coin: Reprieve 3; this patron becomes unaligned.",
+          "costs": [
+            {
+              "resource": "coin",
+              "amount": 1
+            }
+          ],
+          "effects": [
+            {
+              "op": "reprieve",
+              "lookAt": 3,
+              "select": 1,
+              "destination": "opponentCooldown"
+            }
+          ],
+          "activation": "active",
+          "stateChange": "unaligned"
+        },
+        "notes": "player1 = favors the activating player; player2 = favors the opponent."
+      },
+      "uniqueMechanics": "This deck focuses on replacing cards in your hand and temporarily removing your opponent's cards from play.",
+      "imageUrl": "https://images.uesp.net/e/e9/ON-tribute-patron-Almalexia.png",
+      "alwaysInMatch": false,
+      "selectable": true,
+      "chapter": "Necrom",
+      "sourceUrl": "https://en.uesp.net/wiki/Online:Almalexia_(Patron)",
+      "hasFavorTrack": true,
+      "needsReview": false
+    },
+    {
+      "id": "hunding",
+      "name": "Ansei Frandar Hunding",
+      "deckId": "hunding",
+      "favorLevels": {
+        "unaligned": {
+          "raw": "Pay 2 Power: gain 1 Coin; this patron favors you.",
+          "costs": [
+            {
+              "resource": "power",
+              "amount": 2
+            }
+          ],
+          "effects": [
+            {
+              "op": "gainCoin",
+              "amount": 1
+            }
+          ],
+          "activation": "active",
+          "stateChange": "player1"
+        },
+        "player1": {
+          "raw": "If you hold this favor until the start of your turn, gain 1 Coin.",
+          "costs": [],
+          "effects": [
+            {
+              "op": "gainCoin",
+              "amount": 1,
+              "timing": "startOfTurn",
+              "condition": "patronStillFavorsPlayer"
+            }
+          ],
+          "activation": "passive"
+        },
+        "player2": {
+          "raw": "Pay 2 Power: gain 1 Coin; this patron becomes unaligned.",
+          "costs": [
+            {
+              "resource": "power",
+              "amount": 2
+            }
+          ],
+          "effects": [
+            {
+              "op": "gainCoin",
+              "amount": 1
+            }
+          ],
+          "activation": "active",
+          "stateChange": "unaligned"
+        },
+        "notes": "player1 = favors the activating player; player2 = favors the opponent."
+      },
+      "uniqueMechanics": "This deck focuses on allowing the player to return cards of their choice from the cooldown pile to the top of the draw. It also provides flexibility as most of its cards give a choice of two actions when played.\n\nThe Patron's power grants the player 1 extra coin on turns they begin in favored status.",
+      "imageUrl": "https://images.uesp.net/3/38/ON-tribute-patron-Ansei_Frandar_Hunding.png",
+      "alwaysInMatch": false,
+      "selectable": true,
+      "chapter": "High Isle",
+      "sourceUrl": "https://en.uesp.net/wiki/Online:Ansei_Frandar_Hunding",
+      "hasFavorTrack": true,
+      "needsReview": false
+    },
+    {
+      "id": "druid_king",
+      "name": "Druid King Kasorayn",
+      "deckId": "druid_king",
+      "favorLevels": {
+        "unaligned": {
+          "raw": "Passive Combo 5: add The Chimera to your cooldown. Also pay 2 Power to replace up to 2 Tavern cards; this patron favors you.",
+          "costs": [
+            {
+              "resource": "power",
+              "amount": 2,
+              "appliesTo": "replaceTavern"
+            }
+          ],
+          "effects": [
+            {
+              "op": "createCard",
+              "cardName": "The Chimera",
+              "destination": "cooldown",
+              "timing": "passiveCombo",
+              "comboRequirement": 5
+            },
+            {
+              "op": "replaceTavern",
+              "amount": 2,
+              "timing": "active"
+            }
+          ],
+          "activation": "active",
+          "stateChange": "player1"
+        },
+        "player1": {
+          "raw": "Passive Combo 4: add The Chimera to your cooldown. Also pay 2 Power to replace up to 2 Tavern cards.",
+          "costs": [
+            {
+              "resource": "power",
+              "amount": 2,
+              "appliesTo": "replaceTavern"
+            }
+          ],
+          "effects": [
+            {
+              "op": "createCard",
+              "cardName": "The Chimera",
+              "destination": "cooldown",
+              "timing": "passiveCombo",
+              "comboRequirement": 4
+            },
+            {
+              "op": "replaceTavern",
+              "amount": 2,
+              "timing": "active"
+            }
+          ],
+          "activation": "active"
+        },
+        "player2": {
+          "raw": "Pay 2 Power: replace up to 2 Tavern cards; this patron becomes unaligned.",
+          "costs": [
+            {
+              "resource": "power",
+              "amount": 2
+            }
+          ],
+          "effects": [
+            {
+              "op": "replaceTavern",
+              "amount": 2
+            }
+          ],
+          "activation": "active",
+          "stateChange": "unaligned"
+        },
+        "notes": "The Chimera is created passively when the stated Druid combo threshold is reached. The paid Replace is a separate patron action."
+      },
+      "uniqueMechanics": "This deck focuses on creating long, extensive combos to gain massive rewards through extensive agent usage. This is the first deck to feature While in Play effects that trigger every time the corresponding action happens while the card is active; on agents, this includes during the opponent's turn.",
+      "imageUrl": "https://images.uesp.net/8/82/ON-tribute-patron-Druid_King.png",
+      "alwaysInMatch": false,
+      "selectable": true,
+      "chapter": "Firesong / Galen",
+      "sourceUrl": "https://en.uesp.net/wiki/Online:Druid_King",
+      "hasFavorTrack": true,
+      "needsReview": false
+    },
+    {
+      "id": "duke_of_crows",
+      "name": "Duke of Crows",
+      "deckId": "duke_of_crows",
+      "favorLevels": {
+        "unaligned": {
+          "raw": "Pay all Coin: gain Power equal to Coin paid minus 1; this patron favors you.",
+          "costs": [
+            {
+              "resource": "coin",
+              "amount": "all"
+            }
+          ],
+          "effects": [
+            {
+              "op": "gainPower",
+              "amountExpr": {
+                "op": "subtract",
+                "left": "coinPaid",
+                "right": 1
+              }
+            }
+          ],
+          "activation": "active",
+          "stateChange": "player1"
+        },
+        "player1": {
+          "raw": "Unusable; no benefit.",
+          "costs": [
+            {
+              "unusable": true
+            }
+          ],
+          "effects": [],
+          "activation": "unusable"
+        },
+        "player2": {
+          "raw": "Pay all Coin: gain Power equal to Coin paid minus 1; this patron becomes unaligned.",
+          "costs": [
+            {
+              "resource": "coin",
+              "amount": "all"
+            }
+          ],
+          "effects": [
+            {
+              "op": "gainPower",
+              "amountExpr": {
+                "op": "subtract",
+                "left": "coinPaid",
+                "right": 1
+              }
+            }
+          ],
+          "activation": "active",
+          "stateChange": "unaligned"
+        },
+        "notes": "player1 = favors the activating player; player2 = favors the opponent."
+      },
+      "uniqueMechanics": "The main gimmick of this deck is effects that draw more cards. While a few have combo effects that give Coin and Power, the majority involve drawing cards, with cards like Plunder having the potential to draw 3 in a single turn.\n\nThe patron themselves allows you to gain Power by spending leftover Coin. Avoid using this effect early as it will be unusable if you are already favored, while giving your opponent the opportunity to use it twice. However, in late game, the effect can be very powerful if you already have all the cards you want and want to gain a huge lead over your opponent. Additionally, if your opponent makes the mistake of using it early, you can simply ignore that patron for the rest of the match to prevent them from using it again.",
+      "imageUrl": "https://images.uesp.net/f/f8/ON-tribute-patron-Blackfeather_Court.png",
+      "alwaysInMatch": false,
+      "selectable": true,
+      "chapter": "High Isle",
+      "sourceUrl": "https://en.uesp.net/wiki/Online:Duke_of_Crows_(Patron)",
+      "hasFavorTrack": true,
+      "needsReview": false
+    },
+    {
+      "id": "hlaalu",
+      "name": "Grandmaster Delmene Hlaalu",
+      "deckId": "hlaalu",
+      "favorLevels": {
+        "unaligned": {
+          "raw": "Sacrifice one owned in-play card costing at least 1 Coin: gain Prestige equal to its cost minus 1.",
+          "costs": [
+            {
+              "op": "sacrificeCard",
+              "amount": 1,
+              "from": "inPlay",
+              "minCost": 1
+            }
+          ],
+          "effects": [
+            {
+              "op": "gainPrestige",
+              "amountExpr": {
+                "op": "subtract",
+                "left": "sacrificedCardCost",
+                "right": 1
+              }
+            }
+          ],
+          "activation": "active",
+          "stateChange": "player1"
+        },
+        "player1": {
+          "raw": "Sacrifice one owned in-play card costing at least 1 Coin: gain Prestige equal to its cost minus 1.",
+          "costs": [
+            {
+              "op": "sacrificeCard",
+              "amount": 1,
+              "from": "inPlay",
+              "minCost": 1
+            }
+          ],
+          "effects": [
+            {
+              "op": "gainPrestige",
+              "amountExpr": {
+                "op": "subtract",
+                "left": "sacrificedCardCost",
+                "right": 1
+              }
+            }
+          ],
+          "activation": "active"
+        },
+        "player2": {
+          "raw": "Sacrifice one owned in-play card costing at least 1 Coin: gain Prestige equal to its cost minus 1.",
+          "costs": [
+            {
+              "op": "sacrificeCard",
+              "amount": 1,
+              "from": "inPlay",
+              "minCost": 1
+            }
+          ],
+          "effects": [
+            {
+              "op": "gainPrestige",
+              "amountExpr": {
+                "op": "subtract",
+                "left": "sacrificedCardCost",
+                "right": 1
+              }
+            }
+          ],
+          "activation": "active",
+          "stateChange": "unaligned"
+        },
+        "notes": "player1 = favors the activating player; player2 = favors the opponent."
+      },
+      "uniqueMechanics": "This deck focuses on effects that Acquire cards from the Tavern for free, as well as gaining Coin, with most cards giving a lot more compared to other decks. For example, Luxury Exports costs 2 Coin to purchase but gives you 3 Coin whenever it is used. While you cannot win a game with Coin alone as any unspent Coin is completely lost at the end of your turn, this is very useful for building a powerful deck early on by acquiring and purchasing cards from other Patrons.\n\nThe Patron's effect goes hand-in-hand with its deck, giving you Prestige in exchange for cards you've purchased and don't need anymore. This is especially useful near the end of a game when you're either approaching 40 Prestige or trying to gain a lead over your opponent by removing an expensive card you won't use again, such as Hlaalu Kinsman or Hlaalu Councilor. Alternatively you can use this effect to remove and gain Prestige from already damaged Contract Agents (assuming any Patrons with Contract Agents were chosen), since they will be removed from play if your opponent kills them anyway.",
+      "imageUrl": "https://images.uesp.net/1/18/ON-tribute-patron-House_Hlaalu.png",
+      "alwaysInMatch": false,
+      "selectable": true,
+      "chapter": "High Isle",
+      "sourceUrl": "https://en.uesp.net/wiki/Online:Grandmaster_Delmene_Hlaalu",
+      "hasFavorTrack": true,
+      "needsReview": false
+    },
+    {
+      "id": "hermaeus_mora",
+      "name": "Hermaeus Mora",
+      "deckId": "hermaeus_mora",
+      "favorLevels": {
+        "unaligned": {
+          "raw": "Pay 3 Power: Bargain; this patron favors you.",
+          "costs": [
+            {
+              "resource": "power",
+              "amount": 3
+            }
+          ],
+          "effects": [
+            {
+              "op": "bargain",
+              "cardFilter": {
+                "contract": false
+              },
+              "opponentReceivesCopy": true
+            }
+          ],
+          "activation": "active",
+          "stateChange": "player1"
+        },
+        "player1": {
+          "raw": "Pay 3 Power: Bargain.",
+          "costs": [
+            {
+              "resource": "power",
+              "amount": 3
+            }
+          ],
+          "effects": [
+            {
+              "op": "bargain",
+              "cardFilter": {
+                "contract": false
+              },
+              "opponentReceivesCopy": true
+            }
+          ],
+          "activation": "active"
+        },
+        "player2": {
+          "raw": "Pay 2 Power: Bargain; this patron becomes unaligned.",
+          "costs": [
+            {
+              "resource": "power",
+              "amount": 2
+            }
+          ],
+          "effects": [
+            {
+              "op": "bargain",
+              "cardFilter": {
+                "contract": false
+              },
+              "opponentReceivesCopy": true
+            }
+          ],
+          "activation": "active",
+          "stateChange": "unaligned"
+        },
+        "notes": "player1 = favors the activating player; player2 = favors the opponent."
+      },
+      "uniqueMechanics": "This deck focuses on combos and fast power gain, with setbacks to you and gains to your opponent.",
+      "imageUrl": "https://images.uesp.net/1/15/ON-tribute-patron-Hermaeus_Mora.png",
+      "alwaysInMatch": false,
+      "selectable": true,
+      "chapter": "Infinite Archive / Necrom era",
+      "sourceUrl": "https://en.uesp.net/wiki/Online:Hermaeus_Mora_(Patron)",
+      "hasFavorTrack": true,
+      "needsReview": false
+    },
+    {
+      "id": "celarus",
+      "name": "Psijic Loremaster Celarus",
+      "deckId": "celarus",
+      "favorLevels": {
+        "unaligned": {
+          "raw": "If opponent has an active agent, pay 4 Coin: knock it out; patron favors you.",
+          "costs": [
+            {
+              "requirement": "opponentHasAgent",
+              "amount": 1
+            },
+            {
+              "resource": "coin",
+              "amount": 4
+            }
+          ],
+          "effects": [
+            {
+              "op": "knockOut",
+              "amount": 1,
+              "target": "opponentAgent"
+            }
+          ],
+          "activation": "active",
+          "stateChange": "player1"
+        },
+        "player1": {
+          "raw": "If opponent has an active agent, pay 4 Coin: knock it out.",
+          "costs": [
+            {
+              "requirement": "opponentHasAgent",
+              "amount": 1
+            },
+            {
+              "resource": "coin",
+              "amount": 4
+            }
+          ],
+          "effects": [
+            {
+              "op": "knockOut",
+              "amount": 1,
+              "target": "opponentAgent"
+            }
+          ],
+          "activation": "active"
+        },
+        "player2": {
+          "raw": "If opponent has an active agent, pay 4 Coin: knock it out; patron becomes unaligned.",
+          "costs": [
+            {
+              "requirement": "opponentHasAgent",
+              "amount": 1
+            },
+            {
+              "resource": "coin",
+              "amount": 4
+            }
+          ],
+          "effects": [
+            {
+              "op": "knockOut",
+              "amount": 1,
+              "target": "opponentAgent"
+            }
+          ],
+          "activation": "active",
+          "stateChange": "unaligned"
+        },
+        "notes": "player1 = favors the activating player; player2 = favors the opponent."
+      },
+      "uniqueMechanics": "This deck focuses on effects that allow the player to move upcoming cards from the play deck to the cooldown pile. This enabled the player to strategically pick which cards will be drawn next.\n\nThe Patron's effect allows the player to knock out one of the opponent's active agents at the cost of coin.",
+      "imageUrl": "https://images.uesp.net/c/c6/ON-tribute-patron-Psiijic.png",
+      "alwaysInMatch": false,
+      "selectable": true,
+      "chapter": "High Isle",
+      "sourceUrl": "https://en.uesp.net/wiki/Online:Psijic_Loremaster_Celarus",
+      "hasFavorTrack": true,
+      "needsReview": false
+    },
+    {
+      "id": "rajhin",
+      "name": "Rajhin, the Purring Liar",
+      "deckId": "rajhin",
+      "favorLevels": {
+        "unaligned": {
+          "raw": "Pay 3 Coin: create Bewilderment in opponent cooldown; patron favors you.",
+          "costs": [
+            {
+              "resource": "coin",
+              "amount": 3
+            }
+          ],
+          "effects": [
+            {
+              "op": "createCard",
+              "cardName": "Bewilderment",
+              "destination": "opponentCooldown"
+            }
+          ],
+          "activation": "active",
+          "stateChange": "player1"
+        },
+        "player1": {
+          "raw": "Pay 3 Coin: create Bewilderment in opponent cooldown.",
+          "costs": [
+            {
+              "resource": "coin",
+              "amount": 3
+            }
+          ],
+          "effects": [
+            {
+              "op": "createCard",
+              "cardName": "Bewilderment",
+              "destination": "opponentCooldown"
+            }
+          ],
+          "activation": "active"
+        },
+        "player2": {
+          "raw": "Pay 3 Coin: create Bewilderment in opponent cooldown; patron becomes unaligned.",
+          "costs": [
+            {
+              "resource": "coin",
+              "amount": 3
+            }
+          ],
+          "effects": [
+            {
+              "op": "createCard",
+              "cardName": "Bewilderment",
+              "destination": "opponentCooldown"
+            }
+          ],
+          "activation": "active",
+          "stateChange": "unaligned"
+        },
+        "notes": "player1 = favors the activating player; player2 = favors the opponent."
+      },
+      "uniqueMechanics": "This deck focuses on manipulating the opponent's hand and reducing their Prestige.\n\nThe Patron's power adds a curse card into the opponent's cooldown pile, forcing them to play it immediately when drawn.",
+      "imageUrl": "https://images.uesp.net/3/3a/ON-tribute-patron-Rajhin.png",
+      "alwaysInMatch": false,
+      "selectable": true,
+      "chapter": "High Isle",
+      "sourceUrl": "https://en.uesp.net/wiki/Online:Rajhin",
+      "hasFavorTrack": true,
+      "needsReview": false
+    },
+    {
+      "id": "red_eagle",
+      "name": "Red Eagle, King of the Reach",
+      "deckId": "red_eagle",
+      "favorLevels": {
+        "unaligned": {
+          "raw": "Pay 2 Power: draw 1; patron favors you.",
+          "costs": [
+            {
+              "resource": "power",
+              "amount": 2
+            }
+          ],
+          "effects": [
+            {
+              "op": "draw",
+              "amount": 1
+            }
+          ],
+          "activation": "active",
+          "stateChange": "player1"
+        },
+        "player1": {
+          "raw": "Pay 2 Power: draw 1.",
+          "costs": [
+            {
+              "resource": "power",
+              "amount": 2
+            }
+          ],
+          "effects": [
+            {
+              "op": "draw",
+              "amount": 1
+            }
+          ],
+          "activation": "active"
+        },
+        "player2": {
+          "raw": "Pay 2 Power: draw 1; patron becomes unaligned.",
+          "costs": [
+            {
+              "resource": "power",
+              "amount": 2
+            }
+          ],
+          "effects": [
+            {
+              "op": "draw",
+              "amount": 1
+            }
+          ],
+          "activation": "active",
+          "stateChange": "unaligned"
+        },
+        "notes": "player1 = favors the activating player; player2 = favors the opponent."
+      },
+      "uniqueMechanics": "This deck focuses on culling the player's deck and gaining power.",
+      "imageUrl": "https://images.uesp.net/2/2c/ON-tribute-patron-Red_Eagle.png",
+      "alwaysInMatch": false,
+      "selectable": true,
+      "chapter": "High Isle",
+      "sourceUrl": "https://en.uesp.net/wiki/Online:Red_Eagle",
+      "hasFavorTrack": true,
+      "needsReview": false
+    },
+    {
+      "id": "saint_alessia",
+      "name": "Saint Alessia",
+      "deckId": "saint_alessia",
+      "favorLevels": {
+        "unaligned": {
+          "raw": "Pay 4 Coin: create Soldier of the Empire in cooldown; patron favors you.",
+          "costs": [
+            {
+              "resource": "coin",
+              "amount": 4
+            }
+          ],
+          "effects": [
+            {
+              "op": "createCard",
+              "cardName": "Soldier of the Empire",
+              "destination": "cooldown"
+            }
+          ],
+          "activation": "active",
+          "stateChange": "player1"
+        },
+        "player1": {
+          "raw": "Pay 4 Coin: create Chainbreaker Sergeant in cooldown.",
+          "costs": [
+            {
+              "resource": "coin",
+              "amount": 4
+            }
+          ],
+          "effects": [
+            {
+              "op": "createCard",
+              "cardName": "Chainbreaker Sergeant",
+              "destination": "cooldown"
+            }
+          ],
+          "activation": "active"
+        },
+        "player2": {
+          "raw": "Pay 3 Coin: gain 2 Power; patron becomes unaligned.",
+          "costs": [
+            {
+              "resource": "coin",
+              "amount": 3
+            }
+          ],
+          "effects": [
+            {
+              "op": "gainPower",
+              "amount": 2
+            }
+          ],
+          "activation": "active",
+          "stateChange": "unaligned"
+        },
+        "notes": "player1 = favors the activating player; player2 = favors the opponent."
+      },
+      "uniqueMechanics": "This deck focuses on numerous agents with flexible abilities, as well as agent removal.",
+      "imageUrl": "https://images.uesp.net/0/00/ON-tribute-patron-Saint_Alessia.png",
+      "alwaysInMatch": false,
+      "selectable": true,
+      "chapter": "Gold Road",
+      "sourceUrl": "https://en.uesp.net/wiki/Online:Saint_Alessia",
+      "hasFavorTrack": true,
+      "needsReview": false
+    },
+    {
+      "id": "saint_pelin",
+      "name": "Saint Pelin",
+      "deckId": "saint_pelin",
+      "favorLevels": {
+        "unaligned": {
+          "raw": "Pay 2 Power with an agent in cooldown: refresh up to 1 agent; patron favors you.",
+          "costs": [
+            {
+              "resource": "power",
+              "amount": 2
+            },
+            {
+              "requirement": "agentInCooldown",
+              "amount": 1
+            }
+          ],
+          "effects": [
+            {
+              "op": "refresh",
+              "amount": 1,
+              "cardType": "agent",
+              "from": "cooldown",
+              "to": "topOfDraw"
+            }
+          ],
+          "activation": "active",
+          "stateChange": "player1"
+        },
+        "player1": {
+          "raw": "Pay 2 Power with an agent in cooldown: refresh up to 1 agent.",
+          "costs": [
+            {
+              "resource": "power",
+              "amount": 2
+            },
+            {
+              "requirement": "agentInCooldown",
+              "amount": 1
+            }
+          ],
+          "effects": [
+            {
+              "op": "refresh",
+              "amount": 1,
+              "cardType": "agent",
+              "from": "cooldown",
+              "to": "topOfDraw"
+            }
+          ],
+          "activation": "active"
+        },
+        "player2": {
+          "raw": "Pay 2 Power with an agent in cooldown: refresh up to 1 agent; patron becomes unaligned.",
+          "costs": [
+            {
+              "resource": "power",
+              "amount": 2
+            },
+            {
+              "requirement": "agentInCooldown",
+              "amount": 1
+            }
+          ],
+          "effects": [
+            {
+              "op": "refresh",
+              "amount": 1,
+              "cardType": "agent",
+              "from": "cooldown",
+              "to": "topOfDraw"
+            }
+          ],
+          "activation": "active",
+          "stateChange": "unaligned"
+        },
+        "notes": "player1 = favors the activating player; player2 = favors the opponent."
+      },
+      "uniqueMechanics": "This deck focuses on Power gain and Agents with the Taunt effect, which prevent your opponent from gaining Prestige via Power conversion by instead automatically attacking these Agents at the end of their turn.\n\nThe Patron's effect allows you to automatically start your next turn with either an Agent you have just bought, or an Agent who was removed from the field during your opponents turn, to immediately get them back onto the field. This can especially be powerful with the Agents from this Patron's Deck, as you can repeatedly deny your opponent from gaining Prestige.",
+      "imageUrl": "https://images.uesp.net/b/b3/ON-tribute-patron-Saint_Pelin.png",
+      "alwaysInMatch": false,
+      "selectable": true,
+      "chapter": "High Isle",
+      "sourceUrl": "https://en.uesp.net/wiki/Online:Saint_Pelin",
+      "hasFavorTrack": true,
+      "needsReview": false
+    },
+    {
+      "id": "orgnum",
+      "name": "Sorcerer-King Orgnum",
+      "deckId": "orgnum",
+      "favorLevels": {
+        "unaligned": {
+          "raw": "Pay 2 Coin: gain 1 Power per 6 owned cards (floor); patron favors you.",
+          "costs": [
+            {
+              "resource": "coin",
+              "amount": 2
+            }
+          ],
+          "effects": [
+            {
+              "op": "gainPower",
+              "amountExpr": {
+                "op": "floorDivide",
+                "left": "ownedCardCount",
+                "right": 6
+              }
+            }
+          ],
+          "activation": "active",
+          "stateChange": "player1"
+        },
+        "player1": {
+          "raw": "Pay 3 Coin: gain 1 Power per 4 owned cards (floor); create Summerset Sacking.",
+          "costs": [
+            {
+              "resource": "coin",
+              "amount": 3
+            }
+          ],
+          "effects": [
+            {
+              "op": "gainPower",
+              "amountExpr": {
+                "op": "floorDivide",
+                "left": "ownedCardCount",
+                "right": 4
+              }
+            },
+            {
+              "op": "createCard",
+              "cardName": "Summerset Sacking",
+              "destination": "cooldown"
+            }
+          ],
+          "activation": "active"
+        },
+        "player2": {
+          "raw": "Pay 1 Coin: gain 2 Power; patron becomes unaligned.",
+          "costs": [
+            {
+              "resource": "coin",
+              "amount": 1
+            }
+          ],
+          "effects": [
+            {
+              "op": "gainPower",
+              "amount": 2
+            }
+          ],
+          "activation": "active",
+          "stateChange": "unaligned"
+        },
+        "notes": "player1 = favors the activating player; player2 = favors the opponent."
+      },
+      "uniqueMechanics": "This deck focuses on creating combos and directly gaining Prestige.",
+      "imageUrl": "https://images.uesp.net/d/d2/ON-tribute-patron-Orgnum.png",
+      "alwaysInMatch": false,
+      "selectable": true,
+      "chapter": "High Isle",
+      "sourceUrl": "https://en.uesp.net/wiki/Online:Sorcerer-King_Orgnum",
+      "hasFavorTrack": true,
+      "needsReview": false
+    },
+    {
+      "id": "treasury",
+      "name": "Treasury",
+      "deckId": "treasury",
+      "favorLevels": {
+        "unaligned": {
+          "raw": "Pay 2 Coin and sacrifice 1 card from hand or played cards: create Writ of Coin in cooldown.",
+          "costs": [
+            {
+              "resource": "coin",
+              "amount": 2
+            },
+            {
+              "op": "sacrificeCard",
+              "amount": 1,
+              "from": [
+                "hand",
+                "inPlay"
+              ]
+            }
+          ],
+          "effects": [
+            {
+              "op": "createCard",
+              "cardName": "Writ of Coin",
+              "destination": "cooldown"
+            }
+          ],
+          "activation": "active"
+        },
+        "player1": null,
+        "player2": null,
+        "notes": "Treasury has no favor track and always remains unaligned."
+      },
+      "uniqueMechanics": "This is essentially the \"neutral\" deck, consisting of only Contract Action cards that have no combo effects. The effects vary and are useful in many situations rather than there being a specific gimmick. Ambush and Black Sacrament allow you to knock out Agents, Harvest Season lets you draw an additional card, Ragpicker can remove a card in play from the game, and so on.\n\nThe patron, unlike all other patrons, has no favor system, it always remains neutral. It has the effect of replacing any card in play with a Writ of Coin card, which can be very useful during the first few turns to cheaply obtain \"Gain 2 Coin\" cards while also removing less useful starter cards such as Gold.",
+      "imageUrl": "https://images.uesp.net/7/70/ON-tribute-patron-Neutral.png",
+      "alwaysInMatch": true,
+      "selectable": false,
+      "chapter": "High Isle",
+      "sourceUrl": "https://en.uesp.net/wiki/Online:Treasury",
+      "hasFavorTrack": false,
+      "needsReview": false
+    }
+  ],
+  "count": 13
+}

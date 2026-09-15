@@ -147,6 +147,9 @@ assert('draw pile paints a card back', a.pileBack === true && a.pileEmpty === fa
 assert('tavern sits near vertical center', a.tavernCenter === true, a);
 assert('gold tip is in-game sentence', /Gain 1 Coin/i.test(a.goldTip || ''), a.goldTip);
 assert('harvest is Draw 1 card', /Draw 1 card/i.test(a.harvestTip || ''), a.harvestTip);
+const plateHtml = await page.evaluate(() => window.__totTest.dossierFor('collection-plate'));
+assert('collection plate dossier donate', /Donate — Discard up to 1 card from your hand then draw/i.test(plateHtml || ''), plateHtml);
+assert('collection plate no donate stub', !/>Donate 1</.test(plateHtml || '') && !/Donate 1\./.test(plateHtml || ''), plateHtml);
 assert('treasury has no favor tip', a.treasuryHasTip === false, a.patrons);
 assert('no tavern discard pile', a.tavernDiscard === false, a);
 assert('no landscape-plays-better banner', a.landscapeBanner === false, a);
@@ -296,7 +299,7 @@ const held = await holdPatron(page, 'pelin');
 assert('patron hold lifts', !!(held.mid && held.mid.liftActive), held);
 assert('patron hold shows favor text', /Favored|Neutral|Unfavored/i.test(held.dossier || ''), held.dossier);
 assert('patron hold does not open call', held.mid && held.mid.patronConfirm === false, held);
-assert('patron hold uses official sentences', /Refresh — Return|Gain 1 Coin|Draw 1 card|Cannot be used|Knock Out/i.test(held.dossier || ''), held.dossier);
+assert('patron hold uses official sentences', /Refresh — Return|Gain 1 Coin|Draw 1 card|Cannot be used|Knock Out — Place/i.test(held.dossier || ''), held.dossier);
 
 // 7. inspect: full hex + official Toll of Flesh sentences (portrait + landscape)
 async function assertInspect(page, label) {
@@ -312,6 +315,7 @@ async function assertInspect(page, label) {
   assert(`${label} Gain 2 Coin`, /Gain 2 Coin/.test(fit.tipText || ''), fit.tipText);
   assert(`${label} Draw 1 card`, /Draw 1 card/.test(fit.tipText || ''), fit.tipText);
   assert(`${label} no token stub`, !/(?:^|\n)\s*2 Coin\./i.test(fit.tipText || '') && !/(?:^|\n)\s*Draw 1\.(?!\s*card)/i.test(fit.tipText || ''), fit.tipText);
+  assert(`${label} no Tribute Card kicker`, !/Tribute Card/i.test(fit.tipText || ''), fit.tipText);
   await page.evaluate(() => {
     document.querySelector('.lift-clone')?.remove();
   });

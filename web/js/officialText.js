@@ -1,28 +1,140 @@
 /** Expand UESP rawEffect / patron favor raw into official in-game display sentences. */
 import { nameSlug, aliasPatron } from './normalize.js';
 
-function numWord(n, singular, plural) {
+export function donateSentence(n = 1) {
   const x = n == null || n === '' ? 1 : Number(n);
-  if (!Number.isFinite(x) || x <= 1) return singular.replace('1', '1');
-  return (plural || singular).replace(/\bN\b/g, String(x)).replace(/\b1\b/g, String(x));
+  const what = x <= 1 ? '1 card' : `${x} cards`;
+  return `Donate — Discard up to ${what} from your hand then draw that many cards.`;
+}
+
+export function tossSentence(n = 1) {
+  const x = n == null || n === '' ? 1 : Number(n);
+  return `Toss — Look at the next ${x} cards in your play deck. Choose up to ${x} of those cards to move to your cooldown pile.`;
+}
+
+export function refreshSentence(n = 1, agent = false) {
+  const x = n == null || n === '' ? 1 : Number(n);
+  const what = agent
+    ? (x <= 1 ? '1 Agent card' : `${x} Agent cards`)
+    : (x <= 1 ? '1 card of any type' : `${x} cards of any type`);
+  return `Refresh — Return up to ${what} from your cooldown pile to the top of your draw pile.`;
+}
+
+export function knockoutSentence(n = 1) {
+  const x = n == null || n === '' ? 1 : Number(n);
+  if (x <= 1) return "Knock Out — Place 1 of your opponent's active agents into their cooldown pile.";
+  return `Knock Out — Place ${x} of your opponent's active agents into their cooldown pile.`;
+}
+
+export function knockoutAllSentence() {
+  return 'Knock Out All — Place all active Agents into their respective cooldown piles.';
+}
+
+export function destroySentence(n = 1) {
+  const x = n == null || n === '' ? 1 : Number(n);
+  const what = x <= 1 ? '1 of your cards' : `${x} of your cards`;
+  return `Destroy up to ${what} that are in play or in your hand from the game.`;
+}
+
+export function replaceSentence(n = 1) {
+  const x = n == null || n === '' ? 1 : Number(n);
+  return x <= 1
+    ? 'Replace up to 1 card from the Tavern.'
+    : `Replace up to ${x} cards from the Tavern.`;
+}
+
+export function acquireSentence(n) {
+  const x = n == null || n === '' ? 1 : Number(n);
+  return `Acquire 1 card from the Tavern with a cost up to ${x}.`;
+}
+
+export function confineSentence(n = 1) {
+  const x = n == null || n === '' ? 1 : Number(n);
+  const what = x <= 1 ? '1 card' : `${x} cards`;
+  return `Confine — Place ${what} from your opponent's cooldown pile under this card until this card is removed from play.`;
+}
+
+export function discardSentence(n = 1) {
+  const x = n == null || n === '' ? 1 : Number(n);
+  return x <= 1 ? 'Discard a card.' : `Discard ${x} cards.`;
+}
+
+export function healSentence(n = 1) {
+  const x = n == null || n === '' ? 1 : Number(n);
+  return `Heal this Agent for ${x} Health.`;
+}
+
+export function patronCallSentence() {
+  return 'Call on 1 additional Patron this turn.';
+}
+
+export function tauntSentence() {
+  return "Taunt — This agent must be attacked first. Prevents opponent's end of turn power to prestige conversion.";
+}
+
+export function reprieveSentence(n) {
+  const x = n == null || n === '' ? 1 : Number(n);
+  return `Reprieve — Look at the top ${x} cards of your opponent's draw pile. Select 1 to place in their cooldown pile.`;
+}
+
+export function createSentence(name, opponent = false) {
+  const card = String(name || 'a card').replace(/\.$/, '').trim();
+  const dest = opponent ? "your opponent's cooldown pile" : 'your cooldown pile';
+  if (/^a card$/i.test(card)) return `Create 1 card and place it in ${dest}.`;
+  return `Create 1 ${card} card and place it in ${dest}.`;
+}
+
+export function losePrestigeSentence(n = 1) {
+  const x = Math.abs(n == null || n === '' ? 1 : Number(n));
+  return x <= 1 ? 'Opponent loses 1 Prestige.' : `Opponent loses ${x} Prestige.`;
+}
+
+function opponentCreate(name) {
+  return /bewilderment/i.test(String(name || ''));
 }
 
 /** Expand a single bracket token or plain fragment into a sentence (no trailing join). */
 export function expandToken(tok) {
   let t = String(tok || '').trim();
   if (!t) return '';
-  // Strip junk like "16px " leftovers
   t = t.replace(/^\d+px\s+/i, '').trim();
   if (!t) return '';
 
-  // Already a prose sentence
+  let m;
+  // Catalog / leftover stubs that look like short labels, not full in-game lines
   if (/^This card has no play effect/i.test(t)) return t.endsWith('.') ? t : t + '.';
+  if (/^This card has no effect\.?$/i.test(t)) return 'This card has no play effect.';
   if (/^Curse cards must be played/i.test(t)) return t.endsWith('.') ? t : t + '.';
-  if (/^Gain |^Draw |^Donate |^Toss |^Acquire |^Refresh |^Knock Out |^Taunt|^Replace |^Destroy |^Confine |^Opponent |^Setback |^When |^Choose |^Create |^Heal |^Discard /i.test(t) && !t.startsWith('[')) {
+  if ((m = t.match(/^Donate\s+(\d+)\.?$/i))) return donateSentence(Number(m[1]));
+  if (/^Donate\.?$/i.test(t)) return donateSentence(1);
+  if ((m = t.match(/^Toss\s+(\d+)\.?$/i))) return tossSentence(Number(m[1]));
+  if ((m = t.match(/^(?:Hand |Draw )?Refresh(?:\s+(\d+))?(?:\s*\|\s*agent)?\.?$/i))) {
+    return refreshSentence(m[1] ? Number(m[1]) : 1, /agent/i.test(t));
+  }
+  if (/^Knock Out All\.?$/i.test(t)) return knockoutAllSentence();
+  if (/^Knock Out an enemy Agent\.?$/i.test(t)) return knockoutSentence(1);
+  if ((m = t.match(/^Knock Out(?:\s+(\d+))?\.?$/i))) return knockoutSentence(m[1] ? Number(m[1]) : 1);
+  if ((m = t.match(/^Acquire(?:\s+(\d+))?\.?$/i)) && !/Tavern/i.test(t)) {
+    return acquireSentence(m[1] ? Number(m[1]) : 1);
+  }
+  if ((m = t.match(/^Replace(?:\s+(\d+))?\.?$/i)) && !/Tavern/i.test(t)) {
+    return replaceSentence(m[1] ? Number(m[1]) : 1);
+  }
+  if ((m = t.match(/^Destroy(?:\s+(\d+))?\.?$/i)) && !/in play|cooldown|hand/i.test(t)) {
+    return destroySentence(m[1] ? Number(m[1]) : 1);
+  }
+  if ((m = t.match(/^Confine(?:\s+(\d+))?\.?$/i)) && !/cooldown pile under/i.test(t)) {
+    return confineSentence(m[1] ? Number(m[1]) : 1);
+  }
+  if (/^Taunt\.?$/i.test(t) || /^This Agent has Taunt\.?$/i.test(t)) return tauntSentence();
+  if ((m = t.match(/^Reprieve\s+(\d+)\.?$/i))) return reprieveSentence(Number(m[1]));
+  if (/^Patron\.?$/i.test(t) || /^Gain an extra Patron call\.?$/i.test(t)) return patronCallSentence();
+
+  // Already a full in-game sentence
+  if (/^(Gain |Draw |Donate |Toss |Acquire |Refresh |Knock Out |Taunt|Replace |Destroy |Confine |Opponent |Setback |When |Choose |Create |Heal |Discard |This |Place |Pay |Call |Look |While |Cannot |If |Curse |Reprieve |Passive |Sacrifice )/i.test(t) && !t.startsWith('[')) {
     return t.endsWith('.') ? t : t + '.';
   }
 
-  // [While …] [Effect] — may arrive as one token or two; handle combined form
   const whileCombo = t.match(/^\[While ([^\]]+)\]\s*(\[[^\]]+\])$/i);
   if (whileCombo) {
     const when = whileToWhen(whileCombo[1]);
@@ -34,12 +146,10 @@ export function expandToken(tok) {
 
   const br = t.match(/^\[([^\]]+)\]$/);
   if (!br) {
-    // Plain text fragment
     return t.endsWith('.') ? t : t + '.';
   }
   const inner = br[1].trim();
 
-  let m;
   if ((m = inner.match(/^Coin(?:\s+(\d+))?$/i))) {
     const n = m[1] ? Number(m[1]) : 1;
     return n === 1 ? 'Gain 1 Coin.' : `Gain ${n} Coin.`;
@@ -56,67 +166,34 @@ export function expandToken(tok) {
     const n = m[1] ? Number(m[1]) : 1;
     return n === 1 ? 'Draw 1 card.' : `Draw ${n} cards.`;
   }
-  if ((m = inner.match(/^Donate(?:\s+(\d+))?$/i))) {
-    const n = m[1] ? Number(m[1]) : 1;
-    return n === 1 ? 'Donate 1.' : `Donate ${n}.`;
-  }
-  if ((m = inner.match(/^Toss(?:\s+(\d+))?$/i))) {
-    const n = m[1] ? Number(m[1]) : 1;
-    return `Toss ${n}.`;
-  }
-  if ((m = inner.match(/^Acquire(?:\s+(\d+))?$/i))) {
-    const n = m[1] ? Number(m[1]) : 1;
-    return `Acquire a card from the Tavern that costs up to ${n} Coin.`;
-  }
+  if ((m = inner.match(/^Donate(?:\s+(\d+))?$/i))) return donateSentence(m[1] ? Number(m[1]) : 1);
+  if ((m = inner.match(/^Toss(?:\s+(\d+))?$/i))) return tossSentence(m[1] ? Number(m[1]) : 1);
+  if ((m = inner.match(/^Acquire(?:\s+(\d+))?$/i))) return acquireSentence(m[1] ? Number(m[1]) : 1);
   if ((m = inner.match(/^Refresh(?:\s+(\d+))?(?:\|(agent))?$/i))) {
-    const n = m[1] ? Number(m[1]) : 1;
-    const agent = !!m[2];
-    const what = agent
-      ? (n === 1 ? '1 Agent card' : `${n} Agent cards`)
-      : (n === 1 ? '1 card' : `${n} cards`);
-    return `Refresh — Return up to ${what} from your cooldown pile to the top of your draw pile.`;
+    return refreshSentence(m[1] ? Number(m[1]) : 1, !!m[2]);
   }
-  if (/^Knock Out All$/i.test(inner)) return 'Knock Out all enemy Agents.';
-  if ((m = inner.match(/^Knock Out(?:\s+(\d+))?$/i))) {
-    const n = m[1] ? Number(m[1]) : 1;
-    return n === 1 ? 'Knock Out an enemy Agent.' : `Knock Out up to ${n} enemy Agents.`;
-  }
-  if (/^Taunt$/i.test(inner)) return 'Taunt.';
-  if ((m = inner.match(/^Replace(?:\s+(\d+))?$/i))) {
-    const n = m[1] ? Number(m[1]) : 1;
-    return n === 1 ? 'Replace a card in the Tavern.' : `Replace up to ${n} cards in the Tavern.`;
-  }
-  if ((m = inner.match(/^Destroy(?:\s+(\d+))?$/i))) {
-    const n = m[1] ? Number(m[1]) : 1;
-    return n === 1 ? 'Destroy a card in your cooldown pile.' : `Destroy up to ${n} cards in your cooldown pile.`;
-  }
-  if ((m = inner.match(/^Confine(?:\s+(\d+))?$/i))) {
-    const n = m[1] ? Number(m[1]) : 1;
-    return n === 1 ? 'Confine an enemy Agent.' : `Confine up to ${n} enemy Agents.`;
-  }
-  if ((m = inner.match(/^Lose Prestige(?:\s+(\d+))?$/i))) {
-    const n = m[1] ? Number(m[1]) : 1;
-    return n === 1 ? 'Opponent loses 1 Prestige.' : `Opponent loses ${n} Prestige.`;
-  }
-  if (/^Setback Power$/i.test(inner)) return 'Setback — Opponent gains Power.';
+  if (/^Knock Out All$/i.test(inner)) return knockoutAllSentence();
+  if ((m = inner.match(/^Knock Out(?:\s+(\d+))?$/i))) return knockoutSentence(m[1] ? Number(m[1]) : 1);
+  if (/^Taunt$/i.test(inner)) return tauntSentence();
+  if ((m = inner.match(/^Replace(?:\s+(\d+))?$/i))) return replaceSentence(m[1] ? Number(m[1]) : 1);
+  if ((m = inner.match(/^Destroy(?:\s+(\d+))?$/i))) return destroySentence(m[1] ? Number(m[1]) : 1);
+  if ((m = inner.match(/^Confine(?:\s+(\d+))?$/i))) return confineSentence(m[1] ? Number(m[1]) : 1);
+  if ((m = inner.match(/^Lose Prestige(?:\s+(\d+))?$/i))) return losePrestigeSentence(m[1] ? Number(m[1]) : 1);
+  if (/^Setback Power$/i.test(inner)) return 'Setback — Opponent gains 1 Power.';
   if (/^Setback Draw$/i.test(inner)) return 'Setback — Opponent draws 1 card.';
   if ((m = inner.match(/^Setback Coin(?:\|(\d+))?$/i))) {
-    const n = m[1] ? Number(m[1]) : null;
-    return n ? `Setback — Opponent gains ${n} Coin.` : 'Setback — Opponent gains Coin.';
-  }
-  if (/^Patron$/i.test(inner)) return 'Gain an extra Patron call.';
-  if ((m = inner.match(/^Create\s+(.+)$/i))) return `Create ${m[1].trim()}.`;
-  if ((m = inner.match(/^Discard(?:\s+(\d+))?$/i))) {
     const n = m[1] ? Number(m[1]) : 1;
-    return n === 1 ? 'Discard a card.' : `Discard ${n} cards.`;
+    return `Setback — Opponent gains ${n} Coin.`;
   }
-  if ((m = inner.match(/^Heal(?:\s+(\d+))?$/i))) {
-    const n = m[1] ? Number(m[1]) : 1;
-    return `Heal ${n}.`;
+  if (/^Patron$/i.test(inner)) return patronCallSentence();
+  if ((m = inner.match(/^Create\s+(.+)$/i))) {
+    const name = m[1].trim();
+    return createSentence(name, opponentCreate(name));
   }
-  if (/^Choose$/i.test(inner)) return 'Choose';
+  if ((m = inner.match(/^Discard(?:\s+(\d+))?$/i))) return discardSentence(m[1] ? Number(m[1]) : 1);
+  if ((m = inner.match(/^Heal(?:\s+(\d+))?$/i))) return healSentence(m[1] ? Number(m[1]) : 1);
+  if (/^Choose$/i.test(inner)) return 'Choose 1 of the following:';
 
-  // Unknown bracket — strip brackets, keep readable
   return inner.endsWith('.') ? inner : inner + '.';
 }
 
@@ -137,7 +214,6 @@ function whileToWhen(body) {
   if (/^an agent, including this one, is activated or played$/i.test(b)) {
     return 'When an Agent is activated or played';
   }
-  // Generic: "While X" → "When X"
   return 'When ' + b.replace(/^an agent/i, 'an Agent').replace(/cooldown$/i, 'cooldown pile');
 }
 
@@ -148,16 +224,10 @@ export function expandRawEffect(raw) {
   const out = { playText: null, combo2Text: null, combo3Text: null, combo4Text: null };
   if (!raw || !String(raw).trim()) return out;
 
-  // Normalize newlines around Choose ": A" / ": B" forms
   let text = String(raw).replace(/\r\n/g, '\n').trim();
-
-  // Handle [Choose] with following ": …" lines (possibly across newlines)
-  // Convert to a single play sentence before | Combo splitting when it's the lead effect.
   text = normalizeChooseBlocks(text);
-  // Ensure Combo N starts a fresh | section even when separated only by newlines
   text = text.replace(/(?:\|\s*)?(?:\n|\r|\s)+(?=Combo\s*[234]\b)/gi, ' | ');
 
-  // Protect | inside brackets (e.g. [Refresh 4|agent], [Setback Coin|3]) before split
   const protectedBars = [];
   text = text.replace(/\[[^\]]*\]/g, (m) => {
     const safe = m.replace(/\|/g, '\uE000');
@@ -182,21 +252,17 @@ export function expandRawEffect(raw) {
       continue;
     }
 
-    // [Choose] | optA | optB  (until Combo or end)
-    if (/^\[Choose\]$/i.test(p) || /^Choose one\.?$/i.test(p)) {
+    if (/^\[Choose\]$/i.test(p) || /^Choose(?: 1 of the following| one)\.?$/i.test(p)) {
       const opts = [];
       while (i + 1 < parts.length && !/^Combo\s*[234]/i.test(parts[i + 1].trim())) {
         i += 1;
         const opt = expandFragment(parts[i].replace(/^\d+px\s+/i, '').trim());
         if (opt) opts.push(stripDot(opt));
       }
-      if (opts.length >= 2) buckets[bucket].push(`Choose one: ${opts[0]} or ${opts[1]}.`);
-      else if (opts.length === 1) buckets[bucket].push(`Choose one: ${opts[0]}.`);
-      else buckets[bucket].push('Choose one.');
+      buckets[bucket].push(formatChoose(opts));
       continue;
     }
 
-    // While + following effect may have been split: [While …] | [Power]
     if (/^\[While [^\]]+\]$/i.test(p) && i + 1 < parts.length && /^\[[^\]]+\]$/.test(parts[i + 1].trim())) {
       buckets[bucket].push(expandToken(p + ' ' + parts[i + 1].trim()));
       i += 1;
@@ -209,10 +275,9 @@ export function expandRawEffect(raw) {
   const join = (arr) => {
     const cleaned = arr.map(s => String(s || '').trim()).filter(Boolean);
     if (!cleaned.length) return null;
-    // Dedupe consecutive identical
     const uniq = [];
     for (const s of cleaned) {
-      const line = s.endsWith('.') ? s : s + '.';
+      const line = s.endsWith('.') || s.endsWith(':') ? s : s + '.';
       if (uniq[uniq.length - 1] !== line) uniq.push(line);
     }
     return uniq.join(' ');
@@ -225,17 +290,19 @@ export function expandRawEffect(raw) {
   return out;
 }
 
+function formatChoose(opts) {
+  const clean = (opts || []).map(stripDot).filter(Boolean);
+  if (!clean.length) return 'Choose 1 of the following:';
+  if (clean.length === 1) return `Choose 1 of the following: ${clean[0]}.`;
+  return `Choose 1 of the following: ${clean.join('. Or ')}.`;
+}
+
 function expandFragment(frag) {
   const f = String(frag || '').trim();
   if (!f) return '';
-  // Multiple bracket tokens in one fragment: [Coin] [Taunt] or [Choose] [Coin 2] [Power]
-  if (/^\[Choose\]/i.test(f)) {
-    return expandChooseInline(f);
-  }
-  // Sequence of [Token] pieces
+  if (/^\[Choose\]/i.test(f)) return expandChooseInline(f);
   const tokens = (f.match(/\[[^\]]+\]|[^\[]+/g) || []).map(x => x.trim()).filter(Boolean);
   if (tokens.length > 1) {
-    // While opener + effect
     if (/^\[While /i.test(tokens[0]) && /^\[[^\]]+\]$/.test(tokens[1])) {
       const rest = tokens.slice(2).map(expandToken).filter(Boolean);
       return [expandToken(tokens[0] + ' ' + tokens[1]), ...rest].filter(Boolean).join(' ');
@@ -246,30 +313,19 @@ function expandFragment(frag) {
 }
 
 function normalizeChooseBlocks(text) {
-  // [Choose]\n: A\n: B  or [Choose]\n: A\n: B\n\nCombo 2 | ...
   return text.replace(
     /\[Choose\]\s*\n\s*:\s*([^\n]+)\s*\n\s*:\s*([^\n]+)/gi,
-    (_, a, b) => {
-      const A = expandFragment(a.trim());
-      const B = expandFragment(b.trim());
-      return `Choose one: ${stripDot(A)} or ${stripDot(B)}.`;
-    }
+    (_, a, b) => formatChoose([expandFragment(a.trim()), expandFragment(b.trim())])
   );
 }
 
 function expandChooseInline(f) {
-  // [Choose] | [Coin 2] | [Power]  — caller may have already split on |;
-  // here f is "[Choose] [Coin 2] [Power]" style
   const bits = [...f.matchAll(/\[[^\]]+\]/g)].map(m => m[0]);
   if (bits.length >= 3 && /^\[Choose\]$/i.test(bits[0])) {
-    const opts = bits.slice(1).map(expandToken).map(stripDot);
-    if (opts.length === 2) return `Choose one: ${opts[0]} or ${opts[1]}.`;
-    return `Choose one: ${opts.join(' or ')}.`;
+    return formatChoose(bits.slice(1).map(expandToken));
   }
-  if (bits.length === 1) return 'Choose one.';
-  // Fallback: treat remaining as options
-  const opts = bits.slice(1).map(expandToken).map(stripDot);
-  return opts.length ? `Choose one: ${opts.join(' or ')}.` : 'Choose one.';
+  if (bits.length === 1) return 'Choose 1 of the following:';
+  return formatChoose(bits.slice(1).map(expandToken));
 }
 
 function stripDot(s) {
@@ -280,18 +336,30 @@ function looseSlug(name) {
   return nameSlug(name).replace(/sleight/g, 'slight');
 }
 
+function asCardList(data) {
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.cards)) return data.cards;
+  return null;
+}
+
+function asPatronList(data) {
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.patrons)) return data.patrons;
+  return null;
+}
+
 export function overlayOfficialCardText(cards, uespCards) {
-  if (!Array.isArray(cards) || !Array.isArray(uespCards)) return cards;
+  const list = asCardList(uespCards);
+  if (!Array.isArray(cards) || !list) return cards;
   const byId = new Map();
   const bySlug = new Map();
   const byLoose = new Map();
-  for (const u of uespCards) {
+  for (const u of list) {
     if (u.id) byId.set(u.id, u);
     const slug = nameSlug(u.name);
     if (slug) bySlug.set(slug, u);
     const loose = looseSlug(u.name);
     if (loose) byLoose.set(loose, u);
-    // also index local id tail: deck__cat__name → name with _
     const tail = String(u.id || '').split('__').pop();
     if (tail) bySlug.set(tail.replace(/_/g, '-'), u);
   }
@@ -300,17 +368,17 @@ export function overlayOfficialCardText(cards, uespCards) {
     let u = byId.get(card.id)
       || bySlug.get(card.id)
       || bySlug.get(nameSlug(card.name))
-      || byLoose.get(looseSlug(card.name));
+      || byLoose.get(looseSlug(card.name))
+      || bySlug.get(card.slug);
     if (!u || !u.rawEffect) continue;
     const expanded = expandRawEffect(u.rawEffect);
     if (expanded.playText) card.playText = expanded.playText;
     if (expanded.combo2Text) card.combo2Text = expanded.combo2Text;
+    else if (u.rawEffect && !/Combo\s*2/i.test(u.rawEffect)) card.combo2Text = null;
     if (expanded.combo3Text) card.combo3Text = expanded.combo3Text;
+    else if (u.rawEffect && !/Combo\s*3/i.test(u.rawEffect)) card.combo3Text = null;
     if (expanded.combo4Text) card.combo4Text = expanded.combo4Text;
-    // Clear combo text that UESP says is empty when summary had leftover
-    if (!expanded.combo2Text && u.rawEffect && !/Combo\s*2/i.test(u.rawEffect)) {
-      /* keep existing if any — only overlay when UESP provided */
-    }
+    else if (u.rawEffect && !/Combo\s*4/i.test(u.rawEffect)) card.combo4Text = null;
   }
   return cards;
 }
@@ -320,42 +388,56 @@ export function expandPatronDesc(raw, { patronId } = {}) {
   if (!raw || /^none$/i.test(String(raw).trim())) return null;
   let s = String(raw).trim();
 
-  // Favor / neutral phrasing (cost line is separate)
-  s = s.replace(/;?\s*this patron favors you\.?$/i, '');
-  s = s.replace(/;?\s*patron favors you\.?$/i, '');
-  s = s.replace(/;?\s*this patron becomes unaligned\.?$/i, '');
-  s = s.replace(/;?\s*patron becomes unaligned\.?$/i, '');
+  s = s.replace(/;?\s*this patron favors you\.?/gi, '. This Patron now FAVORS you');
+  s = s.replace(/;?\s*patron favors you\.?/gi, '. This Patron now FAVORS you');
+  s = s.replace(/;?\s*this patron becomes unaligned\.?/gi, '. This Patron is now NEUTRAL');
+  s = s.replace(/;?\s*patron becomes unaligned\.?/gi, '. This Patron is now NEUTRAL');
+  s = s.replace(/;?\s*this Patron becomes Neutral\.?/gi, '. This Patron is now NEUTRAL');
   s = s.replace(/\bthis patron favors you\b/gi, 'This Patron now FAVORS you');
   s = s.replace(/\bthis patron becomes unaligned\b/gi, 'This Patron is now NEUTRAL');
 
-  // Pelin Refresh wording
+  s = s.replace(/\bReprieve\s+(\d+)\b/gi, (_, n) => stripDot(reprieveSentence(Number(n))));
+
   if (patronId === 'pelin' || /refresh up to 1 agent/i.test(s)) {
     s = s.replace(
-      /refresh up to 1 agent\.?/i,
-      'Refresh — Return up to 1 Agent card from your cooldown pile to the top of your draw pile.'
+      /refresh up to 1 agent\.?/gi,
+      stripDot(refreshSentence(1, true))
     );
   }
 
-  // Light polish for common abbreviations
+  s = s.replace(
+    /create (\d+ )?Writ of Coin(?: card)?(?: and place it in your cooldown pile)?/gi,
+    'Create 1 Writ of Coin card and place it in your cooldown pile'
+  );
+  s = s.replace(
+    /create Bewilderment in(?: the)? opponent(?:'s)? cooldown(?: pile)?/gi,
+    stripDot(createSentence('Bewilderment', true))
+  );
+  s = s.replace(
+    /create Summerset Sacking\.?/gi,
+    stripDot(createSentence('Summerset Sacking'))
+  );
+  s = s.replace(/\bknock it out\b/gi, stripDot(knockoutSentence(1)).replace(/^Knock Out — /i, 'Knock Out — '));
+  s = s.replace(/\bunusable; no benefit\.?/gi, 'Cannot be used.');
   s = s.replace(/\bgain (\d+) Coin\b/gi, 'Gain $1 Coin');
   s = s.replace(/\bgain (\d+) Power\b/gi, 'Gain $1 Power');
   s = s.replace(/\bgain (\d+) Prestige\b/gi, 'Gain $1 Prestige');
   s = s.replace(/\bdraw 1\b/gi, 'Draw 1 card');
-  s = s.replace(/\bknock it out\b/gi, 'Knock Out that Agent');
-  s = s.replace(/\bunusable; no benefit\.?/i, 'Cannot be used.');
+  s = s.replace(/replace up to (\d+) Tavern cards/gi, (_, n) => stripDot(replaceSentence(Number(n))));
 
-  // Capitalize start of effect after cost strip happens later
   s = s.replace(/\s+/g, ' ').trim();
+  s = s.replace(/\s+\./g, '.');
+  s = s.replace(/\.\s*\./g, '.');
   if (s && !s.endsWith('.') && !s.endsWith('?')) s += '.';
-  // Capitalize first letter of each clause after ": "
   s = s.replace(/(^|[.]\s*)([a-z])/g, (_, a, b) => a + b.toUpperCase());
   return s;
 }
 
 export function overlayOfficialPatronText(patrons, uespPatrons) {
-  if (!Array.isArray(patrons) || !Array.isArray(uespPatrons)) return patrons;
+  const list = asPatronList(uespPatrons);
+  if (!Array.isArray(patrons) || !list) return patrons;
   const byId = new Map();
-  for (const u of uespPatrons) {
+  for (const u of list) {
     const id = aliasPatron(u.id || u.deckId);
     byId.set(id, u);
     if (u.id) byId.set(u.id, u);

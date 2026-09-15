@@ -123,8 +123,8 @@ async function loadData() {
       fetch('data/cards.uesp.json').then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch('data/patrons.uesp.json').then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ]);
-    if (cu) overlayOfficialCardText(norm.cards, cu);
-    if (pu) overlayOfficialPatronText(norm.patrons, pu);
+    if (cu) overlayOfficialCardText(norm.cards, cu.cards || cu);
+    if (pu) overlayOfficialPatronText(norm.patrons, pu.patrons || pu);
   } catch { /* optional local UESP dump */ }
   DATA.cards = norm.cards.map((c) => polishCardCopy({ ...c, patron: canonPatron(c.patron) }));
   DATA.patrons = (norm.patrons || []).map((p) => ({ ...p, id: canonPatron(p.id) }));
@@ -377,7 +377,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 53';
+  if (stamp) stamp.textContent = 'build 54';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -414,24 +414,23 @@ function dossierKind(d) {
 
 function effectBullets(src) {
   const parts = Array.isArray(src)
-    ? src.map((s) => String(s || '').trim()).filter(Boolean)
-    : String(src || '').split(/[;\n]|(?<=\.)\s+/).map((s) => s.trim()).filter(Boolean);
+    ? src.flatMap((s) => String(s || '').split(/(?<=\.)\s+(?:Or\s+)?/).map((x) => x.trim()).filter(Boolean))
+    : String(src || '').split(/[;\n]|(?<=\.)\s+(?:Or\s+)?/).map((s) => s.trim()).filter(Boolean);
   if (!parts.length) return '<li>—</li>';
   return parts.map((s) => {
     let cls = '';
     if (/setback/i.test(s)) cls = 'setback';
-    else if (/power/i.test(s)) cls = 'power';
-    else if (/prestige/i.test(s)) cls = 'prestige';
-    else if (/coin/i.test(s)) cls = 'coin';
-    const line = s.endsWith('.') ? s : s + '.';
+    else if (/^Gain \d+ Power\b/i.test(s)) cls = 'power';
+    else if (/^Gain \d+ Prestige\b/i.test(s) || /loses \d+ Prestige/i.test(s)) cls = 'prestige';
+    else if (/^Gain \d+ Coin\b/i.test(s) || /^Pay \d+ Coin\b/i.test(s)) cls = 'coin';
+    const line = /[:.!?]$/.test(s) ? s : s + '.';
     return `<li class="${cls}">${line}</li>`;
   }).join('');
 }
 
 /** Catalog stubs like "Acquire 5" / "1 Coin" are not in-game sentences.
- *  TODO(ToTs): texts.js isOfficialProse treats /^Acquire / as official, so
- *  applyOfficialCardText leaves "Acquire 5" unexpanded. Prefer not to
- *  double-edit that file. Dossier expands stubs via formatEffects(ops). */
+ *  texts.js isOfficialProse now rejects those stubs; this still covers
+ *  any leftover catalog string that overlay missed. */
 function looksLikeEffectStub(t) {
   const s = String(t || '').trim().replace(/\.+$/, '');
   if (!s) return true;
@@ -451,12 +450,6 @@ function officialCardCopy(d, field = 'play') {
   return field === 'play' ? cardPlayLines(d).join(' ') : cardComboLines(d, field).join(' ');
 }
 
-function dossierProse(text) {
-  const t = String(text || '').trim();
-  if (!t) return '<p class="dossier-prose empty">—</p>';
-  return `<p class="dossier-prose">${t}</p>`;
-}
-
 function dossierHTML(d) {
   const pat = patronsById[d.patron];
   const patronName = pat?.name || d.patron || '';
@@ -470,7 +463,6 @@ function dossierHTML(d) {
     <div class="eso-tip">
       <div class="eso-tip-head">
         <div class="eso-tip-left">
-          <div class="eso-tip-kicker">Tribute Card</div>
           <div class="eso-tip-type">${dossierKind(d)}</div>
         </div>
         <div class="eso-tip-patron">
@@ -482,11 +474,10 @@ function dossierHTML(d) {
       ${d.cost != null ? `<div class="eso-tip-cost">Coin cost <b>${d.cost}</b></div>` : ''}
       <div class="eso-tip-block dossier-block">
         <div class="eso-tip-h dossier-h">Play effect</div>
-        ${dossierProse(play)}
+        <ul>${effectBullets(play)}</ul>
       </div>
-      ${combos.map(([h, text]) => `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">${h}</div>${dossierProse(text)}</div>`).join('')}
-      ${d.hp != null ? `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">Health</div>${dossierProse(`${d.hp}${d.taunt ? ' · Taunt' : ''}`)}</div>` : ''}
-      ${d.hp == null && d.taunt ? `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">Taunt</div>${dossierProse('This Agent has Taunt.')}</div>` : ''}
+      ${combos.map(([h, text]) => `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">${h}</div><ul>${effectBullets(text)}</ul></div>`).join('')}
+      ${d.hp != null ? `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">Health</div><ul><li>${d.hp}</li></ul></div>` : ''}
     </div>`;
 }
 
@@ -774,20 +765,21 @@ function patronDossierHTML(pid) {
     const turn = unlocked ? patronTurnLine(pid, key, pat) : '';
     const hasPay = /^(Pay |If |Passive |Cannot |Sacrifice |Discard )/i.test(desc);
     const cost = unlocked && !hasPay ? patronCostLine(ab) : '';
-    const turnNote = turn && !/FAVORS you|now NEUTRAL|does not take a side/i.test(desc) ? turn : '';
+    const showTurn = key !== 'favored' && turn && !/FAVORS you|now NEUTRAL|does not take a side/i.test(desc);
     return `
       <div class="eso-tip-block dossier-block${on ? ' current-favor' : ''}">
         <div class="eso-tip-h dossier-h">${label}${on ? ' · current' : ''}</div>
-        ${cost ? dossierProse(cost) : ''}
-        ${dossierProse(desc)}
-        ${turnNote ? dossierProse(turnNote) : ''}
+        <ul>
+          ${cost ? `<li class="coin">${cost}</li>` : ''}
+          ${effectBullets(desc)}
+          ${showTurn ? `<li class="turn-note">${turn}</li>` : ''}
+        </ul>
       </div>`;
   }).join('');
   return `
     <div class="eso-tip patron-dossier">
       <div class="eso-tip-head">
         <div class="eso-tip-left">
-          <div class="eso-tip-kicker">Tribute Patron</div>
           <div class="eso-tip-type">${current.toUpperCase()}</div>
         </div>
         <div class="eso-tip-patron">
