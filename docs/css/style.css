@@ -2531,6 +2531,41 @@ body.skin-witches { --splash-a: rgba(255,120,30,0.28); --splash-b: rgba(80,10,20
   .eso-tip li { font-size: 0.95rem; }
 }
 
+/* Hold-inspect dossier only — not felt / landscape packing (jr board-pass). */
+.lift-dossier-modal .eso-tip {
+  min-width: 0;
+  max-width: 100%;
+}
+.lift-dossier-modal .eso-tip-head {
+  gap: 0.55rem;
+  margin-bottom: 0.08rem;
+  align-items: flex-start;
+}
+.lift-dossier-modal .eso-tip-kicker { display: none; }
+.lift-dossier-modal .eso-tip-name {
+  font-size: clamp(1.02rem, 3.2vw, 1.42rem);
+  line-height: 1.18;
+  margin: 0.08rem 0 0.38rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+}
+.lift-dossier-modal .eso-tip-cost { margin-bottom: 0.45rem; }
+.lift-dossier-modal .eso-tip-h,
+.lift-dossier-modal .eso-tip .dossier-h {
+  margin: 0.42rem 0 0.1rem;
+}
+.lift-dossier-modal .eso-tip li {
+  font-size: 0.9rem;
+  line-height: 1.36;
+  margin: 0.1rem 0;
+}
+.lift-dossier-modal .eso-tip-patron {
+  max-width: 42%;
+  white-space: normal;
+  text-align: right;
+}
+
 /* Board uses the whole felt; hand and tavern always reserved */
 #match .board {
   display: grid !important;
