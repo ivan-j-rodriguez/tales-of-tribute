@@ -1392,7 +1392,7 @@ function layoutFan(container, rival = false) {
   const landscape = document.body.classList.contains('is-landscape');
   const first = cards[0].getBoundingClientRect();
   const last = cards[n - 1].getBoundingClientRect();
-  const leftLimit = landscape ? 58 : 52;
+  const leftLimit = landscape ? 78 : 52;
   const rightLimit = landscape ? vw - 124 : vw - 76;
   if (first.left + dx < leftLimit) dx = leftLimit - first.left;
   if (last.right + dx > rightLimit) dx = Math.min(dx, rightLimit - last.right);
@@ -1412,7 +1412,7 @@ function layoutTavern() {
   const first = cards[0].getBoundingClientRect();
   const last = cards[cards.length - 1].getBoundingClientRect();
   const landscape = document.body.classList.contains('is-landscape');
-  const leftLimit = landscape ? 72 : 50;
+  const leftLimit = landscape ? 92 : 50;
   const rightLimit = landscape ? vw - 124 : vw - 82;
   if (first.left + dx < leftLimit) dx = leftLimit - first.left;
   if (last.right + dx > rightLimit) dx = Math.min(dx, rightLimit - last.right);

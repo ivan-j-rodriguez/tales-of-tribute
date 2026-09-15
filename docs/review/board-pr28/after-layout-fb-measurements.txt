@@ -12,15 +12,15 @@ portrait 390x844: tavern 386px = 99% vw
   hits {"tavernVsOppDraw":false,"tavernVsDeck":false,"tavernVsYouDraw":false,"turnVsOppRes":false,"turnVsYouRes":false,"youResVsAgents":false,"oppResVsAgents":false,"endTurnVsPatrons":false,"effectsVsDeck":false,"effectsVsDeckLabel":false,"leaveVsCooldown":false,"sfxVsCooldown":false,"hudVsDeck":false,"hudVsYouDraw":false,"endTurnVsYouDraw":false,"endTurnVsHud":false,"handVsYouDraw":false,"handVsYouCd":false}
 landscape 844x390: tavern 844px = 100% vw
   gutters L/R 0.5% / 0.5%
-  DRAW left 18px  CD right-gap 128px
-  hud strip true  hand dx -0.01  tavern dx -0.01
+  DRAW left 36px  CD right-gap 128px
+  hud strip true  hand dx 0  tavern dx -0.01
   pendants Δx 0.02  orbGone true
   patrons x 751.21 leftOf50 true midGap 46.02 clear true
   DECK left true dy 0 beside true
   pileBack true  playableGlow true  endGlow true
   treasury circle true dial {"w":46,"h":46,"x":728.2,"y":165.88} face {"w":25.75,"h":25.75,"x":738.31,"y":175.98}
-  leftPilesOnCanvas true minX 15.42  rightPilesOnCanvas true maxRight 716
-  tavernOnCanvas true {"minTop":128.72,"maxBottom":214.56,"minLeft":183.92,"maxRight":660.06}
-  handOnCanvas true {"minTop":310.97,"maxBottom":382,"minLeft":310.52,"maxRight":533.47}
+  leftPilesOnCanvas true minX 33.42  rightPilesOnCanvas true maxRight 716
+  tavernOnCanvas true {"minTop":133.39,"maxBottom":220.61,"minLeft":268.3,"maxRight":575.69}
+  handOnCanvas true {"minTop":320.64,"maxBottom":375.36,"minLeft":364,"maxRight":480}
   labels DRAW true DECK true CD true
   hits {"tavernVsOppDraw":false,"tavernVsDeck":false,"tavernVsYouDraw":false,"turnVsOppRes":false,"turnVsYouRes":false,"youResVsAgents":false,"oppResVsAgents":false,"endTurnVsPatrons":false,"effectsVsDeck":false,"effectsVsDeckLabel":false,"leaveVsCooldown":false,"sfxVsCooldown":false,"hudVsDeck":false,"hudVsYouDraw":false,"endTurnVsYouDraw":false,"endTurnVsHud":false,"handVsYouDraw":false,"handVsYouCd":false}

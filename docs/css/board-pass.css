@@ -1352,27 +1352,28 @@ body.is-landscape #match .patron-coin.mora .medallion-svg {
 
 /* ===================================================================
    Build 52 — LANDSCAPE ONLY. Do not copy these onto portrait.
-   Modest overall fit so tavern hexes and the you-hand hexes are fully
-   on-canvas on 844×390. Left DRAW / DECK / you-DRAW shift right just
-   enough that rotated card-backs + under-stack labels clear the left
-   edge (and iPhone landscape safe-area). Right COOLDOWNs stay right.
+   Stronger zoom-out so 844×390 review shots read as unclipped to a
+   human: clear left felt margin beside DRAW/DECK/DRAW, tavern hex
+   top/bottom tips inside the band, you-hand hex bottom tips above
+   the felt edge (room for gold glow). Right COOLDOWNs stay right.
    =================================================================== */
 
 body.is-landscape #match .felt-table {
-  padding: 2px 0 4px !important;
+  padding: 6px 0 16px !important;
   row-gap: 2px !important;
   gap: 2px 0 !important;
   grid-template-rows:
-    minmax(22px, 0.28fr)
+    20px
     24px
     44px
     16px
-    minmax(96px, 1.55fr)
+    minmax(118px, 1.85fr)
     44px
     24px
-    minmax(78px, 1.18fr) !important;
+    minmax(76px, 1.12fr) !important;
 }
 
+body.is-landscape #match .felt-tavern,
 body.is-landscape #match .felt-you-hand {
   min-height: 0 !important;
   height: auto !important;
@@ -1380,48 +1381,57 @@ body.is-landscape #match .felt-you-hand {
   overflow: visible !important;
 }
 
+body.is-landscape #match .tavern-zone {
+  padding: 4px 128px !important;
+  overflow: visible !important;
+  align-items: center !important;
+}
+
 body.is-landscape #match #hand-zone,
 body.is-landscape #match .you-fan {
   height: 100% !important;
   min-height: 0 !important;
-  align-items: flex-end !important;
+  align-items: center !important;
+  padding-bottom: 0 !important;
+  padding-top: 0 !important;
+  box-sizing: border-box !important;
 }
 
 body.is-landscape #match .tavern-zone .card {
-  width: min(92px, 10.8vw, calc((100% - 1.2rem) / 5.18)) !important;
+  width: min(58px, 6.8vw, calc((100% - 1.2rem) / 5.4)) !important;
   height: auto !important;
   aspect-ratio: 1 / 1.52 !important;
   min-height: 0 !important;
-  max-height: 88% !important;
+  max-height: none !important;
 }
 
 body.is-landscape #match #hand-zone .card,
 body.is-landscape #match #hand-zone button.card,
 body.is-landscape #match .you-fan .card {
-  width: min(58px, 6.8vw, calc((100% + 1rem) / 5.7)) !important;
+  width: min(36px, 4.3vw, calc((100% + 1rem) / 6.4)) !important;
   height: auto !important;
   aspect-ratio: 1 / 1.52 !important;
   min-height: 0 !important;
-  max-height: 88% !important;
+  max-height: none !important;
 }
 
 body.is-landscape #match .rival-fan .card,
 body.is-landscape #match #opp-hand-zone .card {
-  width: min(34px, 4vw, calc((100% + 0.8rem) / 6.6)) !important;
+  width: min(30px, 3.6vw, calc((100% + 0.8rem) / 6.8)) !important;
   min-height: 0 !important;
-  max-height: 90% !important;
+  max-height: 86% !important;
 }
 
-/* Left piles: inset from the physical left so stack art + DRAW/DECK
-   words sit fully on-canvas. Keep labels under the stacks. */
+/* Left piles: real felt gutter, not flush. Rotated backs + labels
+   must sit inside a visible margin (safe-area on notched phones). */
 body.is-landscape #match #pile-opp-draw,
 body.is-landscape #match #pile-you-draw,
 body.is-landscape #match #pile-tavern-draw {
-  left: max(18px, calc(env(safe-area-inset-left, 0px) + 12px)) !important;
+  left: max(36px, calc(env(safe-area-inset-left, 0px) + 22px)) !important;
 }
 
 body.is-landscape #match .felt-hud-you {
-  left: max(10px, calc(env(safe-area-inset-left, 0px) + 6px)) !important;
+  left: max(28px, calc(env(safe-area-inset-left, 0px) + 16px)) !important;
 }
 
 /* Right COOLDOWNs stay on the right, fully visible (rail + safe-area). */
@@ -1440,14 +1450,8 @@ body.is-landscape #match #pile-you-cd .pile-stack {
   margin: 0 auto !important;
 }
 
-body.is-landscape #match #pile-opp-draw { top: 6px !important; }
-body.is-landscape #match #pile-you-draw { bottom: 6px !important; }
-body.is-landscape #match #pile-opp-cd { top: 6px !important; }
-body.is-landscape #match #pile-you-cd { bottom: 6px !important; }
-
-body.is-landscape #match #hand-zone,
-body.is-landscape #match .you-fan {
-  padding-bottom: 4px !important;
-  box-sizing: border-box !important;
-}
+body.is-landscape #match #pile-opp-draw { top: 8px !important; }
+body.is-landscape #match #pile-you-draw { bottom: 12px !important; }
+body.is-landscape #match #pile-opp-cd { top: 8px !important; }
+body.is-landscape #match #pile-you-cd { bottom: 12px !important; }
 

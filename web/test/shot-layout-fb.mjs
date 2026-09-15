@@ -290,14 +290,23 @@ async function measure(page, fileStem, { w, h }) {
       if (!m.playableGlowOn) fail(`${fileStem} landscape playable-card gold glow missing`, notes);
       if (!m.endTurnGlowOn) fail(`${fileStem} landscape End Turn gold glow missing`, notes);
       if (!m.treasuryCircle) fail(`${fileStem} landscape Treasury not a 1:1 circle (dial ${JSON.stringify(m.treasuryDialBox)} face ${JSON.stringify(m.treasuryFaceBox)} svg ${JSON.stringify(m.treasurySvgBox)})`, notes);
-      if ((m.drawLeftEdge ?? 0) < 1) fail(`${fileStem} landscape DRAW clipped past the left edge (${m.drawLeftEdge})`, notes);
-      if ((m.drawLeftEdge ?? 99) > 40) fail(`${fileStem} landscape DRAW shifted too far inward (${m.drawLeftEdge})`, notes);
-      if ((m.leftPileMinX ?? -1) < 0.5) fail(`${fileStem} landscape left pile art/label clipped (minX ${m.leftPileMinX})`, notes);
+      if ((m.drawLeftEdge ?? 0) < 24) fail(`${fileStem} landscape DRAW still flush to the left (${m.drawLeftEdge}, need ≥24px felt gutter)`, notes);
+      if ((m.drawLeftEdge ?? 99) > 56) fail(`${fileStem} landscape DRAW shifted too far inward (${m.drawLeftEdge})`, notes);
+      if ((m.leftPileMinX ?? -1) < 18) fail(`${fileStem} landscape left pile art/label still flush (minX ${m.leftPileMinX}, need ≥18)`, notes);
       if ((m.rightPileMaxRight ?? 999) > w + 0.5) fail(`${fileStem} landscape right COOLDOWN clipped (maxRight ${m.rightPileMaxRight} vw ${w})`, notes);
       if (!m.leftPilesOnCanvas) fail(`${fileStem} landscape left DRAW/DECK/DRAW art+labels not fully on-canvas (minX ${m.leftPileMinX})`, notes);
       if (!m.rightPilesOnCanvas) fail(`${fileStem} landscape right COOLDOWN art+labels not fully on-canvas (maxRight ${m.rightPileMaxRight})`, notes);
       if (!m.tavernCardsOnCanvas) fail(`${fileStem} landscape tavern cards clipped (${JSON.stringify(m.tavernCardClip)} vh 390 vw ${w})`, notes);
       if (!m.handCardsOnCanvas) fail(`${fileStem} landscape hand hexes clipped (${JSON.stringify(m.handCardClip)} vh 390 vw ${w})`, notes);
+      if ((m.handCardClip?.maxBottom ?? 999) > 390 - 12) {
+        fail(`${fileStem} landscape hand hex tips still tight to the bottom (${JSON.stringify(m.handCardClip)} need ≤378)`, notes);
+      }
+      if ((m.youResToCards ?? 0) < 12) {
+        fail(`${fileStem} landscape tavern hexes tight to you-res (${m.youResToCards}px, need ≥12)`, notes);
+      }
+      if ((m.oppResToCards ?? 0) < 16) {
+        fail(`${fileStem} landscape tavern hexes tight to opp-res (${m.oppResToCards}px, need ≥16)`, notes);
+      }
       if (!m.drawLabelUnder) fail(`${fileStem} landscape DRAW labels not under the pile graphics`, notes);
       if (!m.cdLabelUnder) fail(`${fileStem} landscape COOLDOWN labels not under the pile graphics`, notes);
       if (!m.deckLabelUnder) fail(`${fileStem} landscape DECK label not under the pile graphic`, notes);
@@ -423,6 +432,18 @@ const landHandBox = await landPage.evaluate(() => {
   };
 });
 await closeUp(landPage, `${TAG}-landscape-hand-hexes`, [landHandBox], 844, 390);
+const landTavernBox = await landPage.evaluate(() => {
+  const cards = [...document.querySelectorAll('#tavern-zone > .card, #tavern-zone > button.card')];
+  if (!cards.length) return null;
+  const rs = cards.map((el) => el.getBoundingClientRect());
+  return {
+    x: Math.min(...rs.map((r) => r.x)),
+    y: Math.min(...rs.map((r) => r.y)),
+    w: Math.max(...rs.map((r) => r.right)) - Math.min(...rs.map((r) => r.x)),
+    h: Math.max(...rs.map((r) => r.bottom)) - Math.min(...rs.map((r) => r.y)),
+  };
+});
+await closeUp(landPage, `${TAG}-landscape-tavern-hexes`, [landTavernBox], 844, 390);
 
 await landPage.evaluate(() => window.__totTest.inspectById('customs-seizure') || window.__totTest.inspectById('toll-of-flesh'));
 await new Promise(r => setTimeout(r, 420));
