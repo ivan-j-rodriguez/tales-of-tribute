@@ -398,12 +398,12 @@ export function expandPatronDesc(raw, { patronId } = {}) {
 
   s = s.replace(/\bReprieve\s+(\d+)\b/gi, (_, n) => stripDot(reprieveSentence(Number(n))));
 
-  if (patronId === 'pelin' || /refresh up to 1 agent/i.test(s)) {
-    s = s.replace(
-      /refresh up to 1 agent\.?/gi,
-      stripDot(refreshSentence(1, true))
-    );
-  }
+  s = s.replace(/\bwith an agent in cooldown\b/gi, 'with an Agent in your cooldown pile');
+  s = s.replace(/\bwith an Agent in cooldown\b/gi, 'with an Agent in your cooldown pile');
+  s = s.replace(
+    /refresh up to 1 agent/gi,
+    stripDot(refreshSentence(1, true))
+  );
 
   s = s.replace(
     /create (\d+ )?Writ of Coin(?: card)?(?: and place it in your cooldown pile)?/gi,
