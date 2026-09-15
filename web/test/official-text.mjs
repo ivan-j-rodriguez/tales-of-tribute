@@ -3,7 +3,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import {
   formatEffects, inspectLines, cardPlayLines, cardComboLines,
-  applyOfficialCardText, applyOfficialPatronText, effectSentence,
+  applyOfficialCardText, applyOfficialPatronText, effectSentence, isOfficialProse,
 } from '../js/texts.js';
 import {
   expandRawEffect, expandToken, overlayOfficialCardText, overlayOfficialPatronText,
@@ -29,7 +29,8 @@ assert('gold sentence', formatEffects([{ op: 'coin', n: 1 }]).join(' ') === 'Gai
 assert('coin stub', formatEffects([], '1 Coin').join(' ') === 'Gain 1 Coin.');
 assert('draw stub', formatEffects([], 'Draw 1').join(' ') === 'Draw 1 card.');
 assert('knock out', effectSentence({ op: 'knockout', n: 1 }) === knockoutSentence(1));
-assert('acquire', effectSentence({ op: 'acquire', n: 6 }) === acquireSentence(6));
+assert('acquire 5 stub is not prose', isOfficialProse('Acquire 5') === false);
+assert('acquire 5 expands', /Acquire 1 card from the Tavern with a cost up to 5/.test(formatEffects([], 'Acquire 5').join(' ')));
 assert('refresh', /Refresh — Return up to 1 card of any type/.test(effectSentence({ op: 'hand_refresh', n: 1 })));
 assert('donate full', effectSentence({ op: 'donate', n: 1 }) === donateSentence(1));
 assert('toss full', effectSentence({ op: 'toss', n: 4 }) === tossSentence(4));
@@ -73,6 +74,13 @@ if (ambush) {
 
 const harvest = byId['harvest-season'];
 assert('harvest draw', /Draw 1 card/.test(cardPlayLines(harvest).join(' ')), cardPlayLines(harvest));
+const customs = byId['customs-seizure'];
+assert('customs seizure uesp acquire', /Acquire 1 card from the Tavern with a cost up to 6/.test(cardPlayLines(customs).join(' ')), cardPlayLines(customs));
+assert('customs not acquire-5 stub', !/^Acquire 5\.?$/.test(cardPlayLines(customs).join(' ')) && !/\bAcquire 5\b/.test(cardPlayLines(customs).join(' ')), cardPlayLines(customs));
+
+const stubAcquire = { id: 'stub-acq', name: 'Stub', playText: 'Acquire 5', play: [{ op: 'acquire', n: 5 }] };
+applyOfficialCardText([stubAcquire]);
+assert('applyOfficial expands Acquire 5 stub', /Acquire 1 card from the Tavern with a cost up to 5/.test(stubAcquire.playText), stubAcquire.playText);
 
 const pats = patrons.patrons || patrons;
 applyOfficialPatronText(pats);
