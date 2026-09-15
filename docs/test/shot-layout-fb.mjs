@@ -1,14 +1,15 @@
 /**
- * Build 52 layout-fb gate + before/after artifacts.
+ * Build 53 layout-fb gate + before/after artifacts.
  * Portrait 390×844 locked to build 51 packing.
- * Landscape 844×390: modest zoom-out so tavern + you-hand hexes are fully
- * on-canvas; left DRAW/DECK/DRAW art+labels fully on-canvas (left > 0).
+ * Landscape 844×390: SFX/settings/Leave horizontal between you-DRAW and
+ * the hand; you-hand hexes zoomed in from build 52 but fully on-canvas
+ * with felt air. Left DRAW/DECK/DRAW art+labels fully on-canvas.
  * Zero getBoundingClientRect intersection for Ivan's overlap pairs.
  * Also: tavern mid on vw/2, hand mid on vw/2, pendant colinear X,
- * DRAW/CD labels under four corner piles, left strip high, End Turn
- * bottom-left, yellow felt orbs gone, patron column left of build 50,
- * middle patron circle clear of neighbors, DECK left of tavern +
- * vertically centered on the tavern band, pile stacks use card-back.svg,
+ * DRAW/CD labels under four corner piles, portrait left strip high,
+ * End Turn bottom-left, yellow felt orbs gone, patron column left of
+ * build 50, middle patron circle clear of neighbors, DECK left of tavern
+ * + vertically centered on the tavern band, pile stacks use card-back.svg,
  * playable / End Turn gold glow present.
  */
 import http from 'http';
@@ -146,6 +147,7 @@ async function measure(page, fileStem, { w, h }) {
     drawLeftEdge: m.drawLeftEdge,
     cdRightGap: m.cdRightGap,
     hudIsLeftStrip: m.hudIsLeftStrip,
+    hudIsLandscapeChrome: m.hudIsLandscapeChrome,
     endTurnBottomLeft: m.endTurnBottomLeft,
     hudTop: m.hudTop,
     youHandCount: m.youHandCount,
@@ -270,7 +272,8 @@ async function measure(page, fileStem, { w, h }) {
     } else {
       if ((m.cdRightGap ?? 99) > 130) fail(`${fileStem} landscape COOLDOWN still far from right (gap ${m.cdRightGap}px)`, notes);
       if ((m.cdRightGap ?? 0) < -2) fail(`${fileStem} landscape COOLDOWN clipped past the right edge (gap ${m.cdRightGap}px)`, notes);
-      if (!m.hudIsLeftStrip) fail(`${fileStem} landscape match-actions not on the left strip`, notes);
+      if (!m.hudIsLandscapeChrome) fail(`${fileStem} landscape match-actions not between you-DRAW and the hand`, notes);
+      if (m.hudIsLeftStrip) fail(`${fileStem} landscape match-actions still a vertical left strip`, notes);
       if (m.youHandCount !== 5) fail(`${fileStem} expected opening 5-card hand (got ${m.youHandCount})`, notes);
       if (m.youHandMidDx == null || Math.abs(m.youHandMidDx) > 4) {
         fail(`${fileStem} landscape hand mid-card top not on vertical center (dx ${m.youHandMidDx}px, need ≤4)`, notes);
@@ -298,8 +301,12 @@ async function measure(page, fileStem, { w, h }) {
       if (!m.rightPilesOnCanvas) fail(`${fileStem} landscape right COOLDOWN art+labels not fully on-canvas (maxRight ${m.rightPileMaxRight})`, notes);
       if (!m.tavernCardsOnCanvas) fail(`${fileStem} landscape tavern cards clipped (${JSON.stringify(m.tavernCardClip)} vh 390 vw ${w})`, notes);
       if (!m.handCardsOnCanvas) fail(`${fileStem} landscape hand hexes clipped (${JSON.stringify(m.handCardClip)} vh 390 vw ${w})`, notes);
-      if ((m.handCardClip?.maxBottom ?? 999) > 390 - 26) {
-        fail(`${fileStem} landscape hand hex tips still tight to the bottom (${JSON.stringify(m.handCardClip)} need ≤364, want visible felt under tips)`, notes);
+      if ((m.handCardClip?.maxBottom ?? 999) > 390 - 10) {
+        fail(`${fileStem} landscape hand hex tips still tight to the bottom (${JSON.stringify(m.handCardClip)} need felt air under tips)`, notes);
+      }
+      const handHexH = (m.handCardClip?.maxBottom ?? 0) - (m.handCardClip?.minTop ?? 0);
+      if (handHexH < 54) {
+        fail(`${fileStem} landscape hand still tiny (${JSON.stringify(m.handCardClip)} h ${handHexH} need ≥54)`, notes);
       }
       if ((m.youResToCards ?? 0) < 12) {
         fail(`${fileStem} landscape tavern hexes tight to you-res (${m.youResToCards}px, need ≥12)`, notes);
@@ -333,6 +340,7 @@ async function measure(page, fileStem, { w, h }) {
     'endTurnVsHud',
     'handVsYouDraw',
     'handVsYouCd',
+    'handVsHud',
   ];
   for (const key of mustClear) {
     if (hits[key]) fail(`${fileStem} overlap ${key}`, { hit: hits[key], notes });
@@ -402,6 +410,10 @@ if (!pFit.nameOn) fail('portrait inspect name clipped', pFit);
 if (pFit.sheet && !pFit.sheetOn) fail('portrait inspect sheet clipped', pFit);
 if (pFit.titleClipped) fail('portrait inspect title clipped', pFit);
 if (!/CUSTOMS SEIZURE|TOLL OF FLESH/i.test(pFit.tipText || '')) fail('portrait inspect missing title', pFit);
+if (!/Acquire a card from the Tavern that costs up to 5 Coin|Gain 2 Coin/i.test(pFit.tipText || '')) {
+  fail('portrait inspect missing official play text', pFit);
+}
+if (pFit.sheet) await closeUp(portPage, `${TAG}-portrait-inspect-sheet`, [pFit.sheet], 390, 844);
 await portPage.close();
 
 const landPage = await browser.newPage();
@@ -432,6 +444,7 @@ const landHandBox = await landPage.evaluate(() => {
   };
 });
 await closeUp(landPage, `${TAG}-landscape-hand-hexes`, [landHandBox], 844, 390);
+await closeUp(landPage, `${TAG}-landscape-chrome-draw-hand`, [lBoxes.youDraw, lBoxes.leaveHud, landHandBox], 844, 390);
 const landTavernBox = await landPage.evaluate(() => {
   const cards = [...document.querySelectorAll('#tavern-zone > .card, #tavern-zone > button.card')];
   if (!cards.length) return null;
@@ -454,10 +467,14 @@ if (!lFit.textOn) fail('landscape inspect text clipped', lFit);
 if (!lFit.nameOn) fail('landscape inspect name clipped', lFit);
 if (lFit.sheet && !lFit.sheetOn) fail('landscape inspect sheet clipped', lFit);
 if (lFit.titleClipped) fail('landscape inspect title clipped', lFit);
+if (!/Acquire a card from the Tavern that costs up to 5 Coin|Gain 2 Coin/i.test(lFit.tipText || '')) {
+  fail('landscape inspect missing official play text', lFit);
+}
+if (lFit.sheet) await closeUp(landPage, `${TAG}-landscape-inspect-sheet`, [lFit.sheet], 844, 390);
 await landPage.close();
 
 const note = [
-  `Build 52 layout-fb (${TAG})`,
+  `Build 53 layout-fb (${TAG})`,
   `portrait 390x844: tavern ${results.portrait.notes.tavernW}px = ${results.portrait.notes.viewportTavernPct}% vw`,
   `  DRAW left ${results.portrait.notes.drawLeftEdge}px  CD right-gap ${results.portrait.notes.cdRightGap}px`,
   `  hud strip ${results.portrait.notes.hudIsLeftStrip}  hudTop ${results.portrait.notes.hudTop}  endTurn BL ${results.portrait.notes.endTurnBottomLeft}`,
@@ -472,7 +489,7 @@ const note = [
   `landscape 844x390: tavern ${results.landscape.notes.tavernW}px = ${results.landscape.notes.viewportTavernPct}% vw`,
   `  gutters L/R ${results.landscape.notes.leftGutterPct}% / ${results.landscape.notes.rightGutterPct}%`,
   `  DRAW left ${results.landscape.notes.drawLeftEdge}px  CD right-gap ${results.landscape.notes.cdRightGap}px`,
-  `  hud strip ${results.landscape.notes.hudIsLeftStrip}  hand dx ${results.landscape.notes.youHandMidDx}  tavern dx ${results.landscape.notes.tavernMidDx}`,
+  `  hud chrome ${results.landscape.notes.hudIsLandscapeChrome}  hand dx ${results.landscape.notes.youHandMidDx}  tavern dx ${results.landscape.notes.tavernMidDx}`,
   `  pendants Δx ${results.landscape.notes.pendantCenterSpread}  orbGone ${results.landscape.notes.yellowOrbGone}`,
   `  patrons x ${results.landscape.notes.patronColX} leftOf50 ${results.landscape.notes.patronColLeftOf50} midGap ${results.landscape.notes.middlePatronGapMin} clear ${results.landscape.notes.middlePatronClear}`,
   `  DECK left ${results.landscape.notes.deckLeftOfTavern} dy ${results.landscape.notes.deckTavernMidDy} beside ${results.landscape.notes.deckBesideTavern}`,
@@ -483,6 +500,8 @@ const note = [
   `  handOnCanvas ${results.landscape.notes.handCardsOnCanvas} ${JSON.stringify(results.landscape.notes.handCardClip)}`,
   `  labels DRAW ${results.landscape.notes.drawLabelUnder} DECK ${results.landscape.notes.deckLabelUnder} CD ${results.landscape.notes.cdLabelUnder}`,
   `  hits ${JSON.stringify(results.landscape.notes.hits)}`,
+  `inspect portrait: ${JSON.stringify({ name: (pFit.tipText || '').split('\n')[0], play: (pFit.tipText || '').replace(/\s+/g, ' ').slice(0, 180) })}`,
+  `inspect landscape: ${JSON.stringify({ name: (lFit.tipText || '').split('\n')[0], play: (lFit.tipText || '').replace(/\s+/g, ' ').slice(0, 180) })}`,
 ].join('\n');
 fs.writeFileSync(path.join(ART, `${TAG}-layout-fb-measurements.txt`), note + '\n');
 console.log(note);
