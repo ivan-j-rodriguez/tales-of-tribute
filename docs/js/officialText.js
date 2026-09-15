@@ -45,7 +45,7 @@ export function replaceSentence(n = 1) {
 
 export function acquireSentence(n) {
   const x = n == null || n === '' ? 1 : Number(n);
-  return `Acquire 1 card from the Tavern with a cost up to ${x}.`;
+  return `Acquire a card from the Tavern that costs up to ${x} Coin.`;
 }
 
 export function confineSentence(n = 1) {
