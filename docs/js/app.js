@@ -377,7 +377,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 52';
+  if (stamp) stamp.textContent = 'build 53';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -428,14 +428,35 @@ function effectBullets(src) {
   }).join('');
 }
 
+/** Full official tooltip string. Do not split into stub fragments.
+ *  TODO(ToTs): Club-side officialText.js / texts.js pass owns the copy.
+ *  This board PR only prints playText / comboNText after applyOfficialCardText
+ *  (and overlayOfficialCardText when a UESP dump is present). */
+function officialCardCopy(d, field = 'play') {
+  if (field === 'play') {
+    const stored = String(d.playText || '').trim();
+    if (stored) return stored;
+    return cardPlayLines(d).join(' ');
+  }
+  const stored = String(d[`combo${field}Text`] || '').trim();
+  if (stored) return stored;
+  return cardComboLines(d, field).join(' ');
+}
+
+function dossierProse(text) {
+  const t = String(text || '').trim();
+  if (!t) return '<p class="dossier-prose empty">—</p>';
+  return `<p class="dossier-prose">${t}</p>`;
+}
+
 function dossierHTML(d) {
   const pat = patronsById[d.patron];
   const patronName = pat?.name || d.patron || '';
   const icon = d.patron ? patronArt(d.patron) : '';
-  const playLines = cardPlayLines(d);
+  const play = officialCardCopy(d, 'play');
   const combos = [2, 3, 4].map((n) => {
-    const lines = cardComboLines(d, n);
-    return lines.length ? [`COMBO ${n}`, lines] : null;
+    const text = officialCardCopy(d, n);
+    return text ? [`Combo ${n}`, text] : null;
   }).filter(Boolean);
   return `
     <div class="eso-tip">
@@ -450,14 +471,14 @@ function dossierHTML(d) {
         </div>
       </div>
       <h2 class="eso-tip-name">${(d.name || '').toUpperCase()}</h2>
-      ${d.cost != null ? `<div class="eso-tip-cost">COIN COST <b>${d.cost}</b></div>` : ''}
+      ${d.cost != null ? `<div class="eso-tip-cost">Coin cost <b>${d.cost}</b></div>` : ''}
       <div class="eso-tip-block dossier-block">
-        <div class="eso-tip-h dossier-h">PLAY EFFECT</div>
-        <ul>${effectBullets(playLines)}</ul>
+        <div class="eso-tip-h dossier-h">Play effect</div>
+        ${dossierProse(play)}
       </div>
-      ${combos.map(([h, lines]) => `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">${h}</div><ul>${effectBullets(lines)}</ul></div>`).join('')}
-      ${d.hp != null ? `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">HEALTH</div><ul><li>${d.hp}${d.taunt ? ' · Taunt' : ''}</li></ul></div>` : ''}
-      ${d.hp == null && d.taunt ? `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">TAUNT</div><ul><li>This Agent has Taunt.</li></ul></div>` : ''}
+      ${combos.map(([h, text]) => `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">${h}</div>${dossierProse(text)}</div>`).join('')}
+      ${d.hp != null ? `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">Health</div>${dossierProse(`${d.hp}${d.taunt ? ' · Taunt' : ''}`)}</div>` : ''}
+      ${d.hp == null && d.taunt ? `<div class="eso-tip-block dossier-block"><div class="eso-tip-h dossier-h">Taunt</div>${dossierProse('This Agent has Taunt.')}</div>` : ''}
     </div>`;
 }
 
@@ -552,20 +573,20 @@ function inspectMetrics(kind) {
   const aspect = isCoin ? 1 : 1.54;
 
   if (land) {
-    const tipMin = isCoin ? 200 : 196;
-    const tipMax = 360;
-    let hexW = Math.min(vw * 0.32, isCoin ? 140 : 220, (vh - pad * 2) / aspect);
+    const tipMin = isCoin ? 220 : 240;
+    const tipMax = Math.min(400, vw - pad * 2 - 88);
+    let hexW = Math.min(vw * 0.24, isCoin ? 118 : 156, (vh - pad * 2 - 24) / aspect);
     let hexH = hexW * aspect;
-    if (hexH > vh - pad * 2) {
-      hexH = vh - pad * 2;
+    if (hexH > vh - pad * 2 - 24) {
+      hexH = vh - pad * 2 - 24;
       hexW = hexH / aspect;
     }
     let tipW = Math.min(tipMax, vw - pad * 2 - hexW - gap);
-    if (tipW < tipMin && hexW > 96) {
-      hexW = Math.max(96, vw - pad * 2 - gap - tipMin);
+    if (tipW < tipMin && hexW > 88) {
+      hexW = Math.max(88, vw - pad * 2 - gap - tipMin);
       hexH = hexW * aspect;
-      if (hexH > vh - pad * 2) {
-        hexH = vh - pad * 2;
+      if (hexH > vh - pad * 2 - 24) {
+        hexH = vh - pad * 2 - 24;
         hexW = hexH / aspect;
       }
       tipW = Math.min(tipMax, vw - pad * 2 - hexW - gap);
@@ -577,13 +598,13 @@ function inspectMetrics(kind) {
       tx, ty, hexW, hexH,
       textL: tx + hexW + gap,
       textT: Math.max(pad, ty),
-      textW: Math.max(140, tipW),
+      textW: Math.max(160, tipW),
       textMaxH: vh - pad * 2,
     };
   }
 
-  const tipMinH = isCoin ? 168 : 132;
-  let hexW = Math.min(vw - pad * 2, isCoin ? 150 : 248);
+  const tipMinH = isCoin ? 168 : 148;
+  let hexW = Math.min(vw - pad * 2, isCoin ? 132 : 196);
   let hexH = hexW * aspect;
   const maxHexH = vh - pad * 2 - tipMinH - gap;
   if (hexH > maxHexH) {
@@ -745,14 +766,13 @@ function patronDossierHTML(pid) {
     const turn = unlocked ? patronTurnLine(pid, key, pat) : '';
     const hasPay = /^(Pay |If |Passive |Cannot |Sacrifice |Discard )/i.test(desc);
     const cost = unlocked && !hasPay ? patronCostLine(ab) : '';
+    const turnNote = turn && !/FAVORS you|now NEUTRAL|does not take a side/i.test(desc) ? turn : '';
     return `
       <div class="eso-tip-block dossier-block${on ? ' current-favor' : ''}">
         <div class="eso-tip-h dossier-h">${label}${on ? ' · current' : ''}</div>
-        <ul>
-          ${cost ? `<li class="coin">${cost}</li>` : ''}
-          <li>${desc}</li>
-          ${turn && !/FAVORS you|now NEUTRAL|does not take a side/i.test(desc) ? `<li class="turn-note">${turn}</li>` : ''}
-        </ul>
+        ${cost ? dossierProse(cost) : ''}
+        ${dossierProse(desc)}
+        ${turnNote ? dossierProse(turnNote) : ''}
       </div>`;
   }).join('');
   return `
@@ -4234,6 +4254,7 @@ function layoutMetrics() {
   const leaveHud = box('#match .felt-hud-you');
   const sfxBtn = box('#btn-match-sfx');
   const leaveBtn = box('#btn-concede');
+  const settingsBtn = box('#btn-match-settings');
   const events = box('#match .events-rail');
   const patronsCluster = box('#rail-patrons');
   const youCalls = box('#you-patron-calls');
@@ -4296,7 +4317,8 @@ function layoutMetrics() {
     youCd ? vw - youCd.right : 99,
     oppCd ? vw - oppCd.right : 99
   );
-  const hudIsLeftStrip = !!(leaveHud && sfxBtn && leaveBtn
+  const portraitBoard = vh > vw;
+  const hudIsLeftStrip = portraitBoard && !!(leaveHud && sfxBtn && leaveBtn
     && leaveHud.x < vw * 0.22
     && leaveHud.h + 1 >= leaveHud.w * 0.85
     && sfxBtn.y + 4 < leaveBtn.y);
@@ -4307,6 +4329,17 @@ function layoutMetrics() {
     && (!leaveHud || hg.y >= leaveHud.bottom - 6));
   const youHandEls = [...document.querySelectorAll('#hand-zone > .card, #hand-zone > button.card')];
   const oppHandEls = [...document.querySelectorAll('#opp-hand-zone > .card')];
+  const youHandLeft = youHandEls.length
+    ? Math.min(...youHandEls.map((el) => el.getBoundingClientRect().x))
+    : vw * 0.45;
+  const hudIsLandscapeChrome = !portraitBoard && !!(leaveHud && sfxBtn && leaveBtn && youDraw
+    && leaveHud.bottom > vh * 0.78
+    && leaveHud.y > vh * 0.55
+    && leaveHud.x >= (youDraw.right || 0) - 10
+    && leaveHud.right <= youHandLeft + 8
+    && sfxBtn.x + 2 < leaveBtn.x
+    && Math.abs((sfxBtn.y + sfxBtn.h / 2) - (leaveBtn.y + leaveBtn.h / 2)) < 16
+    && leaveHud.w > leaveHud.h);
   const youHandMidX = fanMidTopX(youHandEls);
   const oppHandMidX = fanMidTopX(oppHandEls);
   const youHandMidDx = youHandMidX == null ? null : +(youHandMidX - vw / 2).toFixed(2);
@@ -4530,6 +4563,7 @@ function layoutMetrics() {
     endTurnVsHud: hit(hg, leaveHud),
     handVsYouDraw: hit(youHandSpan, youDraw),
     handVsYouCd: hit(youHandSpan, youCd),
+    handVsHud: hit(youHandSpan, leaveHud),
   };
   return {
     vw, vh,
@@ -4569,6 +4603,7 @@ function layoutMetrics() {
     drawLeftEdge: +drawLeftEdge.toFixed(1),
     cdRightGap: +cdRightGap.toFixed(1),
     hudIsLeftStrip,
+    hudIsLandscapeChrome,
     endTurnBottomLeft,
     hudTop: leaveHud ? +leaveHud.y.toFixed(1) : null,
     youHandCount: youHandEls.length,
@@ -4625,7 +4660,7 @@ function layoutMetrics() {
       oppDraw, youDraw, deck, deckLabel, youCd, oppCd,
       turn, oppRes, youRes, leaveHud, events, patronsCluster, youCalls,
       youAgents, oppAgents, endTurn: hg, patronRail: rail,
-      sfxBtn, leaveBtn, oppDrawStack, youDrawStack, oppCdStack, youCdStack,
+      sfxBtn, leaveBtn, settingsBtn, oppDrawStack, youDrawStack, oppCdStack, youCdStack,
     },
   };
 }

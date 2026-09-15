@@ -1,4 +1,5 @@
-/* Build 52 — landscape fit on build 51 portrait packing (Club 47 / board 51).
+/* Build 53 — landscape chrome + you-hand zoom on build 52 packing
+   (Club 47 / board 51 portrait lock).
    TWO compositions. Same engine/state. Different positions and sizes.
    Pewter bezel seated on the portrait coin (CSS face = SVG window).
    Round pewter coin + short gothic peak (~10% of diameter).
@@ -7,11 +8,11 @@
    SFX/Leave strip high on the left; End Turn bottom-left above you-DRAW;
    5 tavern cards + 5-card hand both center on vw/2; patron circles share one X,
    column shifted a bit left with air between coins. PORTRAIT PACKING IS LOCKED.
-   Landscape: modest zoom-out so tavern + you-hand hexes sit fully on the felt;
-   left DRAW / DECK / DRAW (art + labels) inset so they are not clipped;
-   DECK still left of the tavern at band mid; End Turn stays on the rail.
-   Pile stacks show authentic card-back art. Stray top orbs stay gone;
-   playable / End Turn / hand / combo gold glow is kept. */
+   Landscape: SFX / settings / Leave sit horizontally between you-DRAW and
+   the centered hand (bottom of the screen). You-hand hexes zoom in from
+   build 52 but stay fully on-canvas with felt air + gold glow. Left DRAW /
+   DECK / DRAW inset; DECK left of the tavern at band mid; End Turn on the
+   rail. Pile stacks show authentic card-back art. Stray top orbs stay gone. */
 
 #pile-tavern-discard { display: none !important; }
 
@@ -694,7 +695,7 @@ body.is-landscape #match .rail-glass {
   padding: 2px 0 4px !important;
 }
 
-/* Hold-inspect: dark dossier modal. Full card + title inside the sheet.
+/* Hold-inspect: dark dossier modal. Full card + official copy inside the sheet.
    Must sit above the targeting tray (z-index 11000) so hold-to-read works in-modal. */
 #lift-layer {
   z-index: 13000 !important;
@@ -703,6 +704,8 @@ body.is-landscape #match .rail-glass {
   display: flex !important;
   align-items: center;
   justify-content: center;
+  padding: 10px !important;
+  box-sizing: border-box;
   pointer-events: none;
   overflow: hidden !important;
   z-index: 13001 !important;
@@ -711,7 +714,7 @@ body.is-landscape #match .rail-glass {
   z-index: 13001 !important;
 }
 .lift-fly.lift-dossier-modal .lift-veil {
-  background: rgba(6, 10, 12, 0.86) !important;
+  background: rgba(5, 8, 10, 0.78) !important;
 }
 .inspect-dossier-sheet {
   position: relative;
@@ -719,19 +722,22 @@ body.is-landscape #match .rail-glass {
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  gap: 1.1rem;
-  max-width: min(96vw, 860px);
-  max-height: min(90dvh, 640px);
+  gap: 1rem;
+  max-width: min(92vw, 720px);
+  max-height: calc(100dvh - 20px);
   width: auto;
   background:
-    linear-gradient(180deg, rgba(28, 24, 18, 0.98), rgba(10, 14, 14, 0.96));
-  border: 1px solid rgba(212, 175, 55, 0.45);
-  border-radius: 14px;
-  box-shadow: 0 18px 48px #000c, inset 0 0 0 1px rgba(255, 244, 210, 0.08);
-  padding: 1rem 1.15rem 1.1rem;
+    linear-gradient(165deg, rgba(42, 36, 26, 0.98) 0%, rgba(14, 16, 16, 0.97) 48%, rgba(8, 12, 12, 0.98) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.58);
+  border-radius: 12px;
+  box-shadow:
+    0 22px 54px #000d,
+    inset 0 0 0 1px rgba(255, 244, 210, 0.14),
+    inset 0 0 0 5px rgba(18, 14, 10, 0.72);
+  padding: 0.85rem 0.95rem 0.95rem;
   box-sizing: border-box;
   overflow: hidden;
-  pointer-events: none;
+  pointer-events: auto;
 }
 .lift-dossier-modal .lift-hex-fly {
   position: relative !important;
@@ -741,9 +747,11 @@ body.is-landscape #match .rail-glass {
   bottom: auto !important;
   inset: auto !important;
   flex: 0 0 auto;
+  align-self: center;
   max-width: none !important;
-  max-height: min(78dvh, 520px) !important;
+  max-height: min(72dvh, 420px) !important;
   overflow: visible !important;
+  filter: drop-shadow(0 8px 16px #000a);
 }
 .lift-dossier-modal .lift-hex-fly img {
   overflow: visible !important;
@@ -754,28 +762,92 @@ body.is-landscape #match .rail-glass {
   top: auto !important;
   right: auto !important;
   bottom: auto !important;
-  flex: 1 1 auto;
+  flex: 1 1 240px;
   min-width: 0;
   min-height: 0;
   width: auto !important;
   max-width: 100% !important;
-  max-height: min(78dvh, 560px) !important;
+  max-height: min(72dvh, 520px) !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
-  padding: 0 2px 0 0 !important;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.1rem 0.15rem 0.15rem 0.2rem !important;
   opacity: 1 !important;
+  pointer-events: auto;
+}
+.lift-dossier-modal .eso-tip {
+  max-width: 36rem;
+}
+.lift-dossier-modal .eso-tip-head {
+  gap: 0.7rem;
+  margin-bottom: 0.15rem;
+  align-items: center;
+}
+.lift-dossier-modal .eso-tip-kicker {
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #c9a227;
+  font-weight: 600;
+}
+.lift-dossier-modal .eso-tip-type {
+  font-size: 0.78rem;
+  color: #cfc8bc;
+  margin-top: 0.12rem;
+}
+.lift-dossier-modal .eso-tip-patron {
+  font-size: 0.78rem;
+  color: #ddd6cc;
 }
 .lift-dossier-modal .eso-tip-name {
-  position: sticky;
-  top: 0;
+  position: static;
+  top: auto;
   z-index: 1;
-  background: linear-gradient(180deg, rgba(22, 18, 14, 0.98) 70%, rgba(22, 18, 14, 0));
+  background: none;
   overflow: visible !important;
   white-space: normal !important;
   word-break: normal;
   overflow-wrap: anywhere;
   max-width: 100%;
-  padding-bottom: 0.2rem;
+  margin: 0.15rem 0 0.45rem;
+  padding: 0 0 0.45rem;
+  font-size: clamp(1.05rem, 2.4vw, 1.55rem);
+  line-height: 1.15;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.38);
+}
+.lift-dossier-modal .eso-tip-cost {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.55rem;
+  color: #cfc8bc;
+}
+.lift-dossier-modal .eso-tip-h,
+.lift-dossier-modal .dossier-h {
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: #c9a227;
+  margin: 0.55rem 0 0.22rem;
+}
+.lift-dossier-modal .eso-tip-block + .eso-tip-block {
+  margin-top: 0.15rem;
+}
+.eso-tip .dossier-prose {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #f3eee6;
+  text-wrap: pretty;
+}
+.eso-tip .dossier-prose.empty {
+  color: #9a948a;
+}
+.lift-dossier-modal .eso-tip .current-favor {
+  padding: 0.28rem 0.4rem 0.35rem;
+  margin: 0.2rem -0.2rem 0;
+  border-radius: 8px;
+  background: rgba(212, 175, 55, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.22);
 }
 .lift-fly.lift-dossier-modal.closing {
   opacity: 0;
@@ -785,26 +857,43 @@ body.is-landscape #match .rail-glass {
   .inspect-dossier-sheet {
     flex-direction: column;
     align-items: center;
-    max-width: min(94vw, 420px);
-    max-height: min(92dvh, 760px);
+    max-width: min(92vw, 400px);
+    max-height: calc(100dvh - 24px);
     overflow: hidden;
+    gap: 0.7rem;
+    padding: 0.75rem 0.8rem 0.85rem;
   }
   .lift-dossier-modal .lift-hex-fly {
-    max-height: min(42dvh, 280px) !important;
+    max-height: min(38dvh, 240px) !important;
   }
   .lift-dossier-modal .lift-text-fly {
     width: 100% !important;
-    max-height: min(46dvh, 360px) !important;
+    max-height: min(48dvh, 380px) !important;
+    flex-basis: auto;
+  }
+  .lift-dossier-modal .eso-tip-name {
+    font-size: clamp(1.05rem, 5.4vw, 1.4rem);
+    text-align: center;
+  }
+  .lift-dossier-modal .eso-tip-head {
+    width: 100%;
   }
 }
 body.is-portrait .inspect-dossier-sheet {
   flex-direction: column;
   align-items: center;
-  max-width: min(94vw, 420px);
+  max-width: min(92vw, 400px);
 }
 body.is-landscape .inspect-dossier-sheet {
   flex-direction: row;
   align-items: stretch;
+  max-width: min(92vw, 680px);
+}
+body.is-landscape .lift-dossier-modal .lift-hex-fly {
+  max-height: min(78dvh, 300px) !important;
+}
+body.is-landscape .lift-dossier-modal .lift-text-fly {
+  max-height: min(78dvh, 320px) !important;
 }
 
 /* ===================================================================
@@ -1473,4 +1562,71 @@ body.is-landscape #match #pile-opp-draw { top: 14px !important; }
 body.is-landscape #match #pile-you-draw { bottom: 16px !important; }
 body.is-landscape #match #pile-opp-cd { top: 14px !important; }
 body.is-landscape #match #pile-you-cd { bottom: 16px !important; }
+
+/* ===================================================================
+   Build 53 — LANDSCAPE ONLY. Do not copy these onto portrait.
+   1) SFX / settings / Leave: horizontal cluster between you-DRAW and
+      the centered hand, toward the bottom (off the upper-left DRAW).
+   2) You-hand hexes zoom in from the build 52 30px pass — still fully
+      on-canvas with felt air under the tips (gold glow intact).
+   =================================================================== */
+
+body.is-landscape #match .felt-table {
+  padding: 6px 0 14px !important;
+  row-gap: 2px !important;
+  gap: 2px 0 !important;
+  grid-template-rows:
+    16px
+    24px
+    44px
+    16px
+    118px
+    44px
+    24px
+    70px !important;
+}
+
+body.is-landscape #match #hand-zone .card,
+body.is-landscape #match #hand-zone button.card,
+body.is-landscape #match .you-fan .card {
+  width: min(42px, 5vw, calc((100% + 1rem) / 5.6)) !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1.52 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+body.is-landscape #match .felt-hud-you {
+  left: max(108px, calc(env(safe-area-inset-left, 0px) + 96px)) !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: 12px !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: 240px !important;
+}
+
+body.is-landscape #match .you-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 4px !important;
+  padding: 3px 5px !important;
+  margin: 0 !important;
+  background: rgba(6, 12, 10, 0.58) !important;
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  border-radius: 8px;
+}
+
+body.is-landscape #match .you-actions button {
+  min-width: 0 !important;
+  width: auto !important;
+  padding: 0.22rem 0.42rem !important;
+  font-size: 0.58rem !important;
+  line-height: 1.15 !important;
+  letter-spacing: 0.04em;
+  white-space: nowrap !important;
+}
 

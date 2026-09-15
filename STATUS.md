@@ -1,5 +1,9 @@
 # Status
 
+**2026-09-15 (build 53):** Board/felt **landscape only** finish-line. SFX / settings / Leave move off the upper-left (under opp DRAW) into a **horizontal** cluster between you-DRAW and the centered hand, toward the bottom. You-hand hexes zoom in from the build 52 30px pass — still fully on-canvas with felt air under the tips (gold glow intact). Hold-inspect dossier chrome/layout cleaned; card/patron copy prints the full `applyOfficialCardText` / `applyOfficialPatronText` strings (no stub fragments). Portrait packing from build 51 is locked (strip / piles / hand unchanged). Left gutters, DECK beside tavern, Treasury 1:1 circle, card backs, hold-inspect in target trays, and layout-fb overlap gates stay. Club hub / store / collection / economy / music / auth / voice / club-chrome untouched. `?v=53`.
+
+**TODO(ToTs officialText):** Dossier wiring already uses `applyOfficialCardText` / `applyOfficialPatronText` (and `overlayOfficial*` when a UESP dump is present). This PR does **not** edit `officialText.js` / `texts.js`. `web/data/cards.uesp.json` is not in tree, so the UESP overlay is currently a no-op. If in-game sentences still look short vs client tooltips after this board pass, that is the Club-side officialText follow-up — not a board CSS issue.
+
 **2026-09-15 (build 52):** Board/felt **landscape only**. Stronger zoom-out so 844×390 review shots read unclipped: left DRAW / DECK / DRAW share a clear felt gutter (not flush, including the top DRAW stack+label); tavern hex top/bottom tips sit inside the band; you-hand hex bottom tips sit well above the felt edge (~33px air, glow intact). DECK still left of the tavern at band mid. Right COOLDOWNs stay right. Portrait packing from build 51 is locked. Card backs, Treasury 1:1 circle, gold glow, hold-inspect, and layout-fb overlap gates stay. Club hub / store / collection / economy / music / auth / voice / club-chrome untouched. `?v=52`.
 
 **2026-09-14 (build 51):** Board/felt only — Ivan follow-up on 50. Patron column shifts a bit left; vertical gaps so the middle pendant reads as a full circle (centers stay colinear; pewter seated; Treasury/Mora tipless **1:1 circle**, not a horizontal oval). Tavern DECK sits to the left of the tavern cards at the tavern band’s vertical center — opp DRAW stays top-left, you DRAW bottom-left, COOLDOWNs right corners. Deck / draw / cooldown piles show `assets/ui/card-back.svg` again. Stray top-of-felt gold orbs stay gone; playable-card / End Turn / hand / combo gold glow is kept. Layout-fb overlap gates from board #15/#18/#19/#23/#24 stay green. Club hub / store / collection / economy / music / auth / voice / club-chrome untouched. `?v=51`.
@@ -87,7 +91,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=52`. Board/felt landscape fit (zoom-out + left piles on-canvas) on Club 47 / board 51. Portrait packing unchanged.
+`docs/` is a copy of `web/`. Cache-bust `?v=53`. Board/felt landscape chrome (SFX/Leave between you-DRAW and hand) + you-hand zoom + inspect dossier polish on Club 47 / board 51. Portrait packing unchanged.
 
 | Fix | Notes |
 |---|---|
