@@ -28,6 +28,7 @@ import {
   createVoice, voiceStatusLine, canUseVoice, setMuted,
   voiceMicVisible, disableVoice, disableVoiceIfDisallowed,
 } from '../web/js/voice.js';
+import { PEER_CLOUD, JOIN_TIMEOUT_MS, MSG_NO_HOST, MSG_JOIN_TIMEOUT, guestJoinMessage } from '../web/js/netplay.js';
 
 const cards = JSON.parse(readFileSync(new URL('../data/cards.json', import.meta.url), 'utf8')).cards;
 
@@ -45,8 +46,8 @@ assert(/shop|today/i.test(buyErr.error || '') && !/slate/i.test(buyErr.error || 
 const html = readFileSync(new URL('../web/index.html', import.meta.url), 'utf8');
 assert(!/Daily slate/i.test(html), 'index has no Daily slate');
 assert(/Daily stock/.test(html), 'index has Daily stock');
-assert(/build 56/.test(html), 'splash stamp is build 56');
-assert(/\?v=56/.test(html), 'cache bust is 56');
+assert(/build 57/.test(html), 'splash stamp is build 57');
+assert(/\?v=57/.test(html), 'cache bust is 57');
 const splash = html.split('id="splash"')[1]?.split('id="ranked"')[0] || '';
 assert(!/Unofficial/i.test(splash), 'splash body has no unofficial line');
 assert(/id="account-disclaimer"/.test(html) && /id="about-disclaimer"/.test(html), 'disclaimers live on login and About');
@@ -72,7 +73,27 @@ const docsApp = readFileSync(new URL('../docs/js/app.js', import.meta.url), 'utf
 const docsSeat = docsApp.slice(docsApp.indexOf('function localSeat()'), docsApp.indexOf('function canControl()'));
 assert(docsSeat === localSeatSrc, 'docs localSeat matches web');
 const docsHtml = readFileSync(new URL('../docs/index.html', import.meta.url), 'utf8');
-assert(/build 56/.test(docsHtml) && /\?v=56/.test(docsHtml), 'docs index stamp and cache bust are 56');
+assert(/build 57/.test(docsHtml) && /\?v=57/.test(docsHtml), 'docs index stamp and cache bust are 57');
+
+const netplaySrc = readFileSync(new URL('../web/js/netplay.js', import.meta.url), 'utf8');
+const docsNetplay = readFileSync(new URL('../docs/js/netplay.js', import.meta.url), 'utf8');
+assert(netplaySrc === docsNetplay, 'docs netplay matches web');
+assert(/iceServers/.test(netplaySrc), 'netplay.js sets iceServers');
+assert(/stun:stun\.l\.google\.com:19302/.test(netplaySrc), 'netplay.js includes Google STUN');
+assert(/stun:global\.stun\.twilio\.com:3478/.test(netplaySrc), 'netplay.js includes backup STUN');
+assert(/host:\s*'0\.peerjs\.com'/.test(netplaySrc), 'netplay.js sets the PeerJS cloud host');
+assert(/port:\s*443/.test(netplaySrc) && /path:\s*'\/'/.test(netplaySrc) && /secure:\s*true/.test(netplaySrc), 'netplay.js sets PeerJS cloud port, path, and secure');
+assert(/serialization:\s*'json'/.test(netplaySrc), 'guest connect uses json serialization');
+assert(/unavailable-id/.test(netplaySrc) && /attempt < 2/.test(netplaySrc), 'host retries once when the room id is taken');
+assert(PEER_CLOUD.host === '0.peerjs.com' && PEER_CLOUD.port === 443 && PEER_CLOUD.path === '/' && PEER_CLOUD.secure === true, 'PEER_CLOUD is the public PeerJS broker');
+assert(PEER_CLOUD.config.iceServers.some((s) => s.urls === 'stun:stun.l.google.com:19302'), 'PEER_CLOUD iceServers includes Google STUN');
+assert(PEER_CLOUD.config.iceServers.some((s) => s.urls === 'stun:global.stun.twilio.com:3478'), 'PEER_CLOUD iceServers includes Twilio STUN');
+assert(JOIN_TIMEOUT_MS === 30000, 'guest join timeout is 30s');
+assert(guestJoinMessage({ type: 'peer-unavailable' }) === MSG_NO_HOST, 'peer-unavailable names a missing host');
+assert(guestJoinMessage({ type: 'could-not-connect' }) === MSG_NO_HOST, 'could-not-connect names a missing host');
+assert(guestJoinMessage({ message: 'Could not connect to peer tot-room-ABCD' }) === MSG_NO_HOST, 'could-not-connect text names a missing host');
+assert(guestJoinMessage({ type: 'timeout' }) === MSG_JOIN_TIMEOUT, 'timeout tells the guest to check Wi-Fi or use Pass & Play');
+assert(guestJoinMessage({ type: 'peer-unavailable' }) !== guestJoinMessage({ type: 'timeout' }), 'missing host and timeout are different errors');
 assert(TOUR_STEPS.length === 8, `tutorial has 8 steps (${TOUR_STEPS.length})`);
 assert(TOUR_STEPS.every((s) => s.id && s.sel && s.text && tourStep(TOUR_STEPS.indexOf(s))?.id === s.id), 'every tutorial step is addressable');
 assert(/Your hand\. Tap a card/.test(TOUR_STEPS[0].text), 'tutorial explains the hand');

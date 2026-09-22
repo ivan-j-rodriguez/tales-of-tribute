@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-22 (build 57):** Friend remote rooms use an explicit PeerJS cloud broker (`0.peerjs.com:443`, secure) plus public STUN (Google and Twilio) and the PeerJS TURN relays. Guest join waits 30s and says when the code has no host versus when the attempt timed out. A taken room id is retried once with a new code. Hotseat `localSeat` null-safe fix from 56 stays. Board CSS untouched (`board-pass`, `phone-eso`, `table-pack` not edited). `?v=57`.
+
 **2026-09-22 (build 56):** Hotseat Pass & Play patron pick no longer throws when `localSeat` reads `engine.state` before `newMatch`. Hotseat seat falls back to 0 until the match exists. Friend remote host still waits on the lobby until a guest joins. Board CSS untouched (`board-pass`, `phone-eso`, `table-pack` not edited). `?v=56`.
 
 **2026-09-22 (build 55):** Club-only finish. Daily shop stock is one period at a time (rarities and Coin prices, one fragment, sold-out buys, tomorrow is the next period — the Store is never called a slate). Buying or equipping a table skin or card back sets the live match felt and deck backs (Settings selects, Store, Collection, season and crate grants). Collection upgrade subcategories filter. Tutorial steps stay on screen, skip after the first step, and replay from Settings. A claimed login day shows a wax STAMP in the calendar, including right after you claim it. Purse currency in Club copy is Coin. Host Remote Room stays on the Friend lobby with a copyable room code until a guest joins, then opens patron pick. Board/felt layout untouched (`board-pass`, `phone-eso`, `table-pack` not edited). `?v=55`.
@@ -95,7 +97,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=56`. Hotseat patron pick is null-safe (build 56). Club shop, cosmetics, tutorial, and daily stamp are build 55. Long-press inspect stays on the build 54 UESP sentences. Board landscape packing stays 53.
+`docs/` is a copy of `web/`. Cache-bust `?v=57`. Friend rooms use explicit PeerJS cloud + STUN (build 57). Hotseat patron pick is null-safe (build 56). Club shop, cosmetics, tutorial, and daily stamp are build 55. Long-press inspect stays on the build 54 UESP sentences. Board landscape packing stays 53.
 
 | Fix | Notes |
 |---|---|
