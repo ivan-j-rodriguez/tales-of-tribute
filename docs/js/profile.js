@@ -6,10 +6,11 @@ import {
   currentSeason, nextSeason, buildWeeklyGoals, buildSeasonalGoals,
   applyChallengeEvent, markShopPurchase, isOfferSoldOut,
   seedStarterClues, grantCluePack, nyDateStr as ecoNyDate,
-  rarityOf, formatRarity, CLUES_TO_UPGRADE, tomorrowShopSlate,
+  rarityOf, formatRarity, CLUES_TO_UPGRADE,
   shopContextFromProfile, fillMissedLogins, loginMonthGrid,
   clueCountOf, baseCardsForDeck, roadGrandPrize,
   crateVariantForDay, CRATES_PER_MONTH, resolveCrateVariant,
+  patronDisplayName,
 } from './economy.js';
 import { BASE_TO_UPGRADE } from './upgrades.js';
 
@@ -59,6 +60,27 @@ export const CARD_BACKS = [
   { id: 'witches', name: 'Crow Feather', price: 3000, rarity: 'legendary', seasonal: 'witches', desc: 'Witches Festival black and ember.' },
 ];
 
+/** Live felt colors. High Isle matches the board’s default teal so the starter skin does not repaint jr’s felt. */
+export const SKIN_FELT = {
+  'high-isle': { felt: '#0d2a28', deep: '#061614' },
+  auridon: { felt: '#1a2c28', deep: '#0c1816' },
+  grahtwood: { felt: '#142410', deep: '#081208' },
+  vvardenfell: { felt: '#22140e', deep: '#100806' },
+  summerset: { felt: '#161828', deep: '#0a0c18' },
+  clockwork: { felt: '#14140c', deep: '#080806' },
+  apocrypha: { felt: '#06140c', deep: '#020806' },
+  daedra: { felt: '#10141c', deep: '#06080e' },
+  orsinium: { felt: '#16181c', deep: '#0a0c10' },
+  vestige: { felt: '#101828', deep: '#060c18' },
+  nightblade: { felt: '#14081a', deep: '#06030a' },
+  arcanist: { felt: '#0a1810', deep: '#03100a' },
+  warden: { felt: '#0c241c', deep: '#061410' },
+  dragonknight: { felt: '#1a0a08', deep: '#0a0404' },
+  undaunted: { felt: '#1a1410', deep: '#0e0a08' },
+  'high-seas': { felt: '#0a2430', deep: '#041018' },
+  witches: { felt: '#18080c', deep: '#0a0406' },
+};
+
 export const CARD_BACK_PALETTE = {
   default: ['#1a1008', '#d4af37'],
   nightblade: ['#120818', '#c44'],
@@ -74,6 +96,38 @@ export const CARD_BACK_PALETTE = {
   'high-seas': ['#061820', '#3ec8d8'],
   witches: ['#14080a', '#e07020'],
 };
+
+/** CSS url() for the equipped card back. Default keeps the shared SVG; others are a colored back that still says card-back. */
+export function cardBackAssetUrl(backId = 'default') {
+  if (!backId || backId === 'default') return "url('../assets/ui/card-back.svg')";
+  const pal = CARD_BACK_PALETTE[backId] || CARD_BACK_PALETTE.default;
+  const hue = pal[0];
+  const accent = pal[1];
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 308" role="img" aria-label="card-back ${backId}"><rect width="200" height="308" rx="14" fill="${hue}"/><rect x="12" y="12" width="176" height="284" rx="10" fill="none" stroke="${accent}" stroke-width="7"/><circle cx="100" cy="146" r="40" fill="none" stroke="${accent}" stroke-width="4"/><text x="100" y="152" text-anchor="middle" fill="${accent}" font-size="16" font-family="Georgia">card-back</text></svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+
+/** What the live match should show for the equipped table and deck back. */
+export function liveCosmetic(profile) {
+  const skinId = TABLE_SKINS.some((s) => s.id === profile?.tableSkin) ? profile.tableSkin : 'high-isle';
+  const backId = CARD_BACKS.some((b) => b.id === profile?.cardBack) ? profile.cardBack : 'default';
+  const felt = SKIN_FELT[skinId] || SKIN_FELT['high-isle'];
+  const pal = CARD_BACK_PALETTE[backId] || CARD_BACK_PALETTE.default;
+  return {
+    skinId,
+    backId,
+    skinClass: `skin-${skinId}`,
+    felt: felt.felt,
+    feltDeep: felt.deep,
+    backHue: pal[0],
+    backAccent: pal[1],
+    cardBack: cardBackAssetUrl(backId),
+  };
+}
+
+function needCoin(n) {
+  return { error: `Need ${n} Coin.` };
+}
 
 /** @deprecated use priceOf('fragment'|'upgrade', id) — kept so old UI strings fail closed. */
 export const STORE_FRAGMENT_COST = 140;
@@ -292,7 +346,7 @@ export function currentShop(profile, cards = [], when) {
   const ctx = shopContextFromProfile(profile, cards, TABLE_SKINS, CARD_BACKS, LOCKED_DECKS);
   const periodKey = typeof when === 'number' ? when : shopPeriodKey(when);
   const today = buildShopSlate({ ...ctx, periodKey });
-  const tomorrow = tomorrowShopSlate(ctx);
+  const tomorrow = buildShopSlate({ ...ctx, periodKey: periodKey + 1 });
   return { ...today, tomorrow };
 }
 
@@ -398,9 +452,11 @@ export function grantReward(profile, reward = {}, cards = []) {
   }
   if (reward.skin && !profile.unlockedSkins.includes(reward.skin)) {
     profile.unlockedSkins.push(reward.skin);
+    profile.tableSkin = reward.skin;
   }
-  if (reward.back && !profile.unlockedBacks.includes(reward.back)) {
+  if (reward.back && reward.back !== 'default' && !profile.unlockedBacks.includes(reward.back)) {
     profile.unlockedBacks.push(reward.back);
+    profile.cardBack = reward.back;
   }
   if (reward.clues) {
     granted.clueIds = grantCluePack(profile, cards, reward.clues);
@@ -694,7 +750,7 @@ export function claimMatchReward(profile, cards = []) {
   if (pending.gold) profile.gold += pending.gold;
   const rewards = [];
   if (pending.gold) {
-    rewards.push({ type: 'gold', amount: pending.gold, label: `${pending.gold} gold` });
+    rewards.push({ type: 'gold', amount: pending.gold, label: `${pending.gold} Coin` });
   }
   if (pending.won && pending.purse) {
     profile.purses.push(pending.purse);
@@ -783,7 +839,7 @@ export function openPurse(profile, cards, opts = {}) {
     const base = 15 + bias * 12;
     const g = randInt(base, base + 30 + bias * 20);
     profile.gold += g;
-    return { type: 'gold', amount: g, label: `${g} purse gold`, rarity };
+    return { type: 'gold', amount: g, label: `${g} Coin`, rarity };
   };
 
   // Legendary / Epic skew toward cosmetics + fragments
@@ -818,15 +874,15 @@ export function openPurse(profile, cards, opts = {}) {
         unlocked: r.unlocked,
         rarity,
         label: r.unlocked
-          ? `Deck unlocked: ${deck}!`
+          ? `Deck unlocked: ${patronDisplayName(deck)}!`
           : r.needCards
-            ? `Fragment: ${deck} (${r.fragments}/${FRAGMENTS_TO_UNLOCK}) — still need every card clue`
-            : `Fragment: ${deck} (${r.fragments}/${FRAGMENTS_TO_UNLOCK})`,
+            ? `Fragment: ${patronDisplayName(deck)} (${r.fragments}/${FRAGMENTS_TO_UNLOCK}) — still need every card clue`
+            : `Fragment: ${patronDisplayName(deck)} (${r.fragments}/${FRAGMENTS_TO_UNLOCK})`,
       };
     } else reward = goldFallback();
   } else {
     profile.gold += 80 + bias * 40;
-    reward = { type: 'jackpot', gold: 80 + bias * 40, label: `Jackpot! ${80 + bias * 40} gold`, rarity };
+    reward = { type: 'jackpot', gold: 80 + bias * 40, label: `Jackpot! ${80 + bias * 40} Coin`, rarity };
   }
 
   if (reward?.id) discoverCards(profile, [reward.id]);
@@ -846,15 +902,16 @@ export function buySack() {
 }
 
 export function buyClue(profile, cardId, cards = [], opts = {}) {
+  let gate = null;
   if (!opts.ignoreShop) {
-    const gate = assertShopStock(profile, cards, 'clue', cardId);
+    gate = assertShopStock(profile, cards, 'clue', cardId, opts);
     if (gate.error) return gate;
   }
   const cost = priceOf('clue', cardId, cards);
-  if (profile.gold < cost) return { error: `Need ${cost} gold.` };
+  if (profile.gold < cost) return needCoin(cost);
   profile.gold -= cost;
   const r = addCardClue(profile, cardId, cards);
-  if (!opts.ignoreShop) markShopPurchase(profile, shopPeriodKey(), offerId('clue', cardId));
+  if (!opts.ignoreShop) markShopPurchase(profile, gate.slate.periodKey, gate.id);
   saveProfile(profile);
   return { ok: true, ...r, cost };
 }
@@ -877,7 +934,7 @@ export function openCrownCrate(profile, cards = [], variant = null) {
   if (roll < 0.42) {
     const g = 18 + bias * 10 + Math.floor(Math.random() * (16 + bias * 8));
     profile.gold += g;
-    reward = { type: 'gold', amount: g, label: `${g} crate gold`, rarity: crate.rarity };
+    reward = { type: 'gold', amount: g, label: `${g} Coin`, rarity: crate.rarity };
   } else if (roll < 0.68) {
     const granted = grantCluePack(profile, cards, 1);
     const id = granted[0];
@@ -892,27 +949,29 @@ export function openCrownCrate(profile, cards = [], variant = null) {
       fragments: r.fragments,
       unlocked: r.unlocked,
       rarity: crate.rarity,
-      label: r.unlocked ? `Deck unlocked: ${deck}` : `Fragment: ${deck} (${r.fragments}/${FRAGMENTS_TO_UNLOCK})`,
+      label: r.unlocked ? `Deck unlocked: ${patronDisplayName(deck)}` : `Fragment: ${patronDisplayName(deck)} (${r.fragments}/${FRAGMENTS_TO_UNLOCK})`,
     };
   } else if (roll < 0.96 && lockedBacks.length) {
     const back = lockedBacks[Math.floor(Math.random() * lockedBacks.length)];
     profile.unlockedBacks.push(back.id);
+    profile.cardBack = back.id;
     reward = { type: 'back', id: back.id, label: `Card back: ${back.name}`, rarity: crate.rarity };
   } else if (lockedSkins.length && bias >= 2) {
     const skin = lockedSkins[Math.floor(Math.random() * lockedSkins.length)];
     profile.unlockedSkins.push(skin.id);
+    profile.tableSkin = skin.id;
     reward = { type: 'skin', id: skin.id, label: `Table: ${skin.name}`, rarity: crate.rarity };
   } else {
     const g = 22 + bias * 8;
     profile.gold += g;
-    reward = { type: 'gold', amount: g, label: `${g} crate gold`, rarity: crate.rarity };
+    reward = { type: 'gold', amount: g, label: `${g} Coin`, rarity: crate.rarity };
   }
   saveProfile(profile);
   return { reward, crate, rarity: crate.rarity };
 }
 
-function assertShopStock(profile, cards, kind, target) {
-  const slate = currentShop(profile, cards);
+function assertShopStock(profile, cards, kind, target, opts = {}) {
+  const slate = currentShop(profile, cards, opts.periodKey);
   const id = offerId(kind, target);
   const onSlate = slate.featured.find((o) => o.id === id);
   if (!onSlate) return { error: 'Not in today’s shop — check back later.' };
@@ -925,15 +984,16 @@ function assertShopStock(profile, cards, kind, target) {
 export function buyFragment(profile, deckId, cards = [], opts = {}) {
   if (profile.unlockedDecks.includes(deckId)) return { error: 'Already unlocked.' };
   if (!LOCKED_DECKS.includes(deckId)) return { error: 'Invalid deck.' };
+  let gate = null;
   if (!opts.ignoreShop) {
-    const gate = assertShopStock(profile, cards, 'fragment', deckId);
+    gate = assertShopStock(profile, cards, 'fragment', deckId, opts);
     if (gate.error) return gate;
   }
   const cost = priceOf('fragment', deckId);
-  if (profile.gold < cost) return { error: `Need ${cost} gold.` };
+  if (profile.gold < cost) return needCoin(cost);
   profile.gold -= cost;
   const r = addFragment(profile, deckId, cards);
-  if (!opts.ignoreShop) markShopPurchase(profile, shopPeriodKey(), offerId('fragment', deckId));
+  if (!opts.ignoreShop) markShopPurchase(profile, gate.slate.periodKey, gate.id);
   saveProfile(profile);
   return { ok: true, ...r, cost };
 }
@@ -945,15 +1005,16 @@ export function buyUpgrade(profile, upgradeId, cards, opts = {}) {
   const card = cards.find(c => c.id === upgradeId);
   const patron = card?.patron;
   if (patron && !isDeckUnlocked(profile, patron)) return { error: 'Unlock the deck first.' };
+  let gate = null;
   if (!opts.ignoreShop) {
-    const gate = assertShopStock(profile, cards, 'upgrade', upgradeId);
+    gate = assertShopStock(profile, cards, 'upgrade', upgradeId, opts);
     if (gate.error) return gate;
   }
   const cost = priceOf('upgrade', upgradeId, cards);
-  if (profile.gold < cost) return { error: `Need ${cost} gold.` };
+  if (profile.gold < cost) return needCoin(cost);
   profile.gold -= cost;
   addUpgrade(profile, upgradeId);
-  if (!opts.ignoreShop) markShopPurchase(profile, shopPeriodKey(), offerId('upgrade', upgradeId));
+  if (!opts.ignoreShop) markShopPurchase(profile, gate.slate.periodKey, gate.id);
   saveProfile(profile);
   return { ok: true, cost };
 }
@@ -961,21 +1022,22 @@ export function buyUpgrade(profile, upgradeId, cards, opts = {}) {
 export function buySkin(profile, skinId, cards = [], opts = {}) {
   const skin = TABLE_SKINS.find(s => s.id === skinId);
   if (!skin) return { error: 'Unknown skin.' };
+  let gate = null;
+  if (!opts.ignoreShop && skin.price > 0) {
+    gate = assertShopStock(profile, cards, 'skin', skinId, opts);
+    if (gate.error) return gate;
+  }
   if (profile.unlockedSkins.includes(skinId)) {
     profile.tableSkin = skinId;
     saveProfile(profile);
     return { ok: true, equipped: true };
   }
-  if (!opts.ignoreShop && skin.price > 0) {
-    const gate = assertShopStock(profile, cards, 'skin', skinId);
-    if (gate.error) return gate;
-  }
   const cost = skin.price || priceOf('skin', skinId);
-  if (profile.gold < cost) return { error: `Need ${cost} gold.` };
+  if (profile.gold < cost) return needCoin(cost);
   profile.gold -= cost;
   profile.unlockedSkins.push(skinId);
   profile.tableSkin = skinId;
-  if (!opts.ignoreShop && skin.price > 0) markShopPurchase(profile, shopPeriodKey(), offerId('skin', skinId));
+  if (!opts.ignoreShop && skin.price > 0) markShopPurchase(profile, gate.slate.periodKey, gate.id);
   saveProfile(profile);
   return { ok: true, cost };
 }
@@ -983,54 +1045,58 @@ export function buySkin(profile, skinId, cards = [], opts = {}) {
 export function buyBack(profile, backId, cards = [], opts = {}) {
   const back = CARD_BACKS.find(b => b.id === backId);
   if (!back) return { error: 'Unknown back.' };
+  let gate = null;
+  if (!opts.ignoreShop && back.price > 0) {
+    gate = assertShopStock(profile, cards, 'back', backId, opts);
+    if (gate.error) return gate;
+  }
   if (profile.unlockedBacks.includes(backId)) {
     profile.cardBack = backId;
     saveProfile(profile);
     return { ok: true, equipped: true };
   }
-  if (!opts.ignoreShop && back.price > 0) {
-    const gate = assertShopStock(profile, cards, 'back', backId);
-    if (gate.error) return gate;
-  }
   const cost = back.price || priceOf('back', backId);
-  if (profile.gold < cost) return { error: `Need ${cost} gold.` };
+  if (profile.gold < cost) return needCoin(cost);
   profile.gold -= cost;
   profile.unlockedBacks.push(backId);
   profile.cardBack = backId;
-  if (!opts.ignoreShop && back.price > 0) markShopPurchase(profile, shopPeriodKey(), offerId('back', backId));
+  if (!opts.ignoreShop && back.price > 0) markShopPurchase(profile, gate.slate.periodKey, gate.id);
   saveProfile(profile);
   return { ok: true, cost };
 }
 
-export function buyShopOffer(profile, offer, cards = []) {
+export function buyShopOffer(profile, offer, cards = [], opts = {}) {
   if (!offer?.kind) return { error: 'Unknown offer.' };
-  if (offer.kind === 'bundle') return buyBundle(profile, offer, cards);
+  const next = { ...opts, periodKey: opts.periodKey ?? offer.periodKey };
+  if (offer.kind === 'bundle') return buyBundle(profile, offer, cards, next);
   if (!offer.target) return { error: 'Unknown offer.' };
-  if (offer.kind === 'fragment') return buyFragment(profile, offer.target, cards);
-  if (offer.kind === 'upgrade') return buyUpgrade(profile, offer.target, cards);
-  if (offer.kind === 'clue') return buyClue(profile, offer.target, cards);
-  if (offer.kind === 'skin') return buySkin(profile, offer.target, cards);
-  if (offer.kind === 'back') return buyBack(profile, offer.target, cards);
+  if (offer.kind === 'fragment') return buyFragment(profile, offer.target, cards, next);
+  if (offer.kind === 'upgrade') return buyUpgrade(profile, offer.target, cards, next);
+  if (offer.kind === 'clue') return buyClue(profile, offer.target, cards, next);
+  if (offer.kind === 'skin') return buySkin(profile, offer.target, cards, next);
+  if (offer.kind === 'back') return buyBack(profile, offer.target, cards, next);
   return { error: 'Unknown offer.' };
 }
 
-export function buyBundle(profile, offer, cards = []) {
-  const slate = currentShop(profile, cards);
+export function buyBundle(profile, offer, cards = [], opts = {}) {
+  const slate = currentShop(profile, cards, opts.periodKey);
   if (!slate.bundle || slate.bundle.id !== offer.id) return { error: 'That bundle is not in today’s shop.' };
   if (isOfferSoldOut(profile, slate.periodKey, offer.id)) return { error: 'Sold out until the shop refreshes.' };
-  if (profile.gold < offer.price) return { error: `Need ${offer.price} gold.` };
+  if (profile.gold < offer.price) return needCoin(offer.price);
   profile.gold -= offer.price;
   const results = [];
   for (const part of offer.parts || []) {
     if (part.kind === 'fragment') results.push(addFragment(profile, part.target, cards));
     else if (part.kind === 'upgrade') { addUpgrade(profile, part.target); results.push({ ok: true }); }
     else if (part.kind === 'clue') results.push(addCardClue(profile, part.target, cards));
-    else if (part.kind === 'skin' && !profile.unlockedSkins.includes(part.target)) {
-      profile.unlockedSkins.push(part.target);
-      results.push({ ok: true });
-    } else if (part.kind === 'back' && !profile.unlockedBacks.includes(part.target)) {
-      profile.unlockedBacks.push(part.target);
-      results.push({ ok: true });
+    else if (part.kind === 'skin') {
+      if (!profile.unlockedSkins.includes(part.target)) profile.unlockedSkins.push(part.target);
+      profile.tableSkin = part.target;
+      results.push({ ok: true, equipped: true });
+    } else if (part.kind === 'back') {
+      if (!profile.unlockedBacks.includes(part.target)) profile.unlockedBacks.push(part.target);
+      profile.cardBack = part.target;
+      results.push({ ok: true, equipped: true });
     }
     markShopPurchase(profile, slate.periodKey, part.id);
   }

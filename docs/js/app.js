@@ -6,8 +6,8 @@ import {
   recordMatchResult, claimMatchReward, openCrownCrate, claimAchievement, claimDailyChallenge,
   isDeckUnlocked, fragmentProgress, ACHIEVEMENTS, STARTER_DECKS, LOCKED_DECKS,
   ALL_DECKS, FRAGMENTS_TO_UNLOCK, purseCount,
-  TABLE_SKINS, CARD_BACKS, CARD_BACK_PALETTE,
-  buyShopOffer, equipSkin, equipBack, RANK_TIERS,
+  TABLE_SKINS, CARD_BACKS,
+  buyShopOffer, equipSkin, equipBack, liveCosmetic, RANK_TIERS,
   GAUNTLET_STOPS, ensureGauntletDay, recordGauntletResult, setAiDifficulty,
   gauntletCooldownMs, todaysFeatured, roadCrossing, WATER_ZONES,
   msUntilNextNyMidnight, nyDateStr,
@@ -19,10 +19,11 @@ import {
   formatRarity, rarityOf, priceOf, CLUES_TO_UPGRADE, DECK_IMPORTANCE, DECK_CAPTIONS,
   DECK_COLORS, FALLBACK_PATRONS, canonPatron, groupCardsByDeck,
   currentSeason, nextSeason, msUntilShopRefresh, msUntilWeeklyReset,
-  loginMonthGrid, clueCountOf, countClues, deckCardSet, weeklyKey,
+  loginMonthGrid, loginCellHtml, clueCountOf, countClues, deckCardSet, weeklyKey,
   isOfferSoldOut, crateVariantForDay, CRATES_PER_MONTH, resolveCrateVariant,
-  baseCardsForDeck,
+  baseCardsForDeck, patronDisplayName,
 } from './economy.js';
+import { TOUR_STEPS, canSkipTourStep } from './tutorial.js';
 import { hostRoom, joinRoom } from './netplay.js';
 import {
   installProfileSync, currentSession, isSignedIn, accountHint, providerStatus,
@@ -81,18 +82,6 @@ const TURN_SECONDS = 90;
 const HOLD_MS = 1000;
 const AGENT_SLOTS = 4;
 const TOUR_KEY = 'tot_tour_v2';
-
-/** Guided tutorial match — plain language, one spotlight at a time. */
-const TOUR_STEPS = [
-  { sel: '#hand-zone', text: 'Your hand. Tap a card to play it. Hold to read it.' },
-  { sel: '#you-res', text: 'Coin buys from the tavern. Power knocks out agents. Leftover Power becomes Prestige when you end the turn.' },
-  { sel: '#tavern-zone', text: 'The tavern is five cards in the middle. Spend Coin to buy one — it waits in cooldown until your deck reshuffles.' },
-  { sel: '#events-rail', text: 'Combos fire when you play extra cards of the same patron in one turn. Watch played effects on the left.' },
-  { sel: '#you-agents', text: 'Agents stay in these slots until knocked out. Empty outlines are open seats. Taunt agents must be hit first.' },
-  { sel: '#patron-rail', text: 'Patrons live here, plus Treasury. One call per turn. Calling flips favor toward you.' },
-  { sel: '#btn-end', text: 'End Turn when you are done. Power converts to Prestige unless a Taunt agent is still in the way.' },
-  { sel: '#turn-ind', text: 'Win at 40 prestige if they cannot pass you, at 80 outright, or by favoring all four patrons.' },
-];
 
 function polishCardCopy(card) {
   const next = { ...card };
@@ -327,21 +316,32 @@ function medallionMarkup(pid, pat, short, favorWord) {
 
 function applyTableSkin() {
   if (!profile) return;
-  const id = profile.tableSkin || 'high-isle';
+  const look = liveCosmetic(profile);
+  const root = document.documentElement;
   [...document.body.classList].filter(c => c.startsWith('skin-')).forEach(c => document.body.classList.remove(c));
-  document.body.classList.add('skin-' + id);
+  document.body.classList.add(look.skinClass);
+  document.body.classList.add('skin-applied');
+  root.dataset.tableSkin = look.skinId;
+  root.dataset.cardBack = look.backId;
+  root.style.setProperty('--eso-felt', look.felt);
+  root.style.setProperty('--eso-felt-deep', look.feltDeep);
+  root.style.setProperty('--back-hue', look.backHue);
+  root.style.setProperty('--back-accent', look.backAccent);
+  root.style.setProperty('--card-back', look.cardBack);
   const match = $('#match');
   if (match) {
-    match.className = 'screen' + (match.classList.contains('active') ? ' active' : '');
-    match.classList.add('skin-' + id);
+    const active = match.classList.contains('active');
+    [...match.classList].filter(c => c.startsWith('skin-') || c.startsWith('back-')).forEach(c => match.classList.remove(c));
+    if (![...match.classList].includes('screen')) match.classList.add('screen');
+    if (active) match.classList.add('active');
+    match.classList.add('skin-applied', look.skinClass, `back-${look.backId}`);
+    match.dataset.tableSkin = look.skinId;
+    match.dataset.cardBack = look.backId;
   }
-  const pal = CARD_BACK_PALETTE[profile.cardBack] || CARD_BACK_PALETTE.default;
-  document.documentElement.style.setProperty('--back-hue', pal[0]);
-  document.documentElement.style.setProperty('--back-accent', pal[1]);
 }
 
 function goldCoinHtml(extra = '') {
-  return `<span class="gold-coin" title="Gold" ${extra}></span>`;
+  return `<span class="gold-coin" title="Coin" ${extra}></span>`;
 }
 
 function refreshSplashPurse() {
@@ -349,7 +349,7 @@ function refreshSplashPurse() {
   if (!el || !profile) return;
   const r = profile.ranked || {};
   el.innerHTML = `
-    <span>${goldCoinHtml()} ${profile.gold}g</span>
+    <span>${goldCoinHtml()} ${profile.gold} Coin</span>
     <span>🏅 ${r.tier || 'Unranked'}</span>
     <span>Wins ${profile.stats.wins}</span>
   `;
@@ -377,7 +377,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 54';
+  if (stamp) stamp.textContent = 'build 55';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -975,10 +975,15 @@ function updatePickStatus() {
       if (pickYou.length < 2) hint.innerHTML = 'Ranked — choose <strong>your</strong> two patrons. No AI.';
       else if (pickOpp.length < 2) hint.innerHTML = 'Waiting for your rival’s pair.';
       else hint.innerHTML = matchMode === 'remote-guest' ? 'Host will begin the match.' : 'Both ready. Begin Ranked.';
+    } else if ((matchMode === 'remote-host' || matchMode === 'remote-guest') && !isRankedMatch) {
+      if (pickYou.length < 2) hint.innerHTML = 'Guest joined — pick decks. Choose <strong>two</strong> patrons for you.';
+      else if (pickOpp.length < 2) hint.innerHTML = 'Now choose your guest’s two patrons.';
+      else hint.innerHTML = 'Ready. Begin Match and your guest joins the table.';
     } else if (pickYou.length < 2) hint.innerHTML = 'Tap to select, tap again to <strong>deselect</strong>. Choose <strong>two</strong> patrons for you.';
     else if (pickOpp.length < 2) hint.innerHTML = 'Now pick rival\'s pair — or tap <strong>AI takes the rest</strong>.';
     else hint.innerHTML = 'Ready. Begin Match, or deselect to change.';
   }
+  syncRemotePickChrome();
 }
 
 function aiPickOpponents(exclude) {
@@ -2047,7 +2052,7 @@ function showWin(data) {
         won: engine.state.winner === 0, isRandom: isRandomMatch, ranked: false,
         patrons: [...pickYou], rivalPatrons: [...pickOpp],
       });
-      rewardLine = `+${r.gold}g`;
+      rewardLine = `+${r.gold} Coin`;
       if (r.purse) purseNote = ` · ${r.purse.rarity} cutpurse`;
     } else if (matchMode === 'remote-host' || matchMode === 'remote-guest') {
       const won = (matchMode === 'remote-host' && engine.state.winner === 0) ||
@@ -2056,7 +2061,7 @@ function showWin(data) {
         won, isRandom: false, ranked: false,
         patrons: [...pickYou], rivalPatrons: [...pickOpp],
       });
-      rewardLine = `+${r.gold}g`;
+      rewardLine = `+${r.gold} Coin`;
       if (r.purse) purseNote = ` · ${r.purse.rarity} cutpurse`;
     } else if (isTutorialMatch) {
       rewardLine = 'Tutorial complete';
@@ -2065,7 +2070,7 @@ function showWin(data) {
       const awardWin = engine.state.winner === 0;
       const g = recordGauntletResult(profile, { stopIndex: gauntletStopIndex, won: awardWin });
       if (awardWin) {
-        rewardLine = `Province secured · +${g.gold || 0}g`;
+        rewardLine = `Province secured · +${g.gold || 0} Coin`;
         purseNote = g.complete ? ' · Road complete — grand prize!' : ' · next stop open';
       } else {
         rewardLine = "The road locks until NY midnight";
@@ -2082,7 +2087,7 @@ function showWin(data) {
         won: awardWin, isRandom: isRandomMatch, ranked: isRankedMatch,
         patrons: [...pickYou], rivalPatrons: [...pickOpp], aiDifficulty: profile.aiDifficulty,
       });
-      rewardLine = `+${r.gold}g`;
+      rewardLine = `+${r.gold} Coin`;
       if (r.purse) purseNote = ` · ${r.purse.rarity} cutpurse`;
       if (isRankedMatch && r.ranked) {
         rewardLine += ` · ${r.ranked.tier} (${r.ranked.points} pts)`;
@@ -2148,13 +2153,13 @@ function openMatchPurseCeremony(after) {
     anim.classList.add('purse-empty');
     if (rarityEl) rarityEl.textContent = 'Empty purse';
     if (box) box.innerHTML = claimed.gold
-      ? `<div>${goldCoinHtml()} A meager ${claimed.gold}g</div>`
+      ? `<div>${goldCoinHtml()} A meager ${claimed.gold} Coin</div>`
       : `<div>The purse is empty.</div>`;
     playSfx('purse');
   } else {
     anim.classList.add('purse-open', 'sack-anim');
     if (rarityEl) rarityEl.textContent = claimed.rarity || 'Cutpurse';
-    const bits = (claimed.rewards || []).map((r) => r.label).join(' · ') || `${claimed.gold}g`;
+    const bits = (claimed.rewards || []).map((r) => r.label).join(' · ') || `${claimed.gold} Coin`;
     let img = goldCoinHtml();
     const frag = (claimed.rewards || []).find((r) => r.deck);
     const cardRew = (claimed.rewards || []).find((r) => r.id && cardsById[r.id]);
@@ -2338,39 +2343,45 @@ function showTourStep() {
   const step = TOUR_STEPS[tourStep];
   $('#tour-text').textContent = step.text;
   $('#tour-step').textContent = `${tourStep + 1} / ${TOUR_STEPS.length}`;
+  const skip = $('#tour-skip');
+  if (skip) skip.hidden = !canSkipTourStep(tourStep);
   root.hidden = false;
+  placeTourPanel(step, panel, hole);
+  requestAnimationFrame(() => {
+    if (tourActive) placeTourPanel(step, panel, hole);
+  });
+}
 
-  // Spotlight target
-  const target = step.sel ? document.querySelector(step.sel) : null;
-  if (target && hole) {
-    const r = target.getBoundingClientRect();
+function placeTourPanel(step, panel, hole) {
+  const target = step?.sel ? document.querySelector(step.sel) : null;
+  const r = target?.getBoundingClientRect();
+  const visible = !!(r && r.width > 8 && r.height > 8 && r.bottom > 0 && r.right > 0);
+  if (visible && hole) {
     const pad = 8;
     hole.style.left = Math.max(4, r.left - pad) + 'px';
     hole.style.top = Math.max(4, r.top - pad) + 'px';
-    hole.style.width = Math.min(window.innerWidth - 8, r.width + pad * 2) + 'px';
-    hole.style.height = Math.min(window.innerHeight - 8, r.height + pad * 2) + 'px';
+    hole.style.width = Math.min(window.innerWidth - 8, Math.max(36, r.width) + pad * 2) + 'px';
+    hole.style.height = Math.min(window.innerHeight - 8, Math.max(36, r.height) + pad * 2) + 'px';
     hole.classList.add('show');
-    // Place panel opposite the spotlight when possible
     const spaceBelow = window.innerHeight - (r.bottom + 12);
-    if (spaceBelow > 160) {
-      panel.style.top = (r.bottom + 12) + 'px';
+    if (spaceBelow > 150) {
+      panel.style.top = Math.min(window.innerHeight - 150, r.bottom + 12) + 'px';
       panel.style.bottom = 'auto';
     } else {
       panel.style.bottom = Math.max(12, window.innerHeight - r.top + 12) + 'px';
       panel.style.top = 'auto';
     }
-    panel.style.left = '50%';
-    panel.style.transform = 'translateX(-50%)';
   } else if (hole) {
     hole.classList.remove('show');
     panel.style.top = 'auto';
     panel.style.bottom = '24px';
-    panel.style.left = '50%';
-    panel.style.transform = 'translateX(-50%)';
   }
+  panel.style.left = '50%';
+  panel.style.transform = 'translateX(-50%)';
 }
 
 function nextTourStep() {
+  if (!tourActive) return;
   tourStep += 1;
   showTourStep();
 }
@@ -2409,6 +2420,19 @@ function renderSettings() {
       ? 'Sign-in uses Club cloud. Google/Apple/Phone only request scopes when you tap them.'
       : 'Email sign-up saves this browser. Google, Apple, and Phone wait on Club cloud (Firebase) — those buttons stay gated until then.';
   }
+  fillCosmeticSelect($('#sel-table-skin'), TABLE_SKINS, profile.unlockedSkins, profile.tableSkin);
+  fillCosmeticSelect($('#sel-card-back'), CARD_BACKS, profile.unlockedBacks, profile.cardBack);
+}
+
+function fillCosmeticSelect(sel, catalog, owned, equipped) {
+  if (!sel) return;
+  const have = new Set(owned || []);
+  sel.innerHTML = catalog.map((item) => {
+    const mine = have.has(item.id);
+    const label = mine ? item.name : `${item.name} — not owned`;
+    return `<option value="${item.id}" ${mine ? '' : 'disabled'}>${label}</option>`;
+  }).join('');
+  if (equipped && have.has(equipped)) sel.value = equipped;
 }
 
 function leaveSettings() {
@@ -2428,7 +2452,7 @@ function leaveSettings() {
 /* ——— Club / Store / Collection ——— */
 function rewardBits(reward = {}) {
   const bits = [];
-  if (reward.gold) bits.push(`${reward.gold}g`);
+  if (reward.gold) bits.push(`${reward.gold} Coin`);
   if (reward.purses || reward.sacks) bits.push(`${reward.purses || reward.sacks} purse`);
   if (reward.purse) bits.push(`${reward.purse} purse`);
   if (reward.fragment) bits.push('fragment');
@@ -2449,7 +2473,14 @@ function renderGoalRow(g, onClaim) {
     </div>
     <button ${ready ? '' : 'disabled'}>${g.claimed ? 'Claimed' : 'Claim'}</button>
   `;
-  row.querySelector('button')?.addEventListener('click', onClaim);
+  const btn = row.querySelector('button');
+  btn?.addEventListener('click', onClaim);
+  if (ready) {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('button')) return;
+      onClaim();
+    });
+  }
   return row;
 }
 
@@ -2459,7 +2490,7 @@ function renderClub() {
   const r = profile.ranked || {};
   const clues = countClues(profile, DATA.cards);
   $('#club-stats').innerHTML = `
-    <div class="club-stat"><div class="label">Gold</div><div class="val">${goldCoinHtml()} ${profile.gold}</div></div>
+    <div class="club-stat"><div class="label">Coin</div><div class="val">${goldCoinHtml()} ${profile.gold}</div></div>
     <div class="club-stat"><div class="label">Check-in</div><div class="val">${profile.checkInStreak || 0}d</div></div>
     <div class="club-stat"><div class="label">Win streak</div><div class="val">${profile.winStreak || 0}</div></div>
     <div class="club-stat"><div class="label">Record</div><div class="val">${profile.stats.wins}–${profile.stats.losses}</div></div>
@@ -2467,17 +2498,7 @@ function renderClub() {
     <div class="club-stat"><div class="label">Clues</div><div class="val">${clues.have}/${clues.total}</div></div>
   `;
 
-  const cal = $('#club-calendar');
-  if (cal) {
-    const grid = loginMonthGrid(profile.loginDays);
-    const dow = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-    cal.innerHTML = dow.map((d) => `<div class="cal-dow">${d}</div>`).join('') +
-      grid.cells.map((c) => {
-        if (c.state === 'pad') return `<div class="cal-day pad"></div>`;
-        const mark = c.state === 'miss' ? '✕' : (c.state === 'ok' ? '✓' : c.day);
-        return `<div class="cal-day ${c.state}${c.crate ? ' crate' : ''}" title="${c.date}">${mark}</div>`;
-      }).join('');
-  }
+  paintLoginCalendar($('#club-calendar'), profile);
 
   const g = ensureGauntletDay(profile);
   const featured = todaysFeatured(profile);
@@ -2571,14 +2592,14 @@ function renderClub() {
     <div class="ach-row ${dw.progress >= dw.target && !dw.claimed ? 'claimable' : ''}">
       <div class="ach-info">
         <strong>Win ${dw.target} matches today</strong>
-        <span>${dw.progress}/${dw.target}${dw.claimed ? ' · claimed' : ''} · 12g</span>
+        <span>${dw.progress}/${dw.target}${dw.claimed ? ' · claimed' : ''} · 12 Coin</span>
       </div>
-      <button id="btn-claim-daily" ${dw.progress >= dw.target && !dw.claimed ? '' : 'disabled'}>Claim 12g</button>
+      <button id="btn-claim-daily" ${dw.progress >= dw.target && !dw.claimed ? '' : 'disabled'}>Claim 12 Coin</button>
     </div>
   `;
   $('#btn-claim-daily')?.addEventListener('click', () => {
     const res = claimDailyChallenge(profile);
-    if (res) { toast('Daily claimed — +12g'); renderClub(); refreshSplashPurse(); }
+    if (res) { toast('Daily claimed — +12 Coin'); renderClub(); refreshSplashPurse(); }
   });
 
   const list = $('#club-achievements');
@@ -2595,21 +2616,24 @@ function renderClub() {
       </div>
       <button data-ach="${a.id}" ${unlocked && !claimed ? '' : 'disabled'}>${claimed ? 'Claimed' : 'Claim'}</button>
     `;
-    row.querySelector('button')?.addEventListener('click', () => {
+    const claimAch = () => {
       const res = claimAchievement(profile, a.id, DATA.cards);
       if (res) { toast(`Claimed ${a.name}`); renderClub(); refreshSplashPurse(); }
-    });
+    };
+    row.querySelector('button')?.addEventListener('click', claimAch);
+    if (unlocked && !claimed) {
+      row.addEventListener('click', (e) => {
+        if (e.target.closest('button')) return;
+        claimAch();
+      });
+    }
     list.appendChild(row);
   }
 }
 
 function offerTitle(offer) {
   if (!offer) return '';
-  if (offer.kind === 'fragment') {
-    const p = patronRecord(offer.target);
-    const name = offer.target === 'mora' ? 'Hermaeus Mora' : (p?.short || offer.target);
-    return `${name} fragment`;
-  }
+  if (offer.kind === 'fragment') return `${patronDisplayName(offer.target)} fragment`;
   if (offer.kind === 'skin') return TABLE_SKINS.find((x) => x.id === offer.target)?.name || offer.target;
   if (offer.kind === 'back') return CARD_BACKS.find((x) => x.id === offer.target)?.name || offer.target;
   if (offer.kind === 'clue' || offer.kind === 'upgrade') return cardsById[offer.target]?.name || offer.target;
@@ -2663,26 +2687,49 @@ function offerVisual(offer) {
   return `<h4>${offer.id}</h4>`;
 }
 
+function offerOwned(offer) {
+  if (!offer || !profile) return false;
+  if (offer.kind === 'skin') return profile.unlockedSkins.includes(offer.target);
+  if (offer.kind === 'back') return profile.unlockedBacks.includes(offer.target);
+  if (offer.kind === 'fragment') return profile.unlockedDecks.includes(offer.target);
+  if (offer.kind === 'upgrade') return profile.ownedUpgrades.includes(offer.target);
+  return false;
+}
+
+function offerEquipped(offer) {
+  if (!offer || !profile) return false;
+  if (offer.kind === 'skin') return profile.tableSkin === offer.target;
+  if (offer.kind === 'back') return profile.cardBack === offer.target;
+  return false;
+}
+
 function renderOfferCard(offer, { later = false, preview = false } = {}) {
-  const sold = !later && !preview && isOfferSoldOut(profile, shopPeriodKeySafe(), offer.id);
+  const owned = !later && !preview && offerOwned(offer);
+  const cosmetic = offer.kind === 'skin' || offer.kind === 'back';
+  const equipped = owned && offerEquipped(offer);
+  const sold = !owned && !later && !preview && isOfferSoldOut(profile, shopPeriodKeySafe(), offer.id);
   const el = document.createElement('div');
-  el.className = 'store-item' + (sold ? ' soldout' : '') + (later || preview ? ' later' : '') + rarityGlowClass(offer.rarity);
-  const price = preview || later ? 'Returns later' : (sold ? 'Sold out' : `${offer.price}g`);
+  el.className = 'store-item' + (sold ? ' soldout' : '') + (owned ? ' owned' : '') + (equipped ? ' equipped' : '') + (later || preview ? ' later' : '') + rarityGlowClass(offer.rarity);
+  const price = preview || later ? 'Returns later' : owned ? 'Owned' : (sold ? 'Sold out' : `${offer.price} Coin`);
+  const label = preview || later ? '' : equipped ? 'Equipped' : (owned && cosmetic) ? 'Equip' : owned || sold ? 'Sold out' : 'Buy';
   el.innerHTML = `
     <div class="rarity-pip rarity-${offer.rarity}">${formatRarity(offer.rarity)}</div>
     ${offerVisual(offer)}
     <div class="price">${price}</div>
-    ${later || preview ? '' : `<button ${sold ? 'disabled' : ''}>${sold ? 'Sold out' : 'Buy'}</button>`}
+    ${label ? `<button ${sold || equipped || (owned && !cosmetic) ? 'disabled' : ''}>${label}</button>` : ''}
   `;
-  if (!later && !preview && !sold) {
+  if (!later && !preview && !sold && !equipped && !(owned && !cosmetic)) {
     el.querySelector('button').onclick = (e) => {
       e.stopPropagation();
-      const res = buyShopOffer(profile, offer, DATA.cards);
-      if (res.error) toast(res.error);
-      else {
-        toast(res.unlocked ? 'Patron unlocked — if every card clue is in.' : `Bought · ${offer.price}g`);
-        applyTableSkin(); renderStore(); refreshSplashPurse();
+      if (owned) {
+        const res = offer.kind === 'back' ? equipBack(profile, offer.target) : equipSkin(profile, offer.target);
+        if (res?.error) toast(res.error);
+        else { applyTableSkin(); renderStore(); toast('Equipped.'); }
+        return;
       }
+      const res = buyShopOffer(profile, offer, DATA.cards, { periodKey: shopPeriodKeySafe() });
+      if (res.error) toast(res.error);
+      else finishShopBuy(res, offer.price);
     };
   }
   el.addEventListener('click', (e) => {
@@ -2715,35 +2762,48 @@ function renderBundleHero(b, periodKey) {
     <div class="bundle-card store-hero">
       <p class="bundle-kicker">Featured · ${formatRarity(b.rarity)} parcel</p>
       <h4>Roister’s Binding</h4>
-      <p>${names}. Bound in Club gold until stock turns.</p>
+      <p>${names}. Bound for Coin until stock turns.</p>
       <div class="bundle-parts">${parts}</div>
       <div class="bundle-cta">
-        <div class="price">${sold ? 'Sold out' : b.price + 'g'}</div>
+        <div class="price">${sold ? 'Sold out' : `${b.price} Coin`}</div>
         <button class="primary" id="btn-buy-bundle" ${sold ? 'disabled' : ''}>${sold ? 'Sold out' : 'Claim the parcel'}</button>
       </div>
     </div>`;
 }
 
-function renderFeaturedPrize(offer) {
+function renderFeaturedPrize(offer, periodKey) {
   if (!offer) return '<p class="hint">The featured prize rides with tomorrow’s shop.</p>';
+  const sold = isOfferSoldOut(profile, periodKey, offer.id);
   return `
     <div class="store-hero">
-      <p class="bundle-kicker">Featured prize</p>
+      <p class="bundle-kicker">Featured prize · ${formatRarity(offer.rarity)}</p>
       <div class="hero-art-row">${offerThumb(offer)}<div>
         <h4>${offerTitle(offer)}</h4>
-        <p>A patron shard in today’s shop. Win the purse, then claim it.</p>
+        <p>A Patron fragment in today’s shop. ${offer.price} Coin. Win at the table, then claim it.</p>
       </div></div>
       <div class="bundle-cta">
-        <div class="price">${offer.price}g · ${formatRarity(offer.rarity)}</div>
-        <button class="primary" id="btn-buy-featured">Claim</button>
+        <div class="price">${sold ? 'Sold out' : `${offer.price} Coin`}</div>
+        <button class="primary" id="btn-buy-featured" ${sold ? 'disabled' : ''}>${sold ? 'Sold out' : 'Claim'}</button>
       </div>
     </div>`;
+}
+
+function finishShopBuy(res, price) {
+  if (!res || res.error) {
+    toast(res?.error || 'That buy did not go through.');
+    return;
+  }
+  toast(res.unlocked ? 'Patron unlocked — every fragment and base clue is in.' : `Bought · ${price} Coin`);
+  profile = loadProfile();
+  applyTableSkin();
+  renderStore();
+  refreshSplashPurse();
 }
 
 function renderStore() {
   profile = loadProfile();
   ensureClubMeta(profile, DATA.cards);
-  $('#store-gold').textContent = `${profile.gold}g`;
+  $('#store-gold').textContent = `${profile.gold} Coin`;
   const slate = shopSlateNow();
   const timer = $('#store-timer');
   if (timer) timer.textContent = `Shop refreshes in ${fmtCountdown(msUntilShopRefresh())} · midnight ET.`;
@@ -2759,9 +2819,9 @@ function renderStore() {
     if (b) {
       bundleBox.innerHTML = renderBundleHero(b, slate.periodKey);
       $('#btn-buy-bundle')?.addEventListener('click', () => {
-        const res = buyShopOffer(profile, b, DATA.cards);
+        const res = buyShopOffer(profile, b, DATA.cards, { periodKey: slate.periodKey });
         if (res.error) toast(res.error);
-        else { toast(`Parcel claimed · ${b.price}g`); renderStore(); refreshSplashPurse(); }
+        else finishShopBuy(res, b.price);
       });
     } else bundleBox.innerHTML = '';
   }
@@ -2769,12 +2829,12 @@ function renderStore() {
     if (slate.bundle) heroBox.innerHTML = '';
     else {
       const prize = frags[0] || slate.featured?.[0];
-      heroBox.innerHTML = renderFeaturedPrize(prize);
+      heroBox.innerHTML = renderFeaturedPrize(prize, slate.periodKey);
       $('#btn-buy-featured')?.addEventListener('click', () => {
         if (!prize) return;
-        const res = buyShopOffer(profile, prize, DATA.cards);
+        const res = buyShopOffer(profile, prize, DATA.cards, { periodKey: slate.periodKey });
         if (res.error) toast(res.error);
-        else { toast(`Claimed · ${prize.price}g`); renderStore(); refreshSplashPurse(); }
+        else finishShopBuy(res, prize.price);
       });
     }
   }
@@ -2937,7 +2997,7 @@ function showCosmeticSheet(kind, id) {
   const swatch = kind === 'skin' ? `<div class="skin-swatch ${id}"></div>` : `<div class="back-swatch back-${id}"></div>`;
   const how = owned
     ? 'Owned. Equip it here.'
-    : 'Appears in the rotating Club Store. Win matches for gold, then buy it. Seasonal pieces wait for their festival.';
+    : 'Appears in the rotating Club Store. Win matches for Coin, then buy it. Seasonal pieces wait for their festival.';
   openClubSheet(`
     <div class="sheet-hero">
       ${swatch}
@@ -2978,12 +3038,24 @@ function showOfferSheet(offer, { preview = false, sold = false } = {}) {
   }
   openClubSheet(`
     <h3 id="club-sheet-title">${offerTitle(offer)}</h3>
-    <p class="sheet-blurb">${preview ? 'Returns in a later shop.' : sold ? 'Already claimed today.' : 'A Club Store offer. Purse gold only.'}</p>
+    <p class="sheet-blurb">${preview ? 'Returns in a later shop.' : sold ? 'Already claimed today.' : 'A Club Store offer. Coin from your purse only.'}</p>
     <div class="sheet-how"><strong>How to unlock.</strong> Win matches to fill the purse, then buy when the rotating shop shows this piece.</div>
   `);
 }
 
 let collectionTab = 'patrons';
+let collectionSub = 'all';
+
+function setCollectionSub(sub) {
+  collectionSub = sub || 'all';
+  $$('.coll-sub').forEach((b) => b.classList.toggle('active', b.dataset.sub === collectionSub));
+  document.querySelectorAll('[data-subpanel]').forEach((el) => {
+    el.hidden = collectionSub !== 'all' && el.dataset.subpanel !== collectionSub;
+  });
+  document.querySelectorAll('[data-subhead]').forEach((el) => {
+    el.hidden = collectionSub !== 'all' && el.dataset.subhead !== collectionSub;
+  });
+}
 
 function setCollectionTab(tab) {
   collectionTab = tab;
@@ -3038,6 +3110,7 @@ function renderCollection() {
 
   renderClueEncyclopedia();
   renderCollectionUpgrades();
+  setCollectionSub(collectionSub);
 }
 
 function renderClueEncyclopedia() {
@@ -3109,11 +3182,15 @@ function renderCollectionUpgrades() {
         <div class="skin-swatch ${s.id}"></div>
         <h4>${s.name}</h4>
         <p>${s.tag || ''} · ${owned ? (eq ? 'Equipped' : 'Owned') : 'Not owned'}</p>
-        ${owned ? `<button>${eq ? 'Equipped' : 'Equip'}</button>` : ''}
+        ${owned ? `<button>${eq ? 'Equipped' : 'Equip'}</button>` : `<button type="button">View</button>`}
       `;
       el.querySelector('button')?.addEventListener('click', (e) => {
         e.stopPropagation();
-        equipSkin(profile, s.id); applyTableSkin(); renderCollection();
+        if (!owned) { showCosmeticSheet('skin', s.id); return; }
+        const res = equipSkin(profile, s.id);
+        if (res.error) { toast(res.error); return; }
+        applyTableSkin();
+        renderCollection();
       });
       el.addEventListener('click', (e) => {
         if (e.target.closest('button')) return;
@@ -3131,13 +3208,18 @@ function renderCollectionUpgrades() {
       el.className = 'store-item' + (owned ? ' owned' : ' later') + (eq ? ' equipped' : '');
       el.innerHTML = `
         <div class="rarity-pip rarity-${b.rarity || 'fine'}">${formatRarity(b.rarity || 'fine')}</div>
+        <div class="back-swatch back-${b.id}"></div>
         <h4>${b.name}</h4>
         <p>${owned ? (eq ? 'Equipped' : 'Owned') : 'Not owned'}</p>
-        ${owned ? `<button>${eq ? 'Equipped' : 'Equip'}</button>` : ''}
+        ${owned ? `<button>${eq ? 'Equipped' : 'Equip'}</button>` : `<button type="button">View</button>`}
       `;
       el.querySelector('button')?.addEventListener('click', (e) => {
         e.stopPropagation();
-        equipBack(profile, b.id); applyTableSkin(); renderCollection();
+        if (!owned) { showCosmeticSheet('back', b.id); return; }
+        const res = equipBack(profile, b.id);
+        if (res.error) { toast(res.error); return; }
+        applyTableSkin();
+        renderCollection();
       });
       el.addEventListener('click', (e) => {
         if (e.target.closest('button')) return;
@@ -3195,44 +3277,69 @@ function showCollectionDeck(deckId) {
   });
 }
 
+const CAL_DOW = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+
+function paintLoginCalendar(host, prof, { justStamped = null, claimable = false } = {}) {
+  if (!host || !prof) return null;
+  const grid = loginMonthGrid(prof.loginDays);
+  host.innerHTML = CAL_DOW.map((d) => `<div class="cal-dow">${d}</div>`).join('')
+    + grid.cells.map((c) => loginCellHtml(c, { justStamped, claimable })).join('');
+  return grid;
+}
+
 function openLoginGreet() {
   const overlay = $('#login-overlay');
   if (!overlay) return;
   profile = loadProfile();
-  const cal = $('#login-cal');
-  const grid = loginMonthGrid(profile.loginDays);
-  const dow = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-  if (cal) {
-    cal.innerHTML = dow.map((d) => `<div class="cal-dow">${d}</div>`).join('') +
-      grid.cells.map((c) => {
-        if (c.state === 'pad') return `<div class="cal-day pad"></div>`;
-        const mark = c.state === 'miss' ? '✕' : (c.state === 'ok' ? '✓' : c.day);
-        const claim = c.state === 'today' ? ' claimable' : '';
-        return `<div class="cal-day ${c.state}${c.crate ? ' crate' : ''}${claim}" data-date="${c.date || ''}">${mark}</div>`;
-      }).join('');
-  }
-  const crate = crateVariantForDay(grid.today);
+  const grid = paintLoginCalendar($('#login-cal'), profile, { claimable: canClaimDailyLogin(profile) });
+  const crate = grid ? crateVariantForDay(grid.today) : null;
   const hint = $('#login-prize-hint');
   if (hint) {
     hint.textContent = crate && (profile.cratesOpened || 0) < CRATES_PER_MONTH
       ? `Today holds a ${crate.name}. Two Crown Crates a month.`
-      : 'Stamp today for a modest Club purse of gold.';
+      : 'Stamp today for a modest purse of Coin.';
+  }
+  const btn = $('#btn-login-claim');
+  if (btn) {
+    btn.hidden = false;
+    btn.disabled = !canClaimDailyLogin(profile);
+    btn.textContent = canClaimDailyLogin(profile) ? 'Claim today’s stamp' : 'Stamped';
+    btn.onclick = () => claimLoginStamp();
   }
   overlay.classList.add('show');
-  cal?.querySelectorAll('.cal-day.claimable').forEach((el) => {
+  $('#login-cal')?.querySelectorAll('.cal-day.claimable').forEach((el) => {
     el.addEventListener('click', () => claimLoginStamp());
   });
 }
 
 function claimLoginStamp() {
   profile = loadProfile();
+  if (!canClaimDailyLogin(profile)) {
+    toast('Already stamped today.');
+    return;
+  }
   const res = claimDailyLogin(profile, DATA.cards);
-  if (res.error) { toast(res.error); $('#login-overlay')?.classList.remove('show'); return; }
+  if (res.error) { toast(res.error); return; }
   profile = res.profile;
+  const today = loginMonthGrid(profile.loginDays).today;
+  paintLoginCalendar($('#login-cal'), profile, { justStamped: today });
+  paintLoginCalendar($('#club-calendar'), profile, { justStamped: today });
   toast(res.toast);
-  $('#login-overlay')?.classList.remove('show');
   refreshSplashPurse();
-  if (res.crate) openCrateCeremony(res.crate);
+  const btn = $('#btn-login-claim');
+  if (btn) {
+    if (res.crate) {
+      btn.disabled = false;
+      btn.textContent = 'Open Crown Crate';
+      btn.onclick = () => {
+        $('#login-overlay')?.classList.remove('show');
+        openCrateCeremony(res.crate);
+      };
+    } else {
+      btn.disabled = true;
+      btn.textContent = 'Stamped';
+    }
+  }
 }
 
 function openCrateCeremony(variant) {
@@ -3259,6 +3366,7 @@ function doOpenCrate() {
   const res = openCrownCrate(profile, DATA.cards, variant);
   if (res.error) { toast(res.error); return; }
   pendingCrate = null;
+  applyTableSkin();
   playSfx('crate');
   $('#crate-stage')?.classList.add('crate-open');
   $('#crate-reward').innerHTML = `${goldCoinHtml()}<div>${res.reward?.label || 'Crate opened'}</div>`;
@@ -3482,31 +3590,81 @@ function beginHotseatPick() {
   toast('Pass & Play: both players use host unlocks.');
 }
 
+function copyRoomCode(code) {
+  const text = String(code || '').toUpperCase();
+  if (!text) return;
+  const done = () => toast(`Copied ${text}`);
+  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(done, () => done());
+  else done();
+}
+
+function paintFriendRoom(code, { wait = 'Tap the code to copy.' } = {}) {
+  const box = $('#friend-room');
+  const el = $('#friend-room-code');
+  const waitEl = $('#friend-room-wait');
+  const text = code ? String(code).toUpperCase() : '';
+  if (box) box.hidden = !text;
+  if (el) el.textContent = text;
+  if (waitEl) waitEl.textContent = wait;
+  if (el) el.onclick = text ? () => copyRoomCode(text) : null;
+}
+
+function syncRemotePickChrome() {
+  const remote = matchMode === 'remote-host' || matchMode === 'remote-guest';
+  document.body.classList.toggle('remote-friend-pick', remote && !isRankedMatch);
+  const banner = $('#deckpick-room');
+  const code = remote && net?.ok && net.code ? String(net.code).toUpperCase() : '';
+  if (!banner) return;
+  banner.hidden = !code;
+  if (!code) {
+    banner.innerHTML = '';
+    return;
+  }
+  banner.innerHTML = `<span class="deckpick-room-label">Room</span> <button type="button" class="room-code-inline" id="btn-copy-deck-code">${code}</button>`;
+  $('#btn-copy-deck-code').onclick = () => copyRoomCode(code);
+}
+
+function dropNet() {
+  if (net?.destroy) {
+    try { net.destroy(); } catch { /* already closed */ }
+  }
+  net = null;
+}
+
 async function beginHostRoom() {
   const status = $('#friend-status');
   status.textContent = 'Starting PeerJS room…';
+  paintFriendRoom('');
+  dropNet();
   net = await hostRoom();
   if (!net.ok) {
     status.textContent = `Remote unavailable: ${net.error}. Use Pass & Play.`;
+    paintFriendRoom('');
     toast(net.error);
+    show('#friend-lobby');
     return;
   }
-  status.innerHTML = `Room code: <strong style="letter-spacing:.2em">${net.code}</strong> — waiting for guest…`;
   matchMode = 'remote-host';
   isRankedMatch = false;
+  syncVoiceToMatchMode();
+  paintFriendRoom(net.code);
+  status.textContent = 'Waiting for guest…';
   attachVoiceToNet();
+  let hostGuestJoined = false;
   net.onMessage((msg) => {
-    if (msg.type === 'peer-ready' || msg.type === 'hello') {
-      status.textContent = `Guest joined room ${net.code}. Pick decks, then Begin.`;
+    if ((msg.type === 'peer-ready' || msg.type === 'hello') && !hostGuestJoined) {
+      hostGuestJoined = true;
+      status.textContent = 'Guest joined — pick decks';
+      pickYou = []; pickOpp = []; pickPhase = 'you';
+      renderDeckPick();
+      show('#deckpick');
     }
     if (msg.type === 'action') applyRemoteAction(msg);
     if (msg.type === 'request-state' && engine) {
       net.send({ type: 'state-seed', pickYou, pickOpp, ownedUpgrades: profile.ownedUpgrades });
     }
   });
-  pickYou = []; pickOpp = []; pickPhase = 'you';
-  renderDeckPick();
-  show('#deckpick');
+  show('#friend-lobby');
 }
 
 async function beginJoinRoom() {
@@ -3514,16 +3672,23 @@ async function beginJoinRoom() {
   if (code.length < 4) { toast('Enter a 4-letter room code'); return; }
   const status = $('#friend-status');
   status.textContent = `Joining ${code}…`;
+  paintFriendRoom('');
+  dropNet();
   net = await joinRoom(code);
   if (!net.ok) {
-    status.textContent = `Join failed: ${net.error}`;
+    status.textContent = `Join failed: ${net.error}. Use Pass & Play.`;
+    paintFriendRoom('');
     toast(net.error);
+    show('#friend-lobby');
     return;
   }
   matchMode = 'remote-guest';
-  status.textContent = `Connected to ${code}. Waiting for host to start…`;
+  isRankedMatch = false;
+  paintFriendRoom(code, { wait: 'Waiting for the host to begin.' });
+  status.textContent = `Connected to ${code}. Waiting for the host to start…`;
   attachVoiceToNet();
   net.send({ type: 'hello' });
+  show('#friend-lobby');
   net.onMessage((msg) => {
     if (msg.type === 'match-start') {
       pickYou = msg.pickYou;
@@ -3876,9 +4041,18 @@ function bind() {
   $('#btn-ranked-host')?.addEventListener('click', () => beginRankedHost());
   $('#btn-ranked-join')?.addEventListener('click', () => beginRankedJoin());
   $('#btn-friend').onclick = () => {
-    $('#friend-status').textContent = '';
     paintVoiceChrome();
     show('#friend-lobby');
+    if (matchMode === 'remote-host' && net?.ok && net.code && !engine) {
+      paintFriendRoom(net.code);
+      $('#friend-status').textContent = 'Waiting for guest…';
+    } else if (matchMode === 'remote-guest' && net?.ok && net.code && !engine) {
+      paintFriendRoom(net.code, { wait: 'Waiting for the host to begin.' });
+      $('#friend-status').textContent = `Connected to ${net.code}. Waiting for the host to start…`;
+    } else {
+      $('#friend-status').textContent = '';
+      paintFriendRoom('');
+    }
   };
   $('#btn-club').onclick = () => { renderClub(); show('#club'); };
   $('#btn-ency').onclick = () => { renderEncy(); show('#encyclopedia'); };
@@ -3901,6 +4075,25 @@ function bind() {
       renderCollection();
     });
   });
+  $$('.coll-sub').forEach((btn) => {
+    btn.addEventListener('click', () => setCollectionSub(btn.dataset.sub));
+  });
+  $('#sel-table-skin')?.addEventListener('change', (e) => {
+    profile = loadProfile();
+    const res = equipSkin(profile, e.target.value);
+    if (res.error) { toast(res.error); renderSettings(); return; }
+    profile = loadProfile();
+    applyTableSkin();
+    toast(`${TABLE_SKINS.find((s) => s.id === profile.tableSkin)?.name || 'Table'} is on the table.`);
+  });
+  $('#sel-card-back')?.addEventListener('change', (e) => {
+    profile = loadProfile();
+    const res = equipBack(profile, e.target.value);
+    if (res.error) { toast(res.error); renderSettings(); return; }
+    profile = loadProfile();
+    applyTableSkin();
+    toast(`${CARD_BACKS.find((b) => b.id === profile.cardBack)?.name || 'Card back'} is on your deck.`);
+  });
   const openStore = (from) => { storeReturnScreen = from; renderStore(); show('#store'); };
   $('#btn-store')?.addEventListener('click', () => openStore('#club'));
   $('#btn-splash-store')?.addEventListener('click', () => openStore('#splash'));
@@ -3919,7 +4112,6 @@ function bind() {
   });
   $('#ency-patron').onchange = renderEncy;
   $('#ency-search').oninput = renderEncy;
-  $('#btn-login-claim')?.addEventListener('click', () => claimLoginStamp());
   $('#btn-login-later')?.addEventListener('click', () => $('#login-overlay')?.classList.remove('show'));
   $('#btn-crate-open')?.addEventListener('click', () => doOpenCrate());
   $('#btn-crate-close')?.addEventListener('click', () => $('#crate-overlay')?.classList.remove('show'));
@@ -3996,7 +4188,7 @@ function bind() {
     hex?.getAnimations?.().forEach((a) => a.cancel());
     applyInspectBox(hex, text, m);
   };
-  window.addEventListener('resize', () => { syncBoardLayout(); refitInspect(); });
+  window.addEventListener('resize', () => { syncBoardLayout(); refitInspect(); if (tourActive) showTourStep(); });
   window.addEventListener('orientationchange', () => setTimeout(() => { syncBoardLayout(); refitInspect(); }, 160));
   window.visualViewport?.addEventListener('resize', () => { syncBoardLayout(); refitInspect(); });
   $('#btn-hand-done').onclick = () => {
@@ -4756,6 +4948,51 @@ function installTestHook() {
     },
     tourText() {
       return $('#tour-text')?.textContent || '';
+    },
+    tourSkipHidden() {
+      return !!$('#tour-skip')?.hidden;
+    },
+    tourNext() {
+      nextTourStep();
+    },
+    openLogin() {
+      openLoginGreet();
+    },
+    loginCalHtml() {
+      return $('#login-cal')?.innerHTML || '';
+    },
+    claimLogin() {
+      claimLoginStamp();
+      return $('#login-cal')?.innerHTML || '';
+    },
+    equipCosmetic(skinId, backId) {
+      profile = loadProfile();
+      if (skinId && !profile.unlockedSkins.includes(skinId)) profile.unlockedSkins.push(skinId);
+      if (backId && !profile.unlockedBacks.includes(backId)) profile.unlockedBacks.push(backId);
+      if (skinId) equipSkin(profile, skinId);
+      if (backId) equipBack(profile, backId);
+      profile = loadProfile();
+      applyTableSkin();
+      const cs = getComputedStyle(document.documentElement);
+      return {
+        skin: profile.tableSkin,
+        back: profile.cardBack,
+        body: document.body.className,
+        match: $('#match')?.className || '',
+        felt: cs.getPropertyValue('--eso-felt').trim(),
+        cardBack: cs.getPropertyValue('--card-back').trim(),
+      };
+    },
+    setCollectionSubtab(sub) {
+      this.openCollection();
+      setCollectionTab('upgrades');
+      setCollectionSub(sub);
+      return {
+        frags: $('#coll-frags')?.hidden,
+        tables: $('#coll-skins')?.hidden,
+        backs: $('#coll-backs')?.hidden,
+        upgrades: $('#coll-upgrades')?.hidden,
+      };
     },
     accountDisclaimer() {
       return $('#account-disclaimer')?.textContent || '';

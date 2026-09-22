@@ -7,11 +7,11 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta name="theme-color" content="#06141c" />
   <title>Tales of Tribute — Fan Table</title>
-  <link rel="stylesheet" href="css/style.css?v=54" />
-  <link rel="stylesheet" href="css/phone-eso.css?v=54" />
-  <link rel="stylesheet" href="css/table-pack.css?v=54" />
-  <link rel="stylesheet" href="css/board-pass.css?v=54" />
-  <link rel="stylesheet" href="css/club-chrome.css?v=54" />
+  <link rel="stylesheet" href="css/style.css?v=55" />
+  <link rel="stylesheet" href="css/phone-eso.css?v=55" />
+  <link rel="stylesheet" href="css/table-pack.css?v=55" />
+  <link rel="stylesheet" href="css/board-pass.css?v=55" />
+  <link rel="stylesheet" href="css/club-chrome.css?v=55" />
 </head>
 <body>
   <div id="app">
@@ -21,10 +21,10 @@
       <div class="splash-frame hi-frame">
         <p class="hi-kicker">High Isle · Roister’s Club</p>
         <h1>Tales of Tribute</h1>
-        <p class="subtitle">Two patrons, a tavern of five, forty prestige.</p>
+        <p class="subtitle">Two Patrons, a Tavern of five, forty Prestige.</p>
         <div class="splash-purse" id="splash-purse"></div>
         <p class="tutorial-nudge" id="tutorial-nudge" hidden>
-          New here? Play a short tutorial match.
+          New here? A short tutorial match walks you through Coin, the Tavern, and Patrons.
           <button type="button" class="primary" id="btn-nudge-tutorial">Play tutorial</button>
           <button type="button" id="btn-nudge-skip">Skip</button>
         </p>
@@ -53,7 +53,7 @@
           <label class="chk"><input type="checkbox" id="chk-hourglass-splash" /> Hourglass (90s)</label>
           <button type="button" id="btn-music" class="music-toggle" title="Music">♪ Music: Off</button>
         </div>
-        <p class="build-stamp" id="build-stamp">build 54</p>
+        <p class="build-stamp" id="build-stamp">build 55</p>
       </div>
     </section>
 
@@ -83,6 +83,7 @@
     <!-- DECK PICK -->
     <section id="deckpick" class="screen">
       <h2>Choose Your Patrons</h2>
+      <p class="deckpick-room" id="deckpick-room" hidden></p>
       <p class="hint" id="deckpick-hint">Pick <strong>two</strong> patrons for you, then two for your rival — or let the AI finish.</p>
       <div class="pick-meters">
         <div class="pick-meter you" id="pick-you-meter"><span class="pm-label">You</span> <span class="pm-count" id="pick-you-count">0 / 2</span><div class="pm-slots" id="pick-you-slots"></div></div>
@@ -140,6 +141,11 @@
           <input type="checkbox" id="chk-voice-friend" /> Voice chat (optional)
         </label>
         <p class="hint" id="voice-friend-hint">Off by default. Mic permission only if you enable it. Hotseat has no voice.</p>
+        <div class="friend-room" id="friend-room" hidden>
+          <p class="friend-room-label">Room code</p>
+          <button type="button" class="friend-room-code" id="friend-room-code" aria-label="Copy room code"></button>
+          <p class="hint" id="friend-room-wait">Tap the code to copy.</p>
+        </div>
         <p class="hint" id="friend-status"></p>
         <button id="btn-friend-back">Back</button>
       </div>
@@ -199,7 +205,7 @@
         <span class="store-gold" id="store-gold"></span>
         <button id="btn-store-back">Back</button>
       </header>
-      <p class="hint" id="store-hint">Today’s shop — rotating stock, purse gold.</p>
+      <p class="hint" id="store-hint">Today’s shop — rotating stock. Pay with Coin.</p>
       <p class="store-timer" id="store-timer"></p>
       <nav class="store-nav" aria-label="Store sections">
         <a href="#store-featured-block">Featured</a>
@@ -229,7 +235,7 @@
         <div class="store-grid" id="store-tomorrow"></div>
       </section>
       <div class="store-grid" id="store-later" hidden></div>
-      <p class="store-footnote">Purse gold only</p>
+      <p class="store-footnote">Coin only</p>
     </section>
 
     <!-- COLLECTION -->
@@ -252,14 +258,21 @@
         <div class="store-grid" id="clue-grid"></div>
       </div>
       <div id="collection-cosmetics" hidden>
-        <h3 class="club-section">Patron fragments</h3>
-        <div class="store-grid" id="coll-frags"></div>
-        <h3 class="club-section">Table designs</h3>
-        <div class="store-grid" id="coll-skins"></div>
-        <h3 class="club-section">Card backs</h3>
-        <div class="store-grid" id="coll-backs"></div>
-        <h3 class="club-section">Card upgrades owned</h3>
-        <div class="collection-cards" id="coll-upgrades"></div>
+        <div class="coll-subtabs" role="tablist" aria-label="Upgrade categories">
+          <button type="button" class="coll-sub active" data-sub="all">All</button>
+          <button type="button" class="coll-sub" data-sub="frags">Fragments</button>
+          <button type="button" class="coll-sub" data-sub="tables">Tables</button>
+          <button type="button" class="coll-sub" data-sub="backs">Card backs</button>
+          <button type="button" class="coll-sub" data-sub="upgrades">Upgrades</button>
+        </div>
+        <h3 class="club-section" data-subhead="frags">Patron fragments</h3>
+        <div class="store-grid" id="coll-frags" data-subpanel="frags"></div>
+        <h3 class="club-section" data-subhead="tables">Table designs</h3>
+        <div class="store-grid" id="coll-skins" data-subpanel="tables"></div>
+        <h3 class="club-section" data-subhead="backs">Card backs</h3>
+        <div class="store-grid" id="coll-backs" data-subpanel="backs"></div>
+        <h3 class="club-section" data-subhead="upgrades">Card upgrades owned</h3>
+        <div class="collection-cards" id="coll-upgrades" data-subpanel="upgrades"></div>
       </div>
     </section>
 
@@ -270,7 +283,7 @@
         <h2>Settings</h2>
         <button id="btn-settings-back">Back</button>
       </header>
-      <p class="hint">Table options. Equip cosmetics in Collection. New pieces appear in the Store.</p>
+      <p class="hint">Table options. Equip a table or card back here. New pieces appear in the Store.</p>
       <div class="settings-block" id="settings-account">
         <h3 class="club-section">Account</h3>
         <p class="hint" id="settings-account-hint"></p>
@@ -294,6 +307,12 @@
             <option value="table">Card table</option>
             <option value="dramatic">Dramatic</option>
           </select>
+        </label>
+        <label class="settings-row">Table
+          <select id="sel-table-skin" aria-label="Table skin"></select>
+        </label>
+        <label class="settings-row">Card back
+          <select id="sel-card-back" aria-label="Card back"></select>
         </label>
         <label class="chk settings-row"><input type="checkbox" id="chk-settings-hourglass" /> Hourglass default (90s)</label>
         <label class="chk settings-row" id="row-show-bot"><input type="checkbox" id="chk-settings-botcards" /> Show bot cards <span class="hint-inline">(vs AI coach mode — never in ranked/friend)</span></label>
@@ -570,6 +589,6 @@
       </div>
     </div>
   </div>
-  <script type="module" src="js/app.js?v=54"></script>
+  <script type="module" src="js/app.js?v=55"></script>
 </body>
 </html>
