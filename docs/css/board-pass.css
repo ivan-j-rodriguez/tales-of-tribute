@@ -1645,12 +1645,12 @@ body.is-landscape #match .felt-table {
   grid-template-rows:
     58px
     50px
-    34px
-    12px
-    82px
-    34px
-    50px
-    70px !important;
+    40px
+    14px
+    76px
+    40px
+    46px
+    66px !important;
 }
 
 body.is-landscape #match .felt-opp-hand {
@@ -1690,9 +1690,9 @@ body.is-landscape #match .agent-slot.filled,
 body.is-landscape #match .agent-slot.filled .card,
 body.is-landscape #match .card.agent-board {
   width: 30px !important;
-  height: 46px !important;
+  height: 44px !important;
   min-height: 0 !important;
-  max-height: 46px !important;
+  max-height: 44px !important;
 }
 
 body.is-landscape #match .tavern-zone .card {
@@ -1804,22 +1804,45 @@ body.is-landscape #match .events-rail .event-hex {
 body.is-landscape #match .you-fan,
 body.is-landscape #match #hand-zone {
   align-items: flex-start !important;
-  padding-top: 2px !important;
+  padding-top: 0 !important;
 }
 body.is-landscape #match #hand-zone .card,
 body.is-landscape #match #hand-zone button.card,
 body.is-landscape #match .you-fan .card {
   width: 36px !important;
-  height: 56px !important;
-  max-height: 56px !important;
+  height: 54px !important;
+  max-height: 54px !important;
   aspect-ratio: auto !important;
 }
 body.is-landscape #match .tavern-zone .card {
-  width: 36px !important;
-  height: 55px !important;
-  max-height: 55px !important;
+  width: 34px !important;
+  height: 52px !important;
+  max-height: 52px !important;
   min-height: 0 !important;
   aspect-ratio: auto !important;
+}
+body.is-landscape #match #opp-res,
+body.is-landscape #match #you-res {
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  align-self: stretch !important;
+}
+body.is-landscape #match #opp-res .eso-tok,
+body.is-landscape #match #you-res .eso-tok {
+  max-height: 32px !important;
+}
+body.is-landscape #match #turn-ind,
+body.is-landscape #match .turn-chip {
+  max-height: 12px !important;
+  height: 12px !important;
+  line-height: 12px !important;
+  padding: 0 0.55rem !important;
+  margin: 0 !important;
+  font-size: 0.62rem !important;
+  overflow: hidden !important;
+  align-self: center !important;
 }
 
 #match .card,
