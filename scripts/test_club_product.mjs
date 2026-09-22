@@ -13,7 +13,13 @@ if (!globalThis.crypto?.subtle) {
 }
 
 import { readFileSync } from 'fs';
-import { defaultProfile, loadProfile, saveProfile, buyFragment, currentShop } from '../web/js/profile.js';
+import {
+  defaultProfile, loadProfile, saveProfile, buyFragment, currentShop,
+  buyShopOffer, equipSkin, equipBack, liveCosmetic, claimDailyLogin,
+  TABLE_SKINS,
+} from '../web/js/profile.js';
+import { loginMonthGrid, loginCellHtml, priceOf, rarityOf, shopPeriodKey, SHOP_FEATURED_SLOTS, SHOP_FRAG_SLOTS, buildWeeklyGoals, patronDisplayName } from '../web/js/economy.js';
+import { TOUR_STEPS, canSkipTourStep, tourStep } from '../web/js/tutorial.js';
 import {
   signUpEmail, signInEmail, continueAsGuest, signOut, isSignedIn, currentSession,
   mergeProfiles, providerStatus, accountHint, permissionCopy,
@@ -39,8 +45,8 @@ assert(/shop|today/i.test(buyErr.error || '') && !/slate/i.test(buyErr.error || 
 const html = readFileSync(new URL('../web/index.html', import.meta.url), 'utf8');
 assert(!/Daily slate/i.test(html), 'index has no Daily slate');
 assert(/Daily stock/.test(html), 'index has Daily stock');
-assert(/build 54/.test(html), 'splash stamp is build 54');
-assert(/\?v=54/.test(html), 'cache bust is 54');
+assert(/build 55/.test(html), 'splash stamp is build 55');
+assert(/\?v=55/.test(html), 'cache bust is 55');
 const splash = html.split('id="splash"')[1]?.split('id="ranked"')[0] || '';
 assert(!/Unofficial/i.test(splash), 'splash body has no unofficial line');
 assert(/id="account-disclaimer"/.test(html) && /id="about-disclaimer"/.test(html), 'disclaimers live on login and About');
@@ -49,13 +55,97 @@ assert(!/slate/i.test(storeBlock), 'store markup has no slate');
 assert(!/Unofficial/i.test(storeBlock), 'store markup has no unofficial');
 
 const app = readFileSync(new URL('../web/js/app.js', import.meta.url), 'utf8');
-assert(/Your hand\. Tap a card/.test(app), 'tutorial explains the hand');
-assert(/Coin buys from the tavern/.test(app), 'tutorial explains coin/prestige/power');
-assert(/The tavern is five cards/.test(app), 'tutorial explains tavern buy');
-assert(/Combos fire/.test(app), 'tutorial explains combos');
-assert(/Agents stay in these slots/.test(app), 'tutorial explains agents');
-assert(/Patrons live here/.test(app), 'tutorial explains patrons');
-assert(/End Turn when you are done/.test(app), 'tutorial explains end turn');
+assert(TOUR_STEPS.length === 8, `tutorial has 8 steps (${TOUR_STEPS.length})`);
+assert(TOUR_STEPS.every((s) => s.id && s.sel && s.text && tourStep(TOUR_STEPS.indexOf(s))?.id === s.id), 'every tutorial step is addressable');
+assert(/Your hand\. Tap a card/.test(TOUR_STEPS[0].text), 'tutorial explains the hand');
+assert(/Coin buys from the Tavern/.test(TOUR_STEPS.map((s) => s.text).join(' ')), 'tutorial explains Coin and the Tavern');
+assert(/Power knocks out Agents/.test(TOUR_STEPS[1].text) && /Prestige/.test(TOUR_STEPS[1].text), 'tutorial explains Power and Prestige');
+assert(/The Tavern is five cards/.test(TOUR_STEPS[2].text), 'tutorial explains the Tavern buy');
+assert(/Combos fire/.test(TOUR_STEPS[3].text), 'tutorial explains combos');
+assert(/Agents stay in these slots/.test(TOUR_STEPS[4].text), 'tutorial explains agents');
+assert(/Patrons live here/.test(TOUR_STEPS[5].text), 'tutorial explains Patrons');
+assert(/End Turn when you are done/.test(TOUR_STEPS[6].text), 'tutorial explains end turn');
+assert(/40 Prestige/.test(TOUR_STEPS[7].text) && /80 Prestige/.test(TOUR_STEPS[7].text), 'tutorial explains Prestige wins');
+assert(!canSkipTourStep(0) && canSkipTourStep(1), 'tutorial skip opens after the first step');
+assert(!/slate/i.test(TOUR_STEPS.map((s) => s.text).join(' ')), 'tutorial never says slate');
+assert(/canSkipTourStep\(tourStep\)/.test(app), 'match tour hides skip on the first step');
+assert(/id="btn-replay-tour"/.test(html) && /startTutorialMatch/.test(app), 'tutorial replays from Settings');
+assert(/setCollectionSub\(/.test(app) && /data-sub="frags"/.test(html) && /data-sub="backs"/.test(html), 'collection subcategories are wired');
+assert(/sel-table-skin/.test(html) && /sel-card-back/.test(html) && /equipSkin\(profile, e\.target\.value\)/.test(app), 'settings equip table and card back');
+assert(/liveCosmetic\(profile\)/.test(app) && /--eso-felt/.test(app) && /--card-back/.test(app), 'applyTableSkin writes the live table and deck back');
+assert(/loginCellHtml\(/.test(app) && /justStamped/.test(app), 'claim paints a stamp onto the calendar');
+
+const beforeMidnight = new Date('2026-09-15T03:59:00Z');
+const afterMidnight = new Date('2026-09-15T04:01:00Z');
+assert(shopPeriodKey(beforeMidnight) !== shopPeriodKey(afterMidnight), 'shop period rolls at New York midnight');
+assert(shopPeriodKey(beforeMidnight) === shopPeriodKey(new Date('2026-09-14T16:00:00Z')), 'shop period stays put through the New York day');
+
+const periodA = currentShop(defaultProfile(), cards, 2000);
+const periodB = currentShop(defaultProfile(), cards, 2001);
+assert(periodA.periodKey === 2000 && periodB.periodKey === 2001, 'shop period key is the day you ask for');
+assert(periodA.featured.map((o) => o.id).join() !== periodB.featured.map((o) => o.id).join(), 'adjacent shop periods stock different offers');
+assert(periodA.tomorrow.periodKey === 2001, 'tomorrow preview is the next period');
+assert(periodA.tomorrow.featured.map((o) => o.id).join() === periodB.featured.map((o) => o.id).join(), 'tomorrow preview matches the next period’s stock');
+assert(periodA.featured.length > 0 && periodA.featured.length <= SHOP_FEATURED_SLOTS, `daily stock stays sparse (${periodA.featured.length})`);
+assert(periodA.catalogSize > periodA.featured.length, 'the shop does not list the whole catalog at once');
+assert(periodA.featured.filter((o) => o.kind === 'fragment').length === SHOP_FRAG_SLOTS, 'exactly one fragment is in the daily stock');
+assert(periodA.featured.every((o) => o.price === priceOf(o.kind, o.target, cards) && o.rarity === rarityOf(o.kind, o.target, cards)), 'every offer shows its rarity price');
+let sameAll = true;
+for (let k = 2100; k < 2112; k++) {
+  const shop = currentShop(defaultProfile(), cards, k);
+  if (shop.featured.length >= shop.catalogSize) sameAll = false;
+  if (shop.featured.filter((o) => o.kind === 'fragment').length !== 1) sameAll = false;
+}
+assert(sameAll, 'twelve periods stay sparse and keep a single fragment');
+
+let nightbladePeriod = null;
+for (let k = 1; k < 500 && !nightbladePeriod; k++) {
+  const shop = currentShop(defaultProfile(), cards, k);
+  const hit = shop.featured.find((o) => o.kind === 'skin' && o.target === 'nightblade');
+  if (hit) nightbladePeriod = { k, hit };
+}
+assert(!!nightbladePeriod, 'Nightblade table appears in some shop period');
+const buyer = defaultProfile();
+buyer.gold = nightbladePeriod.hit.price;
+const bought = buyShopOffer(buyer, nightbladePeriod.hit, cards, { periodKey: nightbladePeriod.k });
+assert(bought.ok && buyer.tableSkin === 'nightblade', `buying a table skin equips it (${bought.error || buyer.tableSkin})`);
+const worn = liveCosmetic(buyer);
+const plain = liveCosmetic(defaultProfile());
+assert(worn.skinClass === 'skin-nightblade' && worn.felt !== plain.felt, `equipped table changes the live felt (${worn.felt} vs ${plain.felt})`);
+const offPeriod = buyShopOffer(defaultProfile(), nightbladePeriod.hit, cards, { periodKey: nightbladePeriod.k + 3 });
+assert(!!offPeriod.error && !/slate/i.test(offPeriod.error), `off-period buy is refused in shop language (${offPeriod.error})`);
+const sold = buyShopOffer(buyer, nightbladePeriod.hit, cards, { periodKey: nightbladePeriod.k });
+assert(!!sold.error, `second buy is sold out (${sold.error})`);
+
+const backBuyer = defaultProfile();
+backBuyer.unlockedBacks = [...backBuyer.unlockedBacks, 'apocrypha'];
+equipBack(backBuyer, 'apocrypha');
+const backed = liveCosmetic(backBuyer);
+assert(backed.backId === 'apocrypha' && backed.cardBack !== plain.cardBack, 'equipping a card back changes the deck back url');
+assert(backed.backHue === '#0a1810' && backed.backAccent === '#3a9050', 'apocrypha back uses its palette');
+assert(/card-back/i.test(backed.cardBack) && backed.cardBack.includes('3a9050'), 'live back is a card-back in the apocrypha colors');
+const ownedSkin = defaultProfile();
+ownedSkin.unlockedSkins = [...ownedSkin.unlockedSkins, 'auridon'];
+equipSkin(ownedSkin, 'auridon');
+assert(liveCosmetic(ownedSkin).skinId === 'auridon' && liveCosmetic(ownedSkin).felt === '#1a2c28', 'settings-style equip sets the Auridon table');
+assert(TABLE_SKINS.some((s) => s.id === 'auridon'), 'Auridon is a real table skin');
+
+const weekGoals = buildWeeklyGoals('2026-09-14', defaultProfile());
+assert(weekGoals.every((g) => !/\b(pelin|hunding|redeagle|orgnum)\b/.test(g.desc)), `weekly goals use Patron names (${weekGoals.map((g) => g.desc).join(' | ')})`);
+assert(patronDisplayName('mora') === 'Hermaeus Mora', 'Mora displays as Hermaeus Mora');
+
+const stampP = defaultProfile();
+const stamped = claimDailyLogin(stampP, cards);
+assert(!stamped.error && stampP.loginDays, `daily login claims (${stamped.error || 'ok'})`);
+const stampGrid = loginMonthGrid(stampP.loginDays);
+const todayCell = stampGrid.cells.find((c) => c.date === stampGrid.today);
+assert(todayCell?.state === 'ok', `claimed day is marked ok (${todayCell?.state})`);
+const stampHtml = loginCellHtml(todayCell, { justStamped: stampGrid.today });
+assert(/day-stamp/.test(stampHtml) && /STAMP/.test(stampHtml) && /just-stamped/.test(stampHtml), 'claimed day renders a visible stamp');
+const futureCell = stampGrid.cells.find((c) => c.state === 'future');
+if (futureCell) assert(!/day-stamp/.test(loginCellHtml(futureCell)), 'unclaimed days are not stamped');
+const missCell = { date: '2026-09-01', day: 1, state: 'miss' };
+assert(!/day-stamp/.test(loginCellHtml(missCell)) && /✕/.test(loginCellHtml(missCell)), 'missed days keep the red X');
 
 const p = defaultProfile();
 p.gold = 99;

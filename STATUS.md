@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-22 (build 55):** Club-only finish. Daily shop stock is one period at a time (rarities and Coin prices, one fragment, sold-out buys, tomorrow is the next period — the Store is never called a slate). Buying or equipping a table skin or card back sets the live match felt and deck backs (Settings selects, Store, Collection, season and crate grants). Collection upgrade subcategories filter. Tutorial steps stay on screen, skip after the first step, and replay from Settings. A claimed login day shows a wax STAMP in the calendar, including right after you claim it. Purse currency in Club copy is Coin. Board/felt layout untouched (`board-pass`, `phone-eso`, `table-pack` not edited). `?v=55`.
+
 **2026-09-15 (build 54):** Club/inspect copy, rebased on board **53**. Long-press card and patron dossiers use exact in-game UESP template sentences (Donate / Toss / Knock Out / Refresh / Destroy / Acquire / Confine / Reprieve — not “2 Coin”, “Donate 1”, or “Acquire 5” stubs). `web/data/cards.uesp.json` ships so overlay runs. Inspect sheet is leaner (no Tribute Card/Patron kicker; title wraps; body splits full sentences). Board/felt landscape packing from 53 untouched (`board-pass`, `phone-eso`, `table-pack` not edited). `?v=54`.
 
 **2026-09-15 (build 53):** Board/felt **landscape only** finish-line. SFX / settings / Leave move off the upper-left (under opp DRAW) into a **horizontal** cluster between you-DRAW and the centered hand, toward the bottom. You-hand hexes zoom in from the build 52 30px pass — still fully on-canvas with felt air under the tips (gold glow intact). Hold-inspect dossier chrome/layout cleaned; card/patron copy prints the full `applyOfficialCardText` / `applyOfficialPatronText` strings (no stub fragments). Portrait packing from build 51 is locked (strip / piles / hand unchanged). Left gutters, DECK beside tavern, Treasury 1:1 circle, card backs, hold-inspect in target trays, and layout-fb overlap gates stay. Club hub / store / collection / economy / music / auth / voice / club-chrome untouched. `?v=53`.
@@ -91,7 +93,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=54`. Long-press inspect uses in-game UESP sentences (build 54) on board landscape 53.
+`docs/` is a copy of `web/`. Cache-bust `?v=55`. Club shop, cosmetics, tutorial, and daily stamp are build 55. Long-press inspect stays on the build 54 UESP sentences. Board landscape packing stays 53.
 
 | Fix | Notes |
 |---|---|

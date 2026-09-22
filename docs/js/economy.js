@@ -137,6 +137,29 @@ export function canonPatron(id) {
   return PATRON_CANON[k] || k;
 }
 
+const PATRON_NAMES = {
+  pelin: 'Saint Pelin',
+  crows: 'Duke of Crows',
+  hlaalu: 'Grandmaster Delmene Hlaalu',
+  celarus: 'Psijic Loremaster Celarus',
+  hunding: 'Ansei Frandar Hunding',
+  redeagle: 'Red Eagle',
+  orgnum: 'Sorcerer-King Orgnum',
+  rajhin: 'Rajhin',
+  druid: 'The Druid King',
+  almalexia: 'Almalexia',
+  alessia: 'Saint Alessia',
+  mora: 'Hermaeus Mora',
+  treasury: 'Treasury',
+};
+
+/** Player-facing Patron name. Never a raw id. */
+export function patronDisplayName(id) {
+  if (!id) return 'a Patron';
+  const key = canonPatron(id);
+  return PATRON_NAMES[key] || PATRON_NAMES[id] || String(id);
+}
+
 export function sortCardsInDeck(cards = []) {
   return [...cards].sort((a, b) => {
     const as = a.starter ? 0 : 1;
@@ -490,7 +513,7 @@ function makeOffer(kind, target, cards) {
 }
 
 /**
- * Daily sparse slate: ~4 skins, ~4 backs, 1 fragment (the fragment is the prize),
+ * Daily sparse stock: ~4 skins, ~4 backs, 1 fragment (the fragment is the prize),
  * and rarely one expensive clue. Most of the catalog stays off the table.
  */
 export function buildShopSlate({
@@ -515,18 +538,15 @@ export function buildShopSlate({
   for (const s of skins) {
     if (s.price <= 0) continue;
     if (s.seasonal && s.seasonal !== seasonId) continue;
-    if (ownedSkins.includes(s.id)) continue;
     catalog.push(makeOffer('skin', s.id, cards));
   }
   for (const b of backs) {
     if (b.price <= 0) continue;
     if (b.seasonal && b.seasonal !== seasonId) continue;
-    if (ownedBacks.includes(b.id)) continue;
     catalog.push(makeOffer('back', b.id, cards));
   }
-  const cluePool = (cards || []).filter((c) =>
-    c && c.id && !c.token && !c.curse && (ownedClues?.[c.id] || 0) < 1
-  );
+  // Ownership does not change the day's stock. A purchase marks that offer sold out.
+  const cluePool = (cards || []).filter((c) => c && c.id && !c.token && !c.curse);
   for (const c of cluePool) {
     catalog.push(makeOffer('clue', c.id, cards));
   }
@@ -628,6 +648,25 @@ export function loginMonthGrid(loginDays = {}, d = new Date()) {
     cells.push({ date, day, state, crate });
   }
   return { year: y, month: m, today, cells };
+}
+
+/**
+ * One calendar cell. Claimed days carry a visible stamp, not an empty box.
+ * `justStamped` matches the date that was just claimed so the hit animation can run.
+ */
+export function loginCellHtml(cell, { justStamped = null, claimable = false } = {}) {
+  if (!cell || cell.state === 'pad') return '<div class="cal-day pad"></div>';
+  const stamped = cell.state === 'ok';
+  const classes = ['cal-day', cell.state];
+  if (cell.crate) classes.push('crate');
+  if (stamped) classes.push('stamped');
+  if (stamped && justStamped && cell.date === justStamped) classes.push('just-stamped');
+  if (claimable && cell.state === 'today') classes.push('claimable');
+  const inner = stamped
+    ? '<span class="day-stamp" aria-label="Stamped">STAMP</span>'
+    : (cell.state === 'miss' ? '✕' : String(cell.day ?? ''));
+  const date = cell.date || '';
+  return `<div class="${classes.join(' ')}" title="${date}" data-date="${date}">${inner}</div>`;
 }
 
 export function crateDaysForMonth(y, m) {
@@ -817,7 +856,7 @@ export function buildWeeklyGoals(weekKey, profile = {}) {
       id: `w-${weekKey}-${idx}-${def.type}`,
       type: def.type,
       title: def.title,
-      desc: fillDesc(def.desc, { n: def.target, patronName: patron }),
+      desc: fillDesc(def.desc, { n: def.target, patronName: patron ? patronDisplayName(patron) : null }),
       target: def.target,
       progress: 0,
       claimed: false,
@@ -843,7 +882,7 @@ export function buildSeasonalGoals(season, profile = {}) {
       id: `s-${season.id}-${idx}-${def.type}`,
       type: def.type,
       title: def.title,
-      desc: fillDesc(def.desc, { n: def.target, patronName: patron }),
+      desc: fillDesc(def.desc, { n: def.target, patronName: patron ? patronDisplayName(patron) : null }),
       target: def.target,
       progress: 0,
       claimed: false,
