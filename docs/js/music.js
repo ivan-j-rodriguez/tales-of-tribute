@@ -278,7 +278,7 @@ function playSfxFile(kind) {
   const file = SFX_FILE[kind];
   if (!file) return false;
   try {
-    const a = new Audio(`assets/audio/${file}?v=57`);
+    const a = new Audio(`assets/audio/${file}?v=58`);
     a.volume = 0.78;
     const pending = a.play();
     if (pending && typeof pending.catch === 'function') {

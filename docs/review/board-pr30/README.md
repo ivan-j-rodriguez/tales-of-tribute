@@ -1,6 +1,6 @@
-# Board PR review shots (stamp build 57)
+# Board PR review shots (stamp build 58)
 
-Rebased onto latest main (Club Hotseat build 56 is merge `28409e4`; Friend PeerJS is also on that tip). This board PR’s player-facing stamp is **build 57**, not 56. It covers the felt finish-line only. Portrait lock is unchanged (patron column 328, DRAW left 6, HUD top 168.8, Treasury face 24.63). Landscape top-seat hand cards are 52px tall and agents 44px, fully inside the felt. A short tap acts. A one-second hold opens the dossier and does not play, buy, call, or pick. Closing the dossier leaves the felt clickable. Crows landscape inspect shows Favored, Neutral, and Unfavored inside the sheet; the confirm actions stay on screen.
+Rebased onto latest main (Club Hotseat build 56 is merge `28409e4`; Friend PeerJS build 57 is merge `63883a6`). This board PR’s player-facing stamp is **build 58**. It covers the felt finish-line only. Portrait lock is unchanged (patron column 328, DRAW left 6, HUD top 168.8, Treasury face 24.63). Landscape top-seat hand cards are 52px tall and agents 44px, fully inside the felt. A short tap acts. A one-second hold opens the dossier and does not play, buy, call, or pick. Closing the dossier leaves the felt clickable. Crows landscape inspect shows Favored, Neutral, and Unfavored inside the sheet; the confirm actions stay on screen.
 
 | Check | File |
 |---|---|
