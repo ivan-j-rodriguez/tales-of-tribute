@@ -1,9 +1,18 @@
-# Board PR review shots (stamp build 58)
+# Board PR review shots (stamp build 57)
 
-Rebased onto main (splash build 57). This board PR stamps **build 58** and covers the felt finish-line only. Portrait lock is unchanged (patron column 328, DRAW left 6, HUD top 168.8, Treasury face 24.63). Landscape top-seat hand cards are 52px tall and agents 44px, fully inside the felt. A short tap acts. A one-second hold opens the dossier and does not play, buy, call, or pick. Closing the dossier leaves the felt clickable. Crows landscape inspect shows Favored, Neutral, and Unfavored inside the sheet; the confirm actions stay on screen.
+Rebased onto latest main (Club Hotseat build 56 is merge `28409e4`; Friend PeerJS is also on that tip). This board PR’s player-facing stamp is **build 57**, not 56. It covers the felt finish-line only. Portrait lock is unchanged (patron column 328, DRAW left 6, HUD top 168.8, Treasury face 24.63). Landscape top-seat hand cards are 52px tall and agents 44px, fully inside the felt. A short tap acts. A one-second hold opens the dossier and does not play, buy, call, or pick. Closing the dossier leaves the felt clickable. Crows landscape inspect shows Favored, Neutral, and Unfavored inside the sheet; the confirm actions stay on screen.
 
 | Check | File |
 |---|---|
+| Build 57 portrait felt | b57-portrait-felt.png |
+| Build 57 landscape top seat | b57-landscape-top.png |
+| Build 57 hand hold | b57-hand-hold.png |
+| Build 57 tavern hold | b57-tavern-hold.png |
+| Build 57 patron call | b57-patron-call.png |
+| Build 57 patron hold | b57-patron-hold.png |
+| Build 57 Crows landscape | b57-landscape-crows.png |
+| Build 57 targeting hold | b57-tray-hold.png |
+| Build 57 rotate back to portrait | b57-rotate-portrait.png |
 | Landscape top seat (hand + agents) | b56-landscape-top-seat.png |
 | Landscape Crows inspect | b56-landscape-crows-inspect.png |
 | Landscape Crows confirm | b56-landscape-crows-confirm.png |
