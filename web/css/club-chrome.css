@@ -259,7 +259,7 @@
 }
 
 #splash button, #club button, #store button, #collection button,
-#settings button, #ranked button, #gauntlet button, #friend-lobby button,
+#settings button, #ranked button, #gauntlet button:not(.g-marker), #friend-lobby button,
 #deckpick button, #card-modal button, #club-sheet button,
 .login-modal button, .crate-modal button, #sack-overlay button {
   background:
@@ -278,6 +278,65 @@
     linear-gradient(180deg, #b8943a, #6e5214);
   border-color: var(--hi-gold);
   color: #fff8e8;
+}
+
+/* Province stop chips sit on the parchment map. The High Isle button gold
+   must not paint them — that was cream ink on a cream pill. Every marker
+   state is dark ink on an opaque light chip. Cleared and failed shift the
+   pair toward green or red; the border marks the state. Map-art province
+   names are not these chips. */
+#gauntlet button.g-marker {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: #24160c;
+  padding: 0;
+  filter: none;
+}
+#gauntlet button.g-marker:hover,
+#gauntlet button.g-marker:focus,
+#gauntlet button.g-marker:active {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: #24160c;
+  filter: none;
+}
+#gauntlet button.g-marker:active {
+  transform: translate(-50%, -50%);
+}
+#gauntlet button.g-marker .g-name {
+  color: #24160c;
+  background: #fff8dc;
+  border: 1px solid #3d2914;
+  box-shadow: 0 1px 2px rgba(28, 16, 8, 0.35);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  padding: 1px 5px;
+  max-width: 11rem;
+}
+#gauntlet button.g-marker.start .g-name,
+#gauntlet button.g-marker.locked .g-name {
+  color: #24160c;
+  background: #fff8dc;
+  border-color: #3d2914;
+}
+#gauntlet button.g-marker.cleared .g-name {
+  color: #142418;
+  background: #f4fff2;
+  border-color: #1b5e20;
+}
+#gauntlet button.g-marker.failed .g-name {
+  color: #3c1212;
+  background: #fff4f2;
+  border-color: #8e2424;
+}
+#gauntlet button.g-marker.current .g-name {
+  color: #24160c;
+  background: #fff8dc;
+  border-color: #6b4a08;
 }
 
 /* ——— Store: Crown Store energy ——— */
