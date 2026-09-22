@@ -145,7 +145,25 @@ export class GameEngine {
     }
   }
 
+  /** Contracts never enter a player's cooldown, draw, or hand cycle. */
+  _isContract(card) {
+    return !!this.card(card?.id)?.contract;
+  }
+
+  _exile(player, card) {
+    if (!card || !player) return;
+    if (player.exile.some(c => c.uid === card.uid)) return;
+    player.exile.push(card);
+  }
+
   _toCooldown(player, card) {
+    if (!card || !player) return;
+    // One guard for every caller: discard, toss, donate, acquire, confine
+    // release, bargain copies, created cards, end-of-turn flush, and buy.
+    if (this._isContract(card)) {
+      this._exile(player, card);
+      return;
+    }
     player.cooldown.push(card);
     this._triggerPassives(player, 'cooldown', card);
     if (this.card(card.id)?.type === 'agent') {
@@ -279,11 +297,12 @@ export class GameEngine {
       this.emit('agentEnter', { agent: card });
     }
 
-    // Contract actions: resolve then EXILE (never cooldown). Contract agents exile on defeat.
+    // Contract actions: resolve then EXILE (never cooldown). Contract agents stay
+    // on the row until defeat, which exiles them.
     if (def.contract && def.type === 'action') {
       const pi = p.played.findIndex(c => c.uid === card.uid);
       if (pi >= 0) p.played.splice(pi, 1);
-      p.exile.push(card);
+      this._exile(p, card);
     }
 
     this._picks = null;
@@ -520,9 +539,11 @@ export class GameEngine {
   }
 
   _acquire(p, maxCost) {
+    // Acquire puts a tavern card into cooldown. Contracts are not legal targets
+    // (Bargain is explicitly non-contract; a contract must never cycle).
     const affordable = this.state.tavern
       .map((c, i) => ({ c, i, d: this.card(c.id) }))
-      .filter(x => x.d.cost <= maxCost);
+      .filter(x => x.d && x.d.cost <= maxCost && !x.d.contract);
     if (!affordable.length) return;
     const pickUid = this._pullPick('acquire');
     let pick = pickUid
@@ -585,7 +606,7 @@ export class GameEngine {
     for (const c of agent.confined || []) this._toCooldown(owner, c);
     const def = this.card(agent.id);
     if (def?.contract) {
-      owner.exile.push(agent);
+      this._exile(owner, agent);
     } else {
       this._toCooldown(owner, agent);
     }
@@ -713,12 +734,29 @@ export class GameEngine {
     return p.coin >= d.cost;
   }
 
-  buy(tavernIndex) {
+  buy(tavernIndex, picks = null) {
     if (!this.canBuy(tavernIndex)) return false;
     const p = this.me();
     const c = this.state.tavern.splice(tavernIndex, 1)[0];
     const d = this.card(c.id);
     p.coin -= d.cost;
+    if (d.contract) {
+      // Official: a contract is played immediately. It never enters cooldown.
+      p.hand.push(c);
+      const played = this.playCard(c.uid, picks?.choose || 0, picks);
+      if (!played) {
+        const hi = p.hand.findIndex(x => x.uid === c.uid);
+        if (hi >= 0) p.hand.splice(hi, 1);
+        this.state.tavern.splice(Math.min(tavernIndex, this.state.tavern.length), 0, c);
+        p.coin += d.cost;
+        return false;
+      }
+      this._log(`Buy ${d.name} (${d.cost})`);
+      this.emit('buy', { card: c, def: d });
+      this._refillTavernSlot();
+      this.emit('state', this.state);
+      return true;
+    }
     this._toCooldown(p, c);
     this._log(`Buy ${d.name} (${d.cost})`);
     this.emit('buy', { card: c, def: d });
@@ -913,9 +951,10 @@ export class GameEngine {
         break;
       }
       case 'mora_share': {
+        // Bargain: a non-contract action. Both players gain a cooldown copy.
         const actions = this.state.tavern
           .map((c, i) => ({ c, i, d: this.card(c.id) }))
-          .filter(x => x.d.type === 'action');
+          .filter(x => x.d && x.d.type === 'action' && !x.d.contract);
         if (!actions.length) break;
         const pickUid = this._pullPick('moraShare');
         let pick = pickUid ? actions.find(x => x.c.uid === pickUid || x.c.id === pickUid) : null;
@@ -954,14 +993,16 @@ export class GameEngine {
     p.power = 0;
     p.coin = 0;
 
-    // Move played to cooldown (non-exiled)
+    // Move played to cooldown. Contract actions exile. A contract agent left in
+    // played (not seated) exiles too — it must not fall through to cooldown.
     while (p.played.length) {
       const c = p.played.pop();
       const def = this.card(c.id);
       if (def?.contract && def.type === 'action') {
-        p.exile.push(c);
+        this._exile(p, c);
       } else if (def?.type === 'agent') {
-        // agents stay on board — shouldn't be in played; if somehow there, skip
+        const seated = p.agents.some(a => a.uid === c.uid);
+        if (def.contract && !seated) this._exile(p, c);
       } else {
         this._toCooldown(p, c);
       }
@@ -1074,11 +1115,9 @@ export class GameEngine {
     return out;
   }
 
-  _effectsForPlay(uid, choiceIndex = null) {
+  _effectsForDef(def, choiceIndex = null) {
+    if (!def) return [];
     const p = this.me();
-    const card = p.hand.find(c => c.uid === uid);
-    if (!card) return [];
-    const def = this.card(card.id);
     const combo = (p.suitsPlayed[def.patron] || 0) + 1;
     const raw = [...(def.play || [])];
     if (combo >= 2) raw.push(...(def.combo2 || []));
@@ -1092,6 +1131,17 @@ export class GameEngine {
       } else out.push(e);
     }
     return out;
+  }
+
+  _effectsForPlay(uid, choiceIndex = null) {
+    const card = this.me().hand.find(c => c.uid === uid);
+    if (!card) return [];
+    return this._effectsForDef(this.card(card.id), choiceIndex);
+  }
+
+  /** Targeting for a contract still in the tavern, before buy plays it. */
+  targetingStepsForCardId(cardId, choiceIndex = null) {
+    return this._stepsFromEffects(this._effectsForDef(this.card(cardId), choiceIndex));
   }
 
   targetingStepsForPlay(uid, choiceIndex = null) {
@@ -1160,7 +1210,12 @@ export class GameEngine {
       case 'replace':
         return this.state.tavern.map(c => mark(c, 'tavern'));
       case 'acquire':
-        return this.state.tavern.filter(c => (this.card(c.id)?.cost || 0) <= (step.maxCost ?? 99)).map(c => mark(c, 'tavern'));
+        return this.state.tavern
+          .filter(c => {
+            const d = this.card(c.id);
+            return d && !d.contract && (d.cost || 0) <= (step.maxCost ?? 99);
+          })
+          .map(c => mark(c, 'tavern'));
       case 'refreshHand':
         return p.cooldown.map(c => mark(c, 'cooldown'));
       case 'refreshDraw': {
@@ -1183,7 +1238,12 @@ export class GameEngine {
         return o.draw.slice(-look).reverse().map(c => mark(c, 'draw'));
       }
       case 'moraShare':
-        return this.state.tavern.filter(c => this.card(c.id)?.type === 'action').map(c => mark(c, 'tavern'));
+        return this.state.tavern
+          .filter(c => {
+            const d = this.card(c.id);
+            return d && d.type === 'action' && !d.contract;
+          })
+          .map(c => mark(c, 'tavern'));
       default:
         return [];
     }

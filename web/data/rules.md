@@ -64,7 +64,7 @@ Power→Prestige conversion is **blocked** while the opponent has at least one *
 - **Buy a normal card**: pay Coin = cost; it goes to **cooldown** (not played immediately).
 - **Buy a Contract**: it is played **immediately** instead of entering your deck.
 - **Replace**: remove up to N row cards and refill.
-- **Acquire**: take a row card with cost ≤ N without paying (into cooldown).
+- **Acquire**: take a non-contract row card with cost ≤ N without paying (into cooldown). Contracts are not legal Acquire targets.
 - **Bargain**: acquire a non-contract row card; opponent also gains a copy.
 
 ## 8. Agents, attacks, Taunt
@@ -85,8 +85,10 @@ Power→Prestige conversion is **blocked** while the opponent has at least one *
 
 ## 10. Contract cards
 
-- **Contract Actions** resolve immediately when bought. At end of turn they leave play for the Tavern discard / are removed from the match; they never enter either player's deck or cooldown.
-- **Contract Agents** enter the buyer's board immediately. When knocked out, they go to the Tavern discard / are removed rather than to the owner's cooldown.
+- **Contract Actions** are played immediately when bought. After their effects resolve they are **exiled** (removed from the match). They never enter cooldown, draw, or hand.
+- **Contract Agents** enter the buyer's board immediately. When knocked out they are **exiled**. They never enter cooldown.
+- Any other effect that would place a contract in cooldown (discard, toss, donate, confine release, end-of-turn flush, and the rest) exiles it instead. Contracts never cycle back into a deck.
+- Some guides send spent contracts to the tavern discard, which this table reshuffles when the tavern deck is empty. This engine exiles them so they do not re-enter the tavern or either player's deck.
 
 ## 11. Patron activation and favor
 
