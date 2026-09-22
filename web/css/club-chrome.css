@@ -871,3 +871,72 @@
   background:
     radial-gradient(ellipse at 50% 46%, var(--eso-felt) 0%, var(--eso-felt-deep) 100%);
 }
+
+/* Friend remote: the room code stays readable on the lobby and on patron pick. */
+#friend-lobby .friend-room {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  margin: 0.2rem 0 0.4rem;
+  padding: 0.75rem 0.5rem 0.55rem;
+  border: 1px solid rgba(230, 197, 106, 0.55);
+  border-radius: 10px;
+  background: rgba(8, 24, 26, 0.55);
+}
+#friend-lobby .friend-room[hidden] { display: none; }
+#friend-lobby .friend-room-label {
+  margin: 0;
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--hi-cream, #f3ead2);
+}
+#friend-lobby button.friend-room-code {
+  font-family: 'Cinzel', serif;
+  font-size: 2.5rem;
+  line-height: 1.1;
+  letter-spacing: 0.42em;
+  padding: 0.15rem 0.1rem 0.15rem 0.42em;
+  background: transparent;
+  border: 0;
+  color: var(--hi-gold-bright, #f6e7b2);
+  cursor: pointer;
+}
+#deckpick-room.deckpick-room {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  margin: 0 0 0.65rem;
+  padding: 0.4rem 0.6rem;
+  text-align: center;
+  background: rgba(8, 24, 26, 0.94);
+  border: 1px solid rgba(230, 197, 106, 0.55);
+  border-radius: 8px;
+}
+#deckpick-room[hidden] { display: none; }
+#deckpick-room .deckpick-room-label {
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  margin-right: 0.35rem;
+}
+#deckpick button.room-code-inline {
+  font-family: 'Cinzel', serif;
+  font-size: 1.7rem;
+  letter-spacing: 0.35em;
+  padding: 0.1rem 0.05rem 0.1rem 0.35em;
+  background: transparent;
+  border: 0;
+  color: var(--hi-gold-bright, #f6e7b2);
+  cursor: pointer;
+}
+body.remote-friend-pick #diff-pick-wrap,
+body.remote-friend-pick #btn-ai-rest,
+body.remote-friend-pick #btn-random-match,
+body.remote-friend-pick #chk-random-match,
+body.remote-friend-pick .deckpick-modes .chk:has(#chk-random-match) {
+  display: none !important;
+}

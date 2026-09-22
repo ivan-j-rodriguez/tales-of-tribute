@@ -75,6 +75,21 @@ assert(/sel-table-skin/.test(html) && /sel-card-back/.test(html) && /equipSkin\(
 assert(/liveCosmetic\(profile\)/.test(app) && /--eso-felt/.test(app) && /--card-back/.test(app), 'applyTableSkin writes the live table and deck back');
 assert(/loginCellHtml\(/.test(app) && /justStamped/.test(app), 'claim paints a stamp onto the calendar');
 
+const hostFn = app.slice(app.indexOf('async function beginHostRoom'), app.indexOf('async function beginJoinRoom'));
+const hostBeforeGuest = hostFn.split('net.onMessage')[0] || '';
+const hostOnGuest = hostFn.split('net.onMessage')[1] || '';
+assert(!/show\('#deckpick'\)/.test(hostBeforeGuest), 'host does not open patron pick before a guest arrives');
+assert(/show\('#friend-lobby'\)/.test(hostBeforeGuest), 'host stays on the friend lobby with the room code');
+assert(/Waiting for guest/.test(hostFn), 'lobby tells the host it is waiting');
+assert(/peer-ready/.test(hostOnGuest) && /hello/.test(hostOnGuest), 'guest hello or peer-ready advances the host');
+assert(/Guest joined — pick decks/.test(hostOnGuest), 'host says the guest joined');
+assert(/show\('#deckpick'\)/.test(hostOnGuest), 'patron pick opens only after the guest joins');
+assert(/id="friend-room-code"/.test(html) && /letter-spacing:\s*0\.42em/.test(readFileSync(new URL('../web/css/club-chrome.css', import.meta.url), 'utf8')), 'room code is large and letterspaced');
+assert(/id="deckpick-room"/.test(html), 'patron pick keeps a room-code banner');
+const joinFn = app.slice(app.indexOf('async function beginJoinRoom'), app.indexOf('async function updateMusicBtn'));
+assert(!/show\('#deckpick'\)/.test(joinFn) && /match-start/.test(joinFn) && /show\('#match'\)/.test(joinFn), 'guest waits on the lobby until match-start');
+assert(/type: 'match-start'/.test(app) && /pickYou/.test(app) && /pickOpp/.test(app), 'host Begin sends match-start with both patron pairs');
+
 const beforeMidnight = new Date('2026-09-15T03:59:00Z');
 const afterMidnight = new Date('2026-09-15T04:01:00Z');
 assert(shopPeriodKey(beforeMidnight) !== shopPeriodKey(afterMidnight), 'shop period rolls at New York midnight');

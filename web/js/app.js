@@ -975,10 +975,15 @@ function updatePickStatus() {
       if (pickYou.length < 2) hint.innerHTML = 'Ranked — choose <strong>your</strong> two patrons. No AI.';
       else if (pickOpp.length < 2) hint.innerHTML = 'Waiting for your rival’s pair.';
       else hint.innerHTML = matchMode === 'remote-guest' ? 'Host will begin the match.' : 'Both ready. Begin Ranked.';
+    } else if ((matchMode === 'remote-host' || matchMode === 'remote-guest') && !isRankedMatch) {
+      if (pickYou.length < 2) hint.innerHTML = 'Guest joined — pick decks. Choose <strong>two</strong> patrons for you.';
+      else if (pickOpp.length < 2) hint.innerHTML = 'Now choose your guest’s two patrons.';
+      else hint.innerHTML = 'Ready. Begin Match and your guest joins the table.';
     } else if (pickYou.length < 2) hint.innerHTML = 'Tap to select, tap again to <strong>deselect</strong>. Choose <strong>two</strong> patrons for you.';
     else if (pickOpp.length < 2) hint.innerHTML = 'Now pick rival\'s pair — or tap <strong>AI takes the rest</strong>.';
     else hint.innerHTML = 'Ready. Begin Match, or deselect to change.';
   }
+  syncRemotePickChrome();
 }
 
 function aiPickOpponents(exclude) {
@@ -3585,31 +3590,81 @@ function beginHotseatPick() {
   toast('Pass & Play: both players use host unlocks.');
 }
 
+function copyRoomCode(code) {
+  const text = String(code || '').toUpperCase();
+  if (!text) return;
+  const done = () => toast(`Copied ${text}`);
+  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(done, () => done());
+  else done();
+}
+
+function paintFriendRoom(code, { wait = 'Tap the code to copy.' } = {}) {
+  const box = $('#friend-room');
+  const el = $('#friend-room-code');
+  const waitEl = $('#friend-room-wait');
+  const text = code ? String(code).toUpperCase() : '';
+  if (box) box.hidden = !text;
+  if (el) el.textContent = text;
+  if (waitEl) waitEl.textContent = wait;
+  if (el) el.onclick = text ? () => copyRoomCode(text) : null;
+}
+
+function syncRemotePickChrome() {
+  const remote = matchMode === 'remote-host' || matchMode === 'remote-guest';
+  document.body.classList.toggle('remote-friend-pick', remote && !isRankedMatch);
+  const banner = $('#deckpick-room');
+  const code = remote && net?.ok && net.code ? String(net.code).toUpperCase() : '';
+  if (!banner) return;
+  banner.hidden = !code;
+  if (!code) {
+    banner.innerHTML = '';
+    return;
+  }
+  banner.innerHTML = `<span class="deckpick-room-label">Room</span> <button type="button" class="room-code-inline" id="btn-copy-deck-code">${code}</button>`;
+  $('#btn-copy-deck-code').onclick = () => copyRoomCode(code);
+}
+
+function dropNet() {
+  if (net?.destroy) {
+    try { net.destroy(); } catch { /* already closed */ }
+  }
+  net = null;
+}
+
 async function beginHostRoom() {
   const status = $('#friend-status');
   status.textContent = 'Starting PeerJS room…';
+  paintFriendRoom('');
+  dropNet();
   net = await hostRoom();
   if (!net.ok) {
     status.textContent = `Remote unavailable: ${net.error}. Use Pass & Play.`;
+    paintFriendRoom('');
     toast(net.error);
+    show('#friend-lobby');
     return;
   }
-  status.innerHTML = `Room code: <strong style="letter-spacing:.2em">${net.code}</strong> — waiting for guest…`;
   matchMode = 'remote-host';
   isRankedMatch = false;
+  syncVoiceToMatchMode();
+  paintFriendRoom(net.code);
+  status.textContent = 'Waiting for guest…';
   attachVoiceToNet();
+  let hostGuestJoined = false;
   net.onMessage((msg) => {
-    if (msg.type === 'peer-ready' || msg.type === 'hello') {
-      status.textContent = `Guest joined room ${net.code}. Pick decks, then Begin.`;
+    if ((msg.type === 'peer-ready' || msg.type === 'hello') && !hostGuestJoined) {
+      hostGuestJoined = true;
+      status.textContent = 'Guest joined — pick decks';
+      pickYou = []; pickOpp = []; pickPhase = 'you';
+      renderDeckPick();
+      show('#deckpick');
     }
     if (msg.type === 'action') applyRemoteAction(msg);
     if (msg.type === 'request-state' && engine) {
       net.send({ type: 'state-seed', pickYou, pickOpp, ownedUpgrades: profile.ownedUpgrades });
     }
   });
-  pickYou = []; pickOpp = []; pickPhase = 'you';
-  renderDeckPick();
-  show('#deckpick');
+  show('#friend-lobby');
 }
 
 async function beginJoinRoom() {
@@ -3617,16 +3672,23 @@ async function beginJoinRoom() {
   if (code.length < 4) { toast('Enter a 4-letter room code'); return; }
   const status = $('#friend-status');
   status.textContent = `Joining ${code}…`;
+  paintFriendRoom('');
+  dropNet();
   net = await joinRoom(code);
   if (!net.ok) {
-    status.textContent = `Join failed: ${net.error}`;
+    status.textContent = `Join failed: ${net.error}. Use Pass & Play.`;
+    paintFriendRoom('');
     toast(net.error);
+    show('#friend-lobby');
     return;
   }
   matchMode = 'remote-guest';
-  status.textContent = `Connected to ${code}. Waiting for host to start…`;
+  isRankedMatch = false;
+  paintFriendRoom(code, { wait: 'Waiting for the host to begin.' });
+  status.textContent = `Connected to ${code}. Waiting for the host to start…`;
   attachVoiceToNet();
   net.send({ type: 'hello' });
+  show('#friend-lobby');
   net.onMessage((msg) => {
     if (msg.type === 'match-start') {
       pickYou = msg.pickYou;
@@ -3979,9 +4041,18 @@ function bind() {
   $('#btn-ranked-host')?.addEventListener('click', () => beginRankedHost());
   $('#btn-ranked-join')?.addEventListener('click', () => beginRankedJoin());
   $('#btn-friend').onclick = () => {
-    $('#friend-status').textContent = '';
     paintVoiceChrome();
     show('#friend-lobby');
+    if (matchMode === 'remote-host' && net?.ok && net.code && !engine) {
+      paintFriendRoom(net.code);
+      $('#friend-status').textContent = 'Waiting for guest…';
+    } else if (matchMode === 'remote-guest' && net?.ok && net.code && !engine) {
+      paintFriendRoom(net.code, { wait: 'Waiting for the host to begin.' });
+      $('#friend-status').textContent = `Connected to ${net.code}. Waiting for the host to start…`;
+    } else {
+      $('#friend-status').textContent = '';
+      paintFriendRoom('');
+    }
   };
   $('#btn-club').onclick = () => { renderClub(); show('#club'); };
   $('#btn-ency').onclick = () => { renderEncy(); show('#encyclopedia'); };

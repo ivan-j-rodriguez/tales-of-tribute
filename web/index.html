@@ -83,6 +83,7 @@
     <!-- DECK PICK -->
     <section id="deckpick" class="screen">
       <h2>Choose Your Patrons</h2>
+      <p class="deckpick-room" id="deckpick-room" hidden></p>
       <p class="hint" id="deckpick-hint">Pick <strong>two</strong> patrons for you, then two for your rival — or let the AI finish.</p>
       <div class="pick-meters">
         <div class="pick-meter you" id="pick-you-meter"><span class="pm-label">You</span> <span class="pm-count" id="pick-you-count">0 / 2</span><div class="pm-slots" id="pick-you-slots"></div></div>
@@ -140,6 +141,11 @@
           <input type="checkbox" id="chk-voice-friend" /> Voice chat (optional)
         </label>
         <p class="hint" id="voice-friend-hint">Off by default. Mic permission only if you enable it. Hotseat has no voice.</p>
+        <div class="friend-room" id="friend-room" hidden>
+          <p class="friend-room-label">Room code</p>
+          <button type="button" class="friend-room-code" id="friend-room-code" aria-label="Copy room code"></button>
+          <p class="hint" id="friend-room-wait">Tap the code to copy.</p>
+        </div>
         <p class="hint" id="friend-status"></p>
         <button id="btn-friend-back">Back</button>
       </div>
