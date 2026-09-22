@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-22 (build 60):** Challenge the Provinces stop chips (`.g-name` on `.g-marker`) use dark ink on an opaque parchment fill. The High Isle `#gauntlet button` gold no longer paints map markers, so start, current, cleared, failed, and locked pills stay readable. Back and Locked today keep the gold button chrome. Province names printed on the map art are unchanged. Board CSS untouched. `?v=60`.
+
 **2026-09-22 (build 59):** Contract cards never re-enter a player's deck. Buying a contract plays it immediately. Contract actions exile after their effects. Contract agents exile when knocked out. Any other cooldown attempt (discard, toss, donate, confine release, Acquire, Bargain, end-of-turn flush) exiles a contract instead. Card effects match their ops: discard and destroy open the right tray and skip the card being played; Knock Out hits Taunt first; Confine, Heal, and Refresh (including Hand Refresh) use the official piles; action passives stay live while the card is played; curses must be played first; the hand draws up to 5; the second player gains 1 Coin on their first turn. Portrait packing from 51 stays. Club shop, netplay, and Hotseat seating are unchanged aside from this cache-bust. `?v=59`.
 
 **2026-09-22 (build 58):** Board/felt finish-line on main after Club 56 and Friend PeerJS 57. Player-facing splash and cache-bust are **build 58**. Landscape top-seat hand and agents are full cards. A short tap plays, buys, calls, or picks. A one-second hold opens the dossier on tavern, hand, agents, patrons, and targeting trays and never also acts. Dismissing the dossier removes it from hit testing. Landscape patron inspect keeps every favor row on screen. Portrait packing from 51 stays. `?v=58`.
@@ -101,7 +103,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=59`. Contracts exile instead of cooling down (build 59). Board finish-line is build 58 (portrait lock from 51). Friend rooms use explicit PeerJS cloud + STUN (build 57). Hotseat patron pick is null-safe (build 56). Club shop, cosmetics, tutorial, and daily stamp are build 55. Long-press inspect stays on the build 54 UESP sentences.
+`docs/` is a copy of `web/`. Cache-bust `?v=60`. Province stop chips are dark ink on parchment (build 60). Contracts exile instead of cooling down (build 59). Board finish-line is build 58 (portrait lock from 51). Friend rooms use explicit PeerJS cloud + STUN (build 57). Hotseat patron pick is null-safe (build 56). Club shop, cosmetics, tutorial, and daily stamp are build 55. Long-press inspect stays on the build 54 UESP sentences.
 
 | Fix | Notes |
 |---|---|
