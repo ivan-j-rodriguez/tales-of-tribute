@@ -715,6 +715,14 @@ body.is-landscape #match .rail-glass {
 }
 .lift-fly.lift-dossier-modal .lift-veil {
   background: rgba(5, 8, 10, 0.78) !important;
+  pointer-events: none;
+}
+.lift-fly.lift-dossier-modal.show-veil:not(.closing) .lift-veil {
+  pointer-events: auto;
+}
+.lift-fly.lift-dossier-modal.closing,
+.lift-fly.lift-dossier-modal.closing * {
+  pointer-events: none !important;
 }
 .inspect-dossier-sheet {
   position: relative;

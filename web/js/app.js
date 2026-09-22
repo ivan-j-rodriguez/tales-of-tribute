@@ -67,6 +67,7 @@ let tourStep = 0;
 let tourActive = false;
 let settingsReturnScreen = '#splash';
 let liftActive = false;
+let gestureSwallowUntil = 0;
 let liftClone = null;
 let liftFromRect = null;
 let pendingPatron = null;
@@ -498,97 +499,107 @@ function dossierHTML(d) {
 }
 
 /**
- * Phone-first gestures:
- * - Any press that is NOT a hold = play / buy / claim (onTap).
- * - Hold (>=520ms, little movement): lift-to-read; release returns the card.
- * There is no dead zone between tap and hold.
+ * Tap acts. Hold inspects. A press that ends before HOLD_MS plays, buys,
+ * calls, or picks. The dossier opens only once the finger has been down for
+ * HOLD_MS, and it stays up until the player taps outside it.
+ * A phone may turn the press into pointercancel + click. That click acts
+ * only when the press was shorter than the hold.
  */
 function bindCardGesture(el, { onTap, onHoldRead }) {
-  // Short tap plays, buys, or picks. A hold opens the dossier and never also activates.
-  // Phones often turn a long press into pointercancel + click. That click must not play the card.
   let held = false;
-  let suppressClick = false;
+  let acted = false;
+  let moved = false;
+  let live = false;
   let timer = null;
   let t0 = 0;
+  let pendingElapsed = 0;
   let sx = 0;
   let sy = 0;
   let pid = null;
+  const slop = 44;
   const clearHold = () => { clearTimeout(timer); timer = null; };
   const openHold = () => {
-    if (held) return;
+    if (held || !el.isConnected) return;
     held = true;
-    suppressClick = true;
+    acted = true;
     if (onHoldRead) onHoldRead();
   };
+  const doAct = (e) => {
+    if (acted || held || moved || liftActive) return;
+    if (performance.now() < gestureSwallowUntil) return;
+    acted = true;
+    if (onTap) onTap(e);
+  };
+  el.addEventListener('touchstart', (e) => {
+    if (e.cancelable) e.preventDefault();
+  }, { passive: false });
   el.addEventListener('pointerdown', (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     if (pid != null) return;
+    if (liftActive || performance.now() < gestureSwallowUntil) return;
     if (e.cancelable) e.preventDefault();
     pid = e.pointerId;
     held = false;
-    suppressClick = false;
+    acted = false;
+    moved = false;
+    pendingElapsed = 0;
+    live = true;
     t0 = Date.now();
     sx = e.clientX;
     sy = e.clientY;
     try { el.setPointerCapture(e.pointerId); } catch {}
     clearHold();
     timer = setTimeout(openHold, HOLD_MS);
-  });
+  }, { passive: false });
   el.addEventListener('pointermove', (e) => {
-    if (e.pointerId !== pid || held) return;
-    if (Math.hypot(e.clientX - sx, e.clientY - sy) > 28) clearHold();
+    if (!live || e.pointerId !== pid || held) return;
+    if (Math.hypot(e.clientX - sx, e.clientY - sy) > slop) {
+      moved = true;
+      clearHold();
+    }
   });
-  const finish = (e) => {
-    if (pid == null || e.pointerId !== pid) return;
+  const endPointer = (e, cancelled) => {
+    if (!live || pid == null || e.pointerId !== pid) return;
     const elapsed = t0 ? Date.now() - t0 : 0;
-    clearHold();
-    pid = null;
     t0 = 0;
+    live = false;
+    pid = null;
+    clearHold();
     if (held || elapsed >= HOLD_MS) {
       if (!held) openHold();
-      suppressClick = true;
-      endLift();
-      held = false;
+      acted = true;
+      pendingElapsed = 0;
       return;
     }
-    if (liftActive) endLift(true);
-    held = false;
-    if (onTap) {
-      suppressClick = true;
-      onTap(e);
+    if (cancelled) {
+      pendingElapsed = elapsed;
+      return;
     }
+    pendingElapsed = 0;
+    if (!moved) doAct(e);
   };
-  el.addEventListener('pointerup', finish);
-  el.addEventListener('pointercancel', (e) => {
-    if (pid == null || e.pointerId !== pid) return;
-    const elapsed = t0 ? Date.now() - t0 : 0;
-    suppressClick = true;
-    clearHold();
-    pid = null;
-    t0 = 0;
-    // Mobile turns a long press into cancel + click well before pointerup.
-    // Open the dossier and do not play or pick the card.
-    if (held || elapsed >= 450) {
-      if (!held) openHold();
-      return;
-    }
-    held = false;
-  });
+  el.addEventListener('pointerup', (e) => endPointer(e, false));
+  el.addEventListener('pointercancel', (e) => endPointer(e, true));
   el.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (suppressClick || held || liftActive) {
-      suppressClick = false;
+    const elapsed = t0 ? Date.now() - t0 : pendingElapsed;
+    pendingElapsed = 0;
+    t0 = 0;
+    clearHold();
+    live = false;
+    pid = null;
+    if (performance.now() < gestureSwallowUntil) return;
+    if (elapsed >= HOLD_MS) {
+      if (!held) openHold();
+      acted = true;
       return;
     }
-    const elapsed = t0 ? Date.now() - t0 : 0;
-    // pointerup was lost on a short tap. A long press must never arrive here as a play.
-    if (elapsed >= 400) return;
-    if (onTap) onTap(e);
+    if (acted || held || moved || liftActive) return;
+    doAct(e);
   });
   el.addEventListener('contextmenu', (e) => {
     e.preventDefault();
-    suppressClick = true;
   });
 }
 
@@ -690,8 +701,9 @@ function placeInspectStage(wrap, rect, kind) {
 
 function dismissInspectOutside(e) {
   if (!liftActive || !liftClone) return;
-  if (e.target?.closest?.('.lift-source, .inspect-dossier-sheet')) return;
+  if (e.target?.closest?.('.inspect-dossier-sheet')) return;
   endLift(true);
+  gestureSwallowUntil = performance.now() + 280;
 }
 
 function startLift(fromEl, def) {
@@ -726,25 +738,23 @@ function startLift(fromEl, def) {
   placeInspectStage(wrap, rect, 'card');
 }
 
-function endLift(instant = false) {
+function endLift() {
   document.removeEventListener('pointerdown', dismissInspectOutside, true);
-  const src = document.querySelector('.lift-source');
-  const wrap = liftClone;
-  const from = liftFromRect;
+  document.querySelectorAll('.lift-source').forEach((src) => {
+    src.classList.remove('lift-source');
+    src.style.opacity = '';
+  });
   liftActive = false;
   liftClone = null;
   liftFromRect = null;
-  if (src) {
-    src.classList.remove('lift-source');
-    src.style.opacity = '';
-  }
-  if (!wrap) return;
-  const text = wrap.querySelector('.lift-text-fly');
-  if (text) text.classList.remove('show');
-  wrap.classList.remove('show-veil');
-  if (instant || !from) { wrap.remove(); return; }
-  wrap.classList.add('closing');
-  setTimeout(() => { if (wrap.parentNode) wrap.remove(); }, 220);
+  document.querySelectorAll('.lift-dossier-modal, .lift-fly.lift-inspect').forEach((node) => {
+    node.classList.add('closing');
+    node.style.pointerEvents = 'none';
+    node.querySelectorAll('.lift-veil, .inspect-dossier-sheet').forEach((part) => {
+      part.style.pointerEvents = 'none';
+    });
+    node.remove();
+  });
 }
 
 function favorKeyForSeat(pid) {
@@ -1285,8 +1295,10 @@ function renderEventsRail(you, s) {
     if (it.def) {
       el.dataset.id = it.def.id || '';
       el.innerHTML = `<img src="${artFor(it.def)}" alt="" /><span class="ev-pip">${it.pip}</span>`;
-      el.addEventListener('pointerdown', (e) => { e.stopPropagation(); startLift(el, it.def); });
-      el.addEventListener('pointerup', (e) => { e.stopPropagation(); endLift(); });
+      bindCardGesture(el, {
+        onTap: () => startLift(el, it.def),
+        onHoldRead: () => startLift(el, it.def),
+      });
     } else {
       el.innerHTML = `<span class="ev-pip">${it.pip}</span>`;
     }
@@ -1359,12 +1371,6 @@ function renderMatch() {
     bindCardGesture(el, {
       onTap: () => openPatronConfirm(pid, 'call'),
       onHoldRead: () => startPatronLift(el, pid),
-    });
-    el.addEventListener('pointerenter', (e) => {
-      if (e.pointerType === 'mouse') startPatronLift(el, pid);
-    });
-    el.addEventListener('pointerleave', (e) => {
-      if (e.pointerType === 'mouse') endLift();
     });
     return el;
   };

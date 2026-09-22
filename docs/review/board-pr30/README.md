@@ -1,6 +1,6 @@
 # Board PR review shots (stamp build 58)
 
-Rebased onto main (splash build 57). This board PR stamps **build 58** and covers the felt finish-line only. Portrait lock is unchanged (patron column 328, DRAW left 6, HUD top 168.8, Treasury face 24.63). Landscape top-seat hand cards are 52px tall and agents 44px, fully inside the felt. Hold opens the dossier and does not play or pick. Crows landscape inspect shows Favored, Neutral, and Unfavored inside the sheet; the confirm actions stay on screen.
+Rebased onto main (splash build 57). This board PR stamps **build 58** and covers the felt finish-line only. Portrait lock is unchanged (patron column 328, DRAW left 6, HUD top 168.8, Treasury face 24.63). Landscape top-seat hand cards are 52px tall and agents 44px, fully inside the felt. A short tap acts. A one-second hold opens the dossier and does not play, buy, call, or pick. Closing the dossier leaves the felt clickable. Crows landscape inspect shows Favored, Neutral, and Unfavored inside the sheet; the confirm actions stay on screen.
 
 | Check | File |
 |---|---|
