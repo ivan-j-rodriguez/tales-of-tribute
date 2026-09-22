@@ -15,4 +15,8 @@ Club beds — CC0 / public-domain dedication. Never Kevin MacLeod. Never the ESO
 Credits are appreciated for the OpenGameArt tracks; CC0 does not require them.
 The Club rotates short beds with soft crossfades so one loop never nags.
 
+Match one-shots (sfx-deal, sfx-receive, sfx-shuffle, sfx-play, sfx-buy, sfx-coin,
+sfx-patron, sfx-agent, sfx-knock, sfx-combo, sfx-end) are original sounds
+synthesized for this fan table and released CC0. Not Kevin MacLeod. Not the ESO soundtrack.
+
 Tamriel provinces map: UESP File:ON-map-Tamriel (provinces).jpg — unofficial fan table, not for sale.

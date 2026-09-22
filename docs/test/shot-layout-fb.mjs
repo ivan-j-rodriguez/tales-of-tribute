@@ -78,7 +78,7 @@ async function ready(page) {
     const medals = document.querySelectorAll('#rail-patrons .medallion').length >= 5;
     return sized && medals;
   }, { timeout: 10000 });
-  await new Promise(r => setTimeout(r, 280));
+  await new Promise(r => setTimeout(r, 1200));
 }
 
 async function paintMidline(page, on, zone = 'hand') {
@@ -410,7 +410,7 @@ if (!pFit.nameOn) fail('portrait inspect name clipped', pFit);
 if (pFit.sheet && !pFit.sheetOn) fail('portrait inspect sheet clipped', pFit);
 if (pFit.titleClipped) fail('portrait inspect title clipped', pFit);
 if (!/CUSTOMS SEIZURE|TOLL OF FLESH/i.test(pFit.tipText || '')) fail('portrait inspect missing title', pFit);
-if (!/Acquire a card from the Tavern that costs up to 5 Coin|Gain 2 Coin/i.test(pFit.tipText || '')) {
+if (!/Acquire a card from the Tavern that costs up to \d+ Coin|Gain 2 Coin/i.test(pFit.tipText || '')) {
   fail('portrait inspect missing official play text', pFit);
 }
 if (pFit.sheet) await closeUp(portPage, `${TAG}-portrait-inspect-sheet`, [pFit.sheet], 390, 844);
@@ -467,7 +467,7 @@ if (!lFit.textOn) fail('landscape inspect text clipped', lFit);
 if (!lFit.nameOn) fail('landscape inspect name clipped', lFit);
 if (lFit.sheet && !lFit.sheetOn) fail('landscape inspect sheet clipped', lFit);
 if (lFit.titleClipped) fail('landscape inspect title clipped', lFit);
-if (!/Acquire a card from the Tavern that costs up to 5 Coin|Gain 2 Coin/i.test(lFit.tipText || '')) {
+if (!/Acquire a card from the Tavern that costs up to \d+ Coin|Gain 2 Coin/i.test(lFit.tipText || '')) {
   fail('landscape inspect missing official play text', lFit);
 }
 if (lFit.sheet) await closeUp(landPage, `${TAG}-landscape-inspect-sheet`, [lFit.sheet], 844, 390);

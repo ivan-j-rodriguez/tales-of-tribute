@@ -715,6 +715,14 @@ body.is-landscape #match .rail-glass {
 }
 .lift-fly.lift-dossier-modal .lift-veil {
   background: rgba(5, 8, 10, 0.78) !important;
+  pointer-events: none;
+}
+.lift-fly.lift-dossier-modal.show-veil:not(.closing) .lift-veil {
+  pointer-events: auto;
+}
+.lift-fly.lift-dossier-modal.closing,
+.lift-fly.lift-dossier-modal.closing * {
+  pointer-events: none !important;
 }
 .inspect-dossier-sheet {
   position: relative;
@@ -1628,5 +1636,311 @@ body.is-landscape #match .you-actions button {
   line-height: 1.15 !important;
   letter-spacing: 0.04em;
   white-space: nowrap !important;
+}
+
+/* ===================================================================
+   Build 55 — LANDSCAPE ONLY. Portrait packing above stays locked.
+   Rival hand was centering a 36px fan in a 16px track and painting
+   off the top of the felt. Agent rows were 24px with overflow hidden,
+   so a played agent was a clipped sliver. Both bands now fit the
+   whole card. Tavern cards stay above the 52px gate with air to the
+   resource rows. You-hand hexes stay on-canvas with felt under the tips.
+   =================================================================== */
+body.is-landscape #match .felt-table {
+  padding: 0 !important;
+  row-gap: 0 !important;
+  gap: 0 !important;
+  grid-template-rows:
+    58px
+    50px
+    40px
+    14px
+    76px
+    40px
+    46px
+    66px !important;
+}
+
+body.is-landscape #match .felt-opp-hand {
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  align-self: stretch !important;
+  overflow: visible !important;
+}
+body.is-landscape #match .rival-fan,
+body.is-landscape #match #opp-hand-zone {
+  height: 100% !important;
+  min-height: 0 !important;
+  align-items: center !important;
+  overflow: visible !important;
+}
+body.is-landscape #match .rival-fan .card,
+body.is-landscape #match #opp-hand-zone .card {
+  width: 34px !important;
+  height: 52px !important;
+  min-height: 0 !important;
+  max-height: 52px !important;
+  aspect-ratio: auto !important;
+}
+
+body.is-landscape #match .felt-you-agents,
+body.is-landscape #match .felt-opp-agents {
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  overflow: visible !important;
+  align-items: center !important;
+}
+body.is-landscape #match .agent-slot,
+body.is-landscape #match .agent-slot.empty,
+body.is-landscape #match .agent-slot.filled,
+body.is-landscape #match .agent-slot.filled .card,
+body.is-landscape #match .card.agent-board {
+  width: 30px !important;
+  height: 44px !important;
+  min-height: 0 !important;
+  max-height: 44px !important;
+}
+
+body.is-landscape #match .tavern-zone .card {
+  width: min(44px, 5.2vw, calc((100% - 1.2rem) / 6.4)) !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1.52 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+/* Orientation: kill the 0.7s patron spin while the viewport is mid-rotate. */
+body.board-orienting #match .card,
+body.board-orienting #match .tavern-zone,
+body.board-orienting #match .patron-coin .token-dial,
+body.board-orienting #match .patron-coin .medallion-face,
+body.board-orienting #match .hex-pile,
+body.board-orienting #match .felt-hud-you,
+body.board-orienting .target-tray .tray-card {
+  transition: none !important;
+}
+
+#match .card.anim-hold { opacity: 0 !important; }
+
+#match .patron-coin.patron-invoked .token-dial {
+  animation: tot-patron-call 0.68s cubic-bezier(.18, .7, .22, 1);
+}
+@keyframes tot-patron-call {
+  0% { scale: 1; }
+  38% { scale: 1.1; filter: drop-shadow(0 0 12px rgba(240, 215, 138, 0.95)) drop-shadow(0 3px 5px #0009); }
+  100% { scale: 1; }
+}
+
+#match .hex-pile.shuffling .pile-stack i:nth-child(1) {
+  animation: tot-riffle-a 0.62s ease-in-out;
+}
+#match .hex-pile.shuffling .pile-stack i:nth-child(2) {
+  animation: tot-riffle-b 0.62s ease-in-out;
+}
+@keyframes tot-riffle-a {
+  0%, 100% { transform: translate(-2px, 2px) rotate(-6deg); }
+  40% { transform: translate(7px, -3px) rotate(8deg); }
+  70% { transform: translate(-4px, 1px) rotate(-4deg); }
+}
+@keyframes tot-riffle-b {
+  0%, 100% { transform: translate(4px, 2px) rotate(7deg); }
+  40% { transform: translate(-8px, -2px) rotate(-9deg); }
+  70% { transform: translate(3px, 1px) rotate(4deg); }
+}
+
+/* Played-effect hexes were stacking on the tavern DECK once a card
+   was played (the deck paints above the rail, so the hex was covered).
+   Portrait keeps a short column in the clear band under the mid-left
+   HUD and above the DECK. Landscape uses the felt gap between the
+   DECK and the first tavern card. Empty-board lock metrics are unchanged. */
+body.is-portrait #match .events-rail {
+  left: 2px !important;
+  top: 28% !important;
+  width: 42px !important;
+  height: 14.2% !important;
+  max-height: 14.2% !important;
+  padding: 2px 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+body.is-portrait #match .events-rail .events-title,
+body.is-portrait #match #events-combo {
+  display: none !important;
+}
+body.is-portrait #match .events-rail .event-hex {
+  width: 30px !important;
+  height: 34px !important;
+}
+body.is-portrait #match .events-list {
+  gap: 4px !important;
+}
+body.is-landscape #match .events-rail {
+  left: 104px !important;
+  top: 150px !important;
+  width: 188px !important;
+  height: 54px !important;
+  max-height: 54px !important;
+  padding: 0 2px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+body.is-landscape #match .events-rail .events-title,
+body.is-landscape #match #events-combo {
+  display: none !important;
+}
+body.is-landscape #match .events-list {
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  width: max-content !important;
+  gap: 4px !important;
+}
+body.is-landscape #match .events-rail .event-hex {
+  width: 30px !important;
+  height: 44px !important;
+}
+
+/* Build 56 — landscape top seat is a full card, not a clipped sliver.
+   Patron inspect and the confirm sheet keep the last favor row and the
+   action buttons inside the 390px fold. Holds are not stolen by the browser. */
+body.is-landscape #match .you-fan,
+body.is-landscape #match #hand-zone {
+  align-items: flex-start !important;
+  padding-top: 0 !important;
+}
+body.is-landscape #match #hand-zone .card,
+body.is-landscape #match #hand-zone button.card,
+body.is-landscape #match .you-fan .card {
+  width: 36px !important;
+  height: 54px !important;
+  max-height: 54px !important;
+  aspect-ratio: auto !important;
+}
+body.is-landscape #match .tavern-zone .card {
+  width: 34px !important;
+  height: 52px !important;
+  max-height: 52px !important;
+  min-height: 0 !important;
+  aspect-ratio: auto !important;
+}
+body.is-landscape #match #opp-res,
+body.is-landscape #match #you-res {
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  align-self: stretch !important;
+}
+body.is-landscape #match #opp-res .eso-tok,
+body.is-landscape #match #you-res .eso-tok {
+  max-height: 32px !important;
+}
+body.is-landscape #match #turn-ind,
+body.is-landscape #match .turn-chip {
+  max-height: 12px !important;
+  height: 12px !important;
+  line-height: 12px !important;
+  padding: 0 0.55rem !important;
+  margin: 0 !important;
+  font-size: 0.62rem !important;
+  overflow: hidden !important;
+  align-self: center !important;
+}
+
+#match .card,
+#match .patron-coin,
+#match .event-hex,
+#target-overlay .card,
+#target-overlay .tray-card,
+#target-tray .card,
+#patron-grid .patron-card {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+body.is-landscape .lift-fly.lift-dossier-modal {
+  align-items: center !important;
+  padding: 8px !important;
+  overflow: hidden !important;
+}
+body.is-landscape .inspect-dossier-sheet {
+  width: min(96vw, 800px);
+  max-width: min(96vw, 800px);
+  max-height: calc(100dvh - 16px);
+  min-height: 0;
+  overflow: hidden;
+}
+body.is-landscape .lift-dossier-modal .lift-hex-fly {
+  width: 88px !important;
+  height: 88px !important;
+  max-height: calc(100dvh - 32px) !important;
+}
+body.is-landscape .lift-dossier-modal.lift-inspect:not(.inspect-coin) .lift-hex-fly {
+  width: 78px !important;
+  height: 120px !important;
+}
+body.is-landscape .lift-dossier-modal .lift-text-fly {
+  max-height: calc(100dvh - 32px) !important;
+  min-height: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  padding-bottom: 16px !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+body.is-landscape #patron-confirm-overlay.show {
+  align-items: center;
+  padding: 8px;
+  overflow: hidden;
+}
+body.is-landscape .patron-confirm {
+  width: min(96vw, 760px);
+  max-height: calc(100dvh - 16px);
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  align-items: start;
+  text-align: left;
+  gap: 6px 12px;
+  padding: 10px 12px 10px;
+  overflow: hidden;
+}
+body.is-landscape .patron-confirm img {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  width: 72px;
+  height: 72px;
+  align-self: start;
+}
+body.is-landscape .patron-confirm h3 {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+  text-align: left;
+}
+body.is-landscape .patron-confirm .pc-states {
+  grid-column: 2;
+  grid-row: 2;
+  min-height: 0;
+  max-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  margin: 0;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+}
+body.is-landscape .patron-confirm .pc-actions {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  margin-top: 4px;
 }
 
