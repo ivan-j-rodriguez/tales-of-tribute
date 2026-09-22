@@ -406,7 +406,7 @@ export function expandPatronDesc(raw, { patronId } = {}) {
   );
 
   s = s.replace(
-    /create (\d+ )?Writ of Coin(?: card)?(?: and place it in your cooldown pile)?/gi,
+    /create (\d+ )?Writ of Coin(?: card)?(?: and place it in your cooldown pile)?(?: in cooldown)?/gi,
     'Create 1 Writ of Coin card and place it in your cooldown pile'
   );
   s = s.replace(

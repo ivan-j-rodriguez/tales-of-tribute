@@ -82,6 +82,7 @@ export class GameEngine {
       animQueue: [],
     };
 
+    for (const card of tavern) this.emit('tavernDeal', { card, opening: true });
     this._draw(p0, 5);
     this._draw(p1, 5);
     this._startTurn();
@@ -509,9 +510,12 @@ export class GameEngine {
     if (!this.state.tavernPile.length && this.state.tavernDiscard.length) {
       this.state.tavernPile = this.state.tavernDiscard.splice(0);
       this._shuffle(this.state.tavernPile);
+      this.emit('shuffle', { pile: 'tavern' });
     }
     if (this.state.tavernPile.length && this.state.tavern.length < 5) {
-      this.state.tavern.push(this.state.tavernPile.pop());
+      const card = this.state.tavernPile.pop();
+      this.state.tavern.push(card);
+      this.emit('tavernDeal', { card });
     }
   }
 

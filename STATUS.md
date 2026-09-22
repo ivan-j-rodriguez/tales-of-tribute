@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-22 (build 58):** Board/felt finish-line on main 57. Landscape top-seat hand and agents are full cards. Hold opens the dossier on tavern, hand, agents, and targeting trays and never also plays or picks. Landscape patron inspect keeps every favor row on screen. Hotseat `localSeat` stays the build 56 null-safe seat. Portrait packing from 51 stays. `?v=58`.
+
 **2026-09-22 (build 57):** Friend remote rooms use an explicit PeerJS cloud broker (`0.peerjs.com:443`, secure) plus public STUN (Google and Twilio) and the PeerJS TURN relays. Guest join waits 30s and says when the code has no host versus when the attempt timed out. A taken room id is retried once with a new code. Hotseat `localSeat` null-safe fix from 56 stays. Board CSS untouched (`board-pass`, `phone-eso`, `table-pack` not edited). `?v=57`.
 
 **2026-09-22 (build 56):** Hotseat Pass & Play patron pick no longer throws when `localSeat` reads `engine.state` before `newMatch`. Hotseat seat falls back to 0 until the match exists. Friend remote host still waits on the lobby until a guest joins. Board CSS untouched (`board-pass`, `phone-eso`, `table-pack` not edited). `?v=56`.

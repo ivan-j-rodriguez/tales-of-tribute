@@ -256,8 +256,41 @@ function noiseBurst({ dur = 0.06, vol = 0.2, freq = 1200, Q = 0.7 }) {
   src.start();
 }
 
-export function playSfx(kind) {
-  if (!sfxOn) return;
+/** Original one-shots (CC0). Synth below is the fallback if playback is blocked. */
+const SFX_FILE = {
+  play: 'sfx-play.wav',
+  buy: 'sfx-buy.wav',
+  shuffle: 'sfx-shuffle.wav',
+  patron: 'sfx-patron.wav',
+  deal: 'sfx-deal.wav',
+  receive: 'sfx-receive.wav',
+  agent: 'sfx-agent.wav',
+  knockout: 'sfx-knock.wav',
+  trap: 'sfx-knock.wav',
+  combo: 'sfx-combo.wav',
+  end: 'sfx-end.wav',
+  coin: 'sfx-coin.wav',
+  coinA: 'sfx-coin.wav',
+  coinB: 'sfx-coin.wav',
+};
+
+function playSfxFile(kind) {
+  const file = SFX_FILE[kind];
+  if (!file) return false;
+  try {
+    const a = new Audio(`assets/audio/${file}?v=58`);
+    a.volume = 0.78;
+    const pending = a.play();
+    if (pending && typeof pending.catch === 'function') {
+      pending.catch(() => { synthSfx(kind); });
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function synthSfx(kind) {
   ensureCtx();
   sfxStyle = getSfxStyle();
   if (ctx?.state === 'suspended') ctx.resume().catch(() => {});
@@ -287,6 +320,15 @@ export function playSfx(kind) {
       noiseBurst({ dur: 0.16, vol: 0.22, freq: 1600, Q: 0.7 });
       noiseBurst({ dur: 0.12, vol: 0.16, freq: 900, Q: 0.8 });
       beep({ freq: 220, dur: 0.08, type: 'triangle', vol: 0.08, slide: 40 });
+      break;
+    case 'deal':
+      noiseBurst({ dur: 0.09, vol: 0.2, freq: 1400, Q: 0.6 });
+      noiseBurst({ dur: 0.07, vol: 0.14, freq: 800, Q: 0.7 });
+      beep({ freq: 180, dur: 0.06, type: 'triangle', vol: 0.1, slide: -30 });
+      break;
+    case 'receive':
+      noiseBurst({ dur: 0.06, vol: 0.16, freq: 1100, Q: 0.65 });
+      beep({ freq: 240, dur: 0.05, type: 'triangle', vol: 0.1, slide: 20 });
       break;
     case 'knockout':
     case 'trap':
@@ -354,4 +396,10 @@ export function playSfx(kind) {
     default:
       break;
   }
+}
+
+export function playSfx(kind) {
+  if (!sfxOn) return;
+  if (playSfxFile(kind)) return;
+  synthSfx(kind);
 }
