@@ -32,6 +32,8 @@ assert('knock out', effectSentence({ op: 'knockout', n: 1 }) === knockoutSentenc
 assert('acquire 5 stub is not prose', isOfficialProse('Acquire 5') === false);
 assert('acquire 5 expands', /Acquire a card from the Tavern that costs up to 5 Coin/.test(formatEffects([], 'Acquire 5').join(' ')));
 assert('refresh', /Refresh — Return up to 1 card of any type/.test(effectSentence({ op: 'hand_refresh', n: 1 })));
+assert('draw refresh', /Refresh — Return up to 1 card of any type/.test(effectSentence({ op: 'draw_refresh', n: 1 })));
+assert('agent refresh', /Refresh — Return up to 4 Agent cards/.test(effectSentence({ op: 'draw_refresh_agents', n: 4 })));
 assert('donate full', effectSentence({ op: 'donate', n: 1 }) === donateSentence(1));
 assert('toss full', effectSentence({ op: 'toss', n: 4 }) === tossSentence(4));
 assert('destroy full', effectSentence({ op: 'destroy', n: 1 }) === destroySentence(1));

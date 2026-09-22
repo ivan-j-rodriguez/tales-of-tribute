@@ -1499,7 +1499,7 @@ function renderMatch() {
   if (targetSession) {
     const step = targetSession.steps[targetSession.idx];
     if (step && step.kind !== 'choose') {
-      for (const t of engine.legalTargets(step)) {
+      for (const t of engine.legalTargets(stepForTargets(step))) {
         document.querySelector(`#match .card[data-uid="${t.uid}"]`)?.classList.add('legal-target');
       }
     }
@@ -1701,7 +1701,7 @@ function finishPatronCall(pid, picks) {
   afterPlayerAction();
 }
 
-const TARGET_UP_TO = new Set(['destroy', 'confine', 'toss', 'donate', 'discard', 'replace', 'refreshHand', 'refreshDraw']);
+const TARGET_UP_TO = new Set(['destroy', 'confine', 'toss', 'donate', 'replace', 'refreshHand', 'refreshDraw']);
 
 function targetTitle(step) {
   const n = step.n || 1;
@@ -1712,12 +1712,12 @@ function targetTitle(step) {
     case 'destroy': return `DESTROY UP TO ${n} CARD${plural}`;
     case 'knockout': return `KNOCK OUT ${n} AGENT${plural}`;
     case 'powerAttack': return `KNOCK OUT ${n} AGENT${plural}`;
-    case 'discard': return `DISCARD UP TO ${n} CARD${plural}`;
+    case 'discard': return `DISCARD ${n} CARD${plural}`;
     case 'donate': return `DONATE UP TO ${n} CARD${plural}`;
     case 'toss': return `TOSS — MOVE UP TO ${n} CARD${plural}`;
     case 'replace': return `REPLACE UP TO ${n} TAVERN CARD${plural}`;
     case 'acquire': return `ACQUIRE A TAVERN CARD`;
-    case 'refreshHand': return `REFRESH UP TO ${n} CARD${plural} TO HAND`;
+    case 'refreshHand': return `REFRESH UP TO ${n} CARD${plural} TO DRAW`;
     case 'refreshDraw': return `REFRESH UP TO ${n} CARD${plural} TO DRAW`;
     case 'confine': return `CONFINE UP TO ${n} CARD${plural}`;
     case 'heal': return `HEAL ${n} AGENT${plural}`;
@@ -1736,7 +1736,7 @@ function optionCardLabel(opt) {
     if (e.op === 'draw') return `Draw ${e.n}`;
     if (e.op === 'acquire') return `Acquire up to ${e.n} cost`;
     if (e.op === 'draw_refresh') return `Refresh ${e.n} to draw`;
-    if (e.op === 'hand_refresh') return `Refresh ${e.n} to hand`;
+    if (e.op === 'hand_refresh') return `Refresh ${e.n} to draw`;
     if (e.op === 'knockout') return `Knock Out ${e.n}`;
     if (e.op === 'knockout_all') return 'Knock Out all Agents';
     return String(e.op || '').replace(/_/g, ' ');
@@ -1790,7 +1790,7 @@ function confirmTargetStep() {
   if (!step) return;
   const need = step.n || 1;
   const have = targetSession.picked?.length || 0;
-    if (step.kind === 'choose') {
+  if (step.kind === 'choose') {
     if (targetSession.picks.choose == null) { toast('Choose one option'); return; }
     const uid = targetSession.sourceUid;
     const buyId = targetSession.buyCardId;
@@ -1808,12 +1808,11 @@ function confirmTargetStep() {
     paintTargetStep();
     return;
   }
-  if (!have && !TARGET_UP_TO.has(step.kind) && step.kind !== 'acquire') {
-    toast('Pick a card first');
-    return;
-  }
-  if (!TARGET_UP_TO.has(step.kind) && have < need && step.kind !== 'acquire') {
-    toast(`Pick ${need}`);
+  const upTo = TARGET_UP_TO.has(step.kind) || step.kind === 'acquire';
+  const legalCount = targetSession.legal ? targetSession.legal.length : need;
+  const required = upTo ? 0 : Math.min(need, legalCount);
+  if (have < required) {
+    toast(have ? `Pick ${required}` : 'Pick a card first');
     return;
   }
   const delay = step.kind === 'sacrifice' || step.kind === 'destroy' ? 420
@@ -1863,7 +1862,7 @@ function paintTargetStep() {
   if (step.kind === 'acquire') {
     if (ban) ban.hidden = true;
     document.body.classList.add('targeting-board');
-    const legal = engine.legalTargets(step);
+    const legal = engine.legalTargets(stepForTargets(step));
     targetSession.legal = legal;
     targetSession.need = 1;
     targetSession.picked = [];
@@ -1897,7 +1896,7 @@ function paintTargetStep() {
     return;
   }
 
-  const legal = engine.legalTargets(step);
+  const legal = engine.legalTargets(stepForTargets(step));
   targetSession.legal = legal;
   targetSession.need = step.n || 1;
   targetSession.picked = [];
@@ -1915,6 +1914,15 @@ function paintTargetStep() {
     targetSession.idx += 1;
     paintTargetStep();
   }
+}
+
+function stepForTargets(step) {
+  if (!step || !targetSession) return step;
+  if (step.kind !== 'knockout' && step.kind !== 'powerAttack') return step;
+  const prev = targetSession.picks?.[step.kind];
+  const already = Array.isArray(prev) ? prev : (prev ? [prev] : []);
+  if (!already.length) return step;
+  return { ...step, exclude: [...(step.exclude || []), ...already] };
 }
 
 function pickTarget(uid) {
@@ -5493,6 +5501,25 @@ function installTestHook() {
       engine.playCard(c.uid);
       renderMatch();
       return true;
+    },
+    /** Seed Ring's Guile and open its discard tray through the live play path. */
+    discardContractFixture() {
+      if (!engine?.state) return null;
+      const p = engine.state.players[0];
+      const card = engine._inst('rings-guile');
+      p.hand.push(card);
+      p.coin = 0;
+      renderMatch();
+      const el = document.querySelector(`#hand-zone .card[data-uid="${card.uid}"]`);
+      tryPlayCard(card, el);
+      const tray = [...document.querySelectorAll('#target-tray .card')].map(n => n.dataset.uid);
+      return {
+        prompt: document.querySelector('#target-prompt')?.textContent || '',
+        targeting: document.body.classList.contains('targeting'),
+        trayCount: tray.length,
+        trayHasSource: tray.includes(card.uid),
+        sourceUid: card.uid,
+      };
     },
     /** Seed a contract on the tavern and buy it through the live tap path. */
     buyContractFixture(cardId = 'blackmail') {

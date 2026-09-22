@@ -160,8 +160,29 @@ assert(cards.filter(c => c.contract && c.type !== 'action' && c.type !== 'agent'
   agent.confined = [trapped];
   p.agents.push(agent);
   eng._defeatAgent(p, agent);
-  notCycling(p, trapped.uid, 'released Kwama Egg Mine');
+  const rival = eng.state.players[1];
+  notCycling(rival, trapped.uid, 'released Kwama Egg Mine');
+  assert(!has(p.exile, trapped.uid) && !has(p.cooldown, trapped.uid), 'released contract did not stay with the agent owner');
   assert(!has(p.agents, agent.uid), 'host agent left the row');
+}
+
+// Contract discard: Ring's Guile opens a hand discard, skips itself, and exiles.
+{
+  const eng = fresh();
+  const p = eng.me();
+  const card = eng._inst('rings-guile');
+  const gold = p.hand.find(c => c.id === 'gold');
+  p.hand.push(card);
+  const steps = eng.targetingStepsForPlay(card.uid);
+  const disc = steps.find(s => s.kind === 'discard');
+  assert(!!disc, 'Ring\'s Guile opens a discard step');
+  assert(disc?.sourceUid === card.uid, 'discard step is tagged with the resolving card');
+  const legal = eng.legalTargets(disc);
+  assert(legal.every(t => t.uid !== card.uid), 'Ring\'s Guile cannot discard itself');
+  assert(legal.some(t => t.uid === gold.uid), 'a Gold in hand is a legal discard');
+  assert(eng.playCard(card.uid, 0, { discard: [gold.uid] }) === true, 'play Ring\'s Guile');
+  assert(has(p.cooldown, gold.uid), 'discarded Gold reached cooldown');
+  notCycling(p, card.uid, 'played Ring\'s Guile');
 }
 
 // Acquire and Bargain cannot select contracts. A normal buy still cools down.

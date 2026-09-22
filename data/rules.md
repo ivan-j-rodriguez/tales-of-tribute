@@ -70,18 +70,24 @@ Power→Prestige conversion is **blocked** while the opponent has at least one *
 ## 8. Agents, attacks, Taunt
 
 - Spend Power equal to an agent's current HP to knock it to cooldown (unless text says otherwise).
-- **Taunt** agents must be attacked before non-Taunt agents and block Power→Prestige conversion while in play for the opposing player.
-- **Knock Out** effects remove agents without spending Power (per targeting rules).
+- **Taunt** agents must be attacked before non-Taunt agents, including Knock Out effects. If fewer agents are in play than the printed count, knock out as many as there are.
+- Taunt also blocks Power→Prestige conversion while that agent is in play for the opposing player.
+- **Knock Out** effects remove agents without spending Power. Contract agents are exiled instead of cooling down.
+- **Heal** restores Health on the agent that printed it, up to its maximum.
 
 ## 9. Discard / cooldown / exile / sacrifice
 
 - **Cooldown**: recycle pile; shuffle into new draw when draw is empty.
-- **Destroy / sacrifice**: remove your card from the game (hand or in play as allowed).
+- **Discard** is mandatory, up to as many cards as you actually hold (other than the card resolving the effect).
+- **Destroy / Donate / Toss / Replace / Refresh / Confine** are "up to" the printed count.
+- **Destroy / sacrifice**: remove your card from the game (hand or played row, not an agent on the board, unless a patron sacrifice says otherwise). Sacrificing an agent releases anything confined under it.
 - **Exile / Tavern discard**: leave player ownership and do not recycle through that player's deck. Spent Contract Actions and defeated Contract Agents go here.
-- **Refresh**: move card(s) from cooldown to top of draw.
-- **Toss**: look at top N of draw; move any of them to cooldown.
-- **Donate**: discard up to N from hand, draw that many.
-- **Confine / Reprieve / Create**: see card ops in `cards.json`.
+- **Refresh**: move card(s) from cooldown to the top of the draw pile. Cards printed "Hand Refresh" use this same pile. They do not return to hand.
+- **Toss**: look at the next N cards of the draw, shuffling cooldown in when the draw pile is empty; move any of them to cooldown.
+- **Donate**: discard up to N from hand, then draw that many.
+- **Confine**: place up to N cards from the opponent's cooldown under this agent. When the agent leaves play, those cards return to the opponent's cooldown (a contract is exiled instead).
+- **Reprieve**: look at the top N of the opponent's draw (shuffling their cooldown in if the draw is empty) and move one to their cooldown.
+- **Create**: the named token enters cooldown. A contract token would exile instead.
 
 ## 10. Contract cards
 
