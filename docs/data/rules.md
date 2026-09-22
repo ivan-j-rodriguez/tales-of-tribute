@@ -64,29 +64,37 @@ Power→Prestige conversion is **blocked** while the opponent has at least one *
 - **Buy a normal card**: pay Coin = cost; it goes to **cooldown** (not played immediately).
 - **Buy a Contract**: it is played **immediately** instead of entering your deck.
 - **Replace**: remove up to N row cards and refill.
-- **Acquire**: take a row card with cost ≤ N without paying (into cooldown).
+- **Acquire**: take a non-contract row card with cost ≤ N without paying (into cooldown). Contracts are not legal Acquire targets.
 - **Bargain**: acquire a non-contract row card; opponent also gains a copy.
 
 ## 8. Agents, attacks, Taunt
 
 - Spend Power equal to an agent's current HP to knock it to cooldown (unless text says otherwise).
-- **Taunt** agents must be attacked before non-Taunt agents and block Power→Prestige conversion while in play for the opposing player.
-- **Knock Out** effects remove agents without spending Power (per targeting rules).
+- **Taunt** agents must be attacked before non-Taunt agents, including Knock Out effects. If fewer agents are in play than the printed count, knock out as many as there are.
+- Taunt also blocks Power→Prestige conversion while that agent is in play for the opposing player.
+- **Knock Out** effects remove agents without spending Power. Contract agents are exiled instead of cooling down.
+- **Heal** restores Health on the agent that printed it, up to its maximum.
 
 ## 9. Discard / cooldown / exile / sacrifice
 
 - **Cooldown**: recycle pile; shuffle into new draw when draw is empty.
-- **Destroy / sacrifice**: remove your card from the game (hand or in play as allowed).
+- **Discard** is mandatory, up to as many cards as you actually hold (other than the card resolving the effect).
+- **Destroy / Donate / Toss / Replace / Refresh / Confine** are "up to" the printed count.
+- **Destroy / sacrifice**: remove your card from the game (hand or played row, not an agent on the board, unless a patron sacrifice says otherwise). Sacrificing an agent releases anything confined under it.
 - **Exile / Tavern discard**: leave player ownership and do not recycle through that player's deck. Spent Contract Actions and defeated Contract Agents go here.
-- **Refresh**: move card(s) from cooldown to top of draw.
-- **Toss**: look at top N of draw; move any of them to cooldown.
-- **Donate**: discard up to N from hand, draw that many.
-- **Confine / Reprieve / Create**: see card ops in `cards.json`.
+- **Refresh**: move card(s) from cooldown to the top of the draw pile. Cards printed "Hand Refresh" use this same pile. They do not return to hand.
+- **Toss**: look at the next N cards of the draw, shuffling cooldown in when the draw pile is empty; move any of them to cooldown.
+- **Donate**: discard up to N from hand, then draw that many.
+- **Confine**: place up to N cards from the opponent's cooldown under this agent. When the agent leaves play, those cards return to the opponent's cooldown (a contract is exiled instead).
+- **Reprieve**: look at the top N of the opponent's draw (shuffling their cooldown in if the draw is empty) and move one to their cooldown.
+- **Create**: the named token enters cooldown. A contract token would exile instead.
 
 ## 10. Contract cards
 
-- **Contract Actions** resolve immediately when bought. At end of turn they leave play for the Tavern discard / are removed from the match; they never enter either player's deck or cooldown.
-- **Contract Agents** enter the buyer's board immediately. When knocked out, they go to the Tavern discard / are removed rather than to the owner's cooldown.
+- **Contract Actions** are played immediately when bought. After their effects resolve they are **exiled** (removed from the match). They never enter cooldown, draw, or hand.
+- **Contract Agents** enter the buyer's board immediately. When knocked out they are **exiled**. They never enter cooldown.
+- Any other effect that would place a contract in cooldown (discard, toss, donate, confine release, end-of-turn flush, and the rest) exiles it instead. Contracts never cycle back into a deck.
+- Some guides send spent contracts to the tavern discard, which this table reshuffles when the tavern deck is empty. This engine exiles them so they do not re-enter the tavern or either player's deck.
 
 ## 11. Patron activation and favor
 

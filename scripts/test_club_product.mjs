@@ -46,8 +46,8 @@ assert(/shop|today/i.test(buyErr.error || '') && !/slate/i.test(buyErr.error || 
 const html = readFileSync(new URL('../web/index.html', import.meta.url), 'utf8');
 assert(!/Daily slate/i.test(html), 'index has no Daily slate');
 assert(/Daily stock/.test(html), 'index has Daily stock');
-assert(/build 57/.test(html), 'splash stamp is build 57');
-assert(/\?v=57/.test(html), 'cache bust is 57');
+assert(/build 59/.test(html), 'splash stamp is build 59');
+assert(/\?v=59/.test(html), 'cache bust is 59');
 const splash = html.split('id="splash"')[1]?.split('id="ranked"')[0] || '';
 assert(!/Unofficial/i.test(splash), 'splash body has no unofficial line');
 assert(/id="account-disclaimer"/.test(html) && /id="about-disclaimer"/.test(html), 'disclaimers live on login and About');
@@ -73,7 +73,7 @@ const docsApp = readFileSync(new URL('../docs/js/app.js', import.meta.url), 'utf
 const docsSeat = docsApp.slice(docsApp.indexOf('function localSeat()'), docsApp.indexOf('function canControl()'));
 assert(docsSeat === localSeatSrc, 'docs localSeat matches web');
 const docsHtml = readFileSync(new URL('../docs/index.html', import.meta.url), 'utf8');
-assert(/build 57/.test(docsHtml) && /\?v=57/.test(docsHtml), 'docs index stamp and cache bust are 57');
+assert(/build 59/.test(docsHtml) && /\?v=59/.test(docsHtml), 'docs index stamp and cache bust are 59');
 
 const netplaySrc = readFileSync(new URL('../web/js/netplay.js', import.meta.url), 'utf8');
 const docsNetplay = readFileSync(new URL('../docs/js/netplay.js', import.meta.url), 'utf8');

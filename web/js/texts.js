@@ -37,10 +37,8 @@ export function effectSentence(e) {
     case 'confine': return confineSentence(n);
     case 'patron_extra': return patronCallSentence();
     case 'hand_refresh': return refreshSentence(n, false);
-    case 'draw_refresh': return n === 1
-      ? 'Look at the next 1 card of your draw. You may move it to your cooldown.'
-      : `Look at the next ${n} cards of your draw. Choose up to ${n} of those cards to move to your cooldown.`;
-    case 'draw_refresh_agents': return `Look at the next ${n} cards of your draw. You may move Agents among them to your cooldown.`;
+    case 'draw_refresh': return refreshSentence(n, false);
+    case 'draw_refresh_agents': return refreshSentence(n, true);
     case 'heal': return healSentence(n);
     case 'create': return createSentence(e.card || 'a card', /bewilderment/i.test(e.card || ''));
     case 'sacking': return createSentence('Summerset Sacking');
@@ -54,10 +52,10 @@ export function effectSentence(e) {
     case 'passive': {
       const res = RES[e.resource] || e.resource || 'Coin';
       const gain = `Gain ${nOf(e.n, res)}.`;
-      if (e.trigger === 'agent_play') return `While this Agent is in play: when an Agent is played, ${gain}`;
-      if (e.trigger === 'agent_cooldown') return `While this Agent is in play: when an Agent is placed in your cooldown, ${gain}`;
-      if (e.trigger === 'discard') return `While this Agent is in play: when you discard a card, ${gain}`;
-      return `While this Agent is in play: when a card is placed in your cooldown, ${gain}`;
+      if (e.trigger === 'agent_play') return `While this card is in play: when an Agent is played, ${gain}`;
+      if (e.trigger === 'agent_cooldown') return `While this card is in play: when an Agent is placed in your cooldown, ${gain}`;
+      if (e.trigger === 'discard') return `While this card is in play: when you discard a card, ${gain}`;
+      return `While this card is in play: when a card is placed in your cooldown, ${gain}`;
     }
     case 'choose': {
       const opts = (e.options || []).map((opt) => {
@@ -225,8 +223,8 @@ export const OFFICIAL_PATRON_TEXT = {
     unfavored: 'Pay 3 Coin: Create 1 Bewilderment card and place it in your opponent\'s cooldown pile. This Patron is now NEUTRAL.',
   },
   druid: {
-    favored: 'Passive Combo 4: add The Chimera to your cooldown. Also pay 2 Power to Replace up to 2 cards from the Tavern.',
-    neutral: 'Passive Combo 5: add The Chimera to your cooldown. Also pay 2 Power to Replace up to 2 cards from the Tavern. This Patron now FAVORS you.',
+    favored: 'Passive Combo 4: The Chimera awakens on your agent row (5 Health, Taunt). Also pay 2 Power to Replace up to 2 cards from the Tavern.',
+    neutral: 'Passive Combo 5: The Chimera awakens on your agent row (5 Health, Taunt). Also pay 2 Power to Replace up to 2 cards from the Tavern. This Patron now FAVORS you.',
     unfavored: 'Pay 2 Power: Replace up to 2 cards from the Tavern. This Patron is now NEUTRAL.',
   },
   almalexia: {

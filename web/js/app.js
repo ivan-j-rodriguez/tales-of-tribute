@@ -394,7 +394,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 58';
+  if (stamp) stamp.textContent = 'build 59';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -1393,10 +1393,7 @@ function renderMatch() {
         if (targetSession) { pickTarget(inst.uid); return; }
         if (!canControl()) return;
         if (engine.canBuy(i)) {
-          armFlight(el, c.uid, { kind: 'buy', owner: 'you', cardId: c.id });
-          engine.buy(i);
-          syncAction({ op: 'buy', i });
-          afterPlayerAction();
+          tryBuyFromTavern(i, c, el);
         } else {
           toast(`Need ${cardsById[c.id]?.cost ?? '?'} Coin`);
         }
@@ -1502,7 +1499,7 @@ function renderMatch() {
   if (targetSession) {
     const step = targetSession.steps[targetSession.idx];
     if (step && step.kind !== 'choose') {
-      for (const t of engine.legalTargets(step)) {
+      for (const t of engine.legalTargets(stepForTargets(step))) {
         document.querySelector(`#match .card[data-uid="${t.uid}"]`)?.classList.add('legal-target');
       }
     }
@@ -1704,7 +1701,7 @@ function finishPatronCall(pid, picks) {
   afterPlayerAction();
 }
 
-const TARGET_UP_TO = new Set(['destroy', 'confine', 'toss', 'donate', 'discard', 'replace', 'refreshHand', 'refreshDraw']);
+const TARGET_UP_TO = new Set(['destroy', 'confine', 'toss', 'donate', 'replace', 'refreshHand', 'refreshDraw']);
 
 function targetTitle(step) {
   const n = step.n || 1;
@@ -1715,12 +1712,12 @@ function targetTitle(step) {
     case 'destroy': return `DESTROY UP TO ${n} CARD${plural}`;
     case 'knockout': return `KNOCK OUT ${n} AGENT${plural}`;
     case 'powerAttack': return `KNOCK OUT ${n} AGENT${plural}`;
-    case 'discard': return `DISCARD UP TO ${n} CARD${plural}`;
+    case 'discard': return `DISCARD ${n} CARD${plural}`;
     case 'donate': return `DONATE UP TO ${n} CARD${plural}`;
     case 'toss': return `TOSS — MOVE UP TO ${n} CARD${plural}`;
     case 'replace': return `REPLACE UP TO ${n} TAVERN CARD${plural}`;
     case 'acquire': return `ACQUIRE A TAVERN CARD`;
-    case 'refreshHand': return `REFRESH UP TO ${n} CARD${plural} TO HAND`;
+    case 'refreshHand': return `REFRESH UP TO ${n} CARD${plural} TO DRAW`;
     case 'refreshDraw': return `REFRESH UP TO ${n} CARD${plural} TO DRAW`;
     case 'confine': return `CONFINE UP TO ${n} CARD${plural}`;
     case 'heal': return `HEAL ${n} AGENT${plural}`;
@@ -1739,7 +1736,7 @@ function optionCardLabel(opt) {
     if (e.op === 'draw') return `Draw ${e.n}`;
     if (e.op === 'acquire') return `Acquire up to ${e.n} cost`;
     if (e.op === 'draw_refresh') return `Refresh ${e.n} to draw`;
-    if (e.op === 'hand_refresh') return `Refresh ${e.n} to hand`;
+    if (e.op === 'hand_refresh') return `Refresh ${e.n} to draw`;
     if (e.op === 'knockout') return `Knock Out ${e.n}`;
     if (e.op === 'knockout_all') return 'Knock Out all Agents';
     return String(e.op || '').replace(/_/g, ' ');
@@ -1796,7 +1793,12 @@ function confirmTargetStep() {
   if (step.kind === 'choose') {
     if (targetSession.picks.choose == null) { toast('Choose one option'); return; }
     const uid = targetSession.sourceUid;
-    if (uid) {
+    const buyId = targetSession.buyCardId;
+    if (buyId) {
+      const more = engine.targetingStepsForCardId(buyId, targetSession.picks.choose);
+      targetSession.steps = more;
+      targetSession.idx = 0;
+    } else if (uid) {
       const more = engine.targetingStepsForPlay(uid, targetSession.picks.choose);
       targetSession.steps = more;
       targetSession.idx = 0;
@@ -1806,12 +1808,11 @@ function confirmTargetStep() {
     paintTargetStep();
     return;
   }
-  if (!have && !TARGET_UP_TO.has(step.kind) && step.kind !== 'acquire') {
-    toast('Pick a card first');
-    return;
-  }
-  if (!TARGET_UP_TO.has(step.kind) && have < need && step.kind !== 'acquire') {
-    toast(`Pick ${need}`);
+  const upTo = TARGET_UP_TO.has(step.kind) || step.kind === 'acquire';
+  const legalCount = targetSession.legal ? targetSession.legal.length : need;
+  const required = upTo ? 0 : Math.min(need, legalCount);
+  if (have < required) {
+    toast(have ? `Pick ${required}` : 'Pick a card first');
     return;
   }
   const delay = step.kind === 'sacrifice' || step.kind === 'destroy' ? 420
@@ -1861,7 +1862,7 @@ function paintTargetStep() {
   if (step.kind === 'acquire') {
     if (ban) ban.hidden = true;
     document.body.classList.add('targeting-board');
-    const legal = engine.legalTargets(step);
+    const legal = engine.legalTargets(stepForTargets(step));
     targetSession.legal = legal;
     targetSession.need = 1;
     targetSession.picked = [];
@@ -1895,7 +1896,7 @@ function paintTargetStep() {
     return;
   }
 
-  const legal = engine.legalTargets(step);
+  const legal = engine.legalTargets(stepForTargets(step));
   targetSession.legal = legal;
   targetSession.need = step.n || 1;
   targetSession.picked = [];
@@ -1913,6 +1914,15 @@ function paintTargetStep() {
     targetSession.idx += 1;
     paintTargetStep();
   }
+}
+
+function stepForTargets(step) {
+  if (!step || !targetSession) return step;
+  if (step.kind !== 'knockout' && step.kind !== 'powerAttack') return step;
+  const prev = targetSession.picks?.[step.kind];
+  const already = Array.isArray(prev) ? prev : (prev ? [prev] : []);
+  if (!already.length) return step;
+  return { ...step, exclude: [...(step.exclude || []), ...already] };
 }
 
 function pickTarget(uid) {
@@ -1942,6 +1952,37 @@ function pickTarget(uid) {
   if (Array.isArray(targetSession.picks[key])) targetSession.picks[key].push(uid);
   else targetSession.picks[key] = uid;
   document.querySelector(`.legal-target[data-uid="${uid}"]`)?.classList.add('target-picked');
+}
+
+function tryBuyFromTavern(index, inst, el) {
+  if (!canControl() || targetSession || !engine) return;
+  const def = cardsById[inst.id];
+  const go = (picks) => {
+    const contract = !!def?.contract;
+    const kind = !contract ? 'buy' : (def.type === 'agent' ? 'agent' : 'play');
+    armFlight(el, inst.uid, { kind, owner: 'you', cardId: inst.id });
+    const ok = engine.buy(index, picks);
+    if (!ok) {
+      flights.delete(inst.uid);
+      toast('Cannot buy that now');
+      renderMatch();
+      return;
+    }
+    syncAction({ op: 'buy', i: index, picks: picks || undefined });
+    afterPlayerAction();
+  };
+  if (def?.contract) {
+    const steps = engine.targetingStepsForCardId(inst.id);
+    if (steps.length) {
+      beginTargetSession({
+        steps,
+        onDone: (picks) => go(picks),
+      });
+      if (targetSession) targetSession.buyCardId = inst.id;
+      return;
+    }
+  }
+  go(null);
 }
 
 function tryPlayCard(inst, el) {
@@ -2098,7 +2139,7 @@ function syncAction(msg) {
 function applyRemoteAction(msg) {
   if (!engine) return;
   if (msg.op === 'play') engine.playCard(msg.uid, msg.choice || 0, msg.picks);
-  else if (msg.op === 'buy') engine.buy(msg.i);
+  else if (msg.op === 'buy') engine.buy(msg.i, msg.picks || null);
   else if (msg.op === 'patron') engine.callPatron(msg.pid, msg.picks);
   else if (msg.op === 'knockout') engine.knockoutWithPower(msg.uid);
   else if (msg.op === 'end') engine.endTurn();
@@ -2144,10 +2185,13 @@ function startMatch(opts = {}) {
     if (ev === 'knockout') {
       playSfx('knockout');
       flashFx(data?.agent, 'fx-slash');
-      const from = document.querySelector(`#match .card[data-uid="${data?.agent?.uid}"]`)
-        || document.querySelector(`.tray-card[data-uid="${data?.agent?.uid}"]`);
-      const dest = data?.ownerIsActive ? pileEl('you-cooldown') : pileEl('opp-cooldown');
-      if (from && dest) flyCard(from, dest, data.agent, () => {});
+      const contract = !!cardsById[data?.agent?.id]?.contract;
+      if (!contract) {
+        const from = document.querySelector(`#match .card[data-uid="${data?.agent?.uid}"]`)
+          || document.querySelector(`.tray-card[data-uid="${data?.agent?.uid}"]`);
+        const dest = data?.ownerIsActive ? pileEl('you-cooldown') : pileEl('opp-cooldown');
+        if (from && dest) flyCard(from, dest, data.agent, () => {});
+      }
     }
     if (ev === 'draw' && data?.card) {
       const you = engine.state?.players?.[localSeat()];
@@ -2406,7 +2450,11 @@ function handleAiActionAnim(action) {
     } else if (action.type === 'buy') {
       const tz = $('#tavern-zone');
       const from = tz?.children[action.index] || tz;
-      armFlight(from, from?.dataset?.uid, { kind: 'buy', owner: 'opp', cardId: action.cardId });
+      const def = cardsById[action.cardId];
+      const contract = !!def?.contract;
+      const kind = !contract ? 'buy' : (def.type === 'agent' ? 'agent' : 'play');
+      if (contract) flashVfx(from, 'contract');
+      armFlight(from, from?.dataset?.uid, { kind, owner: 'opp', cardId: action.cardId });
     }
   } catch {}
 }
@@ -5453,6 +5501,49 @@ function installTestHook() {
       engine.playCard(c.uid);
       renderMatch();
       return true;
+    },
+    /** Seed Ring's Guile and open its discard tray through the live play path. */
+    discardContractFixture() {
+      if (!engine?.state) return null;
+      const p = engine.state.players[0];
+      const card = engine._inst('rings-guile');
+      p.hand.push(card);
+      p.coin = 0;
+      renderMatch();
+      const el = document.querySelector(`#hand-zone .card[data-uid="${card.uid}"]`);
+      tryPlayCard(card, el);
+      const tray = [...document.querySelectorAll('#target-tray .card')].map(n => n.dataset.uid);
+      return {
+        prompt: document.querySelector('#target-prompt')?.textContent || '',
+        targeting: document.body.classList.contains('targeting'),
+        trayCount: tray.length,
+        trayHasSource: tray.includes(card.uid),
+        sourceUid: card.uid,
+      };
+    },
+    /** Seed a contract on the tavern and buy it through the live tap path. */
+    buyContractFixture(cardId = 'blackmail') {
+      if (!engine?.state) return null;
+      const p = engine.state.players[0];
+      const card = engine._inst(cardId);
+      engine.state.tavern[0] = card;
+      p.coin = Math.max(p.coin, (cardsById[cardId]?.cost || 0) + 1);
+      renderMatch();
+      const el = document.querySelector('#tavern-zone .card');
+      tryBuyFromTavern(0, card, el);
+      const you = engine.state.players[0];
+      return {
+        id: cardId,
+        power: you.power,
+        agents: you.agents.map(c => c.id),
+        exile: you.exile.map(c => c.id),
+        cooldown: you.cooldown.map(c => c.id),
+        hand: you.hand.map(c => c.id),
+        cdLabel: document.querySelector('#cnt-you-cd')?.textContent || '',
+        boughtUidInHand: you.hand.some(c => c.uid === card.uid),
+        boughtUidInCooldown: you.cooldown.some(c => c.uid === card.uid),
+        boughtUidInExile: you.exile.some(c => c.uid === card.uid),
+      };
     },
     tapCard(sel) {
       const el = document.querySelector(sel);

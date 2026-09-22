@@ -129,23 +129,60 @@ export class GameEngine {
   me() { return this.state.players[this.state.active]; }
   opp() { return this.state.players[1 - this.state.active]; }
 
+  _fillDraw(player) {
+    if (player.draw.length || !player.cooldown.length) return false;
+    player.draw = player.cooldown.splice(0);
+    this._shuffle(player.draw);
+    this.emit('shuffle', { player });
+    return true;
+  }
+
   _draw(player, n) {
     for (let i = 0; i < n; i++) {
-      if (!player.draw.length) {
-        if (!player.cooldown.length) break;
-        player.draw = player.cooldown.splice(0);
-        this._shuffle(player.draw);
-        this.emit('shuffle', { player });
-      }
-      if (player.draw.length) {
-        const c = player.draw.pop();
-        player.hand.push(c);
-        this.emit('draw', { player, card: c });
-      }
+      if (!player.draw.length) this._fillDraw(player);
+      if (!player.draw.length) break;
+      const c = player.draw.pop();
+      player.hand.push(c);
+      this.emit('draw', { player, card: c });
     }
   }
 
+  /** Top of the draw, shuffling cooldown in when the draw pile runs out. Restores the cards. */
+  _peekDraw(player, n) {
+    const got = [];
+    for (let i = 0; i < n; i++) {
+      if (!player.draw.length) this._fillDraw(player);
+      if (!player.draw.length) break;
+      got.push(player.draw.pop());
+    }
+    for (let i = got.length - 1; i >= 0; i--) player.draw.push(got[i]);
+    return got;
+  }
+
+  _drawUpTo(player, cap) {
+    const need = Math.max(0, cap - player.hand.length);
+    if (need) this._draw(player, need);
+  }
+
+  /** Contracts never enter a player's cooldown, draw, or hand cycle. */
+  _isContract(card) {
+    return !!this.card(card?.id)?.contract;
+  }
+
+  _exile(player, card) {
+    if (!card || !player) return;
+    if (player.exile.some(c => c.uid === card.uid)) return;
+    player.exile.push(card);
+  }
+
   _toCooldown(player, card) {
+    if (!card || !player) return;
+    // One guard for every caller: discard, toss, donate, acquire, confine
+    // release, bargain copies, created cards, end-of-turn flush, and buy.
+    if (this._isContract(card)) {
+      this._exile(player, card);
+      return;
+    }
     player.cooldown.push(card);
     this._triggerPassives(player, 'cooldown', card);
     if (this.card(card.id)?.type === 'agent') {
@@ -153,22 +190,19 @@ export class GameEngine {
     }
   }
 
-  _triggerPassives(owner, trigger, card) {
-    // Check all agents in play for both players (some trigger on any agent play)
+  _triggerPassives(owner, trigger, card, exceptUid = null) {
+    // Agents stay in play. Action passives last while that card is in the played row.
     for (const pl of this.state.players) {
-      for (const ag of pl.agents) {
+      const sources = [...pl.agents, ...pl.played];
+      for (const ag of sources) {
+        if (exceptUid && ag.uid === exceptUid) continue;
         const def = this.card(ag.id);
         if (!def) continue;
-        const effects = [...(def.play || [])];
-        for (const e of effects) {
-          if (e.op === 'passive' && e.trigger === trigger) {
-            // Coin/Agent triggers for the agent owner when ANY agent is played
-            if (trigger === 'agent_play') {
-              this._grant(pl, e.resource, e.n);
-            } else if (pl === owner) {
-              this._grant(pl, e.resource, e.n);
-            }
-          }
+        for (const e of def.play || []) {
+          if (e.op !== 'passive' || e.trigger !== trigger) continue;
+          // "When an Agent is played" pays the passive's owner, whoever played the agent.
+          if (trigger === 'agent_play') this._grant(pl, e.resource, e.n);
+          else if (pl === owner) this._grant(pl, e.resource, e.n);
         }
       }
     }
@@ -194,11 +228,18 @@ export class GameEngine {
         this._log('Hunding favor: +1 Coin');
       }
     }
-    // Mora setbacks
+    // The player who acts second gets 1 Coin on their first turn.
+    if (this.state.turn === 2 && !p.openingCoin) {
+      p.coin += 1;
+      p.openingCoin = true;
+      this._log('Second player: +1 Coin');
+    }
+    // Setbacks resolve before the draw-up, so a draw setback is extra only when the hand is already full.
     if (p.setback.coin) { p.coin += p.setback.coin; this._log(`Setback: +${p.setback.coin} Coin`); }
     if (p.setback.power) { p.power += p.setback.power; this._log(`Setback: +${p.setback.power} Power`); }
     if (p.setback.draw) { this._draw(p, p.setback.draw); this._log(`Setback: Draw ${p.setback.draw}`); }
     p.setback = { coin: 0, power: 0, draw: 0 };
+    this._drawUpTo(p, 5);
     this.state.phase = 'main';
     this.emit('turnStart', { player: this.state.active });
   }
@@ -219,7 +260,11 @@ export class GameEngine {
 
   canPlay(uid) {
     const p = this.me();
-    return p.hand.some(c => c.uid === uid) && !this.state.winner && this.state.phase === 'main';
+    if (this.state.winner || this.state.phase !== 'main') return false;
+    if (!p.hand.some(c => c.uid === uid)) return false;
+    const curses = p.hand.filter(c => this.card(c.id)?.curse);
+    if (curses.length && !curses.some(c => c.uid === uid)) return false;
+    return true;
   }
 
   playCard(uid, choiceIndex = 0, picks = null) {
@@ -232,7 +277,6 @@ export class GameEngine {
     if (idx < 0) { this._picks = null; return false; }
     const card = p.hand.splice(idx, 1)[0];
     const def = this.card(card.id);
-    p.played.push(card);
     p.playedThisTurn = p.playedThisTurn || [];
     p.playedThisTurn.push({ uid: card.uid, id: card.id, patron: def.patron });
 
@@ -242,6 +286,19 @@ export class GameEngine {
 
     this._log(`Play ${def.name}`);
     this.emit('play', { card, def, comboCount });
+
+    // Agents enter the row before effects so Confine and Heal attach to this card.
+    if (def.type === 'agent') {
+      card.hp = def.hp || card.hp || 2;
+      card.maxHp = def.hp || card.maxHp || 2;
+      card.taunt = !!def.taunt;
+      card.confined = card.confined || [];
+      p.agents.push(card);
+      this._triggerPassives(p, 'agent_play', card, card.uid);
+      this.emit('agentEnter', { agent: card });
+    } else {
+      p.played.push(card);
+    }
 
     // On-play effects
     this._resolveEffects(def.play || [], { card, def, choiceIndex });
@@ -266,24 +323,12 @@ export class GameEngine {
     // Druid Chimera check
     this._checkChimera(comboCount, suit);
 
-    // Agents sit on YOUR agent row until knocked out (not in played/cooldown while alive).
-    if (def.type === 'agent') {
-      const pi = p.played.findIndex(c => c.uid === card.uid);
-      if (pi >= 0) p.played.splice(pi, 1);
-      card.hp = def.hp || card.hp || 2;
-      card.maxHp = def.hp || card.maxHp || 2;
-      card.taunt = !!def.taunt;
-      card.confined = card.confined || [];
-      p.agents.push(card);
-      this._triggerPassives(p, 'agent_play', card);
-      this.emit('agentEnter', { agent: card });
-    }
-
-    // Contract actions: resolve then EXILE (never cooldown). Contract agents exile on defeat.
+    // Contract actions: resolve then EXILE (never cooldown). Contract agents stay
+    // on the row until defeat, which exiles them.
     if (def.contract && def.type === 'action') {
       const pi = p.played.findIndex(c => c.uid === card.uid);
       if (pi >= 0) p.played.splice(pi, 1);
-      p.exile.push(card);
+      this._exile(p, card);
     }
 
     this._picks = null;
@@ -331,7 +376,7 @@ export class GameEngine {
       case 'discard': this._autoDiscard(p, e.n); break;
       case 'donate': this._donate(p, e.n); break;
       case 'toss': this._toss(p, e.n); break;
-      case 'destroy': this._destroy(p, e.n); break;
+      case 'destroy': this._destroy(p, e.n, ctx.card?.uid); break;
       case 'replace': this._replaceTavern(e.n); break;
       case 'acquire': this._acquire(p, e.n); break;
       case 'patron_extra': p.patronCallsLeft += e.n; break;
@@ -437,7 +482,11 @@ export class GameEngine {
 
   _toss(p, n) {
     const seen = [];
-    for (let i = 0; i < n && p.draw.length; i++) seen.push(p.draw.pop());
+    for (let i = 0; i < n; i++) {
+      if (!p.draw.length) this._fillDraw(p);
+      if (!p.draw.length) break;
+      seen.push(p.draw.pop());
+    }
     if (!seen.length) return;
     const tossUids = this._pullPickList('toss');
     if (tossUids && tossUids.length) {
@@ -459,23 +508,27 @@ export class GameEngine {
     for (const c of toTop.reverse()) p.draw.push(c);
   }
 
-  _destroy(p, n) {
+  _destroy(p, n, exceptUid = null) {
     for (let i = 0; i < n; i++) {
       const uid = this._pullPick('destroy');
       if (uid) {
+        if (uid === exceptUid) continue;
         const f = this._pluck(p, uid, ['played', 'hand']);
         if (!f) continue;
-        p.exile.push(f.card);
+        this._exile(p, f.card);
         this._log(`Destroy ${this.card(f.card.id)?.name}`);
         this.emit('sacrifice', { card: f.card });
         continue;
       }
-      if (!this._useAutoPick() || !p.played.length) break;
-      p.played.sort((a, b) => this._cardValue(a) - this._cardValue(b));
-      const c = p.played.shift();
-      p.exile.push(c);
-      this._log(`Destroy ${this.card(c.id)?.name}`);
-      this.emit('sacrifice', { card: c });
+      if (!this._useAutoPick()) break;
+      const pool = [...p.played, ...p.hand].filter(c => c.uid !== exceptUid);
+      if (!pool.length) break;
+      pool.sort((a, b) => this._cardValue(a) - this._cardValue(b));
+      const f = this._pluck(p, pool[0].uid, ['played', 'hand']);
+      if (!f) break;
+      this._exile(p, f.card);
+      this._log(`Destroy ${this.card(f.card.id)?.name}`);
+      this.emit('sacrifice', { card: f.card });
     }
   }
 
@@ -520,9 +573,11 @@ export class GameEngine {
   }
 
   _acquire(p, maxCost) {
+    // Acquire puts a tavern card into cooldown. Contracts are not legal targets
+    // (Bargain is explicitly non-contract; a contract must never cycle).
     const affordable = this.state.tavern
       .map((c, i) => ({ c, i, d: this.card(c.id) }))
-      .filter(x => x.d.cost <= maxCost);
+      .filter(x => x.d && x.d.cost <= maxCost && !x.d.contract);
     if (!affordable.length) return;
     const pickUid = this._pullPick('acquire');
     let pick = pickUid
@@ -547,10 +602,18 @@ export class GameEngine {
     const o = this.opp();
     for (let i = 0; i < n; i++) {
       const uid = this._pullPick('knockout');
-      const target = uid
-        ? o.agents.find(a => a.uid === uid)
-        : (this._useAutoPick() ? this._pickKnockTarget(o) : null);
-      if (!target) break;
+      let target = null;
+      if (uid) {
+        target = o.agents.find(a => a.uid === uid);
+        const taunts = o.agents.filter(a => a.taunt);
+        if (target && taunts.length && !target.taunt) target = null;
+      } else if (this._useAutoPick()) {
+        target = this._pickKnockTarget(o);
+      }
+      if (!target) {
+        if (uid) continue;
+        break;
+      }
       this._defeatAgent(o, target);
       this._lastKnocked = (this._lastKnocked || 0) + 1;
       if (coinPer) this.me().coin += coinPer;
@@ -581,11 +644,10 @@ export class GameEngine {
     const idx = owner.agents.findIndex(a => a.uid === agent.uid);
     if (idx < 0) return;
     owner.agents.splice(idx, 1);
-    // Release confined
-    for (const c of agent.confined || []) this._toCooldown(owner, c);
+    this._releaseConfined(owner, agent);
     const def = this.card(agent.id);
     if (def?.contract) {
-      owner.exile.push(agent);
+      this._exile(owner, agent);
     } else {
       this._toCooldown(owner, agent);
     }
@@ -623,14 +685,18 @@ export class GameEngine {
     return true;
   }
 
+  _releaseConfined(owner, agent) {
+    if (!agent) return;
+    // Confined cards were taken from the opponent. They return to that player.
+    const rival = this.state.players.find(pl => pl !== owner) || owner;
+    for (const c of agent.confined || []) this._toCooldown(rival, c);
+    agent.confined = [];
+  }
+
   _heal(card, n) {
     const p = this.me();
-    const uid = this._pullPick('heal');
-    const agent = (uid && p.agents.find(a => a.uid === uid))
-      || (this._useAutoPick()
-        ? (p.agents.find(a => a.uid === card.uid) || p.agents[0])
-        : null);
-    if (agent) agent.hp = Math.min(agent.maxHp, agent.hp + n);
+    const agent = card && p.agents.find(a => a.uid === card.uid);
+    if (agent) agent.hp = Math.min(agent.maxHp || agent.hp, agent.hp + n);
   }
 
   _createToken(p, cardId, n) {
@@ -648,18 +714,8 @@ export class GameEngine {
   }
 
   _handRefresh(p, n) {
-    for (let i = 0; i < n; i++) {
-      const uid = this._pullPick('refreshHand');
-      if (uid) {
-        const f = this._pluck(p, uid, ['cooldown']);
-        if (f) p.hand.push(f.card);
-        continue;
-      }
-      if (!this._useAutoPick() || !p.cooldown.length) break;
-      p.cooldown.sort((a, b) => this._cardValue(b) - this._cardValue(a));
-      const c = p.cooldown.shift();
-      p.hand.push(c);
-    }
+    // Official Refresh returns cards to the top of the draw pile, not the hand.
+    this._drawRefresh(p, n, false);
   }
 
   _drawRefresh(p, n, agentsOnly) {
@@ -713,12 +769,29 @@ export class GameEngine {
     return p.coin >= d.cost;
   }
 
-  buy(tavernIndex) {
+  buy(tavernIndex, picks = null) {
     if (!this.canBuy(tavernIndex)) return false;
     const p = this.me();
     const c = this.state.tavern.splice(tavernIndex, 1)[0];
     const d = this.card(c.id);
     p.coin -= d.cost;
+    if (d.contract) {
+      // Official: a contract is played immediately. It never enters cooldown.
+      p.hand.push(c);
+      const played = this.playCard(c.uid, picks?.choose || 0, picks);
+      if (!played) {
+        const hi = p.hand.findIndex(x => x.uid === c.uid);
+        if (hi >= 0) p.hand.splice(hi, 1);
+        this.state.tavern.splice(Math.min(tavernIndex, this.state.tavern.length), 0, c);
+        p.coin += d.cost;
+        return false;
+      }
+      this._log(`Buy ${d.name} (${d.cost})`);
+      this.emit('buy', { card: c, def: d });
+      this._refillTavernSlot();
+      this.emit('state', this.state);
+      return true;
+    }
     this._toCooldown(p, c);
     this._log(`Buy ${d.name} (${d.cost})`);
     this.emit('buy', { card: c, def: d });
@@ -772,7 +845,8 @@ export class GameEngine {
         this._strictPicks = false;
         return false;
       }
-      p.exile.push(sac);
+      this._releaseConfined(p, sac);
+      this._exile(p, sac);
       this.emit('sacrifice', { card: sac });
       this._createToken(p, 'writ-of-coin', 1);
       this._log('Treasury: Writ of Coin');
@@ -858,9 +932,10 @@ export class GameEngine {
           c = pool[0] ? this._pluck(p, pool[0].uid, ['played', 'agents'])?.card : null;
         }
         if (c) {
+          this._releaseConfined(p, c);
           const cost = this.card(c.id)?.cost || 0;
           p.prestige += Math.max(0, cost - 1);
-          p.exile.push(c);
+          this._exile(p, c);
           this.emit('sacrifice', { card: c });
         }
         break;
@@ -896,7 +971,11 @@ export class GameEngine {
       case 'look_confine': {
         const n = ab.n || 3;
         const seen = [];
-        for (let i = 0; i < n && o.draw.length; i++) seen.push(o.draw.pop());
+        for (let i = 0; i < n; i++) {
+          if (!o.draw.length) this._fillDraw(o);
+          if (!o.draw.length) break;
+          seen.push(o.draw.pop());
+        }
         if (!seen.length) break;
         const uid = this._pullPick('lookConfine');
         let move = uid ? seen.find(c => c.uid === uid) : null;
@@ -913,9 +992,10 @@ export class GameEngine {
         break;
       }
       case 'mora_share': {
+        // Bargain: a non-contract action. Both players gain a cooldown copy.
         const actions = this.state.tavern
           .map((c, i) => ({ c, i, d: this.card(c.id) }))
-          .filter(x => x.d.type === 'action');
+          .filter(x => x.d && x.d.type === 'action' && !x.d.contract);
         if (!actions.length) break;
         const pickUid = this._pullPick('moraShare');
         let pick = pickUid ? actions.find(x => x.c.uid === pickUid || x.c.id === pickUid) : null;
@@ -954,14 +1034,16 @@ export class GameEngine {
     p.power = 0;
     p.coin = 0;
 
-    // Move played to cooldown (non-exiled)
+    // Move played to cooldown. Contract actions exile. A contract agent left in
+    // played (not seated) exiles too — it must not fall through to cooldown.
     while (p.played.length) {
       const c = p.played.pop();
       const def = this.card(c.id);
       if (def?.contract && def.type === 'action') {
-        p.exile.push(c);
+        this._exile(p, c);
       } else if (def?.type === 'agent') {
-        // agents stay on board — shouldn't be in played; if somehow there, skip
+        const seated = p.agents.some(a => a.uid === c.uid);
+        if (def.contract && !seated) this._exile(p, c);
       } else {
         this._toCooldown(p, c);
       }
@@ -1007,10 +1089,9 @@ export class GameEngine {
       this._log(`${p.prestige} Prestige — opponent's last chance!`);
     }
 
-    // Next turn
+    // Next turn. The only draw is _drawUpTo inside _startTurn.
     this.state.active = 1 - this.state.active;
     this.state.turn += 1;
-    this._draw(this.me(), 5);
     this._startTurn();
     this.emit('turnEnd', {});
     this.emit('state', this.state);
@@ -1074,11 +1155,9 @@ export class GameEngine {
     return out;
   }
 
-  _effectsForPlay(uid, choiceIndex = null) {
+  _effectsForDef(def, choiceIndex = null) {
+    if (!def) return [];
     const p = this.me();
-    const card = p.hand.find(c => c.uid === uid);
-    if (!card) return [];
-    const def = this.card(card.id);
     const combo = (p.suitsPlayed[def.patron] || 0) + 1;
     const raw = [...(def.play || [])];
     if (combo >= 2) raw.push(...(def.combo2 || []));
@@ -1092,6 +1171,17 @@ export class GameEngine {
       } else out.push(e);
     }
     return out;
+  }
+
+  _effectsForPlay(uid, choiceIndex = null) {
+    const card = this.me().hand.find(c => c.uid === uid);
+    if (!card) return [];
+    return this._effectsForDef(this.card(card.id), choiceIndex);
+  }
+
+  /** Targeting for a contract still in the tavern, before buy plays it. */
+  targetingStepsForCardId(cardId, choiceIndex = null) {
+    return this._stepsFromEffects(this._effectsForDef(this.card(cardId), choiceIndex));
   }
 
   targetingStepsForPlay(uid, choiceIndex = null) {
@@ -1118,23 +1208,27 @@ export class GameEngine {
     return steps.filter(s => s.kind === 'choose' || this.legalTargets(s).length > 0);
   }
 
-  _stepsFromEffects(effects) {
+  _stepsFromEffects(effects, meta) {
+    const sourceUid = meta?.uid || null;
     const steps = [];
     for (const e of effects || []) {
       if (e.op === 'choose') steps.push({ kind: 'choose', options: e.options || [] });
       else if (e.op === 'sacrifice') steps.push({ kind: 'sacrifice', n: e.n || 1, zones: e.zones || ['hand', 'played'], minCost: e.minCost || 0 });
-      else if (e.op === 'destroy') steps.push({ kind: 'destroy', n: e.n || 1, zones: ['played', 'hand'] });
-      else if (e.op === 'knockout') steps.push({ kind: 'knockout', n: e.n || 1 });
-      else if (e.op === 'discard') steps.push({ kind: 'discard', n: e.n || 1, zones: ['hand'] });
-      else if (e.op === 'donate') steps.push({ kind: 'donate', n: e.n || 1, zones: ['hand'] });
+      else if (e.op === 'destroy') steps.push({ kind: 'destroy', n: e.n || 1, zones: ['played', 'hand'], sourceUid });
+      else if (e.op === 'knockout') {
+        // One agent at a time so Taunt is honored, then the rest.
+        const count = e.n || 1;
+        for (let i = 0; i < count; i++) steps.push({ kind: 'knockout', n: 1 });
+      }
+      else if (e.op === 'discard') steps.push({ kind: 'discard', n: e.n || 1, zones: ['hand'], sourceUid });
+      else if (e.op === 'donate') steps.push({ kind: 'donate', n: e.n || 1, zones: ['hand'], sourceUid });
       else if (e.op === 'toss') steps.push({ kind: 'toss', n: e.n || 1 });
       else if (e.op === 'replace') steps.push({ kind: 'replace', n: e.n || 1 });
       else if (e.op === 'acquire') steps.push({ kind: 'acquire', n: 1, maxCost: e.n });
-      else if (e.op === 'hand_refresh') steps.push({ kind: 'refreshHand', n: e.n || 1 });
-      else if (e.op === 'draw_refresh') steps.push({ kind: 'refreshDraw', n: e.n || 1, agentsOnly: false });
+      else if (e.op === 'hand_refresh' || e.op === 'draw_refresh') steps.push({ kind: 'refreshDraw', n: e.n || 1, agentsOnly: false });
       else if (e.op === 'draw_refresh_agents') steps.push({ kind: 'refreshDraw', n: e.n || 1, agentsOnly: true });
       else if (e.op === 'confine') steps.push({ kind: 'confine', n: e.n || 1 });
-      else if (e.op === 'heal') steps.push({ kind: 'heal', n: 1 });
+      // Heal is always this agent. No target tray.
     }
     return steps.filter(s => s.kind === 'choose' || s.kind === 'toss' || this.legalTargets(s).length > 0);
   }
@@ -1149,18 +1243,30 @@ export class GameEngine {
         return this._sacrificePool(p, step.zones || ['hand', 'played'], step.minCost || 0)
           .map(c => mark(c, p.hand.includes(c) ? 'hand' : p.played.includes(c) ? 'played' : 'agents'));
       case 'destroy':
-        return [...p.played, ...p.hand].map(c => mark(c, p.played.includes(c) ? 'played' : 'hand'));
-      case 'knockout': {
-        const taunts = o.agents.filter(a => a.taunt);
-        return (taunts.length ? taunts : o.agents).map(c => mark(c, 'opp-agents'));
+        return [...p.played, ...p.hand]
+          .filter(c => c.uid !== step.sourceUid)
+          .map(c => mark(c, p.played.includes(c) ? 'played' : 'hand'));
+      case 'knockout':
+      case 'powerAttack': {
+        const exclude = new Set(step.exclude || []);
+        let pool = o.agents.filter(a => !exclude.has(a.uid));
+        const taunts = pool.filter(a => a.taunt);
+        if (taunts.length) pool = taunts;
+        if (step.kind === 'powerAttack') pool = pool.filter(a => p.power >= (a.hp || 0));
+        return pool.map(c => mark(c, 'opp-agents'));
       }
       case 'discard':
       case 'donate':
-        return p.hand.map(c => mark(c, 'hand'));
+        return p.hand.filter(c => c.uid !== step.sourceUid).map(c => mark(c, 'hand'));
       case 'replace':
         return this.state.tavern.map(c => mark(c, 'tavern'));
       case 'acquire':
-        return this.state.tavern.filter(c => (this.card(c.id)?.cost || 0) <= (step.maxCost ?? 99)).map(c => mark(c, 'tavern'));
+        return this.state.tavern
+          .filter(c => {
+            const d = this.card(c.id);
+            return d && !d.contract && (d.cost || 0) <= (step.maxCost ?? 99);
+          })
+          .map(c => mark(c, 'tavern'));
       case 'refreshHand':
         return p.cooldown.map(c => mark(c, 'cooldown'));
       case 'refreshDraw': {
@@ -1170,20 +1276,18 @@ export class GameEngine {
       case 'confine':
         return o.cooldown.map(c => mark(c, 'opp-cooldown'));
       case 'heal':
-        return p.agents.map(c => mark(c, 'agents'));
+        return [];
       case 'toss':
-        return p.draw.slice(-Math.max(1, step.n || 1)).reverse().map(c => mark(c, 'draw'));
-      case 'powerAttack': {
-        const taunts = o.agents.filter(a => a.taunt);
-        const pool = taunts.length ? taunts : o.agents;
-        return pool.filter(a => p.power >= (a.hp || 0)).map(c => mark(c, 'opp-agents'));
-      }
-      case 'lookConfine': {
-        const look = step.look || 3;
-        return o.draw.slice(-look).reverse().map(c => mark(c, 'draw'));
-      }
+        return this._peekDraw(p, Math.max(1, step.n || 1)).map(c => mark(c, 'draw'));
+      case 'lookConfine':
+        return this._peekDraw(o, step.look || 3).map(c => mark(c, 'draw'));
       case 'moraShare':
-        return this.state.tavern.filter(c => this.card(c.id)?.type === 'action').map(c => mark(c, 'tavern'));
+        return this.state.tavern
+          .filter(c => {
+            const d = this.card(c.id);
+            return d && d.type === 'action' && !d.contract;
+          })
+          .map(c => mark(c, 'tavern'));
       default:
         return [];
     }
