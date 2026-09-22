@@ -377,7 +377,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 55';
+  if (stamp) stamp.textContent = 'build 56';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -1006,7 +1006,7 @@ function startRandomMatch() {
 
 /* ——— Match helpers ——— */
 function localSeat() {
-  if (matchMode === 'hotseat') return engine.state.active;
+  if (matchMode === 'hotseat') return engine?.state?.active ?? 0;
   if (matchMode === 'remote-guest') return 1;
   return 0;
 }
