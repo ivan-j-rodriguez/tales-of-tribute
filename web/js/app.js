@@ -394,7 +394,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 60';
+  if (stamp) stamp.textContent = 'build 61';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -4033,6 +4033,63 @@ function openGauntlet() {
   ensureGauntletDay(profile);
   renderGauntlet();
   show('#gauntlet');
+  fitGauntletNames();
+}
+
+/** Slide a stop chip inward when centering it would cross the map frame.
+    The marker stays on the province coordinate. Overflow on the wrap stays
+    hidden so the rounded gold border still clips the map art. */
+let gauntletNameFitBound = false;
+function fitGauntletNames() {
+  const wrap = document.querySelector('.gauntlet-map-wrap');
+  if (!wrap) return;
+  const box = wrap.getBoundingClientRect();
+  if (box.width < 40 || box.height < 40) return;
+  const border = 2;
+  const pad = 8;
+  const leftLim = box.left + border + pad;
+  const rightLim = box.right - border - pad;
+  const topLim = box.top + border + pad;
+  const botLim = box.bottom - border - pad;
+  wrap.querySelectorAll('.g-marker .g-name').forEach((name) => {
+    name.style.setProperty('--name-x', '-50%');
+    name.style.setProperty('--name-y', '-50%');
+    const r = name.getBoundingClientRect();
+    if (r.width < 2 || r.height < 2) return;
+    let dx = 0;
+    let dy = 0;
+    if (r.left < leftLim) dx = leftLim - r.left;
+    else if (r.right > rightLim) dx = rightLim - r.right;
+    if (r.top < topLim) dy = topLim - r.top;
+    else if (r.bottom > botLim) dy = botLim - r.bottom;
+    if (!dx && !dy) return;
+    name.style.setProperty('--name-x', `calc(-50% + ${dx.toFixed(2)}px)`);
+    name.style.setProperty('--name-y', `calc(-50% + ${dy.toFixed(2)}px)`);
+    const r2 = name.getBoundingClientRect();
+    let dx2 = 0;
+    let dy2 = 0;
+    if (r2.left < leftLim - 0.5) dx2 = leftLim - r2.left;
+    else if (r2.right > rightLim + 0.5) dx2 = rightLim - r2.right;
+    if (r2.top < topLim - 0.5) dy2 = topLim - r2.top;
+    else if (r2.bottom > botLim + 0.5) dy2 = botLim - r2.bottom;
+    if (dx2 || dy2) {
+      name.style.setProperty('--name-x', `calc(-50% + ${(dx + dx2).toFixed(2)}px)`);
+      name.style.setProperty('--name-y', `calc(-50% + ${(dy + dy2).toFixed(2)}px)`);
+    }
+  });
+}
+
+function bindGauntletNameFit() {
+  if (gauntletNameFitBound) return;
+  gauntletNameFitBound = true;
+  const wrap = document.querySelector('.gauntlet-map-wrap');
+  if (wrap && typeof ResizeObserver !== 'undefined') {
+    const obs = new ResizeObserver(() => fitGauntletNames());
+    obs.observe(wrap);
+  } else {
+    window.addEventListener('resize', () => fitGauntletNames());
+  }
+  document.fonts?.ready?.then(() => fitGauntletNames());
 }
 
 function renderGauntlet() {
@@ -4093,6 +4150,8 @@ function renderGauntlet() {
     if (st) st.textContent = `Stop ${(g.cursor || 0) + 1}/${g.order?.length || 0}: ${featured.name} ${via} — vs ${featured.rival}. Win advances. Lose locks the day. Prize: ${prize.label}.`;
     if (btn) { btn.disabled = false; btn.textContent = `Ride to ${featured.name}`; }
   }
+  bindGauntletNameFit();
+  fitGauntletNames();
 }
 
 function startGauntletStop(stop) {
@@ -5118,6 +5177,7 @@ function layoutMetrics() {
 function installTestHook() {
   window.__totTest = {
     lastToast: () => lastToast,
+    fitGauntletNames() { fitGauntletNames(); },
     startQuick() {
       try { localStorage.setItem(TOUR_KEY, '1'); } catch {}
       $('#login-overlay')?.classList.remove('show');
