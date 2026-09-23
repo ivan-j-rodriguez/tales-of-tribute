@@ -497,6 +497,19 @@ export function isDeckUnlocked(profile, deckId) {
   return profile.unlockedDecks.includes(deckId);
 }
 
+/**
+ * Collection lock hides a patron's name outside a match.
+ * A patron sitting on the live table is already in the game, rival deck
+ * included, so the confirm and the hold-inspect dossier use the real name.
+ */
+export function patronIdentityOpen(profile, pid, { inMatch = false, onTable = false } = {}) {
+  if (!pid) return false;
+  if (pid === 'treasury') return true;
+  if (inMatch && onTable) return true;
+  if (!profile?.unlockedDecks) return false;
+  return isDeckUnlocked(profile, pid);
+}
+
 export function fragmentProgress(profile, deckId) {
   return profile.deckFragments[deckId] || 0;
 }

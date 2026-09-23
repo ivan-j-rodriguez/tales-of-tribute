@@ -4,7 +4,7 @@ import { normalizeCatalog, nameSlug } from './normalize.js';
 import {
   loadProfile, saveProfile, canClaimDailyLogin, claimDailyLogin, ensureDailyChallengeReset,
   recordMatchResult, claimMatchReward, openCrownCrate, claimAchievement, claimDailyChallenge,
-  isDeckUnlocked, fragmentProgress, ACHIEVEMENTS, STARTER_DECKS, LOCKED_DECKS,
+  isDeckUnlocked, patronIdentityOpen, fragmentProgress, ACHIEVEMENTS, STARTER_DECKS, LOCKED_DECKS,
   ALL_DECKS, FRAGMENTS_TO_UNLOCK, purseCount,
   TABLE_SKINS, CARD_BACKS,
   buyShopOffer, equipSkin, equipBack, liveCosmetic, RANK_TIERS,
@@ -23,7 +23,7 @@ import {
   isOfferSoldOut, crateVariantForDay, CRATES_PER_MONTH, resolveCrateVariant,
   baseCardsForDeck, patronDisplayName,
 } from './economy.js';
-import { TOUR_STEPS, canSkipTourStep } from './tutorial.js';
+import { TOUR_STEPS, canSkipTourStep, layoutTourStep } from './tutorial.js';
 import { hostRoom, joinRoom } from './netplay.js';
 import {
   installProfileSync, currentSession, isSignedIn, accountHint, providerStatus,
@@ -131,6 +131,7 @@ async function loadData() {
 }
 
 function show(id) {
+  if (tourActive && id !== '#match') endTour({ resume: false });
   document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
   $(id).classList.add('active');
   requestAnimationFrame(() => syncBoardLayout());
@@ -394,7 +395,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 62';
+  if (stamp) stamp.textContent = 'build 63';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -788,10 +789,25 @@ function patronTurnLine(pid, key, pat) {
   return 'This Patron is now NEUTRAL.';
 }
 
+function patronOnTable(pid) {
+  if (!pid || !engine?.state) return false;
+  if (pid === 'treasury') return true;
+  const s = engine.state;
+  if ((s.matchPatrons || []).includes(pid)) return true;
+  return (s.players || []).some((p) => (p?.patrons || []).includes(pid));
+}
+
+function patronRevealed(pid) {
+  return patronIdentityOpen(profile, pid, {
+    inMatch: matchIsLive(),
+    onTable: patronOnTable(pid),
+  });
+}
+
 function patronDossierHTML(pid) {
   const pat = patronsById[pid];
   if (!pat) return '';
-  const unlocked = pid === 'treasury' || isDeckUnlocked(profile, pid);
+  const unlocked = patronRevealed(pid);
   const current = favorKeyForSeat(pid);
   // Treasury has no favor track. Mora stays a tipless coin but still prints
   // the three in-game sentences (Favored / Neutral / Unfavored).
@@ -1639,10 +1655,35 @@ function patronThreeStateHTML(pid) {
   }).join('');
 }
 
+function patronCanContinue(pid, mode) {
+  if (mode === 'pick') return true;
+  if (!engine || !canControl()) return false;
+  try {
+    return !!engine.canCallPatron(pid);
+  } catch {
+    return false;
+  }
+}
+
+function syncPatronConfirmActions(canContinue) {
+  const go = $('#pc-continue');
+  const cancel = $('#pc-cancel');
+  if (go) {
+    go.disabled = !canContinue;
+    go.hidden = !canContinue;
+    go.textContent = 'Continue';
+  }
+  if (cancel) {
+    cancel.disabled = false;
+    cancel.hidden = false;
+    cancel.textContent = canContinue ? 'Cancel' : 'Close';
+  }
+}
+
 function openPatronConfirm(pid, mode = 'call') {
   const pat = patronsById[pid];
   if (!pat) return;
-  const unlocked = pid === 'treasury' || isDeckUnlocked(profile, pid);
+  const unlocked = patronRevealed(pid);
   const overlay = $('#patron-confirm-overlay');
   if (!overlay) return;
   pendingPatron = { pid, mode };
@@ -1659,11 +1700,7 @@ function openPatronConfirm(pid, mode = 'call') {
       ? patronThreeStateHTML(pid)
       : '<p class="pc-locked">This patron has not yet revealed their true name.</p>';
   }
-  const go = $('#pc-continue');
-  if (go) {
-    const ok = mode === 'pick' || (engine && canControl() && engine.canCallPatron(pid));
-    go.disabled = !ok;
-  }
+  syncPatronConfirmActions(patronCanContinue(pid, mode));
   overlay.classList.add('show');
 }
 
@@ -2260,6 +2297,7 @@ function flashCombo(n) {
 }
 
 function showWin(data) {
+  if (tourActive) endTour({ resume: false });
   stopHourglass();
   const seat = localSeat();
   let rewardLine = '';
@@ -2552,15 +2590,46 @@ function startTour(force = false) {
   showTourStep();
 }
 
-function endTour() {
+function clearInspectOverlays() {
+  closeInspect();
+  document.querySelectorAll('.inspect-overlay, .club-inspect-overlay').forEach((el) => {
+    el.classList.remove('show');
+    el.hidden = true;
+  });
+}
+
+function tourViewport() {
+  const vv = window.visualViewport;
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+  if (vv && vv.width > 0 && vv.height > 0
+      && (vv.offsetTop || 0) < 1 && (vv.offsetLeft || 0) < 1
+      && vv.height <= height + 1 && vv.width <= width + 1) {
+    width = Math.min(width, vv.width);
+    height = Math.min(height, vv.height);
+  }
+  const probe = $('#tour-panel');
+  const safeRaw = probe ? getComputedStyle(probe).getPropertyValue('--tour-safe-b') : '';
+  const safeBottom = Math.max(0, parseFloat(safeRaw) || 0);
+  return { width, height, offsetLeft: 0, offsetTop: 0, safeBottom };
+}
+
+function endTour({ resume = true } = {}) {
+  const was = tourActive;
   tourActive = false;
+  clearInspectOverlays();
   const root = $('#tour-root');
   if (root) root.hidden = true;
+  const panel = $('#tour-panel');
+  if (panel) panel.hidden = true;
   $('#tour-hole')?.classList.remove('show');
-  localStorage.setItem(TOUR_KEY, '1');
-  const nudge = $('#tutorial-nudge');
-  if (nudge) nudge.hidden = true;
-  if (engine && matchMode === 'ai' && !isRankedMatch && engine.state.active === 1) maybeAI();
+  if (was) {
+    try { localStorage.setItem(TOUR_KEY, '1'); } catch {}
+    const nudge = $('#tutorial-nudge');
+    if (nudge) nudge.hidden = true;
+  }
+  if (!was || !resume) return;
+  if (engine && matchMode === 'ai' && !isRankedMatch && engine.state.active === 1 && engine.state.winner == null) maybeAI();
   else if (hourglassOn && canControl() && engine && !engine.state.winner) startHourglass();
 }
 
@@ -2579,6 +2648,7 @@ function showTourStep() {
   const skip = $('#tour-skip');
   if (skip) skip.hidden = !canSkipTourStep(tourStep);
   root.hidden = false;
+  panel.hidden = false;
   placeTourPanel(step, panel, hole);
   requestAnimationFrame(() => {
     if (tourActive) placeTourPanel(step, panel, hole);
@@ -2587,34 +2657,60 @@ function showTourStep() {
 
 function placeTourPanel(step, panel, hole) {
   const target = step?.sel ? document.querySelector(step.sel) : null;
-  const r = target?.getBoundingClientRect();
-  const visible = !!(r && r.width > 8 && r.height > 8 && r.bottom > 0 && r.right > 0);
-  if (visible && hole) {
-    const pad = 8;
-    hole.style.left = Math.max(4, r.left - pad) + 'px';
-    hole.style.top = Math.max(4, r.top - pad) + 'px';
-    hole.style.width = Math.min(window.innerWidth - 8, Math.max(36, r.width) + pad * 2) + 'px';
-    hole.style.height = Math.min(window.innerHeight - 8, Math.max(36, r.height) + pad * 2) + 'px';
+  const raw = target?.getBoundingClientRect();
+  const viewport = tourViewport();
+  panel.hidden = false;
+  const capW = Math.min(352, Math.max(160, viewport.width - 24));
+  panel.style.boxSizing = 'border-box';
+  panel.style.right = 'auto';
+  panel.style.bottom = 'auto';
+  panel.style.transform = 'none';
+  panel.style.width = capW + 'px';
+  panel.style.maxWidth = capW + 'px';
+  panel.style.maxHeight = Math.max(88, viewport.height - (viewport.safeBottom || 0) - 24) + 'px';
+  panel.style.left = '12px';
+  panel.style.top = '12px';
+  const measured = panel.getBoundingClientRect();
+  const layout = layoutTourStep({
+    target: raw && raw.width > 8 ? { left: raw.left, top: raw.top, width: raw.width, height: raw.height } : null,
+    viewport,
+    panel: {
+      width: Math.min(measured.width || capW, capW),
+      height: Math.max(72, measured.height || 160),
+    },
+  });
+  panel.style.left = layout.panel.left + 'px';
+  panel.style.top = layout.panel.top + 'px';
+  panel.style.width = layout.panel.width + 'px';
+  panel.style.maxHeight = layout.panel.maxHeight + 'px';
+  if (layout.hole && hole) {
+    hole.style.left = layout.hole.left + 'px';
+    hole.style.top = layout.hole.top + 'px';
+    hole.style.width = layout.hole.width + 'px';
+    hole.style.height = layout.hole.height + 'px';
     hole.classList.add('show');
-    const spaceBelow = window.innerHeight - (r.bottom + 12);
-    if (spaceBelow > 150) {
-      panel.style.top = Math.min(window.innerHeight - 150, r.bottom + 12) + 'px';
-      panel.style.bottom = 'auto';
-    } else {
-      panel.style.bottom = Math.max(12, window.innerHeight - r.top + 12) + 'px';
-      panel.style.top = 'auto';
-    }
   } else if (hole) {
     hole.classList.remove('show');
-    panel.style.top = 'auto';
-    panel.style.bottom = '24px';
   }
-  panel.style.left = '50%';
-  panel.style.transform = 'translateX(-50%)';
+  const placed = panel.getBoundingClientRect();
+  const m = 8;
+  const limitW = viewport.width;
+  const limitH = viewport.height - (viewport.safeBottom || 0);
+  let dx = 0;
+  let dy = 0;
+  if (placed.left < m) dx = m - placed.left;
+  else if (placed.right > limitW - m) dx = (limitW - m) - placed.right;
+  if (placed.top < m) dy = m - placed.top;
+  else if (placed.bottom > limitH - m) dy = (limitH - m) - placed.bottom;
+  if (dx || dy) {
+    panel.style.left = (parseFloat(panel.style.left) + dx) + 'px';
+    panel.style.top = (parseFloat(panel.style.top) + dy) + 'px';
+  }
 }
 
 function nextTourStep() {
   if (!tourActive) return;
+  clearInspectOverlays();
   tourStep += 1;
   showTourStep();
 }
@@ -4525,6 +4621,7 @@ function bind() {
 
   $('#btn-concede').onclick = () => {
     if (!engine) return;
+    if (tourActive) endTour({ resume: false });
     if (matchMode === 'ai' && !isRankedMatch) engine.state.winner = 1;
     else if (matchMode === 'hotseat') engine.state.winner = 1 - engine.state.active;
     else if (matchMode === 'remote-host') engine.state.winner = 1;
@@ -4534,6 +4631,17 @@ function bind() {
 
   $('#tour-next')?.addEventListener('click', () => nextTourStep());
   $('#tour-skip')?.addEventListener('click', () => endTour());
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if ($('#patron-confirm-overlay')?.classList.contains('show')) {
+      e.preventDefault();
+      closePatronConfirm();
+      return;
+    }
+    if (!tourActive) return;
+    e.preventDefault();
+    endTour();
+  });
 
   $('#btn-pile-close').onclick = () => $('#pile-overlay').classList.remove('show');
   $('#pile-overlay').onclick = (e) => { if (e.target.id === 'pile-overlay') e.target.classList.remove('show'); };
@@ -5201,6 +5309,20 @@ function installTestHook() {
       isTutorialMatch = false;
       startMatch({ playerFirst: true, difficulty: 1 });
     },
+    startWithOpp(opp = ['druid', 'rajhin']) {
+      try { localStorage.setItem(TOUR_KEY, '1'); } catch {}
+      $('#login-overlay')?.classList.remove('show');
+      $('#account-overlay')?.classList.remove('show');
+      $('#crate-overlay')?.classList.remove('show');
+      pickYou = ['pelin', 'hlaalu'];
+      pickOpp = [...opp];
+      matchMode = 'ai';
+      isRandomMatch = true;
+      isRankedMatch = false;
+      isGauntletMatch = false;
+      isTutorialMatch = false;
+      startMatch({ playerFirst: true, difficulty: 1 });
+    },
     openClub() {
       $('#login-overlay')?.classList.remove('show');
       $('#account-overlay')?.classList.remove('show');
@@ -5282,6 +5404,54 @@ function installTestHook() {
     tourNext() {
       nextTourStep();
     },
+    tourFrame() {
+      const onScreen = (el) => {
+        if (!el || el.hidden) return false;
+        const cs = getComputedStyle(el);
+        if (cs.display === 'none' || cs.visibility === 'hidden' || Number(cs.opacity) === 0) return false;
+        const r = el.getBoundingClientRect();
+        return r.width > 8 && r.height > 8
+          && r.top >= -1 && r.left >= -1
+          && r.bottom <= window.innerHeight + 1
+          && r.right <= window.innerWidth + 1;
+      };
+      const box = (el) => {
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return { t: r.top, l: r.left, r: r.right, b: r.bottom, w: r.width, h: r.height };
+      };
+      const hit = (el) => {
+        if (!el || el.hidden) return false;
+        const r = el.getBoundingClientRect();
+        const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return top === el || !!el.contains(top);
+      };
+      const panel = $('#tour-panel');
+      const skip = $('#tour-skip');
+      const next = $('#tour-next');
+      const hole = $('#tour-hole');
+      return {
+        active: tourActive,
+        step: tourStep,
+        text: $('#tour-text')?.textContent || '',
+        rootHidden: !!$('#tour-root')?.hidden,
+        panelHidden: !!panel?.hidden,
+        skipHidden: !!skip?.hidden,
+        panelOn: onScreen(panel),
+        skipOn: onScreen(skip),
+        nextOn: onScreen(next),
+        skipHit: hit(skip),
+        nextHit: hit(next),
+        panel: box(panel),
+        hole: hole?.classList.contains('show') ? box(hole) : null,
+        vw: window.innerWidth,
+        vh: window.innerHeight,
+        inspect: !!document.querySelector('.lift-fly, .lift-dossier-modal, .inspect-overlay.show, .club-inspect-overlay'),
+        tourKey: localStorage.getItem(TOUR_KEY),
+        screen: document.querySelector('.screen.active')?.id || '',
+      };
+    },
+    skipTour() { endTour(); },
     openLogin() {
       openLoginGreet();
     },
