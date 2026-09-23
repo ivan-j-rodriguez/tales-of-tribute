@@ -395,7 +395,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 64';
+  if (stamp) stamp.textContent = 'build 65';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -892,14 +892,14 @@ function renderCard(inst, opts = {}) {
   el.dataset.id = inst.id;
   const hp = inst.hp != null ? inst.hp : d.hp;
   el.innerHTML = `
-    <img class="art" src="${artFor(d)}" alt="${d.name}" draggable="false" onerror="this.style.background='#2a1810'" />
+    <img class="art" src="${artFor(d)}" alt="${d.name}" draggable="false" decoding="${opts.compact ? 'async' : 'auto'}" onerror="this.style.background='#2a1810'" />
     ${d.cost != null ? `<div class="cost-badge">${d.cost}</div>` : ''}
     ${hp != null ? `<div class="hp-badge">${hp}${d.taunt || inst.taunt ? ' T' : ''}</div>` : ''}
     ${(d.taunt || inst.taunt) ? `<div class="taunt-badge">TAUNT</div>` : ''}
     <div class="meta">
       <div class="cname">${d.name}</div>
       <div class="ctype">${typeLabel(d)}</div>
-      <div class="ceffect">${d.playText || ''}</div>
+      ${opts.compact ? '' : `<div class="ceffect">${d.playText || ''}</div>`}
     </div>
   `;
   if (d.contract) el.classList.add('contract-card');
@@ -1112,6 +1112,7 @@ const arrivals = new Map();
 const flights = new Map();
 let boardPainted = false;
 let invokedPatron = null;
+let pendingWritFly = null;
 let arrivalSfxTimer = 0;
 
 function queueArrival(uid, kind, from) {
@@ -1245,6 +1246,21 @@ function settleBoardMotion(opening) {
   releaseFlights();
   paintPatronInvoke();
   if (opening) playSfx('deal');
+}
+
+/** Writ flight starts after the board paint so confirm does not measure a tray that is about to close. */
+function flushPendingWritFly() {
+  if (!pendingWritFly) return;
+  const cardId = pendingWritFly.cardId;
+  pendingWritFly = null;
+  const dest = pileEl('you-cooldown');
+  const from = document.querySelector('.patron-coin.treasury');
+  if (dest) dest.classList.add('just-writ');
+  if (from && dest) {
+    flyCard(from, dest, { id: cardId }, () => dest.classList.remove('just-writ'));
+  } else if (dest) {
+    setTimeout(() => dest.classList.remove('just-writ'), 700);
+  }
 }
 
 function pileEl(which) {
@@ -1480,8 +1496,6 @@ function renderMatch() {
       onHoldRead: (_i, el) => startLift(el, def),
     }));
   });
-  layoutFan(hz, false);
-  layoutTavern();
   // Rival fanned backs (top)
   const ohz = $('#opp-hand-zone');
   if (ohz) {
@@ -1502,7 +1516,6 @@ function renderMatch() {
         ohz.appendChild(el);
       }
     });
-    layoutFan(ohz, true);
   }
 
   const dock = $('#log-dock');
@@ -1524,6 +1537,7 @@ function renderMatch() {
   boardPainted = true;
   syncBoardLayout();
   settleBoardMotion(opening);
+  flushPendingWritFly();
 }
 
 function cardTopCenterX(el) {
@@ -1732,7 +1746,11 @@ function confirmPatronContinue() {
 }
 
 function finishPatronCall(pid, picks) {
-  if (!engine?.canCallPatron(pid)) { toast('Cannot call that patron now'); return; }
+  if (!engine?.canCallPatron(pid)) {
+    toast('Cannot call that patron now');
+    syncEndTurnAvailability();
+    return;
+  }
   engine.callPatron(pid, picks);
   syncAction({ op: 'patron', pid, picks });
   afterPlayerAction();
@@ -1781,11 +1799,22 @@ function optionCardLabel(opt) {
   return bits.join('\n') || 'Option';
 }
 
+function syncEndTurnAvailability() {
+  const endBtn = $('#btn-end');
+  if (!endBtn || !engine?.state) return;
+  const s = engine.state;
+  const yourTurn = canControl();
+  const busy = !!targetSession;
+  endBtn.classList.toggle('can-end', yourTurn && s.winner == null && !busy);
+  endBtn.disabled = !yourTurn || s.winner != null || busy;
+}
+
 function beginTargetSession({ steps, onDone }) {
   endLift(true);
   targetSession = { steps, idx: 0, picks: {}, chosen: [], onDone, peeking: false, boardPick: false };
   document.body.classList.add('targeting');
   paintTargetStep();
+  syncEndTurnAvailability();
 }
 
 function clearTargetUI() {
@@ -1804,10 +1833,11 @@ function clearTargetUI() {
 }
 
 function cancelTargetSession() {
+  endLift(true);
   clearTargetUI();
   targetSession = null;
+  syncEndTurnAvailability();
   toast('Canceled');
-  renderMatch();
 }
 
 function setTargetPeek(on) {
@@ -1852,25 +1882,10 @@ function confirmTargetStep() {
     toast(have ? `Pick ${required}` : 'Pick a card first');
     return;
   }
-  const delay = step.kind === 'sacrifice' || step.kind === 'destroy' ? 420
-    : step.kind === 'knockout' || step.kind === 'powerAttack' ? 380
-    : step.kind === 'confine' || step.kind === 'lookConfine' ? 400
-    : 60;
-  const sess = targetSession;
-  if (have) {
-    for (const uid of targetSession.picked) {
-      const el = document.querySelector(`.legal-target[data-uid="${uid}"]`);
-      if (!el) continue;
-      if (step.kind === 'sacrifice' || step.kind === 'destroy') el.classList.add('fx-sacrifice');
-      if (step.kind === 'knockout' || step.kind === 'powerAttack') el.classList.add('fx-slash');
-      if (step.kind === 'confine' || step.kind === 'lookConfine') el.classList.add('fx-confine');
-    }
-  }
-  setTimeout(() => {
-    if (targetSession !== sess) return;
-    targetSession.idx += 1;
-    paintTargetStep();
-  }, delay);
+  // Resolve on this turn. A 380–420ms timeout used to hold the tray open so a
+  // filter animation could play, and the click felt like the UI had hung.
+  targetSession.idx += 1;
+  paintTargetStep();
 }
 
 function paintTargetStep() {
@@ -1937,15 +1952,19 @@ function paintTargetStep() {
   targetSession.legal = legal;
   targetSession.need = step.n || 1;
   targetSession.picked = [];
-  for (const t of legal) {
-    if (!tray) break;
-    // Same hold-inspect as in-match: hold opens the dossier and never picks.
-    // Short tap toggles pickTarget; Confirm still required (except board auto-confirm).
-    tray.appendChild(renderCard(t, {
-      extraClass: 'legal-target tray-card',
-      onTap: () => pickTarget(t.uid),
-      onHoldRead: (_inst, el) => startLift(el, cardsById[t.id] || cardsById[_inst.id]),
-    }));
+  if (tray && legal.length) {
+    const frag = document.createDocumentFragment();
+    for (const t of legal) {
+      // Same hold-inspect as in-match: hold opens the dossier and never picks.
+      // Short tap toggles pickTarget; Confirm still required (except board auto-confirm).
+      frag.appendChild(renderCard(t, {
+        extraClass: 'legal-target tray-card',
+        compact: true,
+        onTap: () => pickTarget(t.uid),
+        onHoldRead: (_inst, el) => startLift(el, cardsById[t.id] || cardsById[_inst.id]),
+      }));
+    }
+    tray.appendChild(frag);
   }
   if (!legal.length) {
     targetSession.idx += 1;
@@ -2246,14 +2265,7 @@ function startMatch(opts = {}) {
     if (ev === 'sacrifice') flashFx(data?.card, 'fx-sacrifice');
     if (ev === 'confine') flashFx(data?.agent, 'fx-confine');
     if (ev === 'writ') {
-      const dest = pileEl('you-cooldown');
-      const from = document.querySelector('.patron-coin.treasury');
-      if (dest) dest.classList.add('just-writ');
-      if (from && dest) {
-        flyCard(from, dest, { id: data?.cardId || 'writ-of-coin' }, () => dest?.classList.remove('just-writ'));
-      } else {
-        setTimeout(() => dest?.classList.remove('just-writ'), 700);
-      }
+      pendingWritFly = { cardId: data?.cardId || 'writ-of-coin' };
     }
     if (ev === 'shuffle') {
       playSfx('shuffle');
