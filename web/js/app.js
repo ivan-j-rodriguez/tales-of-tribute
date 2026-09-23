@@ -26,9 +26,9 @@ import {
 import { TOUR_STEPS, canSkipTourStep, layoutTourStep } from './tutorial.js';
 import { hostRoom, joinRoom } from './netplay.js';
 import {
-  installProfileSync, currentSession, isSignedIn, accountHint, providerStatus,
-  signUpEmail, signInEmail, signInProvider, startPhoneSignIn, confirmPhoneSignIn,
-  continueAsGuest, signOut, markAccountSeen, accountSeen, permissionCopy,
+  installProfileSync, currentSession, isSignedIn, accountHint, cloudConfigured,
+  signUpEmail, signInEmail,
+  continueAsGuest, signOut, markAccountSeen, accountSeen,
 } from './auth.js';
 import {
   createVoice, enableVoice, disableVoice, disableVoiceIfDisallowed, setMuted,
@@ -77,7 +77,6 @@ let gauntletStopIndex = null;
 let isGauntletMatch = false;
 let isTutorialMatch = false;
 let voice = createVoice();
-let phoneConfirm = null;
 
 const TURN_SECONDS = 90;
 const HOLD_MS = 1000;
@@ -395,7 +394,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 65';
+  if (stamp) stamp.textContent = 'build 66';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -2756,10 +2755,9 @@ function renderSettings() {
   if (mic) mic.checked = !!(profile.permissions?.mic);
   const permAuth = $('#settings-perm-auth');
   if (permAuth) {
-    const st = providerStatus();
-    permAuth.textContent = st.cloud
-      ? 'Sign-in uses Club cloud. Google/Apple/Phone only request scopes when you tap them.'
-      : 'Email sign-up saves this browser. Google, Apple, and Phone wait on Club cloud (Firebase) — those buttons stay gated until then.';
+    permAuth.textContent = cloudConfigured()
+      ? 'Sign-in is email. A Club account syncs this profile.'
+      : 'Sign-in is email on this device. Guest play stays here.';
   }
   fillCosmeticSelect($('#sel-table-skin'), TABLE_SKINS, profile.unlockedSkins, profile.tableSkin);
   fillCosmeticSelect($('#sel-card-back'), CARD_BACKS, profile.unlockedBacks, profile.cardBack);
@@ -4322,36 +4320,6 @@ function renderAccountChrome() {
   if (out) out.hidden = !signed;
   const inBtn = $('#btn-settings-account');
   if (inBtn) inBtn.textContent = signed ? 'Manage account' : 'Sign in / Sign up';
-  const st = providerStatus();
-  const g = $('#btn-auth-google');
-  const a = $('#btn-auth-apple');
-  const p = $('#btn-auth-phone');
-  if (g) {
-    g.disabled = !st.google.ready;
-    g.title = st.google.reason || 'Sign in with Google';
-  }
-  if (a) {
-    a.disabled = !st.apple.ready;
-    a.title = st.apple.reason || 'Sign in with Apple';
-  }
-  if (p) {
-    p.disabled = !st.phone.ready;
-    p.title = st.phone.reason || 'Send SMS code';
-  }
-  const ph = $('#account-provider-hint');
-  if (ph) {
-    const bits = [];
-    if (!st.google.ready) bits.push(st.google.reason);
-    if (!st.apple.ready) bits.push(st.apple.reason);
-    if (!st.phone.ready) bits.push(st.phone.reason);
-    ph.textContent = bits.filter(Boolean).join(' ') || permissionCopy().google;
-  }
-  const status = $('#account-status');
-  if (status) {
-    status.textContent = st.cloud
-      ? 'Signed-in progress syncs across devices.'
-      : 'Email works on this device. Cloud sync needs Firebase — see Settings → About and STATUS.md. Guest play always works.';
-  }
 }
 
 function openAccountOverlay({ first = false } = {}) {
@@ -4748,38 +4716,6 @@ function bind() {
     closeAccountOverlay();
     refreshSplashPurse();
     toast('Club account saved.');
-  });
-  $('#btn-auth-google')?.addEventListener('click', async () => {
-    const res = await signInProvider('google');
-    if (res.error) { toast(res.error); return; }
-    profile = loadProfile();
-    closeAccountOverlay();
-    refreshSplashPurse();
-    toast('Signed in with Google.');
-  });
-  $('#btn-auth-apple')?.addEventListener('click', async () => {
-    const res = await signInProvider('apple');
-    if (res.error) { toast(res.error); return; }
-    profile = loadProfile();
-    closeAccountOverlay();
-    refreshSplashPurse();
-    toast('Signed in with Apple.');
-  });
-  $('#btn-auth-phone')?.addEventListener('click', async () => {
-    const res = await startPhoneSignIn($('#account-phone')?.value, $('#btn-auth-phone'));
-    if (res.error) { toast(res.error); return; }
-    phoneConfirm = res.confirmation;
-    $('#account-sms').hidden = false;
-    $('#btn-auth-sms').hidden = false;
-    toast('Code sent. Enter it to finish.');
-  });
-  $('#btn-auth-sms')?.addEventListener('click', async () => {
-    const res = await confirmPhoneSignIn(phoneConfirm, $('#account-sms')?.value);
-    if (res.error) { toast(res.error); return; }
-    profile = loadProfile();
-    closeAccountOverlay();
-    refreshSplashPurse();
-    toast('Signed in with phone.');
   });
   $('#btn-auth-guest')?.addEventListener('click', async () => {
     await continueAsGuest();
@@ -5507,9 +5443,6 @@ function installTestHook() {
         backs: $('#coll-backs')?.hidden,
         upgrades: $('#coll-upgrades')?.hidden,
       };
-    },
-    accountDisclaimer() {
-      return $('#account-disclaimer')?.textContent || '';
     },
     aboutDisclaimer() {
       return $('#about-disclaimer')?.textContent || '';
