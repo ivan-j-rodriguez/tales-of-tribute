@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-23 (build 67):** Difficulties 1–3 play like beginners. Level 1 often ends with cards still in hand, buys the weakest tavern card, walks past a Taunt, and calls a random patron or none. Levels 2 and 3 make those mistakes less often and still sit below the old mid curve. Difficulties 4–10 keep the existing heuristic (4 still has the mild score noise). Tutorial matches and gauntlet stops on difficulty 1–3 pick this up automatically. The iOS AI uses the same curve. Board CSS untouched. `?v=67`.
+
 **2026-09-23 (build 66):** Sign-in and sign-up are email only. Google, Apple, and phone/SMS controls, handlers, and permission copy are gone. The Sign In sheet keeps the title, email, password, Sign in, Sign up, guest, and Close. The fan disclaimer stays on Settings → About. Guest play is unchanged. Email still uses the on-device vault, or Firebase email/password when `web/js/firebase-config.js` is filled. Board CSS untouched. `?v=66`.
 
 **2026-09-23 (build 65):** Treasury sacrifice (and the other target trays) confirm, pick, and cancel on the same turn. Confirm used to wait 380–420ms so a filter animation could play, which left the tray up and felt like a hang. Cancel no longer rebuilds the whole board. Tray cards skip the infinite glow and the effect line, sound effects reuse a warmed buffer, and the Writ flight starts after the board paint. Portrait tray insets from build 64 stay. `?v=65`.
@@ -115,7 +117,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=66`. Sign-in is email and guest (build 66). Treasury and other target trays confirm without the old delay gate (build 65). Portrait target trays keep end cards inside the sheet, and music fades stay inside [0, 1] (build 64). The guided tour stays on screen and can always be skipped or left (build 63). Login crates are Storm Atronach, Scalecaller, Flame Atronach, and Dark Brotherhood (build 62). Province stop chips stay inside the map frame (build 61) and use dark ink on parchment (build 60). Contracts exile instead of cooling down (build 59). Board finish-line is build 58 (portrait lock from 51). Friend rooms use explicit PeerJS cloud + STUN (build 57). Hotseat patron pick is null-safe (build 56). Club shop, cosmetics, tutorial, and daily stamp are build 55. Long-press inspect stays on the build 54 UESP sentences.
+`docs/` is a copy of `web/`. Cache-bust `?v=67`. Difficulties 1–3 are beginners (build 67). Sign-in is email and guest (build 66). Treasury and other target trays confirm without the old delay gate (build 65). Portrait target trays keep end cards inside the sheet, and music fades stay inside [0, 1] (build 64). The guided tour stays on screen and can always be skipped or left (build 63). Login crates are Storm Atronach, Scalecaller, Flame Atronach, and Dark Brotherhood (build 62). Province stop chips stay inside the map frame (build 61) and use dark ink on parchment (build 60). Contracts exile instead of cooling down (build 59). Board finish-line is build 58 (portrait lock from 51). Friend rooms use explicit PeerJS cloud + STUN (build 57). Hotseat patron pick is null-safe (build 56). Club shop, cosmetics, tutorial, and daily stamp are build 55. Long-press inspect stays on the build 54 UESP sentences.
 
 | Fix | Notes |
 |---|---|

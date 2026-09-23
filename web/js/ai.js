@@ -1,11 +1,30 @@
 /**
  * Difficulty-scaled AI for Tales of Tribute.
- * 1 = greedy/randomish, 5 = solid heuristic, 10 = look-ahead (combo, 40-clock, denial, taunt, treasury).
+ * 1 = beginner (passes, worst buys, misses Taunts and patron timing).
+ * 2–3 = soft learners, still well below the mid curve.
+ * 4 = noisy greedy. 5 = solid heuristic. 10 = look-ahead
+ * (combo, 40-clock, denial, taunt, treasury).
+ *
+ * Levels 1–3 use the table below and never reach the 4–10 heuristic.
+ * `blind` is a misclick, often End Turn. `sloppy` plays the turn but
+ * picks the weak card, the weak buy, and a random patron.
+ * The rest is a thinned, noisy reading of the same scores.
  */
+const BEGINNER = {
+  1: { blind: 0.56, sloppy: 0.32, giveUp: 0.50, tauntNotice: 0.12, buyWorst: 1, dropPatron: 0.78, buyFlip: 1, playBand: 24 },
+  2: { blind: 0.24, sloppy: 0.34, giveUp: 0.30, tauntNotice: 0.48, buyWorst: 0.62, dropPatron: 0.38, buyFlip: 0.48, playBand: 12 },
+  3: { blind: 0.12, sloppy: 0.22, giveUp: 0.18, tauntNotice: 0.74, buyWorst: 0.42, dropPatron: 0.18, buyFlip: 0.28, playBand: 8 },
+};
+
 export class TributeAI {
-  constructor(engine, difficulty = 5) {
+  constructor(engine, difficulty = 5, rng = null) {
     this.engine = engine;
+    this._rng = typeof rng === 'function' ? rng : Math.random;
     this.setDifficulty(difficulty);
+  }
+
+  _r() {
+    return this._rng();
   }
 
   setDifficulty(d) {
@@ -26,6 +45,7 @@ export class TributeAI {
     const eng = this.engine;
     const base = delay != null ? delay : this.actionDelay();
     let guard = 0;
+    let failed = 0;
     while (!eng.state.winner && eng.me().isAI && guard++ < 40) {
       const action = this.chooseAction();
       if (!action || action.type === 'end') {
@@ -35,7 +55,18 @@ export class TributeAI {
       }
       eng.emit('aiAction', action);
       await sleep(Math.min(280, base * 0.45));
-      this.execute(action);
+      const ok = this.execute(action);
+      if (ok === false) {
+        // A rejected click (usually a beginner aiming at an illegal card)
+        // must not spin the turn. Three misses and they pass.
+        if (++failed >= 3) {
+          await sleep(base * 0.7);
+          eng.endTurn();
+          break;
+        }
+        continue;
+      }
+      failed = 0;
       eng.emit('state', eng.state);
       await sleep(base * 0.55);
     }
@@ -43,10 +74,11 @@ export class TributeAI {
 
   execute(a) {
     const eng = this.engine;
-    if (a.type === 'play') eng.playCard(a.uid);
-    else if (a.type === 'buy') eng.buy(a.index);
-    else if (a.type === 'patron') eng.callPatron(a.id);
-    else if (a.type === 'ko') eng.knockoutWithPower(a.uid);
+    if (a.type === 'play') return eng.playCard(a.uid);
+    if (a.type === 'buy') return eng.buy(a.index);
+    if (a.type === 'patron') return eng.callPatron(a.id);
+    if (a.type === 'ko') return eng.knockoutWithPower(a.uid);
+    return false;
   }
 
   chooseAction() {
@@ -56,16 +88,12 @@ export class TributeAI {
     const o = eng.opp();
     const d = this.difficulty;
 
-    // Low difficulty: shuffle / randomish picks
-    if (d <= 2) {
-      const nonEnd = acts.filter(a => a.type !== 'end');
-      if (!nonEnd.length) return { type: 'end' };
-      if (Math.random() < 0.35) return nonEnd[Math.floor(Math.random() * nonEnd.length)];
-      // else fall through to weak greedy
-    }
+    // Levels 1–3 never use the heuristic below. A new player should
+    // usually beat 1; 2 and 3 still blunder, then 4 picks up the old curve.
+    if (d <= 3) return this._chooseBeginner(acts, p, o);
 
     const scored = acts.map(a => ({ a, s: this.score(a, p, o) }));
-    // Noise for mid-low difficulties
+    // Difficulty 4 keeps the old mild noise. 5–10 are deterministic.
     if (d < 5) {
       for (const x of scored) x.s += (Math.random() - 0.5) * (12 - d * 2);
     }
@@ -91,6 +119,174 @@ export class TributeAI {
     const next = scored.find(x => x.a.type !== 'end');
     if (next && next.s > (d >= 5 ? 5 : 10)) return next.a;
     return { type: 'end' };
+  }
+
+  /**
+   * Beginner policy for difficulties 1–3.
+   * Curses are still played — the rules require it — and everything else
+   * is a mistake on purpose: passing with cards in hand, buying the worst
+   * tavern card, walking past a Taunt (so Power never becomes Prestige),
+   * and calling a random patron or none at all.
+   */
+  _chooseBeginner(acts, p, o) {
+    const legal = this._executable(acts);
+    if (!legal.some(a => a.type !== 'end')) return { type: 'end' };
+
+    const curses = legal.filter(a => a.type === 'play' && this.engine.card(a.cardId)?.curse);
+    if (curses.length) return curses[Math.floor(this._r() * curses.length)];
+
+    const curve = BEGINNER[this.difficulty];
+    const roll = this._r();
+    if (roll < curve.blind) return this._blind(legal, p, o, curve);
+    if (roll < curve.blind + curve.sloppy) return this._sloppy(legal, p, o, curve);
+    return this._reading(legal, p, o, curve);
+  }
+
+  _executable(acts) {
+    const eng = this.engine;
+    return acts.filter(a => {
+      if (a.type === 'play') return eng.canPlay(a.uid);
+      if (a.type === 'buy') return eng.canBuy(a.index);
+      if (a.type === 'patron') return eng.canCallPatron(a.id);
+      if (a.type === 'ko') return eng.opp().agents.some(x => x.uid === a.uid) && eng.me().power >= a.hp;
+      return a.type === 'end';
+    });
+  }
+
+  _blind(legal, p, o, curve) {
+    const moving = legal.filter(a => a.type !== 'end');
+    if (!moving.length) return { type: 'end' };
+    // Pass while cards, buys, or a Taunt are still sitting there.
+    if (this._r() < curve.giveUp) return { type: 'end' };
+
+    let pool = moving;
+    if (o.agents.some(a => a.taunt) && this._r() >= curve.tauntNotice) {
+      pool = pool.filter(a => a.type !== 'ko');
+    }
+    if (!pool.length) return { type: 'end' };
+
+    const d = this.difficulty;
+    const weighted = pool.map(a => {
+      let w = 1;
+      if (a.type === 'play') w = 3;
+      else if (a.type === 'buy') w = d === 1 ? 5 : d === 2 ? 3 : 2;
+      else if (a.type === 'patron') w = d === 1 ? 2 : 1.2;
+      else if (a.type === 'ko') w = 0.35;
+      return { a, w };
+    });
+    return this._pickWeighted(weighted);
+  }
+
+  _sloppy(legal, p, o, curve) {
+    const plays = legal.filter(a => a.type === 'play');
+    const buys = legal.filter(a => a.type === 'buy');
+    const pats = legal.filter(a => a.type === 'patron');
+
+    if (plays.length) {
+      // A suit already started is the combo. They play a different one.
+      const fresh = plays.filter(a => {
+        const def = this.engine.card(a.cardId);
+        return def && !(p.suitsPlayed[def.patron] > 0);
+      });
+      const pool = fresh.length && fresh.length < plays.length ? fresh : plays;
+      return this._worstPlay(pool, p, o);
+    }
+
+    let kos = legal.filter(a => a.type === 'ko');
+    // One roll: miss the knockout entirely, Taunt or not.
+    if (kos.length && this._r() >= curve.tauntNotice) kos = [];
+    if (kos.length && o.agents.some(a => a.taunt)) {
+      return kos[Math.floor(this._r() * kos.length)];
+    }
+    if (buys.length) {
+      if (this._r() < curve.buyWorst) return this._worstBuy(buys, p, o);
+      return this._bestBuy(buys, p, o);
+    }
+    if (kos.length) return kos[Math.floor(this._r() * kos.length)];
+    if (pats.length && this._r() >= curve.dropPatron) {
+      return pats[Math.floor(this._r() * pats.length)];
+    }
+    return { type: 'end' };
+  }
+
+  _reading(legal, p, o, curve) {
+    // Same action order as difficulties 4–10 (play, knockout, patron, buy),
+    // but knockouts and patrons are dropped on purpose and buys are often
+    // ranked backwards. End Turn is what is left, not a score that beats a buy.
+    const d = this.difficulty;
+    let pool = legal.slice();
+    if (this._r() >= curve.tauntNotice) pool = pool.filter(a => a.type !== 'ko');
+    if (this._r() < curve.dropPatron) pool = pool.filter(a => a.type !== 'patron');
+
+    const flipBuy = this._r() < curve.buyFlip;
+    const noise = d === 3 ? 8 : d === 2 ? 14 : 20;
+    const scored = pool.map(a => {
+      let s = this.score(a, p, o);
+      if (a.type === 'buy') {
+        const def = this.engine.card(a.cardId);
+        const quality = def ? this.buyScore(def, p, o) : 0;
+        s = (flipBuy ? 40 - quality : quality) + (this._r() - 0.5) * noise;
+      } else if (a.type === 'play' || a.type === 'patron') {
+        s += (this._r() - 0.5) * (a.type === 'play' ? curve.playBand : noise);
+      }
+      return { a, s };
+    });
+
+    const bandW = d === 1 ? 14 : d === 2 ? 9 : 4;
+    const pick = (type, thresh) => {
+      const rows = scored.filter(x => x.a.type === type && x.s >= thresh);
+      rows.sort((a, b) => b.s - a.s);
+      if (!rows.length) return null;
+      const near = rows.filter(x => x.s >= rows[0].s - bandW);
+      return near[Math.floor(this._r() * near.length)].a;
+    };
+
+    const play = pick('play', d === 3 ? 14 : 8);
+    if (play) return play;
+    const ko = pick('ko', d === 3 ? 26 : 16);
+    if (ko) return ko;
+    const pat = pick('patron', d === 3 ? 18 : 8);
+    if (pat) return pat;
+    const buy = pick('buy', d === 3 ? 8 : 4);
+    if (buy) return buy;
+    return { type: 'end' };
+  }
+
+  _worstPlay(plays, p, o) {
+    const ranked = plays.map(a => ({
+      a,
+      s: this.playScore(this.engine.card(a.cardId), p, o),
+    })).sort((x, y) => x.s - y.s);
+    const band = ranked.filter(x => x.s <= ranked[0].s + 2);
+    return band[Math.floor(this._r() * band.length)].a;
+  }
+
+  _worstBuy(buys, p, o) {
+    const ranked = buys.map(a => {
+      const def = this.engine.card(a.cardId);
+      return { a, s: def ? this.buyScore(def, p, o) : 0 };
+    }).sort((x, y) => x.s - y.s);
+    const band = ranked.filter(x => x.s <= ranked[0].s + 3);
+    return band[Math.floor(this._r() * band.length)].a;
+  }
+
+  _bestBuy(buys, p, o) {
+    const ranked = buys.map(a => {
+      const def = this.engine.card(a.cardId);
+      return { a, s: def ? this.buyScore(def, p, o) : 0 };
+    }).sort((x, y) => y.s - x.s);
+    return ranked[0].a;
+  }
+
+  _pickWeighted(items) {
+    const total = items.reduce((n, x) => n + x.w, 0);
+    if (!(total > 0)) return { type: 'end' };
+    let r = this._r() * total;
+    for (const x of items) {
+      r -= x.w;
+      if (r <= 0) return x.a;
+    }
+    return items[items.length - 1].a;
   }
 
   score(a, p, o) {

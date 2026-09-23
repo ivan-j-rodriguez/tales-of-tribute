@@ -1,6 +1,25 @@
 import Foundation
 
+/// How often levels 1–3 leave the heuristic. Mirrors `BEGINNER` in `web/js/ai.js`.
+private struct BeginnerCurve: Sendable {
+    let blind: Double
+    let sloppy: Double
+    let giveUp: Double
+    let tauntNotice: Double
+    let buyWorst: Double
+    let dropPatron: Double
+    let buyFlip: Double
+    let playBand: Double
+}
+
+private let beginnerCurve: [Int: BeginnerCurve] = [
+    1: BeginnerCurve(blind: 0.56, sloppy: 0.32, giveUp: 0.50, tauntNotice: 0.12, buyWorst: 1, dropPatron: 0.78, buyFlip: 1, playBand: 24),
+    2: BeginnerCurve(blind: 0.24, sloppy: 0.34, giveUp: 0.30, tauntNotice: 0.48, buyWorst: 0.62, dropPatron: 0.38, buyFlip: 0.48, playBand: 12),
+    3: BeginnerCurve(blind: 0.12, sloppy: 0.22, giveUp: 0.18, tauntNotice: 0.74, buyWorst: 0.42, dropPatron: 0.18, buyFlip: 0.28, playBand: 8),
+]
+
 /// Difficulty-scaled AI (1–10), ported from `web/js/ai.js`.
+/// 1 passes and buys badly. 2–3 are soft. 4–10 keep the heuristic.
 public struct TributeAI: Sendable {
     public var difficulty: Int
 
@@ -20,6 +39,7 @@ public struct TributeAI: Sendable {
 
     public func takeTurn(engine: TributeEngine) {
         var guardCount = 0
+        var failed = 0
         while engine.state.winner == nil && engine.me().isAI && guardCount < 40 {
             guardCount += 1
             let action = chooseAction(engine: engine)
@@ -27,7 +47,15 @@ public struct TributeAI: Sendable {
                 engine.endTurn()
                 break
             }
-            execute(action!, engine: engine)
+            if !execute(action!, engine: engine) {
+                failed += 1
+                if failed >= 3 {
+                    engine.endTurn()
+                    break
+                }
+                continue
+            }
+            failed = 0
         }
     }
 
@@ -38,13 +66,12 @@ public struct TributeAI: Sendable {
         let o = engine.opp()
         let d = difficulty
 
-        if d <= 2 {
-            let nonEnd = acts.filter { !isEnd($0) }
-            if nonEnd.isEmpty { return .end }
-            if Double.random(in: 0...1) < 0.35 { return nonEnd.randomElement() }
+        if d <= 3, let curve = beginnerCurve[d] {
+            return chooseBeginner(acts, engine: engine, p: p, o: o, curve: curve)
         }
 
         var scored = acts.map { (a: $0, s: score($0, engine: engine, p: p, o: o)) }
+        // Difficulty 4 keeps the old mild noise. 5–10 are unchanged.
         if d < 5 {
             for i in scored.indices {
                 scored[i].s += Int((Double.random(in: -0.5...0.5) * Double(12 - d * 2)).rounded())
@@ -75,14 +102,194 @@ public struct TributeAI: Sendable {
         return .end
     }
 
-    public func execute(_ a: EngineAction, engine: TributeEngine) {
+    @discardableResult
+    public func execute(_ a: EngineAction, engine: TributeEngine) -> Bool {
         switch a {
-        case .play(let uid, _, let choice): engine.playCard(uid, choice: choice)
-        case .buy(let index, _, _): engine.buy(index)
-        case .patron(let id): engine.callPatron(id)
-        case .knockout(let uid, _): engine.knockoutWithPower(uid)
-        case .end: engine.endTurn()
+        case .play(let uid, _, let choice): return engine.playCard(uid, choice: choice)
+        case .buy(let index, _, _): return engine.buy(index)
+        case .patron(let id): return engine.callPatron(id)
+        case .knockout(let uid, _): return engine.knockoutWithPower(uid)
+        case .end:
+            engine.endTurn()
+            return true
         }
+    }
+
+    private func chooseBeginner(
+        _ acts: [EngineAction], engine: TributeEngine, p: PlayerState, o: PlayerState, curve: BeginnerCurve
+    ) -> EngineAction {
+        let legal = executable(acts, engine: engine)
+        if !legal.contains(where: { !isEnd($0) }) { return .end }
+        let curses = legal.filter { action in
+            guard case .play(_, let cardId, _) = action else { return false }
+            return engine.def(cardId)?.isCurse == true
+        }
+        if !curses.isEmpty { return curses[Int.random(in: 0..<curses.count)] }
+        let roll = Double.random(in: 0..<1)
+        if roll < curve.blind { return blind(legal, o: o, curve: curve) }
+        if roll < curve.blind + curve.sloppy { return sloppy(legal, engine: engine, p: p, o: o, curve: curve) }
+        return reading(legal, engine: engine, p: p, o: o, curve: curve)
+    }
+
+    private func executable(_ acts: [EngineAction], engine: TributeEngine) -> [EngineAction] {
+        acts.filter { action in
+            switch action {
+            case .play(let uid, _, _): return engine.canPlay(uid)
+            case .buy(let index, _, _): return engine.canBuy(index)
+            case .patron(let id): return engine.canCall(id)
+            case .knockout(let uid, let hp):
+                return engine.opp().agents.contains { $0.uid == uid } && engine.me().power >= hp
+            case .end: return true
+            }
+        }
+    }
+
+    private func blind(
+        _ legal: [EngineAction], o: PlayerState, curve: BeginnerCurve
+    ) -> EngineAction {
+        let moving = legal.filter { !isEnd($0) }
+        if moving.isEmpty { return .end }
+        if Double.random(in: 0..<1) < curve.giveUp { return .end }
+        var pool = moving
+        if o.agents.contains(where: { $0.taunt }) && Double.random(in: 0..<1) >= curve.tauntNotice {
+            pool = pool.filter { if case .knockout = $0 { return false }; return true }
+        }
+        if pool.isEmpty { return .end }
+        let d = difficulty
+        let weighted: [(EngineAction, Double)] = pool.map { action in
+            let w: Double
+            switch action {
+            case .play: w = 3
+            case .buy: w = d == 1 ? 5 : d == 2 ? 3 : 2
+            case .patron: w = d == 1 ? 2 : 1.2
+            case .knockout: w = 0.35
+            case .end: w = 1
+            }
+            return (action, w)
+        }
+        return pickWeighted(weighted)
+    }
+
+    private func sloppy(
+        _ legal: [EngineAction], engine: TributeEngine, p: PlayerState, o: PlayerState, curve: BeginnerCurve
+    ) -> EngineAction {
+        let plays = legal.filter { if case .play = $0 { return true }; return false }
+        let buys = legal.filter { if case .buy = $0 { return true }; return false }
+        let pats = legal.filter { if case .patron = $0 { return true }; return false }
+        if !plays.isEmpty {
+            let fresh = plays.filter { action in
+                guard case .play(_, let cardId, _) = action, let def = engine.def(cardId) else { return false }
+                return (p.suitsPlayed[def.patron] ?? 0) == 0
+            }
+            let pool = !fresh.isEmpty && fresh.count < plays.count ? fresh : plays
+            return worstPlay(pool, engine: engine, p: p, o: o)
+        }
+        var kos = legal.filter { if case .knockout = $0 { return true }; return false }
+        if !kos.isEmpty && Double.random(in: 0..<1) >= curve.tauntNotice { kos = [] }
+        if !kos.isEmpty && o.agents.contains(where: { $0.taunt }) {
+            return kos[Int.random(in: 0..<kos.count)]
+        }
+        if !buys.isEmpty {
+            if Double.random(in: 0..<1) < curve.buyWorst {
+                return worstBuy(buys, engine: engine, p: p)
+            }
+            return bestBuy(buys, engine: engine, p: p)
+        }
+        if !kos.isEmpty { return kos[Int.random(in: 0..<kos.count)] }
+        if !pats.isEmpty && Double.random(in: 0..<1) >= curve.dropPatron {
+            return pats[Int.random(in: 0..<pats.count)]
+        }
+        return .end
+    }
+
+    private func reading(
+        _ legal: [EngineAction], engine: TributeEngine, p: PlayerState, o: PlayerState, curve: BeginnerCurve
+    ) -> EngineAction {
+        let d = difficulty
+        var pool = legal
+        if Double.random(in: 0..<1) >= curve.tauntNotice {
+            pool = pool.filter { if case .knockout = $0 { return false }; return true }
+        }
+        if Double.random(in: 0..<1) < curve.dropPatron {
+            pool = pool.filter { if case .patron = $0 { return false }; return true }
+        }
+        let flipBuy = Double.random(in: 0..<1) < curve.buyFlip
+        let noise = d == 3 ? 8.0 : d == 2 ? 14.0 : 20.0
+        let scored: [(EngineAction, Double)] = pool.map { action in
+            var s = Double(score(action, engine: engine, p: p, o: o))
+            switch action {
+            case .buy(_, let cardId, _):
+                let quality = engine.def(cardId).map { Double(buyScore($0, p: p)) } ?? 0
+                s = (flipBuy ? 40 - quality : quality) + (Double.random(in: 0..<1) - 0.5) * noise
+            case .play:
+                s += (Double.random(in: 0..<1) - 0.5) * curve.playBand
+            case .patron:
+                s += (Double.random(in: 0..<1) - 0.5) * noise
+            default:
+                break
+            }
+            return (action, s)
+        }
+        let bandW = d == 1 ? 14.0 : d == 2 ? 9.0 : 4.0
+        func pick(_ kind: String, thresh: Double) -> EngineAction? {
+            let rows = scored.filter { matches($0.0, kind) && $0.1 >= thresh }.sorted { $0.1 > $1.1 }
+            guard let best = rows.first else { return nil }
+            let near = rows.filter { $0.1 >= best.1 - bandW }
+            return near[Int.random(in: 0..<near.count)].0
+        }
+        if let play = pick("play", thresh: d == 3 ? 14 : 8) { return play }
+        if let ko = pick("ko", thresh: d == 3 ? 26 : 16) { return ko }
+        if let pat = pick("patron", thresh: d == 3 ? 18 : 8) { return pat }
+        if let buy = pick("buy", thresh: d == 3 ? 8 : 4) { return buy }
+        return .end
+    }
+
+    private func matches(_ action: EngineAction, _ kind: String) -> Bool {
+        switch (kind, action) {
+        case ("play", .play), ("buy", .buy), ("patron", .patron), ("ko", .knockout): return true
+        default: return false
+        }
+    }
+
+    private func worstPlay(
+        _ plays: [EngineAction], engine: TributeEngine, p: PlayerState, o: PlayerState
+    ) -> EngineAction {
+        let ranked: [(EngineAction, Int)] = plays.map { action in
+            guard case .play(_, let cardId, _) = action, let def = engine.def(cardId) else { return (action, 0) }
+            return (action, playScore(def, p: p, o: o))
+        }.sorted { $0.1 < $1.1 }
+        guard let floor = ranked.first?.1 else { return .end }
+        let band = ranked.filter { $0.1 <= floor + 2 }
+        return band[Int.random(in: 0..<band.count)].0
+    }
+
+    private func worstBuy(_ buys: [EngineAction], engine: TributeEngine, p: PlayerState) -> EngineAction {
+        let ranked: [(EngineAction, Int)] = buys.map { action in
+            guard case .buy(_, let cardId, _) = action, let def = engine.def(cardId) else { return (action, 0) }
+            return (action, buyScore(def, p: p))
+        }.sorted { $0.1 < $1.1 }
+        guard let floor = ranked.first?.1 else { return .end }
+        let band = ranked.filter { $0.1 <= floor + 3 }
+        return band[Int.random(in: 0..<band.count)].0
+    }
+
+    private func bestBuy(_ buys: [EngineAction], engine: TributeEngine, p: PlayerState) -> EngineAction {
+        let ranked: [(EngineAction, Int)] = buys.map { action in
+            guard case .buy(_, let cardId, _) = action, let def = engine.def(cardId) else { return (action, 0) }
+            return (action, buyScore(def, p: p))
+        }.sorted { $0.1 > $1.1 }
+        return ranked.first?.0 ?? .end
+    }
+
+    private func pickWeighted(_ items: [(EngineAction, Double)]) -> EngineAction {
+        let total = items.reduce(0.0) { $0 + $1.1 }
+        if total <= 0 { return .end }
+        var r = Double.random(in: 0..<1) * total
+        for item in items {
+            r -= item.1
+            if r <= 0 { return item.0 }
+        }
+        return items[items.count - 1].0
     }
 
     private func isEnd(_ a: EngineAction?) -> Bool {

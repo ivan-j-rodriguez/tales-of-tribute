@@ -75,7 +75,7 @@ async function assertNoHorizontalOverflow(page, sel, label) {
 const splash = await pageAt('?test=1');
 const stamp = await splash.$eval('#build-stamp', (el) => el.textContent);
 console.log('stamp', stamp);
-if (!/build 66/.test(stamp)) throw new Error(`expected build 66, got ${stamp}`);
+if (!/build 67/.test(stamp)) throw new Error(`expected build 67, got ${stamp}`);
 await shot(splash, 'club_splash.png');
 await splash.close();
 
