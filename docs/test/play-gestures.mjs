@@ -337,6 +337,11 @@ await portraitPage.goto(`http://127.0.0.1:${port}/?test=1`, { waitUntil: 'domcon
 await waitReady(portraitPage);
 await start(portraitPage);
 await assertInspect(portraitPage, 'portrait');
+const tray = await portraitPage.evaluate(() => window.__totTest.sacrificeTrayBox(6));
+assert('portrait sacrifice tray shows six cards', tray && tray.count === 6 && tray.portrait === true, tray);
+assert('portrait sacrifice tray fits without clipping the ends', tray && tray.scrolling === false && tray.allInside === true, tray);
+assert('portrait sacrifice tray keeps the first card inset', !!(tray && tray.firstAtStart && tray.firstAtStart.inside && !tray.firstAtStart.nameCut && !tray.firstAtStart.typeCut), tray && tray.firstAtStart);
+assert('portrait sacrifice tray keeps the last card inset', !!(tray && tray.lastAtEnd && tray.lastAtEnd.inside && !tray.lastAtEnd.nameCut && !tray.lastAtEnd.typeCut), tray && tray.lastAtEnd);
 await portraitPage.close();
 
 const nativePage = await browser.newPage();
