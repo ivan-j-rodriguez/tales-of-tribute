@@ -967,7 +967,10 @@ body.is-portrait #match .pile-stack {
 .target-sheet {
   position: relative;
   z-index: 1;
+  box-sizing: border-box;
   width: min(94vw, 640px);
+  max-width: calc(100vw - 16px);
+  min-width: 0;
   padding: 1.1rem 1rem 1rem;
   border-radius: 14px;
   border: 1px solid rgba(212,175,55,0.55);
@@ -975,6 +978,7 @@ body.is-portrait #match .pile-stack {
   box-shadow: 0 16px 48px #000c;
   color: #efe6d4;
   text-align: center;
+  overflow: hidden;
 }
 .target-sheet[hidden] { display: none !important; }
 .target-sheet h2 {
@@ -1016,12 +1020,16 @@ body.is-portrait #match .pile-stack {
   flex-wrap: nowrap;
   gap: 0.55rem;
   justify-content: center;
+  justify-content: safe center;
   align-items: flex-end;
+  width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
   overflow-x: auto;
   margin-bottom: 0.85rem;
   min-height: 7.5rem;
-  padding: 0.4rem 0.2rem;
+  padding: 0.4rem 0.7rem 0.55rem;
+  scroll-padding-inline: 0.7rem;
 }
 .target-tray .tray-card {
   width: 72px;
@@ -1030,6 +1038,43 @@ body.is-portrait #match .pile-stack {
   position: relative;
   transition: transform 0.18s ease;
   touch-action: manipulation;
+}
+/* Portrait rows used to center a flex line wider than the sheet, which
+   clips the first and last cards (and their labels) at the gold frame.
+   Shrink toward a readable floor so a full hand fits; if a longer pool
+   still scrolls, safe-center plus inline padding keeps the ends inset. */
+body.is-portrait .target-sheet {
+  width: min(calc(100vw - 12px), 640px);
+  padding: 0.85rem 0.45rem 0.7rem;
+}
+body.is-portrait .target-tray {
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem 0.5rem;
+  scroll-padding-inline: 0.5rem;
+  min-height: 0;
+}
+body.is-portrait .target-tray .tray-card,
+body.is-portrait .target-tray .card.tray-card {
+  flex: 0 1 64px;
+  width: auto;
+  min-width: 48px;
+  max-width: 72px;
+  height: auto;
+  aspect-ratio: 2 / 3;
+}
+body.is-portrait .target-tray .tray-card:hover,
+body.is-portrait .target-tray .tray-card:focus,
+body.is-portrait .target-tray .card:hover {
+  transform: none;
+}
+body.is-portrait .target-tray .tray-card .meta {
+  padding: 0.65rem 0.12rem 0.2rem;
+}
+body.is-portrait .target-tray .tray-card .cname,
+body.is-portrait .target-tray .tray-card .ctype {
+  font-size: 0.5rem;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
 }
 .target-tray .tray-card:hover,
 .target-tray .tray-card:focus {

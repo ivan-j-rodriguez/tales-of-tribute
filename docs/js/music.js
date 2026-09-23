@@ -54,7 +54,7 @@ function makePlayer() {
   const el = new Audio();
   el.preload = 'auto';
   el.loop = false;
-  el.volume = 0;
+  applyVolume(el, 0);
   el.addEventListener('ended', () => {
     if (!musicOn || !playing) return;
     advanceTrack(true);
@@ -78,20 +78,51 @@ function clearFade() {
   fadeRaf = 0;
 }
 
+/** HTMLMediaElement.volume throws IndexSizeError outside [0, 1]. */
+export function clampMediaVolume(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 0;
+  return Math.min(1, Math.max(0, n));
+}
+
+/** Fade progress stays in [0, 1] when the frame clock is behind or ahead of t0. */
+export function fadeProgress(elapsedMs, durationMs) {
+  if (!(durationMs > 0)) return 1;
+  const raw = Number(elapsedMs) / durationMs;
+  if (!Number.isFinite(raw)) return 1;
+  return Math.min(1, Math.max(0, raw));
+}
+
+export function fadeVolumePair(fromStart, toTarget, elapsedMs, durationMs) {
+  const p = fadeProgress(elapsedMs, durationMs);
+  const from0 = clampMediaVolume(fromStart);
+  const target = clampMediaVolume(toTarget);
+  return {
+    p,
+    to: clampMediaVolume(target * p),
+    from: clampMediaVolume(from0 * (1 - p)),
+  };
+}
+
+function applyVolume(el, value) {
+  if (!el) return;
+  try { el.volume = clampMediaVolume(value); } catch { /* keep the last legal volume */ }
+}
+
 function fadeVolumes(fromEl, toEl, ms = FADE_MS) {
   clearFade();
   const t0 = performance.now();
   const from0 = fromEl ? fromEl.volume : 0;
   const step = (now) => {
-    const p = Math.min(1, (now - t0) / ms);
-    if (toEl) toEl.volume = TARGET_VOL * p;
-    if (fromEl) fromEl.volume = from0 * (1 - p);
-    if (p < 1) fadeRaf = requestAnimationFrame(step);
+    const pair = fadeVolumePair(from0, TARGET_VOL, now - t0, ms);
+    applyVolume(toEl, pair.to);
+    applyVolume(fromEl, pair.from);
+    if (pair.p < 1) fadeRaf = requestAnimationFrame(step);
     else {
       fadeRaf = 0;
       if (fromEl && fromEl !== toEl) {
-        fromEl.pause();
-        fromEl.volume = 0;
+        try { fromEl.pause(); } catch { /* already stopped */ }
+        applyVolume(fromEl, 0);
       }
     }
   };
@@ -130,13 +161,13 @@ function startTrack(src, { fade = true } = {}) {
     return;
   }
   to.src = src;
-  to.volume = fade ? 0 : TARGET_VOL;
+  applyVolume(to, fade ? 0 : TARGET_VOL);
   const go = () => {
     to.play().catch(() => {});
     if (fade && from && from !== to && !from.paused) fadeVolumes(from, to, FADE_MS);
     else {
-      to.volume = TARGET_VOL;
-      if (from && from !== to) { from.pause(); from.volume = 0; }
+      applyVolume(to, TARGET_VOL);
+      if (from && from !== to) { try { from.pause(); } catch { /* already stopped */ } applyVolume(from, 0); }
     }
     active = 1 - active;
     armTimer = 0;
@@ -156,11 +187,11 @@ export async function setMusicEnabled(on) {
     if (ctx?.state === 'suspended') await ctx.resume();
     playing = true;
     startTrack(srcAt(trackIndex), { fade: false });
-    players[active].volume = TARGET_VOL;
+    applyVolume(players[active], TARGET_VOL);
     try { await players[active].play(); } catch {}
   } else {
     clearFade();
-    players.forEach((p) => { p.pause(); p.volume = 0; });
+    players.forEach((p) => { try { p.pause(); } catch { /* already stopped */ } applyVolume(p, 0); });
     playing = false;
   }
   return on;
@@ -208,7 +239,7 @@ export function setMusicCue(cue) {
   if (musicOn && playing) startTrack(srcAt(0), { fade: true });
   else {
     players[active].src = srcAt(0);
-    players[active].volume = 0;
+    applyVolume(players[active], 0);
   }
 }
 
@@ -218,7 +249,7 @@ export function warmMuted() {
   sfxStyle = getSfxStyle();
   sfxOn = preferSfxFromStorage();
   if (sfxGain) sfxGain.gain.value = sfxOn ? 0.28 : 0;
-  players.forEach((p) => { p.volume = 0; });
+  players.forEach((p) => { applyVolume(p, 0); });
 }
 
 function beep({ freq = 440, dur = 0.08, type = 'triangle', vol = 0.35, slide = 0, filterFreq = 0, filterQ = 1 }) {
@@ -278,8 +309,8 @@ function playSfxFile(kind) {
   const file = SFX_FILE[kind];
   if (!file) return false;
   try {
-    const a = new Audio(`assets/audio/${file}?v=63`);
-    a.volume = 0.78;
+    const a = new Audio(`assets/audio/${file}?v=64`);
+    applyVolume(a, 0.78);
     const pending = a.play();
     if (pending && typeof pending.catch === 'function') {
       pending.catch(() => { synthSfx(kind); });

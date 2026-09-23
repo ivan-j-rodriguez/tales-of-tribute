@@ -395,7 +395,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 63';
+  if (stamp) stamp.textContent = 'build 64';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -5732,6 +5732,69 @@ function installTestHook() {
       });
       renderMatch();
       return true;
+    },
+    sacrificeTrayBox(n = 6) {
+      if (!engine?.state) return null;
+      const you = engine.state.players[localSeat()];
+      you.hand = [];
+      you.played = [];
+      for (let i = 0; i < n; i++) {
+        const c = engine._inst('gold');
+        if (i % 2 === 0) you.played.push(c);
+        else you.hand.push(c);
+      }
+      renderMatch();
+      beginTargetSession({
+        steps: [{ kind: 'sacrifice', n: 1, zones: ['hand', 'played'], minCost: 0 }],
+        onDone: () => {},
+      });
+      const sheet = document.querySelector('#target-sheet');
+      const tray = document.querySelector('#target-tray');
+      const cards = [...document.querySelectorAll('#target-tray .card, #target-tray .tray-card')];
+      const measure = () => {
+        const sr = sheet?.getBoundingClientRect();
+        return cards.map((el) => {
+          const r = el.getBoundingClientRect();
+          const name = el.querySelector('.cname');
+          const type = el.querySelector('.ctype');
+          const inset = 1;
+          const inside = !!(sr && r.width > 16 && r.height > 16
+            && r.left >= sr.left + inset - 0.5
+            && r.right <= sr.right - inset + 0.5
+            && r.top >= sr.top - 1
+            && r.bottom <= sr.bottom + 1
+            && r.left >= -1
+            && r.right <= window.innerWidth + 1);
+          return {
+            left: +r.left.toFixed(1),
+            right: +r.right.toFixed(1),
+            w: +r.width.toFixed(1),
+            h: +r.height.toFixed(1),
+            name: name?.textContent || '',
+            nameCut: !!(name && name.scrollWidth > name.clientWidth + 2),
+            typeCut: !!(type && type.scrollWidth > type.clientWidth + 2),
+            inside,
+          };
+        });
+      };
+      if (tray) tray.scrollLeft = 0;
+      const atStart = measure();
+      if (tray) tray.scrollLeft = tray.scrollWidth;
+      const atEnd = measure();
+      const scrolling = !!(tray && tray.scrollWidth > tray.clientWidth + 2);
+      return {
+        count: cards.length,
+        vw: window.innerWidth,
+        vh: window.innerHeight,
+        portrait: document.body.classList.contains('is-portrait'),
+        sheetW: sheet ? +sheet.getBoundingClientRect().width.toFixed(1) : 0,
+        scrolling,
+        atStart,
+        atEnd,
+        firstAtStart: atStart[0] || null,
+        lastAtEnd: atEnd[atEnd.length - 1] || null,
+        allInside: atStart.length > 0 && atStart.every((b) => b.inside),
+      };
     },
     patronInspect(pid = 'mora') {
       const el = document.querySelector(`#rail-patrons .patron-coin[data-pid="${pid}"]`);

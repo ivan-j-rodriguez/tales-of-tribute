@@ -48,8 +48,8 @@ const html = readFileSync(new URL('../web/index.html', import.meta.url), 'utf8')
 assert(!/Crown Crate/i.test(html), 'index has no Crown Crate product name');
 assert(!/Daily slate/i.test(html), 'index has no Daily slate');
 assert(/Daily stock/.test(html), 'index has Daily stock');
-assert(/build 63/.test(html), 'splash stamp is build 63');
-assert(/\?v=63/.test(html), 'cache bust is 63');
+assert(/build 64/.test(html), 'splash stamp is build 64');
+assert(/\?v=64/.test(html), 'cache bust is 64');
 const splash = html.split('id="splash"')[1]?.split('id="ranked"')[0] || '';
 assert(!/Unofficial/i.test(splash), 'splash body has no unofficial line');
 assert(/id="account-disclaimer"/.test(html) && /id="about-disclaimer"/.test(html), 'disclaimers live on login and About');
@@ -75,7 +75,7 @@ const docsApp = readFileSync(new URL('../docs/js/app.js', import.meta.url), 'utf
 const docsSeat = docsApp.slice(docsApp.indexOf('function localSeat()'), docsApp.indexOf('function canControl()'));
 assert(docsSeat === localSeatSrc, 'docs localSeat matches web');
 const docsHtml = readFileSync(new URL('../docs/index.html', import.meta.url), 'utf8');
-assert(/build 63/.test(docsHtml) && /\?v=63/.test(docsHtml), 'docs index stamp and cache bust are 63');
+assert(/build 64/.test(docsHtml) && /\?v=64/.test(docsHtml), 'docs index stamp and cache bust are 64');
 const chrome = readFileSync(new URL('../web/css/club-chrome.css', import.meta.url), 'utf8');
 const docsChrome = readFileSync(new URL('../docs/css/club-chrome.css', import.meta.url), 'utf8');
 assert(chrome === docsChrome, 'docs club-chrome matches web');
