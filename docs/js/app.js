@@ -394,7 +394,7 @@ function onSplashEnter() {
   ensureDailyChallengeReset(profile);
   refreshSplashPurse();
   const stamp = document.getElementById('build-stamp');
-  if (stamp) stamp.textContent = 'build 61';
+  if (stamp) stamp.textContent = 'build 62';
   applyTableSkin();
   syncHourglassUI();
   setMusicCue('tavern');
@@ -3140,7 +3140,7 @@ function deckUnlockState(deckId) {
   if (!unlocked) {
     status = ready ? 'Ready to unlock' : 'Locked';
     const bits = [];
-    if (missingFrag) bits.push(`${missingFrag} more fragment${missingFrag === 1 ? '' : 's'} from the Club Store, Crown Crates, or match rewards`);
+    if (missingFrag) bits.push(`${missingFrag} more fragment${missingFrag === 1 ? '' : 's'} from the Club Store, login crates, or match rewards`);
     if (missingClues) bits.push(`a clue for ${missingClues} more base card${missingClues === 1 ? '' : 's'} — win matches or buy a clue when it appears in the shop`);
     how = ready
       ? 'Fragments and every base clue are in. Claim unlock below.'
@@ -3529,7 +3529,7 @@ function openLoginGreet() {
   const hint = $('#login-prize-hint');
   if (hint) {
     hint.textContent = crate && (profile.cratesOpened || 0) < CRATES_PER_MONTH
-      ? `Today holds a ${crate.name}. Two Crown Crates a month.`
+      ? `Today holds a ${crate.name}. Two seasonal crates a month.`
       : 'Stamp today for a modest purse of Coin.';
   }
   const btn = $('#btn-login-claim');
@@ -3563,7 +3563,7 @@ function claimLoginStamp() {
   if (btn) {
     if (res.crate) {
       btn.disabled = false;
-      btn.textContent = 'Open Crown Crate';
+      btn.textContent = `Open ${res.crate.name}`;
       btn.onclick = () => {
         $('#login-overlay')?.classList.remove('show');
         openCrateCeremony(res.crate);
@@ -3585,9 +3585,18 @@ function openCrateCeremony(variant) {
   stage?.classList.remove('crate-open');
   stage?.classList.remove('crate-iron', 'crate-orichalcum', 'crate-ebony', 'crate-voidsteel');
   stage?.classList.add(`crate-${crate.id}`);
+  const art = $('#crate-art');
+  if (art) {
+    art.src = crate.icon || '';
+    art.alt = crate.name;
+  }
   $('#crate-rarity').textContent = crate.name;
   $('#crate-reward').innerHTML = '';
-  $('#btn-crate-open').hidden = false;
+  const openBtn = $('#btn-crate-open');
+  if (openBtn) {
+    openBtn.hidden = false;
+    openBtn.textContent = `Open ${crate.name}`;
+  }
   $('#btn-crate-close').hidden = true;
   overlay.classList.add('show');
 }
@@ -3595,7 +3604,7 @@ function openCrateCeremony(variant) {
 function doOpenCrate() {
   profile = loadProfile();
   const variant = pendingCrate || resolveCrateVariant(profile.pendingCrate);
-  if (!variant) { toast('No Crown Crate waiting.'); return; }
+  if (!variant) { toast('No seasonal crate waiting.'); return; }
   const res = openCrownCrate(profile, DATA.cards, variant);
   if (res.error) { toast(res.error); return; }
   pendingCrate = null;
@@ -5275,6 +5284,11 @@ function installTestHook() {
     },
     openLogin() {
       openLoginGreet();
+    },
+    showCrate(id) {
+      $('#login-overlay')?.classList.remove('show');
+      $('#account-overlay')?.classList.remove('show');
+      openCrateCeremony(id || 'iron');
     },
     loginCalHtml() {
       return $('#login-cal')?.innerHTML || '';

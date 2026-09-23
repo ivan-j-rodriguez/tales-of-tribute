@@ -213,11 +213,14 @@ export const CHECKIN_GOLD = 10;
 export const CHECKIN_STREAK7_GOLD = 14;
 export const PURSE_BUY_COST = 99999;
 
+/** Login crates. Ids stay the old loot keys so saved pendingCrate rows still resolve. */
+const CRATE_ART_V = '62';
+const crateArt = (file) => `assets/crates/${file}?v=${CRATE_ART_V}`;
 export const CRATE_VARIANTS = [
-  { id: 'iron', name: 'Iron Crown Crate', rarity: 'common' },
-  { id: 'orichalcum', name: 'Orichalcum Crown Crate', rarity: 'fine' },
-  { id: 'ebony', name: 'Ebony Crown Crate', rarity: 'superior' },
-  { id: 'voidsteel', name: 'Voidsteel Crown Crate', rarity: 'epic' },
+  { id: 'iron', name: 'Storm Atronach Crate', season: 'Storm Atronach', rarity: 'common', icon: crateArt('storm-atronach.png') },
+  { id: 'orichalcum', name: 'Scalecaller Crate', season: 'Scalecaller', rarity: 'fine', icon: crateArt('scalecaller.png') },
+  { id: 'ebony', name: 'Flame Atronach Crate', season: 'Flame Atronach', rarity: 'superior', icon: crateArt('flame-atronach.png') },
+  { id: 'voidsteel', name: 'Dark Brotherhood Crate', season: 'Dark Brotherhood', rarity: 'epic', icon: crateArt('dark-brotherhood.png') },
 ];
 
 /** Canonical crate row by id. Display name is not a loot-table key. */
@@ -644,8 +647,8 @@ export function loginMonthGrid(loginDays = {}, d = new Date()) {
     else if (date < today && date >= firstOk) state = 'miss';
     else if (date < today) state = 'empty';
     else state = loginDays[date] ? 'ok' : 'today';
-    const crate = crateDaysForMonth(y, m).includes(day);
-    cells.push({ date, day, state, crate });
+    const crateVariant = crateDaysForMonth(y, m).includes(day) ? crateVariantForDay(date) : null;
+    cells.push({ date, day, state, crate: !!crateVariant, crateVariant });
   }
   return { year: y, month: m, today, cells };
 }
@@ -662,11 +665,16 @@ export function loginCellHtml(cell, { justStamped = null, claimable = false } = 
   if (stamped) classes.push('stamped');
   if (stamped && justStamped && cell.date === justStamped) classes.push('just-stamped');
   if (claimable && cell.state === 'today') classes.push('claimable');
+  const variant = cell.crateVariant || null;
+  const icon = variant?.icon
+    ? `<img class="cal-crate" src="${variant.icon}" alt="${variant.name}" />`
+    : '';
   const inner = stamped
     ? '<span class="day-stamp" aria-label="Stamped">STAMP</span>'
-    : (cell.state === 'miss' ? '✕' : String(cell.day ?? ''));
+    : (cell.state === 'miss' ? '✕' : `<span class="cal-num">${cell.day ?? ''}</span>`);
   const date = cell.date || '';
-  return `<div class="${classes.join(' ')}" title="${date}" data-date="${date}">${inner}</div>`;
+  const title = variant?.name ? `${date} · ${variant.name}` : date;
+  return `<div class="${classes.join(' ')}" title="${title}" data-date="${date}">${inner}${icon}</div>`;
 }
 
 export function crateDaysForMonth(y, m) {

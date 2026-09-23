@@ -1,7 +1,7 @@
 /**
  * Club economy: rotating shop, rarity, clues, seasons, login calendar (no browser).
  */
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 
 const mem = {};
 globalThis.localStorage = {
@@ -16,7 +16,7 @@ import {
   roadGrandPrize, clueCountOf, DECK_IMPORTANCE, SHOP_FEATURED_SLOTS,
   SHOP_SKIN_SLOTS, SHOP_BACK_SLOTS, SHOP_FRAG_SLOTS, groupCardsByDeck, canonPatron,
   crateDaysForMonth, crateVariantForDay, CRATE_VARIANTS, CRATES_PER_MONTH,
-  resolveCrateVariant,
+  resolveCrateVariant, loginCellHtml,
 } from '../web/js/economy.js';
 import {
   defaultProfile, addFragment, addCardClue, tryUnlockDeck, deckReadyToUnlock,
@@ -168,7 +168,29 @@ assert(['iron', 'orichalcum'].includes(firstCrate?.id), `first crate day is iron
 assert(['ebony', 'voidsteel'].includes(secondCrate?.id), `second crate day is ebony/voidsteel (${secondCrate?.id})`);
 assert(resolveCrateVariant({ id: 'ebony', rarity: 'fine' })?.rarity === 'superior',
   'crate id wins over a mismatched rarity field');
-assert(CRATES_PER_MONTH === 2, 'max two crown crates a month');
+assert(CRATES_PER_MONTH === 2, 'max two seasonal crates a month');
+const seasonNames = {
+  iron: 'Storm Atronach Crate',
+  orichalcum: 'Scalecaller Crate',
+  ebony: 'Flame Atronach Crate',
+  voidsteel: 'Dark Brotherhood Crate',
+};
+for (const variant of CRATE_VARIANTS) {
+  assert(variant.name === seasonNames[variant.id], `${variant.id} displays ${variant.name}`);
+  assert(variant.rarity && variant.icon, `${variant.id} keeps a rarity and an icon`);
+  const iconPath = String(variant.icon).split('?')[0];
+  assert(existsSync(new URL(`../web/${iconPath}`, import.meta.url)), `${variant.id} icon is in the repo (${iconPath})`);
+  assert(!/crown crate/i.test(variant.name), `${variant.id} name is not a crown crate (${variant.name})`);
+}
+assert(resolveCrateVariant('iron')?.name === 'Storm Atronach Crate', 'old iron id resolves to Storm Atronach');
+assert(resolveCrateVariant({ id: 'voidsteel', name: 'Voidsteel Crown Crate' })?.name === 'Dark Brotherhood Crate',
+  'old voidsteel save name is replaced by the season');
+const septGrid = loginMonthGrid({}, new Date(Date.UTC(2026, 8, 15, 16)));
+const crateCell = septGrid.cells.find((c) => c.crate);
+assert(!!crateCell?.crateVariant?.icon, `September crate cell has a season icon (${crateCell?.date})`);
+const crateHtml = loginCellHtml(crateCell);
+assert(/cal-crate/.test(crateHtml) && crateHtml.includes(crateCell.crateVariant.name),
+  'crate day renders the season icon and name');
 
 const origRandom = Math.random;
 Math.random = () => 0;
@@ -177,10 +199,10 @@ try {
   const orichalcum = openCrownCrate(defaultProfile(), cards, CRATE_VARIANTS[1]);
   const ebony = openCrownCrate(defaultProfile(), cards, { id: 'ebony' });
   const voidsteel = openCrownCrate(defaultProfile(), cards, 'voidsteel');
-  assert(iron.crate.id === 'iron' && iron.rarity === 'common', `iron crate loot is common (${iron.rarity})`);
-  assert(orichalcum.crate.id === 'orichalcum' && orichalcum.rarity === 'fine', 'orichalcum crate loot is fine');
-  assert(ebony.crate.id === 'ebony' && ebony.rarity === 'superior', 'ebony crate loot is superior');
-  assert(voidsteel.crate.id === 'voidsteel' && voidsteel.rarity === 'epic', 'voidsteel crate loot is epic');
+  assert(iron.crate.id === 'iron' && iron.rarity === 'common' && iron.crate.name === 'Storm Atronach Crate', `iron crate loot is common Storm Atronach (${iron.rarity} ${iron.crate.name})`);
+  assert(orichalcum.crate.id === 'orichalcum' && orichalcum.rarity === 'fine' && orichalcum.crate.name === 'Scalecaller Crate', 'orichalcum crate loot is fine Scalecaller');
+  assert(ebony.crate.id === 'ebony' && ebony.rarity === 'superior' && ebony.crate.name === 'Flame Atronach Crate', 'ebony crate loot is superior Flame Atronach');
+  assert(voidsteel.crate.id === 'voidsteel' && voidsteel.rarity === 'epic' && voidsteel.crate.name === 'Dark Brotherhood Crate', 'voidsteel crate loot is epic Dark Brotherhood');
   assert(iron.reward.type === 'gold' && ebony.reward.type === 'gold', 'deterministic gold path for loot-bias check');
   assert(iron.reward.amount < orichalcum.reward.amount, `orichalcum gold > iron (${iron.reward.amount} vs ${orichalcum.reward.amount})`);
   assert(orichalcum.reward.amount < ebony.reward.amount, `ebony gold > orichalcum (${orichalcum.reward.amount} vs ${ebony.reward.amount})`);
@@ -196,7 +218,7 @@ assert(fromPending.crate?.id === 'ebony', `open uses the pending offered crate (
 assert(!capP.pendingCrate, 'pending crate is consumed on open');
 openCrownCrate(capP, cards, CRATE_VARIANTS[0]);
 const third = openCrownCrate(capP, cards, CRATE_VARIANTS[3]);
-assert(!!third.error, `third crate in a month blocked (${third.error})`);
+assert(!!third.error && !/Crown Crate/i.test(third.error), `third crate in a month blocked without the old product name (${third.error})`);
 assert(capP.cratesOpened === 2, `opened count stays at two (${capP.cratesOpened})`);
 
 const rollP = defaultProfile();
