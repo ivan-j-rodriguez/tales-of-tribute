@@ -19,7 +19,7 @@ import {
   TABLE_SKINS,
 } from '../web/js/profile.js';
 import { loginMonthGrid, loginCellHtml, priceOf, rarityOf, shopPeriodKey, SHOP_FEATURED_SLOTS, SHOP_FRAG_SLOTS, buildWeeklyGoals, patronDisplayName } from '../web/js/economy.js';
-import { TOUR_STEPS, canSkipTourStep, tourStep } from '../web/js/tutorial.js';
+import { TOUR_STEPS, canSkipTourStep, tourStep, layoutTourStep } from '../web/js/tutorial.js';
 import {
   signUpEmail, signInEmail, continueAsGuest, signOut, isSignedIn, currentSession,
   mergeProfiles, providerStatus, accountHint, permissionCopy,
@@ -47,8 +47,8 @@ const html = readFileSync(new URL('../web/index.html', import.meta.url), 'utf8')
 assert(!/Crown Crate/i.test(html), 'index has no Crown Crate product name');
 assert(!/Daily slate/i.test(html), 'index has no Daily slate');
 assert(/Daily stock/.test(html), 'index has Daily stock');
-assert(/build 62/.test(html), 'splash stamp is build 62');
-assert(/\?v=62/.test(html), 'cache bust is 62');
+assert(/build 63/.test(html), 'splash stamp is build 63');
+assert(/\?v=63/.test(html), 'cache bust is 63');
 const splash = html.split('id="splash"')[1]?.split('id="ranked"')[0] || '';
 assert(!/Unofficial/i.test(splash), 'splash body has no unofficial line');
 assert(/id="account-disclaimer"/.test(html) && /id="about-disclaimer"/.test(html), 'disclaimers live on login and About');
@@ -74,7 +74,7 @@ const docsApp = readFileSync(new URL('../docs/js/app.js', import.meta.url), 'utf
 const docsSeat = docsApp.slice(docsApp.indexOf('function localSeat()'), docsApp.indexOf('function canControl()'));
 assert(docsSeat === localSeatSrc, 'docs localSeat matches web');
 const docsHtml = readFileSync(new URL('../docs/index.html', import.meta.url), 'utf8');
-assert(/build 62/.test(docsHtml) && /\?v=62/.test(docsHtml), 'docs index stamp and cache bust are 62');
+assert(/build 63/.test(docsHtml) && /\?v=63/.test(docsHtml), 'docs index stamp and cache bust are 63');
 const chrome = readFileSync(new URL('../web/css/club-chrome.css', import.meta.url), 'utf8');
 const docsChrome = readFileSync(new URL('../docs/css/club-chrome.css', import.meta.url), 'utf8');
 assert(chrome === docsChrome, 'docs club-chrome matches web');
@@ -115,9 +115,45 @@ assert(/Agents stay in these slots/.test(TOUR_STEPS[4].text), 'tutorial explains
 assert(/Patrons live here/.test(TOUR_STEPS[5].text), 'tutorial explains Patrons');
 assert(/End Turn when you are done/.test(TOUR_STEPS[6].text), 'tutorial explains end turn');
 assert(/40 Prestige/.test(TOUR_STEPS[7].text) && /80 Prestige/.test(TOUR_STEPS[7].text), 'tutorial explains Prestige wins');
-assert(!canSkipTourStep(0) && canSkipTourStep(1), 'tutorial skip opens after the first step');
+assert(canSkipTourStep(0) && canSkipTourStep(1) && canSkipTourStep(7), 'tutorial skip is on every step, including the first');
+assert(!canSkipTourStep(-1) && !canSkipTourStep(1.5), 'tutorial skip ignores a bad index');
 assert(!/slate/i.test(TOUR_STEPS.map((s) => s.text).join(' ')), 'tutorial never says slate');
-assert(/canSkipTourStep\(tourStep\)/.test(app), 'match tour hides skip on the first step');
+assert(/canSkipTourStep\(tourStep\)/.test(app), 'match tour asks canSkipTourStep');
+assert(/layoutTourStep\(/.test(app), 'match tour clamps the tip with layoutTourStep');
+assert(/Skip Tour/.test(html), 'tour offers Skip Tour');
+assert(/if \(tourActive\) endTour\(\{ resume: false \}\)/.test(app), 'leave and win clear the tour');
+assert(/e\.key !== 'Escape' \|\| !tourActive/.test(app), 'Escape ends an active tour');
+assert(/clearInspectOverlays\(/.test(app), 'tour clears a leftover inspect overlay');
+const patronsStuck = layoutTourStep({
+  target: { left: 298, top: 0, width: 92, height: 844 },
+  viewport: { width: 390, height: 844 },
+  panel: { width: 320, height: 168 },
+});
+const oldOffscreenTop = 844 - Math.max(12, 844 - 0 + 12) - 168;
+assert(oldOffscreenTop < 0, 'old patron-rail formula parked the tip above the viewport');
+assert(patronsStuck.dock === 'safe', 'full-height patron rail docks the tip');
+assert(patronsStuck.panel.top >= 12 && patronsStuck.panel.top + 168 <= 844 - 12, 'patrons tip stays inside the portrait viewport');
+assert(patronsStuck.panel.left >= 12 && patronsStuck.panel.left + patronsStuck.panel.width <= 390 - 12, 'patrons tip stays inside the portrait width');
+assert(patronsStuck.hole && patronsStuck.hole.height > 400 && patronsStuck.hole.left >= 280, 'patrons hole still spotlights the rail');
+const handTip = layoutTourStep({
+  target: { left: 40, top: 640, width: 300, height: 140 },
+  viewport: { width: 390, height: 844 },
+  panel: { width: 320, height: 150 },
+});
+assert(handTip.dock === 'above' && handTip.panel.top >= 12 && handTip.panel.top + 150 <= 844 - 12, 'a low hand keeps the tip on screen above it');
+const tavernTip = layoutTourStep({
+  target: { left: 40, top: 280, width: 300, height: 120 },
+  viewport: { width: 390, height: 844 },
+  panel: { width: 320, height: 150 },
+});
+assert(tavernTip.dock === 'below' && tavernTip.panel.top + 150 <= 844 - 12, 'a tavern with room below keeps the tip underneath');
+const landTip = layoutTourStep({
+  target: { left: 760, top: 0, width: 84, height: 390 },
+  viewport: { width: 844, height: 390 },
+  panel: { width: 340, height: 150 },
+});
+assert(landTip.panel.top >= 12 && landTip.panel.top + 150 <= 390 - 12, 'landscape patrons tip stays on screen');
+assert(landTip.panel.left >= 12 && landTip.panel.left + landTip.panel.width <= 844 - 12, 'landscape patrons tip stays inside the width');
 assert(/id="btn-replay-tour"/.test(html) && /startTutorialMatch/.test(app), 'tutorial replays from Settings');
 assert(/setCollectionSub\(/.test(app) && /data-sub="frags"/.test(html) && /data-sub="backs"/.test(html), 'collection subcategories are wired');
 assert(/sel-table-skin/.test(html) && /sel-card-back/.test(html) && /equipSkin\(profile, e\.target\.value\)/.test(app), 'settings equip table and card back');

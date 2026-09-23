@@ -1,5 +1,7 @@
 # Status
 
+**2026-09-23 (build 63):** The guided tour can no longer trap the player. A full-height target (the patron rail in portrait) used to set the tip’s `bottom` to about one screen tall, which parked Next and Skip above the viewport while the gold hole stayed up. The tip now clamps into the portrait and landscape viewport, and a too-tall target docks the sheet at the bottom while the hole still frames the target. Skip Tour is on every step, including step 0 of a tutorial match. Leave, a win, leaving the table, and Escape call `endTour` and hide the overlay. Advancing, skipping, or ending the tour clears a leftover hold-inspect dossier, and the tip sits above that dossier so it cannot cover Next or Skip. Board CSS untouched. `?v=63`.
+
 **2026-09-23 (build 62):** Login crates use four real ESO seasons — Storm Atronach, Scalecaller, Flame Atronach, and Dark Brotherhood — with public UESP store icons on the ceremony and the calendar. Old save ids (`iron` / `orichalcum` / `ebony` / `voidsteel`) still open the same common / fine / superior / epic loot. Player-facing copy says the season name, or “seasonal crates” / “login crates” when no single crate is named. Board CSS untouched. `?v=62`.
 
 **2026-09-22 (build 61):** Province stop chips stay fully inside the map frame. The marker stays on the province coordinate; a chip that would cross the rounded gold border slides inward (Gonfalon Bay’s G, and the other edge stops). Dark ink on a light chip from build 60 stays. Board CSS untouched. `?v=61`.
@@ -107,7 +109,7 @@ Live **table** felt, patron rail, resource triad, hourglass, targeting: not in t
 
 ## Web (GitHub Pages — play this)
 
-`docs/` is a copy of `web/`. Cache-bust `?v=62`. Login crates are Storm Atronach, Scalecaller, Flame Atronach, and Dark Brotherhood (build 62). Province stop chips stay inside the map frame (build 61) and use dark ink on parchment (build 60). Contracts exile instead of cooling down (build 59). Board finish-line is build 58 (portrait lock from 51). Friend rooms use explicit PeerJS cloud + STUN (build 57). Hotseat patron pick is null-safe (build 56). Club shop, cosmetics, tutorial, and daily stamp are build 55. Long-press inspect stays on the build 54 UESP sentences.
+`docs/` is a copy of `web/`. Cache-bust `?v=63`. The guided tour stays on screen and can always be skipped or left (build 63). Login crates are Storm Atronach, Scalecaller, Flame Atronach, and Dark Brotherhood (build 62). Province stop chips stay inside the map frame (build 61) and use dark ink on parchment (build 60). Contracts exile instead of cooling down (build 59). Board finish-line is build 58 (portrait lock from 51). Friend rooms use explicit PeerJS cloud + STUN (build 57). Hotseat patron pick is null-safe (build 56). Club shop, cosmetics, tutorial, and daily stamp are build 55. Long-press inspect stays on the build 54 UESP sentences.
 
 | Fix | Notes |
 |---|---|

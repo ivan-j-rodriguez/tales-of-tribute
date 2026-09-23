@@ -7,11 +7,11 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta name="theme-color" content="#06141c" />
   <title>Tales of Tribute — Fan Table</title>
-  <link rel="stylesheet" href="css/style.css?v=62" />
-  <link rel="stylesheet" href="css/phone-eso.css?v=62" />
-  <link rel="stylesheet" href="css/table-pack.css?v=62" />
-  <link rel="stylesheet" href="css/board-pass.css?v=62" />
-  <link rel="stylesheet" href="css/club-chrome.css?v=62" />
+  <link rel="stylesheet" href="css/style.css?v=63" />
+  <link rel="stylesheet" href="css/phone-eso.css?v=63" />
+  <link rel="stylesheet" href="css/table-pack.css?v=63" />
+  <link rel="stylesheet" href="css/board-pass.css?v=63" />
+  <link rel="stylesheet" href="css/club-chrome.css?v=63" />
 </head>
 <body>
   <div id="app">
@@ -53,7 +53,7 @@
           <label class="chk"><input type="checkbox" id="chk-hourglass-splash" /> Hourglass (90s)</label>
           <button type="button" id="btn-music" class="music-toggle" title="Music">♪ Music: Off</button>
         </div>
-        <p class="build-stamp" id="build-stamp">build 62</p>
+        <p class="build-stamp" id="build-stamp">build 63</p>
       </div>
     </section>
 
@@ -556,17 +556,17 @@
     <div id="tour-root" class="tour-root" hidden>
       <div class="tour-backdrop" id="tour-backdrop"></div>
       <div class="tour-hole" id="tour-hole" aria-hidden="true"></div>
-      <div class="tour-panel eso-hint" id="tour-panel">
-        <div class="tip-ornament"></div>
-        <div class="tour-step" id="tour-step">1 / 8</div>
-        <div id="tour-text"></div>
-        <div class="tip-nav">
-          <button type="button" id="tour-skip">Skip</button>
-          <button type="button" class="primary" id="tour-next">Next</button>
-        </div>
-      </div>
     </div>
     <div id="lift-layer" aria-hidden="true"></div>
+    <div class="tour-panel eso-hint" id="tour-panel" hidden role="dialog" aria-modal="false" aria-labelledby="tour-step">
+      <div class="tip-ornament" aria-hidden="true"></div>
+      <div class="tour-step" id="tour-step">1 / 8</div>
+      <div id="tour-text"></div>
+      <div class="tip-nav">
+        <button type="button" id="tour-skip">Skip Tour</button>
+        <button type="button" class="primary" id="tour-next">Next</button>
+      </div>
+    </div>
     <div class="overlay" id="patron-confirm-overlay">
       <div class="patron-confirm" id="patron-confirm">
         <img id="pc-art" alt="" />
@@ -588,6 +588,6 @@
       </div>
     </div>
   </div>
-  <script type="module" src="js/app.js?v=62"></script>
+  <script type="module" src="js/app.js?v=63"></script>
 </body>
 </html>

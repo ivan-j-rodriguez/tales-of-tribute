@@ -1013,6 +1013,96 @@
   color: var(--hi-gold-bright, #f6e7b2);
   cursor: pointer;
 }
+/* Guided tour. High Isle sheet, kept on screen by layoutTourStep.
+   The panel is a sibling of #lift-layer (not inside #tour-root) so its
+   z-index can sit above a hold-inspect dossier. The spotlight stays in
+   #tour-root, under the dossier, and still frames the real target.
+   Board/felt CSS does not own this. */
+#tour-panel {
+  --tour-safe-b: env(safe-area-inset-bottom, 0px);
+}
+#tour-panel[hidden] { display: none !important; }
+#tour-hole.tour-hole {
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 9999px rgba(3, 11, 18, 0.72),
+    0 0 0 2px #e6c56a,
+    0 0 18px rgba(230, 197, 106, 0.55);
+}
+#tour-panel.tour-panel {
+  box-sizing: border-box;
+  width: min(22rem, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 24px - env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  overflow: hidden;
+  padding: 0.85rem 1rem 0.8rem;
+  border-radius: 12px;
+  color: #f7f1e4;
+  background:
+    linear-gradient(180deg, rgba(246, 231, 178, 0.1), transparent 32%),
+    linear-gradient(165deg, rgba(18, 46, 56, 0.98) 0%, rgba(6, 18, 26, 0.98) 100%);
+  border: 1px solid rgba(230, 197, 106, 0.78);
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(246, 231, 178, 0.22),
+    inset 0 0 0 1px rgba(6, 16, 22, 0.8);
+  font-family: 'Source Sans 3', 'Segoe UI', sans-serif;
+  font-size: 0.98rem;
+  line-height: 1.45;
+  z-index: 14000;
+}
+#tour-panel .tip-ornament {
+  height: 2px;
+  margin: 0 0 0.15rem;
+  background: linear-gradient(90deg, transparent, #e6c56a, transparent);
+  flex-shrink: 0;
+}
+#tour-panel .tour-step {
+  font-family: 'Cinzel', serif;
+  color: #e6c56a;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  margin: 0;
+  flex-shrink: 0;
+}
+#tour-panel #tour-text {
+  color: #f7f1e4;
+  overflow: auto;
+  min-height: 0;
+}
+#tour-panel .tip-nav {
+  margin-top: 0.35rem;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+#tour-panel .tip-nav button {
+  min-height: 44px;
+  padding: 0.45rem 0.95rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(246, 231, 178, 0.14), transparent 40%),
+    linear-gradient(180deg, #1a3a44, #0c1c24);
+  border: 1px solid rgba(230, 197, 106, 0.45);
+  color: #f6e7b2;
+}
+#tour-panel .tip-nav button.primary {
+  background:
+    linear-gradient(180deg, rgba(255, 236, 180, 0.28), transparent 45%),
+    linear-gradient(180deg, #b8943a, #6e5214);
+  border-color: #e6c56a;
+  color: #fff8e8;
+}
+
 body.remote-friend-pick #diff-pick-wrap,
 body.remote-friend-pick #btn-ai-rest,
 body.remote-friend-pick #btn-random-match,
