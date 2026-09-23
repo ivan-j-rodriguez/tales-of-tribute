@@ -4,10 +4,9 @@
  * Email always works:
  *   - Firebase Auth + Firestore when FIREBASE_CONFIG is set
  *   - otherwise a salted SHA-256 vault in this browser (honestly labeled device-only)
- * Google / Apple / Phone: real Firebase providers when config + flags allow;
- * otherwise the buttons stay gated and say why. Guest play never requires an account.
+ * Guest play never requires an account.
  */
-import { FIREBASE_CONFIG, FIREBASE_PROVIDERS } from './firebase-config.js';
+import { FIREBASE_CONFIG } from './firebase-config.js';
 import { defaultProfile, loadProfile, saveProfile, setProfileSaveHook, PROFILE_KEY } from './profile.js';
 
 export const SESSION_KEY = 'tot_session_v1';
@@ -20,7 +19,6 @@ export const FB_CDN = 'https://www.gstatic.com/firebasejs/10.14.1';
 const listeners = [];
 let fbReady = null;
 let cloudUnsub = null;
-let recaptcha = null;
 let syncTimer = null;
 
 function storeGet(key, fallback) {
@@ -49,36 +47,10 @@ export function cloudConfigured() {
   return !!(FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId);
 }
 
-export function providerStatus() {
-  const cloud = cloudConfigured();
-  return {
-    cloud,
-    email: { ready: true, cloud },
-    google: {
-      ready: cloud && FIREBASE_PROVIDERS.google !== false,
-      reason: cloud
-        ? (FIREBASE_PROVIDERS.google === false ? 'Google sign-in is not enabled in Club cloud config.' : '')
-        : 'Google sign-in needs Club cloud (Firebase).',
-    },
-    apple: {
-      ready: cloud && !!FIREBASE_PROVIDERS.apple,
-      reason: cloud
-        ? (FIREBASE_PROVIDERS.apple ? '' : 'Apple sign-in needs an Apple Service ID in Club cloud config.')
-        : 'Apple sign-in needs Club cloud (Firebase + Apple).',
-    },
-    phone: {
-      ready: cloud && !!FIREBASE_PROVIDERS.phone,
-      reason: cloud
-        ? (FIREBASE_PROVIDERS.phone ? '' : 'Phone sign-in needs Firebase Phone Auth in Club cloud config.')
-        : 'Phone sign-in needs Club cloud (Firebase Phone Auth).',
-    },
-  };
-}
-
 export function accountHint() {
   if (isSignedIn()) {
     const s = currentSession();
-    if (s.cloud) return `Signed in · cloud sync on (${s.email || s.phone || s.provider})`;
+    if (s.cloud) return `Signed in · cloud sync on (${s.email || 'Club account'})`;
     return `Signed in on this device · ${s.email || 'Club account'}. Cloud sync waits on Firebase (STATUS.md).`;
   }
   return cloudConfigured()
@@ -306,74 +278,6 @@ export async function signInEmail(email, password) {
   return { ok: true, session: currentSession() };
 }
 
-export async function signInProvider(kind) {
-  const st = providerStatus()[kind];
-  if (!st?.ready) return { error: st?.reason || `${kind} sign-in is not available.` };
-  const fb = await loadFirebase();
-  if (!fb.ok) return { error: `Club cloud unavailable (${fb.reason}).` };
-  const firebase = globalThis.firebase;
-  try {
-    let provider;
-    if (kind === 'google') provider = new firebase.auth.GoogleAuthProvider();
-    else if (kind === 'apple') {
-      provider = new firebase.auth.OAuthProvider('apple.com');
-      provider.addScope('email');
-      provider.addScope('name');
-    } else return { error: 'Unknown sign-in.' };
-    const cred = await fb.auth.signInWithPopup(provider);
-    const session = {
-      guest: false,
-      uid: cred.user.uid,
-      email: cred.user.email || '',
-      provider: kind,
-      cloud: true,
-    };
-    await adoptUser(session, accountProfiles()[cred.user.uid] || null);
-    return { ok: true, session: currentSession() };
-  } catch (err) {
-    return { error: firebaseError(err) };
-  }
-}
-
-export async function startPhoneSignIn(phone, buttonEl) {
-  const st = providerStatus().phone;
-  if (!st.ready) return { error: st.reason };
-  const fb = await loadFirebase();
-  if (!fb.ok) return { error: `Club cloud unavailable (${fb.reason}).` };
-  const firebase = globalThis.firebase;
-  const num = String(phone || '').trim();
-  if (!/^\+?[0-9]{8,15}$/.test(num.replace(/[\s()-]/g, ''))) {
-    return { error: 'Enter a phone number with country code, like +15551234567.' };
-  }
-  try {
-    if (!recaptcha) {
-      recaptcha = new firebase.auth.RecaptchaVerifier(buttonEl || 'btn-auth-phone', { size: 'invisible' });
-    }
-    const confirmation = await fb.auth.signInWithPhoneNumber(num, recaptcha);
-    return { ok: true, pending: true, confirmation };
-  } catch (err) {
-    return { error: firebaseError(err) };
-  }
-}
-
-export async function confirmPhoneSignIn(confirmation, code) {
-  if (!confirmation) return { error: 'Request a code first.' };
-  try {
-    const cred = await confirmation.confirm(String(code || '').trim());
-    const session = {
-      guest: false,
-      uid: cred.user.uid,
-      phone: cred.user.phoneNumber || '',
-      provider: 'phone',
-      cloud: true,
-    };
-    await adoptUser(session, accountProfiles()[cred.user.uid] || null);
-    return { ok: true, session: currentSession() };
-  } catch (err) {
-    return { error: firebaseError(err) };
-  }
-}
-
 export async function continueAsGuest() {
   const snap = localStorage.getItem(GUEST_SNAPSHOT_KEY);
   writeSession({ guest: true, uid: 'guest', provider: 'guest' });
@@ -412,17 +316,12 @@ function firebaseError(err) {
   if (code.includes('user-not-found') || code.includes('invalid-credential')) return 'Email or password did not match.';
   if (code.includes('wrong-password')) return 'Wrong password.';
   if (code.includes('weak-password')) return 'Password must be at least 6 characters.';
-  if (code.includes('popup-closed')) return 'Sign-in window closed.';
-  if (code.includes('operation-not-allowed')) return 'That sign-in method is not enabled in Club cloud.';
-  if (code.includes('invalid-phone')) return 'That phone number is not valid.';
+  if (code.includes('operation-not-allowed')) return 'Email sign-in is not enabled in Club cloud.';
   return String(err?.message || err || 'Sign-in failed.');
 }
 
 export function permissionCopy() {
   return {
     mic: 'Microphone is off unless you turn on optional voice in a Friend or Ranked room. We ask the browser only then.',
-    google: 'Google may share your email so the Club can sync this profile.',
-    apple: 'Apple may share your name and email. Used only to sign in and sync.',
-    phone: 'SMS is used once to prove the number. We do not send match alerts.',
   };
 }

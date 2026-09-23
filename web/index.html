@@ -7,11 +7,11 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta name="theme-color" content="#06141c" />
   <title>Tales of Tribute — Fan Table</title>
-  <link rel="stylesheet" href="css/style.css?v=65" />
-  <link rel="stylesheet" href="css/phone-eso.css?v=65" />
-  <link rel="stylesheet" href="css/table-pack.css?v=65" />
-  <link rel="stylesheet" href="css/board-pass.css?v=65" />
-  <link rel="stylesheet" href="css/club-chrome.css?v=65" />
+  <link rel="stylesheet" href="css/style.css?v=66" />
+  <link rel="stylesheet" href="css/phone-eso.css?v=66" />
+  <link rel="stylesheet" href="css/table-pack.css?v=66" />
+  <link rel="stylesheet" href="css/board-pass.css?v=66" />
+  <link rel="stylesheet" href="css/club-chrome.css?v=66" />
 </head>
 <body>
   <div id="app">
@@ -53,7 +53,7 @@
           <label class="chk"><input type="checkbox" id="chk-hourglass-splash" /> Hourglass (90s)</label>
           <button type="button" id="btn-music" class="music-toggle" title="Music">♪ Music: Off</button>
         </div>
-        <p class="build-stamp" id="build-stamp">build 65</p>
+        <p class="build-stamp" id="build-stamp">build 66</p>
       </div>
     </section>
 
@@ -296,7 +296,7 @@
         <label class="chk settings-row"><input type="checkbox" id="chk-settings-mic" /> Microphone
           <span class="hint-inline">Optional 1:1 voice in Friend/Ranked. The browser asks only when you enable voice.</span>
         </label>
-        <p class="hint" id="settings-perm-auth">Sign-in: email is local or Club cloud. Google/Apple/Phone stay off until those providers are enabled — we do not request those scopes in advance.</p>
+        <p class="hint" id="settings-perm-auth">Sign-in is email. Guest play stays on this device.</p>
       </div>
       <div class="settings-block">
         <h3 class="club-section">Table</h3>
@@ -522,8 +522,6 @@
     <div class="overlay" id="account-overlay">
       <div class="login-modal hi-frame account-modal">
         <h2 id="account-title">Sign in</h2>
-        <p class="hint disclaimer" id="account-disclaimer">Unofficial fan-made table. Not affiliated with Bethesda Softworks or ZeniMax Online Studios. Not for sale.</p>
-        <p class="hint" id="account-status"></p>
         <label class="account-field">Email
           <input id="account-email" type="email" autocomplete="username" placeholder="you@example.com" />
         </label>
@@ -534,19 +532,6 @@
           <button type="button" class="primary" id="btn-auth-signin">Sign in</button>
           <button type="button" id="btn-auth-signup">Sign up</button>
         </div>
-        <div class="account-providers">
-          <button type="button" id="btn-auth-google">Google</button>
-          <button type="button" id="btn-auth-apple">Apple</button>
-        </div>
-        <label class="account-field">Phone
-          <input id="account-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+15551234567" />
-        </label>
-        <div class="account-actions">
-          <button type="button" id="btn-auth-phone">Send code</button>
-          <input id="account-sms" inputmode="numeric" maxlength="8" placeholder="SMS code" hidden />
-          <button type="button" id="btn-auth-sms" hidden>Confirm</button>
-        </div>
-        <p class="hint" id="account-provider-hint"></p>
         <button type="button" class="primary" id="btn-auth-guest">Play as guest</button>
         <button type="button" id="btn-auth-close">Close</button>
       </div>
@@ -588,6 +573,6 @@
       </div>
     </div>
   </div>
-  <script type="module" src="js/app.js?v=65"></script>
+  <script type="module" src="js/app.js?v=66"></script>
 </body>
 </html>

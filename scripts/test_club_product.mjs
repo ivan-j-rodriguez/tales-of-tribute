@@ -23,7 +23,7 @@ import { loginMonthGrid, loginCellHtml, priceOf, rarityOf, shopPeriodKey, SHOP_F
 import { TOUR_STEPS, canSkipTourStep, tourStep, layoutTourStep } from '../web/js/tutorial.js';
 import {
   signUpEmail, signInEmail, continueAsGuest, signOut, isSignedIn, currentSession,
-  mergeProfiles, providerStatus, accountHint, permissionCopy,
+  mergeProfiles, accountHint, permissionCopy,
 } from '../web/js/auth.js';
 import {
   createVoice, voiceStatusLine, canUseVoice, setMuted,
@@ -48,11 +48,15 @@ const html = readFileSync(new URL('../web/index.html', import.meta.url), 'utf8')
 assert(!/Crown Crate/i.test(html), 'index has no Crown Crate product name');
 assert(!/Daily slate/i.test(html), 'index has no Daily slate');
 assert(/Daily stock/.test(html), 'index has Daily stock');
-assert(/build 65/.test(html), 'splash stamp is build 65');
-assert(/\?v=65/.test(html), 'cache bust is 65');
+assert(/build 66/.test(html), 'splash stamp is build 66');
+assert(/\?v=66/.test(html), 'cache bust is 66');
 const splash = html.split('id="splash"')[1]?.split('id="ranked"')[0] || '';
 assert(!/Unofficial/i.test(splash), 'splash body has no unofficial line');
-assert(/id="account-disclaimer"/.test(html) && /id="about-disclaimer"/.test(html), 'disclaimers live on login and About');
+assert(!/id="account-disclaimer"/.test(html), 'sign-in sheet has no fan disclaimer');
+assert(/id="about-disclaimer"/.test(html), 'disclaimer stays on Settings → About');
+assert(!/btn-auth-google|btn-auth-apple|btn-auth-phone|btn-auth-sms|account-phone|account-sms|account-provider-hint|id="account-status"/.test(html), 'sign-in has no Google, Apple, phone, or status copy');
+assert(/id="btn-auth-signin"/.test(html) && /id="btn-auth-signup"/.test(html) && /id="btn-auth-guest"/.test(html) && /id="btn-auth-close"/.test(html), 'sign-in keeps email actions, guest, and close');
+assert(!/Google\/Apple\/Phone|Sign in with Google|Sign in with Apple/.test(html), 'index copy does not offer Google, Apple, or phone sign-in');
 const storeBlock = html.split('id="store"')[1]?.split('id="collection"')[0] || '';
 assert(!/slate/i.test(storeBlock), 'store markup has no slate');
 assert(!/Unofficial/i.test(storeBlock), 'store markup has no unofficial');
@@ -75,7 +79,7 @@ const docsApp = readFileSync(new URL('../docs/js/app.js', import.meta.url), 'utf
 const docsSeat = docsApp.slice(docsApp.indexOf('function localSeat()'), docsApp.indexOf('function canControl()'));
 assert(docsSeat === localSeatSrc, 'docs localSeat matches web');
 const docsHtml = readFileSync(new URL('../docs/index.html', import.meta.url), 'utf8');
-assert(/build 65/.test(docsHtml) && /\?v=65/.test(docsHtml), 'docs index stamp and cache bust are 65');
+assert(/build 66/.test(docsHtml) && /\?v=66/.test(docsHtml), 'docs index stamp and cache bust are 66');
 const chrome = readFileSync(new URL('../web/css/club-chrome.css', import.meta.url), 'utf8');
 const docsChrome = readFileSync(new URL('../docs/css/club-chrome.css', import.meta.url), 'utf8');
 assert(chrome === docsChrome, 'docs club-chrome matches web');
@@ -271,13 +275,10 @@ assert(inn.ok && isSignedIn(), 'email sign-in works');
 assert(loadProfile().gold === 99, 'signed-in profile restores gold');
 const bad = await signInEmail('roister@example.com', 'nope');
 assert(!!bad.error, 'wrong password is rejected');
-const st = providerStatus();
-assert(st.email.ready, 'email path is ready');
-assert(!st.google.ready && /Firebase|cloud/i.test(st.google.reason), `Google is gated honestly (${st.google.reason})`);
-assert(!st.apple.ready && /Apple/i.test(st.apple.reason), `Apple is gated honestly (${st.apple.reason})`);
-assert(!st.phone.ready && /Phone/i.test(st.phone.reason), `Phone is gated honestly (${st.phone.reason})`);
 assert(/Guest|device|cloud/i.test(accountHint()), `account hint is honest (${accountHint()})`);
 assert(/microphone/i.test(permissionCopy().mic), 'mic permission copy explains why');
+assert(!permissionCopy().google && !permissionCopy().apple && !permissionCopy().phone, 'permission copy does not offer Google, Apple, or phone');
+assert(!/signInProvider|startPhoneSignIn|confirmPhoneSignIn|GoogleAuthProvider|signInWithPhoneNumber/.test(readFileSync(new URL('../web/js/auth.js', import.meta.url), 'utf8')), 'auth.js has no Google, Apple, or phone handlers');
 
 const merged = mergeProfiles({ gold: 10, updatedAt: 1 }, { gold: 50, updatedAt: 9 });
 assert(merged.gold === 50, 'newer remote profile wins');

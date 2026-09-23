@@ -313,7 +313,7 @@ function sfxAudio(kind) {
   if (!file) return null;
   let a = sfxCache.get(kind);
   if (!a) {
-    a = new Audio(`assets/audio/${file}?v=65`);
+    a = new Audio(`assets/audio/${file}?v=66`);
     a.preload = 'auto';
     sfxCache.set(kind, a);
   }

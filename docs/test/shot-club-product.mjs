@@ -76,15 +76,29 @@ await store.close();
 const login = await pageAt('?test=1');
 await login.evaluate(() => window.__totTest.openAccount());
 await new Promise((r) => setTimeout(r, 300));
-const acc = await login.evaluate(() => ({
-  open: document.querySelector('#account-overlay')?.classList.contains('show'),
-  disclaimer: window.__totTest.accountDisclaimer(),
-  googleDisabled: document.querySelector('#btn-auth-google')?.disabled,
-  appleDisabled: document.querySelector('#btn-auth-apple')?.disabled,
-}));
+const acc = await login.evaluate(() => {
+  const root = document.querySelector('#account-overlay');
+  const text = (root?.innerText || '').replace(/\s+/g, ' ').trim();
+  return {
+    open: root?.classList.contains('show'),
+    text,
+    email: !!document.querySelector('#account-email'),
+    password: !!document.querySelector('#account-password'),
+    signIn: !!document.querySelector('#btn-auth-signin'),
+    signUp: !!document.querySelector('#btn-auth-signup'),
+    guest: document.querySelector('#btn-auth-guest')?.textContent || '',
+    close: !!document.querySelector('#btn-auth-close'),
+    google: !!document.querySelector('#btn-auth-google'),
+    apple: !!document.querySelector('#btn-auth-apple'),
+    phone: !!document.querySelector('#btn-auth-phone') || !!document.querySelector('#account-phone'),
+  };
+});
 console.log('account', acc);
-if (!acc.open || !/Unofficial/i.test(acc.disclaimer)) throw new Error('login overlay missing fan disclaimer');
-if (!acc.googleDisabled || !acc.appleDisabled) throw new Error('Google/Apple should stay gated without Firebase');
+if (!acc.open) throw new Error('login overlay did not open');
+if (!acc.email || !acc.password || !acc.signIn || !acc.signUp || !acc.close) throw new Error('email sign-in controls missing');
+if (!/guest/i.test(acc.guest)) throw new Error('guest play missing');
+if (acc.google || acc.apple || acc.phone) throw new Error('Google, Apple, or phone controls still on the sign-in sheet');
+if (/unofficial|bethesda|firebase|google|apple|phone/i.test(acc.text)) throw new Error(`sign-in sheet still has extra copy: ${acc.text}`);
 await shot(login, 'club_login_signup.png');
 await login.close();
 
