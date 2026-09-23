@@ -342,6 +342,28 @@ assert('portrait sacrifice tray shows six cards', tray && tray.count === 6 && tr
 assert('portrait sacrifice tray fits without clipping the ends', tray && tray.scrolling === false && tray.allInside === true, tray);
 assert('portrait sacrifice tray keeps the first card inset', !!(tray && tray.firstAtStart && tray.firstAtStart.inside && !tray.firstAtStart.nameCut && !tray.firstAtStart.typeCut), tray && tray.firstAtStart);
 assert('portrait sacrifice tray keeps the last card inset', !!(tray && tray.lastAtEnd && tray.lastAtEnd.inside && !tray.lastAtEnd.nameCut && !tray.lastAtEnd.typeCut), tray && tray.lastAtEnd);
+const tray8 = await portraitPage.evaluate(() => window.__totTest.sacrificeTrayBox(8));
+assert('portrait 8-card tray scrolls', tray8 && tray8.count === 8 && tray8.scrolling === true, tray8);
+assert('portrait 8-card ends stay inset when scrolled', !!(tray8 && tray8.firstAtStart && tray8.firstAtStart.inside && !tray8.firstAtStart.nameCut && tray8.lastAtEnd && tray8.lastAtEnd.inside && !tray8.lastAtEnd.nameCut), tray8);
+const snapConfirm = await portraitPage.evaluate(() => {
+  window.__totTest.startTreasuryTarget();
+  const card = document.querySelector('#target-tray .card');
+  card?.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 4, pointerType: 'touch', clientX: 8, clientY: 8, isPrimary: true }));
+  card?.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 4, pointerType: 'touch', clientX: 8, clientY: 8, isPrimary: true }));
+  const t0 = performance.now();
+  document.querySelector('#target-confirm')?.click();
+  const snap = window.__totTest.snapshot();
+  return { ms: performance.now() - t0, targeting: snap.targeting, picked: snap.targetPicked.length };
+});
+assert('treasury confirm closes the tray on the click', snapConfirm && snapConfirm.targeting === false && snapConfirm.ms < 200, snapConfirm);
+const snapCancel = await portraitPage.evaluate(() => {
+  window.__totTest.startTreasuryTarget();
+  const t0 = performance.now();
+  document.querySelector('#target-cancel')?.click();
+  const snap = window.__totTest.snapshot();
+  return { ms: performance.now() - t0, targeting: snap.targeting, toast: snap.toast };
+});
+assert('treasury cancel closes without rebuilding into a stall', snapCancel && snapCancel.targeting === false && snapCancel.ms < 80 && /Canceled/.test(snapCancel.toast || ''), snapCancel);
 await portraitPage.close();
 
 const nativePage = await browser.newPage();

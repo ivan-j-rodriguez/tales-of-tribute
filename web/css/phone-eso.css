@@ -1036,7 +1036,7 @@ body.is-portrait #match .pile-stack {
   height: 108px;
   flex: 0 0 auto;
   position: relative;
-  transition: transform 0.18s ease;
+  transition: none;
   touch-action: manipulation;
 }
 /* Portrait rows used to center a flex line wider than the sheet, which
@@ -1108,7 +1108,16 @@ body.targeting-peek .target-veil { background: rgba(6, 10, 12, 0.22); }
 .tray-card.legal-target {
   outline: 2px solid #7fe8ff;
   box-shadow: 0 0 12px rgba(127, 232, 255, 0.8);
+}
+#match .card.legal-target {
   animation: tot-legal 1.2s ease-in-out infinite;
+}
+/* The veil is translucent, so board glows would keep filtering every frame under the tray. */
+body.targeting #match button.card.playable::after,
+body.targeting #match button.card.affordable::after,
+body.targeting #match .card.playable::after,
+body.targeting #match .card.affordable::after {
+  animation: none;
 }
 .fx-sacrifice { animation: tot-sac 0.65s ease forwards; }
 .fx-slash { animation: tot-slash 0.55s ease; }

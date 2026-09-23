@@ -250,6 +250,7 @@ export function warmMuted() {
   sfxOn = preferSfxFromStorage();
   if (sfxGain) sfxGain.gain.value = sfxOn ? 0.28 : 0;
   players.forEach((p) => { applyVolume(p, 0); });
+  for (const kind of Object.keys(SFX_FILE)) sfxAudio(kind);
 }
 
 function beep({ freq = 440, dur = 0.08, type = 'triangle', vol = 0.35, slide = 0, filterFreq = 0, filterQ = 1 }) {
@@ -305,12 +306,26 @@ const SFX_FILE = {
   coinB: 'sfx-coin.wav',
 };
 
-function playSfxFile(kind) {
+const sfxCache = new Map();
+
+function sfxAudio(kind) {
   const file = SFX_FILE[kind];
-  if (!file) return false;
+  if (!file) return null;
+  let a = sfxCache.get(kind);
+  if (!a) {
+    a = new Audio(`assets/audio/${file}?v=65`);
+    a.preload = 'auto';
+    sfxCache.set(kind, a);
+  }
+  return a;
+}
+
+function playSfxFile(kind) {
+  const a = sfxAudio(kind);
+  if (!a) return false;
   try {
-    const a = new Audio(`assets/audio/${file}?v=64`);
     applyVolume(a, 0.78);
+    try { a.currentTime = 0; } catch { /* metadata not ready yet */ }
     const pending = a.play();
     if (pending && typeof pending.catch === 'function') {
       pending.catch(() => { synthSfx(kind); });
