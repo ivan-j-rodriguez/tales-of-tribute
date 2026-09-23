@@ -1,0 +1,21 @@
+Seasonal crate icons — public UESP store icons.
+Unofficial fan table. Not for sale. Not Bethesda / ZeniMax art beyond these public wiki files.
+
+  Storm Atronach Crate
+    File:ON-icon-store-Storm Atronach Crown Crate.png
+    https://en.uesp.net/wiki/File:ON-icon-store-Storm_Atronach_Crown_Crate.png
+  Scalecaller Crate
+    File:ON-icon-store-Scalecaller Crown Crate.png
+    https://en.uesp.net/wiki/File:ON-icon-store-Scalecaller_Crown_Crate.png
+  Flame Atronach Crate
+    File:ON-icon-store-Flame Atronach Crown Crate.png
+    https://en.uesp.net/wiki/File:ON-icon-store-Flame_Atronach_Crown_Crate.png
+  Dark Brotherhood Crate
+    File:ON-icon-store-Dark Brotherhood Crate.png
+    https://en.uesp.net/wiki/File:ON-icon-store-Dark_Brotherhood_Crate.png
+
+Index: https://en.uesp.net/wiki/Category:Online-Icons-Store
+Seasons: https://en.uesp.net/wiki/Online:Crown_Crates
+
+Loot ids stay iron / orichalcum / ebony / voidsteel so older saves open the same rarity.
+Display names and these icons are the seasonal crates.

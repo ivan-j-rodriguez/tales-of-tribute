@@ -7,11 +7,11 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta name="theme-color" content="#06141c" />
   <title>Tales of Tribute — Fan Table</title>
-  <link rel="stylesheet" href="css/style.css?v=61" />
-  <link rel="stylesheet" href="css/phone-eso.css?v=61" />
-  <link rel="stylesheet" href="css/table-pack.css?v=61" />
-  <link rel="stylesheet" href="css/board-pass.css?v=61" />
-  <link rel="stylesheet" href="css/club-chrome.css?v=61" />
+  <link rel="stylesheet" href="css/style.css?v=62" />
+  <link rel="stylesheet" href="css/phone-eso.css?v=62" />
+  <link rel="stylesheet" href="css/table-pack.css?v=62" />
+  <link rel="stylesheet" href="css/board-pass.css?v=62" />
+  <link rel="stylesheet" href="css/club-chrome.css?v=62" />
 </head>
 <body>
   <div id="app">
@@ -53,7 +53,7 @@
           <label class="chk"><input type="checkbox" id="chk-hourglass-splash" /> Hourglass (90s)</label>
           <button type="button" id="btn-music" class="music-toggle" title="Music">♪ Music: Off</button>
         </div>
-        <p class="build-stamp" id="build-stamp">build 61</p>
+        <p class="build-stamp" id="build-stamp">build 62</p>
       </div>
     </section>
 
@@ -480,7 +480,7 @@
     <div class="overlay" id="login-overlay">
       <div class="login-modal hi-frame">
         <h2>Daily stamp</h2>
-        <p class="hint">Stamp today. Two Crown Crates a month.</p>
+        <p class="hint">Stamp today. Two seasonal crates a month.</p>
         <div id="login-cal" class="login-cal"></div>
         <p class="hint" id="login-prize-hint"></p>
         <button class="primary" id="btn-login-claim">Claim today’s stamp</button>
@@ -489,13 +489,12 @@
     </div>
     <div class="overlay" id="crate-overlay">
       <div class="crate-modal hi-frame" id="crate-modal">
-        <div class="crate-stage crate-closed" id="crate-stage">
-          <div class="crate-lid"></div>
-          <div class="crate-body"></div>
+        <div class="crate-stage" id="crate-stage">
+          <img class="crate-art" id="crate-art" alt="" width="192" height="192" />
         </div>
         <div class="sack-rarity" id="crate-rarity"></div>
         <div class="sack-reward" id="crate-reward"></div>
-        <button class="primary" id="btn-crate-open">Open Crown Crate</button>
+        <button class="primary" id="btn-crate-open">Open crate</button>
         <button id="btn-crate-close" hidden>Continue</button>
       </div>
     </div>
@@ -589,6 +588,6 @@
       </div>
     </div>
   </div>
-  <script type="module" src="js/app.js?v=61"></script>
+  <script type="module" src="js/app.js?v=62"></script>
 </body>
 </html>

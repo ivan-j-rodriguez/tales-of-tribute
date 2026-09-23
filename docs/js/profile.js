@@ -919,10 +919,10 @@ export function buyClue(profile, cardId, cards = [], opts = {}) {
 export function openCrownCrate(profile, cards = [], variant = null) {
   syncCrateMonth(profile);
   if ((profile.cratesOpened || 0) >= CRATES_PER_MONTH) {
-    return { error: 'Two Crown Crates a month — the Club is not a crate farm.' };
+    return { error: 'Two seasonal crates a month — the Club is not a crate farm.' };
   }
   const crate = resolveCrateVariant(variant) || resolveCrateVariant(profile.pendingCrate);
-  if (!crate) return { error: 'No Crown Crate waiting.' };
+  if (!crate) return { error: 'No seasonal crate waiting.' };
   profile.cratesOpened = (profile.cratesOpened || 0) + 1;
   profile.pendingCrate = null;
   const bias = rarityRollBias(crate.rarity);
