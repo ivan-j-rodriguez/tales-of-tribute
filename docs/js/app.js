@@ -4,7 +4,7 @@ import { normalizeCatalog, nameSlug } from './normalize.js';
 import {
   loadProfile, saveProfile, canClaimDailyLogin, claimDailyLogin, ensureDailyChallengeReset,
   recordMatchResult, claimMatchReward, openCrownCrate, claimAchievement, claimDailyChallenge,
-  isDeckUnlocked, fragmentProgress, ACHIEVEMENTS, STARTER_DECKS, LOCKED_DECKS,
+  isDeckUnlocked, patronIdentityOpen, fragmentProgress, ACHIEVEMENTS, STARTER_DECKS, LOCKED_DECKS,
   ALL_DECKS, FRAGMENTS_TO_UNLOCK, purseCount,
   TABLE_SKINS, CARD_BACKS,
   buyShopOffer, equipSkin, equipBack, liveCosmetic, RANK_TIERS,
@@ -789,10 +789,25 @@ function patronTurnLine(pid, key, pat) {
   return 'This Patron is now NEUTRAL.';
 }
 
+function patronOnTable(pid) {
+  if (!pid || !engine?.state) return false;
+  if (pid === 'treasury') return true;
+  const s = engine.state;
+  if ((s.matchPatrons || []).includes(pid)) return true;
+  return (s.players || []).some((p) => (p?.patrons || []).includes(pid));
+}
+
+function patronRevealed(pid) {
+  return patronIdentityOpen(profile, pid, {
+    inMatch: matchIsLive(),
+    onTable: patronOnTable(pid),
+  });
+}
+
 function patronDossierHTML(pid) {
   const pat = patronsById[pid];
   if (!pat) return '';
-  const unlocked = pid === 'treasury' || isDeckUnlocked(profile, pid);
+  const unlocked = patronRevealed(pid);
   const current = favorKeyForSeat(pid);
   // Treasury has no favor track. Mora stays a tipless coin but still prints
   // the three in-game sentences (Favored / Neutral / Unfavored).
@@ -1640,10 +1655,35 @@ function patronThreeStateHTML(pid) {
   }).join('');
 }
 
+function patronCanContinue(pid, mode) {
+  if (mode === 'pick') return true;
+  if (!engine || !canControl()) return false;
+  try {
+    return !!engine.canCallPatron(pid);
+  } catch {
+    return false;
+  }
+}
+
+function syncPatronConfirmActions(canContinue) {
+  const go = $('#pc-continue');
+  const cancel = $('#pc-cancel');
+  if (go) {
+    go.disabled = !canContinue;
+    go.hidden = !canContinue;
+    go.textContent = 'Continue';
+  }
+  if (cancel) {
+    cancel.disabled = false;
+    cancel.hidden = false;
+    cancel.textContent = canContinue ? 'Cancel' : 'Close';
+  }
+}
+
 function openPatronConfirm(pid, mode = 'call') {
   const pat = patronsById[pid];
   if (!pat) return;
-  const unlocked = pid === 'treasury' || isDeckUnlocked(profile, pid);
+  const unlocked = patronRevealed(pid);
   const overlay = $('#patron-confirm-overlay');
   if (!overlay) return;
   pendingPatron = { pid, mode };
@@ -1660,11 +1700,7 @@ function openPatronConfirm(pid, mode = 'call') {
       ? patronThreeStateHTML(pid)
       : '<p class="pc-locked">This patron has not yet revealed their true name.</p>';
   }
-  const go = $('#pc-continue');
-  if (go) {
-    const ok = mode === 'pick' || (engine && canControl() && engine.canCallPatron(pid));
-    go.disabled = !ok;
-  }
+  syncPatronConfirmActions(patronCanContinue(pid, mode));
   overlay.classList.add('show');
 }
 
@@ -4596,7 +4632,13 @@ function bind() {
   $('#tour-next')?.addEventListener('click', () => nextTourStep());
   $('#tour-skip')?.addEventListener('click', () => endTour());
   document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape' || !tourActive) return;
+    if (e.key !== 'Escape') return;
+    if ($('#patron-confirm-overlay')?.classList.contains('show')) {
+      e.preventDefault();
+      closePatronConfirm();
+      return;
+    }
+    if (!tourActive) return;
     e.preventDefault();
     endTour();
   });
@@ -5262,6 +5304,20 @@ function installTestHook() {
       pickOpp = ['crows', 'celarus'];
       matchMode = 'ai';
       isRandomMatch = false;
+      isRankedMatch = false;
+      isGauntletMatch = false;
+      isTutorialMatch = false;
+      startMatch({ playerFirst: true, difficulty: 1 });
+    },
+    startWithOpp(opp = ['druid', 'rajhin']) {
+      try { localStorage.setItem(TOUR_KEY, '1'); } catch {}
+      $('#login-overlay')?.classList.remove('show');
+      $('#account-overlay')?.classList.remove('show');
+      $('#crate-overlay')?.classList.remove('show');
+      pickYou = ['pelin', 'hlaalu'];
+      pickOpp = [...opp];
+      matchMode = 'ai';
+      isRandomMatch = true;
       isRankedMatch = false;
       isGauntletMatch = false;
       isTutorialMatch = false;

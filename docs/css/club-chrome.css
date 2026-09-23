@@ -1103,6 +1103,29 @@
   color: #fff8e8;
 }
 
+/* In-match patron confirm. Portrait keeps Close / Cancel on screen when the
+   three favor rows are long. Landscape layout stays in board-pass. */
+body.is-portrait #patron-confirm.patron-confirm {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 24px - env(safe-area-inset-bottom, 0px));
+  overflow: hidden;
+}
+body.is-portrait #patron-confirm .pc-states {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+body.is-portrait #patron-confirm .pc-actions {
+  flex-shrink: 0;
+  margin-top: 0.35rem;
+}
+body.is-portrait #patron-confirm .pc-actions button {
+  min-height: 44px;
+  min-width: 7.5rem;
+}
+
 body.remote-friend-pick #diff-pick-wrap,
 body.remote-friend-pick #btn-ai-rest,
 body.remote-friend-pick #btn-random-match,

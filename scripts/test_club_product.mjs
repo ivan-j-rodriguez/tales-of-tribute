@@ -16,6 +16,7 @@ import { readFileSync } from 'fs';
 import {
   defaultProfile, loadProfile, saveProfile, buyFragment, currentShop,
   buyShopOffer, equipSkin, equipBack, liveCosmetic, claimDailyLogin,
+  patronIdentityOpen,
   TABLE_SKINS,
 } from '../web/js/profile.js';
 import { loginMonthGrid, loginCellHtml, priceOf, rarityOf, shopPeriodKey, SHOP_FEATURED_SLOTS, SHOP_FRAG_SLOTS, buildWeeklyGoals, patronDisplayName } from '../web/js/economy.js';
@@ -122,7 +123,7 @@ assert(/canSkipTourStep\(tourStep\)/.test(app), 'match tour asks canSkipTourStep
 assert(/layoutTourStep\(/.test(app), 'match tour clamps the tip with layoutTourStep');
 assert(/Skip Tour/.test(html), 'tour offers Skip Tour');
 assert(/if \(tourActive\) endTour\(\{ resume: false \}\)/.test(app), 'leave and win clear the tour');
-assert(/e\.key !== 'Escape' \|\| !tourActive/.test(app), 'Escape ends an active tour');
+assert(/e\.key !== 'Escape'[\s\S]{0,280}if \(!tourActive\) return;\s*e\.preventDefault\(\);\s*endTour\(\)/.test(app), 'Escape ends an active tour');
 assert(/clearInspectOverlays\(/.test(app), 'tour clears a leftover inspect overlay');
 const patronsStuck = layoutTourStep({
   target: { left: 298, top: 0, width: 92, height: 844 },
@@ -154,6 +155,16 @@ const landTip = layoutTourStep({
 });
 assert(landTip.panel.top >= 12 && landTip.panel.top + 150 <= 390 - 12, 'landscape patrons tip stays on screen');
 assert(landTip.panel.left >= 12 && landTip.panel.left + landTip.panel.width <= 844 - 12, 'landscape patrons tip stays inside the width');
+const freshPatron = defaultProfile();
+assert(!patronIdentityOpen(freshPatron, 'druid'), 'locked Druid King stays hidden off the table');
+assert(patronIdentityOpen(freshPatron, 'druid', { inMatch: true, onTable: true }), 'Druid King on the table is named');
+assert(!patronIdentityOpen(freshPatron, 'druid', { inMatch: false, onTable: true }), 'a table flag outside a match does not reveal a locked deck');
+assert(!patronIdentityOpen(freshPatron, 'druid', { inMatch: true, onTable: false }), 'a deck not in this match stays locked');
+assert(patronIdentityOpen(freshPatron, 'pelin') && patronIdentityOpen(freshPatron, 'treasury'), 'starters and Treasury stay named');
+assert(/patronRevealed\(pid\)/.test(app) && /patronIdentityOpen\(/.test(app), 'match confirm and dossier use the on-table name');
+assert(/canContinue \? 'Cancel' : 'Close'/.test(app), 'a patron you cannot call offers Close');
+assert(/go\.hidden = !canContinue/.test(app), 'disabled Continue is not left as the only action');
+assert(/#patron-confirm-overlay'\)\?\.classList\.contains\('show'\)/.test(app), 'Escape closes the patron confirm');
 assert(/id="btn-replay-tour"/.test(html) && /startTutorialMatch/.test(app), 'tutorial replays from Settings');
 assert(/setCollectionSub\(/.test(app) && /data-sub="frags"/.test(html) && /data-sub="backs"/.test(html), 'collection subcategories are wired');
 assert(/sel-table-skin/.test(html) && /sel-card-back/.test(html) && /equipSkin\(profile, e\.target\.value\)/.test(app), 'settings equip table and card back');
